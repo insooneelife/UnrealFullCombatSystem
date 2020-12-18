@@ -287,7 +287,7 @@ public:
     void Impact();
     void Backstabbed();
 
-    void SetCameraLagSmoothly(float TargetLagSpeed);
+    void SetCameraLagSmoothly(float InTargetLagSpeed);
     void UpdateCameraLag();
     void SetSprint(bool bActivate);
 
