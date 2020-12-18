@@ -13,9 +13,20 @@
 #include "Components/EquipmentComponent.h"
 #include "Components/InventoryComponent.h"
 #include "GamePlay/Items/ObjectItems/ItemBase.h"
+#include "GameCore/GameUtils.h"
 
 
 
+UActiveEquipmentSlotUI::UActiveEquipmentSlotUI(const FObjectInitializer& ObjectInitializer)
+    : 
+    Super(ObjectInitializer),
+    SlotSize(128.0f, 128.0f)
+{
+    static UTexture2D* LoadedObject =
+        GameUtils::LoadAssetObject<UTexture2D>(TEXT("/Game/DynamicCombatSystem/Widgets/Textures/T_MeleeWeapon"));
+
+    BackgroundTexture = LoadedObject;
+}
 
 void UActiveEquipmentSlotUI::NativePreConstruct()
 {

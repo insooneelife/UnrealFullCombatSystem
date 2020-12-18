@@ -28,10 +28,15 @@ protected:
 
     void Open();
     void Close();
+
+    UFUNCTION()
     void FocusSelf();
 
+    UFUNCTION()
     void OnInventoryItemClicked(UInventoryItemUI* InItem);
-    void OnClickedCloseButton();
+
+    UFUNCTION()
+    void OnClicked_CloseButton();
 
 public:
     void CategoryButtonClicked(UCategoryButtonUI* Button);

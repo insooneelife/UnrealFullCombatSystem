@@ -17,9 +17,22 @@
 #include "GamePlay/Items/ObjectItems/ItemBase.h"
 #include "GameCore/GameUtils.h"
 
+UEquipmentSlotUI::UEquipmentSlotUI(const FObjectInitializer& ObjectInitializer)
+    :
+    Super(ObjectInitializer), 
+    SlotSize(96.0f), 
+    bShowActiveBorder(true)
+{
+    static UTexture2D* LoadedObject =
+        GameUtils::LoadAssetObject<UTexture2D>(TEXT("/Game/DynamicCombatSystem/Widgets/Textures/T_MeleeWeapon"));
+
+    BackgroundTexture = LoadedObject;
+}
 
 void UEquipmentSlotUI::NativePreConstruct()
 {
+    Super::NativePreConstruct();
+
     SlotSizeBox->SetWidthOverride(SlotSize);
     SlotSizeBox->SetHeightOverride(SlotSize);
     BackgroundImage->SetBrushFromTexture(BackgroundTexture);
@@ -27,6 +40,8 @@ void UEquipmentSlotUI::NativePreConstruct()
 
 void UEquipmentSlotUI::NativeConstruct()
 {
+    Super::NativeConstruct();
+
     EquipmentComponent = Cast<UEquipmentComponent>(
         GetOwningPlayerPawn()->GetComponentByClass(UEquipmentComponent::StaticClass()));
 
@@ -47,22 +62,22 @@ void UEquipmentSlotUI::NativeConstruct()
         EquipmentComponent->OnActiveItemChanged.AddDynamic(this, &UEquipmentSlotUI::OnActiveItemChanged);
     }
 
-    SlotButton->OnClicked.AddDynamic(this, &UEquipmentSlotUI::OnClickedSlotButton);
-    SlotButton->OnHovered.AddDynamic(this, &UEquipmentSlotUI::OnHoveredSlotButton);
-    SlotButton->OnUnhovered.AddDynamic(this, &UEquipmentSlotUI::OnUnhoveredSlotButton);
+    SlotButton->OnClicked.AddDynamic(this, &UEquipmentSlotUI::OnClicked_SlotButton);
+    SlotButton->OnHovered.AddDynamic(this, &UEquipmentSlotUI::OnHovered_SlotButton);
+    SlotButton->OnUnhovered.AddDynamic(this, &UEquipmentSlotUI::OnUnhovered_SlotButton);
 }
 
-void UEquipmentSlotUI::OnClickedSlotButton()
+void UEquipmentSlotUI::OnClicked_SlotButton()
 {
     EquipmentUI->EquipmentSlotClicked(this);
 }
 
-void UEquipmentSlotUI::OnHoveredSlotButton()
+void UEquipmentSlotUI::OnHovered_SlotButton()
 {
     BackgroundImage->SetColorAndOpacity(GameUtils::Gray);
 }
 
-void UEquipmentSlotUI::OnUnhoveredSlotButton()
+void UEquipmentSlotUI::OnUnhovered_SlotButton()
 {
     BackgroundImage->SetColorAndOpacity(GameUtils::Black);
 }

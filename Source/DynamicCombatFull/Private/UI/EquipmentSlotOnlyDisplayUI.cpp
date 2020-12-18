@@ -14,8 +14,22 @@
 #include "EquipmentUI.h"
 #include "GameCore/GameUtils.h"
 
+UEquipmentSlotOnlyDisplayUI::UEquipmentSlotOnlyDisplayUI(const FObjectInitializer& ObjectInitializer)
+    :
+    Super(ObjectInitializer),
+    SlotSize(64.0f),
+    bShowActiveBorder(true)
+{
+    static UTexture2D* LoadedObject =
+        GameUtils::LoadAssetObject<UTexture2D>(TEXT("/Game/DynamicCombatSystem/Widgets/Textures/T_MeleeWeapon"));
+
+    BackgroundTexture = LoadedObject;
+}
+
 void UEquipmentSlotOnlyDisplayUI::NativePreConstruct()
 {
+    Super::NativePreConstruct();
+
     SlotSizeBox->SetWidthOverride(SlotSize);
     SlotSizeBox->SetHeightOverride(SlotSize);
     BackgroundImage->SetBrushFromTexture(BackgroundTexture);
@@ -23,6 +37,8 @@ void UEquipmentSlotOnlyDisplayUI::NativePreConstruct()
 
 void UEquipmentSlotOnlyDisplayUI::NativeConstruct()
 {
+    Super::NativeConstruct();
+
     EquipmentComponent = 
         Cast<UEquipmentComponent>(GetOwningPlayerPawn()->GetComponentByClass(UEquipmentComponent::StaticClass()));
 

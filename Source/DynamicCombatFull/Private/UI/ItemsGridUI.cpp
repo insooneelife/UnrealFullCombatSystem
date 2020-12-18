@@ -21,9 +21,19 @@
 #include "InventoryItemUI.h"
 #include "GameCore/GameUtils.h"
 
+UItemsGridUI::UItemsGridUI(const FObjectInitializer& ObjectInitializer)
+    :
+    Super(ObjectInitializer), 
+    GridColumns(5), 
+    DisplayedType(EItemType::MeleeWeapon)
+{
+}
+
 
 void UItemsGridUI::NativeConstruct()
 {
+    Super::NativeConstruct();
+
     InventoryComponent =
         Cast<UInventoryComponent>(GetOwningPlayerPawn()->GetComponentByClass(UInventoryComponent::StaticClass()));
 

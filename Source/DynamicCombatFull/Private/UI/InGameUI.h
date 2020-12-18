@@ -21,12 +21,9 @@ class UInGameUI : public UUserWidget
 {
 	GENERATED_BODY()
 	
-
 protected:
 
-
 public:
-
 
 private:
 

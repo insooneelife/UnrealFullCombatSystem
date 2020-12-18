@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameCore/DataTypes.h"
 #include "GameCore/CustomStructs.h"
+#include "GamePlay/Items/ObjectItems/ItemBase.h"
 
 class UExtendedStatComponent;
 /**

@@ -14,11 +14,12 @@
 
 void UPickupItemUI::NativeConstruct()
 {
+    Super::NativeConstruct();
     UpdateWidget();
-    ItemButton->OnClicked.AddDynamic(this, &UPickupItemUI::OnClickedItemButton);
+    ItemButton->OnClicked.AddDynamic(this, &UPickupItemUI::OnClicked_ItemButton);
 }
 
-void UPickupItemUI::OnClickedItemButton()
+void UPickupItemUI::OnClicked_ItemButton()
 {
     PickupUI->PickupItemClicked(this);
 }

@@ -16,14 +16,23 @@
 #include "ItemsGridUI.h"
 #include "GameCore/GameUtils.h"
 
+UInventoryItemUI::UInventoryItemUI(const FObjectInitializer& ObjectInitializer)
+    :
+    Super(ObjectInitializer), SlotSize(96.0f)
+{
+}
+
 void UInventoryItemUI::NativePreConstruct()
 {
+    Super::NativePreConstruct();
     SlotSizeBox->SetWidthOverride(SlotSize);
     SlotSizeBox->SetHeightOverride(SlotSize);
 }
 
 void UInventoryItemUI::NativeConstruct()
 {
+    Super::NativeConstruct();
+
     SetFocusedImage(false);
     if (EquipmentComponent->IsValidLowLevel())
     {
@@ -31,35 +40,36 @@ void UInventoryItemUI::NativeConstruct()
         EquipmentComponent->OnActiveItemChanged.AddDynamic(this, &UInventoryItemUI::OnActiveItemChanged);
     }
 
-    SlotButton->OnClicked.AddDynamic(this, &UInventoryItemUI::OnClicked);
-    SlotButton->OnHovered.AddDynamic(this, &UInventoryItemUI::OnHovered);
-    SlotButton->OnUnhovered.AddDynamic(this, &UInventoryItemUI::OnUnhovered);
+    SlotButton->OnClicked.AddDynamic(this, &UInventoryItemUI::OnClicked_SlotButton);
+    SlotButton->OnHovered.AddDynamic(this, &UInventoryItemUI::OnHovered_SlotButton);
+    SlotButton->OnUnhovered.AddDynamic(this, &UInventoryItemUI::OnUnhovered_SlotButton);
 }
 
-void UInventoryItemUI::OnClicked()
+void UInventoryItemUI::OnClicked_SlotButton()
 {
     ItemsGridUI->InventoryItemClicked(this);
+}
+
+
+void UInventoryItemUI::OnHovered_SlotButton()
+{
+    SetFocusedImage(true);
+}
+
+void UInventoryItemUI::OnUnhovered_SlotButton()
+{
+    SetFocusedImage(false);
 }
 
 void UInventoryItemUI::OnItemInSlotChanged(FStoredItem OldItem, FStoredItem NewItem, EItemType Type, int SlotIndex, int ItemIndex)
 {
     if (IsOpen())
     {
-        if (OldItem.Id == Item.Id || NewItem.Id ==Item.Id)
+        if (OldItem.Id == Item.Id || NewItem.Id == Item.Id)
         {
             UpdateIsEquippedImage();
         }
     }
-}
-
-void UInventoryItemUI::OnHovered()
-{
-    SetFocusedImage(true);
-}
-
-void UInventoryItemUI::OnUnhovered()
-{
-    SetFocusedImage(false);
 }
 
 void UInventoryItemUI::OnActiveItemChanged(FStoredItem OldItem, FStoredItem NewItem, EItemType Type, int SlotIndex, int ItemIndex)

@@ -6,6 +6,7 @@
 
 void UKeybindingsUI::NativeConstruct()
 {
+    Super::NativeConstruct();
     HideKeybindings();
 }
 

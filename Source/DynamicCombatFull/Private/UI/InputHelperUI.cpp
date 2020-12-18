@@ -8,6 +8,7 @@
 
 void UInputHelperUI::NativeConstruct()
 {
+    Super::NativeConstruct();
     UpdateInputHelper(Key, Action);
 }
 

@@ -15,9 +15,7 @@ class UInputHelperUI : public UUserWidget
 {
 	GENERATED_BODY()
 	
-
 protected:
-
     virtual void NativeConstruct() override;
 
 public:

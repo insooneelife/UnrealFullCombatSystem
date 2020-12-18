@@ -38,9 +38,10 @@ protected:
     virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 public:
-    
+    UFUNCTION()
     void OnActiveItemChanged(FStoredItem OldItem, FStoredItem NewItem, EItemType Type, int SlotIndex, int ActiveIndex);
 
+    UFUNCTION()
     void OnMainHandTypeChanged(EItemType Type);
 
     void UpdateAbilityFromEquipment();

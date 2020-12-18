@@ -9,13 +9,24 @@
 #include "GameCore/DefaultGameInstance.h"
 #include "Components/ExtendedStatComponent.h"
 
+UStatBarUI::UStatBarUI(const FObjectInitializer& ObjectInitializer)
+    :
+    Super(ObjectInitializer),
+    FillColor(0.3f, 0.0f, 0.0f, 1.0f)
+{
+}
+
 void UStatBarUI::NativePreConstruct()
 {
+    Super::NativePreConstruct();
+
     SetFillColor(FillColor);
 }
 
 void UStatBarUI::NativeConstruct()
 {
+    Super::NativeConstruct();
+
     UExtendedStatComponent* Comp =
         UDefaultGameInstance::GetExtendedStatComponent(GetOwningPlayerPawn(), ExtendedStatType);
 

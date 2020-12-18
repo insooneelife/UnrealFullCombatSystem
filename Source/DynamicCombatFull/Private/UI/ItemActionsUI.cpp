@@ -17,6 +17,8 @@
 
 void UItemActionsUI::NativeConstruct()
 {
+    Super::NativeConstruct();
+
     bIsFocusable = true;
     UWidgetBlueprintLibrary::SetInputMode_UIOnlyEx(GetOwningPlayer(), this, EMouseLockMode::LockAlways);
     SetPosition(SpawnPosition);
@@ -29,8 +31,8 @@ void UItemActionsUI::NativeConstruct()
 
     BackKey = UDefaultGameInstance::GetFirstActionMappingKey(UDefaultGameInstance::UIBack);
 
-    UseButton->OnClicked.AddDynamic(this, &UItemActionsUI::OnClickedUseButton);
-    DropButton->OnClicked.AddDynamic(this, &UItemActionsUI::OnClickedDropButton);
+    UseButton->OnClicked.AddDynamic(this, &UItemActionsUI::OnClicked_UseButton);
+    DropButton->OnClicked.AddDynamic(this, &UItemActionsUI::OnClicked_DropButton);
 }
 
 void UItemActionsUI::Close()
@@ -39,7 +41,7 @@ void UItemActionsUI::Close()
     RemoveFromParent();
 }
 
-void UItemActionsUI::OnClickedUseButton()
+void UItemActionsUI::OnClicked_UseButton()
 {
     if (InventoryComponent->IsValidLowLevel())
     {
@@ -48,7 +50,7 @@ void UItemActionsUI::OnClickedUseButton()
     }
 }
 
-void UItemActionsUI::OnClickedDropButton()
+void UItemActionsUI::OnClicked_DropButton()
 {
     if (InventoryComponent->IsValidLowLevel())
     {
@@ -59,6 +61,8 @@ void UItemActionsUI::OnClickedDropButton()
 
 FReply UItemActionsUI::NativeOnMouseButtonUp(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent)
 {
+    Super::NativeOnMouseButtonUp(InGeometry, InMouseEvent);
+
     FKey EventKey = UKismetInputLibrary::PointerEvent_GetEffectingButton(InMouseEvent);
 
     if (ActionsSB->IsHovered() && EventKey == EKeys::LeftMouseButton)
@@ -74,6 +78,8 @@ FReply UItemActionsUI::NativeOnMouseButtonUp(const FGeometry& InGeometry, const 
 
 FReply UItemActionsUI::NativeOnKeyDown(const FGeometry& InGeometry, const FKeyEvent& InKeyEvent)
 {
+    Super::NativeOnKeyDown(InGeometry, InKeyEvent);
+
     if (UKismetInputLibrary::GetKey(InKeyEvent) == BackKey)
     {
         Close();

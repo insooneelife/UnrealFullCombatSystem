@@ -24,9 +24,16 @@
 #include "Interfaces/CanOpenUI.h"
 
 
+UPickupUI::UPickupUI(const FObjectInitializer& ObjectInitializer)
+    :
+    Super(ObjectInitializer), 
+    TakeAllKey(EKeys::SpaceBar)
+{
+}
 
 void UPickupUI::NativeConstruct()
 {
+    Super::NativeConstruct();
     bIsFocusable = true;
 
     UWidgetBlueprintLibrary::SetInputMode_UIOnlyEx(GetOwningPlayer(), this, EMouseLockMode::LockAlways);
@@ -53,13 +60,34 @@ void UPickupUI::NativeConstruct()
     CreateItemWidgets();
     PickupNameText->SetText(FinalText);
 
-    TakeAllButton->OnClicked.AddDynamic(this, &UPickupUI::OnClickedTakeAllButton);
-    CloseButton->OnClicked.AddDynamic(this, &UPickupUI::OnClickedCloseButton);
+    TakeAllButton->OnClicked.AddDynamic(this, &UPickupUI::OnClicked_TakeAllButton);
+    CloseButton->OnClicked.AddDynamic(this, &UPickupUI::OnClicked_CloseButton);
 }
 
 FReply UPickupUI::NativeOnKeyDown(const FGeometry& InGeometry, const FKeyEvent& InKeyEvent)
 {
-    return Super::NativeOnKeyDown(InGeometry, InKeyEvent);
+    Super::NativeOnKeyDown(InGeometry, InKeyEvent);
+
+    FKey EventKey = UKismetInputLibrary::GetKey(InKeyEvent);
+
+    if (EventKey == BackKey)
+    {
+        Close();
+        return FReply::Handled();
+    }
+    else
+    {
+        if (EventKey == TakeAllKey)
+        {
+            Pickup->TakeAllItems();
+            Close();
+            return FReply::Handled();
+        }
+        else
+        {
+            return FReply::Unhandled();
+        }
+    }
 }
 
 void UPickupUI::Close()
@@ -75,13 +103,13 @@ void UPickupUI::Close()
     RemoveFromParent();
 }
 
-void UPickupUI::OnClickedTakeAllButton()
+void UPickupUI::OnClicked_TakeAllButton()
 {
     Pickup->TakeAllItems();
     Close();
 }
 
-void UPickupUI::OnClickedCloseButton()
+void UPickupUI::OnClicked_CloseButton()
 {
     Close();
 }

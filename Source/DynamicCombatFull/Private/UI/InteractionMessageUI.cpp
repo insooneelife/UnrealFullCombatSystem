@@ -12,6 +12,7 @@ const FName UInteractionMessageUI::None = FName(TEXT("None"));
 
 void UInteractionMessageUI::NativeConstruct()
 {
+    Super::NativeConstruct();
     InteractInputHelper = InputHelpers->AddInputHelper(FText(), FText());
 
     UpdateWidget(None);

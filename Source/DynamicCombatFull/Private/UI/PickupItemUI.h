@@ -23,7 +23,9 @@ class UPickupItemUI : public UUserWidget
 	
 protected:
     virtual void NativeConstruct() override;
-    void OnClickedItemButton();
+
+    UFUNCTION()
+    void OnClicked_ItemButton();
 
 public:
     void UpdateWidget();

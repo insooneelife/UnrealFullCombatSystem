@@ -8,6 +8,10 @@
 #include "GameCore/CustomStructs.h"
 #include "ItemActionsUI.generated.h"
 
+class UInventoryComponent;
+class USizeBox;
+class UButton;
+
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FWidgetRemovedSignature);
 
 /**
@@ -23,8 +27,11 @@ protected:
 
     void Close();
 
-    void OnClickedUseButton();
-    void OnClickedDropButton();
+    UFUNCTION()
+    void OnClicked_UseButton();
+
+    UFUNCTION()
+    void OnClicked_DropButton();
 
     virtual FReply NativeOnMouseButtonUp(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
     virtual FReply NativeOnKeyDown(const FGeometry& InGeometry, const FKeyEvent& InKeyEvent) override;

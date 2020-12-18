@@ -43,11 +43,14 @@ void UInventoryUI::NativeConstruct()
     FText BackDisplayName = UKismetInputLibrary::Key_GetDisplayName(BackKey);
     InputHelpers->AddInputHelper(BackDisplayName, FText::FromString(TEXT("Back")));
 
-    CloseButton->OnClicked.AddDynamic(this, &UInventoryUI::OnClickedCloseButton);
+    CloseButton->OnClicked.AddDynamic(this, &UInventoryUI::OnClicked_CloseButton);
+    InventoryItemsGrid->OnInventoryItemClicked.AddDynamic(this, &UInventoryUI::OnInventoryItemClicked);
 }
 
 FReply UInventoryUI::NativeOnKeyDown(const FGeometry& InGeometry, const FKeyEvent& InKeyEvent)
 {
+    Super::NativeOnKeyDown(InGeometry, InKeyEvent);
+
     FKey EventKey = UKismetInputLibrary::GetKey(InKeyEvent);
 
     if (EventKey == InventoryKey)
@@ -112,7 +115,7 @@ void UInventoryUI::OnInventoryItemClicked(UInventoryItemUI* InItem)
     CreatedUI->AddToViewport();
 }
 
-void UInventoryUI::OnClickedCloseButton()
+void UInventoryUI::OnClicked_CloseButton()
 {
     Close();
 }

@@ -11,8 +11,20 @@
 #include "Blueprint/WidgetBlueprintLibrary.h"
 #include "GameCore/GameUtils.h"
 
+UCategoryButtonUI::UCategoryButtonUI(const FObjectInitializer& ObjectInitializer)
+    :
+    Super(ObjectInitializer), SlotSize(96.0f)
+{
+    static UTexture2D* LoadedObject =
+        GameUtils::LoadAssetObject<UTexture2D>(TEXT("/Game/DynamicCombatSystem/Widgets/Textures/T_MeleeWeapon"));
+
+    CategoryTexture = LoadedObject;
+}
+
 void UCategoryButtonUI::NativePreConstruct()
 {
+    Super::NativePreConstruct();
+
     SlotSizeBox->SetWidthOverride(SlotSize);
     SlotSizeBox->SetHeightOverride(SlotSize);
     CategoryImage->SetBrushFromTexture(CategoryTexture);
@@ -20,9 +32,11 @@ void UCategoryButtonUI::NativePreConstruct()
 
 void UCategoryButtonUI::NativeConstruct()
 {
-    SlotButton->OnClicked.AddDynamic(this, &UCategoryButtonUI::OnClicked);
-    SlotButton->OnHovered.AddDynamic(this, &UCategoryButtonUI::OnHovered);
-    SlotButton->OnUnhovered.AddDynamic(this, &UCategoryButtonUI::OnUnhovered);
+    Super::NativeConstruct();
+
+    SlotButton->OnClicked.AddDynamic(this, &UCategoryButtonUI::OnClicked_SlotButton);
+    SlotButton->OnHovered.AddDynamic(this, &UCategoryButtonUI::OnHovered_SlotButton);
+    SlotButton->OnUnhovered.AddDynamic(this, &UCategoryButtonUI::OnUnhovered_SlotButton);
 
     TArray<UUserWidget*> FoundWidgets;
     UWidgetBlueprintLibrary::GetAllWidgetsOfClass(GetWorld(), FoundWidgets, UInventoryUI::StaticClass());
@@ -37,7 +51,7 @@ void UCategoryButtonUI::NativeConstruct()
     }
 }
 
-void UCategoryButtonUI::OnClicked()
+void UCategoryButtonUI::OnClicked_SlotButton()
 {
     if (InventoryUI->IsValidLowLevel())
     {
@@ -45,12 +59,12 @@ void UCategoryButtonUI::OnClicked()
     }
 }
 
-void UCategoryButtonUI::OnHovered()
+void UCategoryButtonUI::OnHovered_SlotButton()
 {
     CategoryImage->SetColorAndOpacity(GameUtils::Brown);
 }
 
-void UCategoryButtonUI::OnUnhovered()
+void UCategoryButtonUI::OnUnhovered_SlotButton()
 {
     CategoryImage->SetColorAndOpacity(FLinearColor::Gray);
 }

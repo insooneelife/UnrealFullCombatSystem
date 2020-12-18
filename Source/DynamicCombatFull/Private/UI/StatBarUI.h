@@ -16,11 +16,14 @@ UCLASS()
 class UStatBarUI : public UUserWidget
 {
 	GENERATED_BODY()
-	
+public:
+    UStatBarUI(const FObjectInitializer& ObjectInitializer);
+
 protected:
     virtual void NativePreConstruct() override;
     virtual void NativeConstruct() override;
 
+    UFUNCTION()
     void OnValueChanged(float InNewValue, float InMaxValue);
     void Init(UExtendedStatComponent* InStatComp);
 

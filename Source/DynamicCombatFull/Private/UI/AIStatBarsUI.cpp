@@ -6,6 +6,7 @@
 
 void UAIStatBarsUI::NativeConstruct()
 {
+    Super::NativeConstruct();
     Stamina->SetVisibility(ESlateVisibility::Collapsed);
 }
 

@@ -22,11 +22,16 @@ UCLASS()
 class UItemsGridUI : public UUserWidget
 {
 	GENERATED_BODY()
-	
+public:
+    UItemsGridUI(const FObjectInitializer& ObjectInitializer);
+
 protected:
     virtual void NativeConstruct() override;
 
+    UFUNCTION()
     void OnItemAdded(FStoredItem InItem);
+
+    UFUNCTION()
     void OnItemRemoved(FStoredItem InItem);
 
 public:

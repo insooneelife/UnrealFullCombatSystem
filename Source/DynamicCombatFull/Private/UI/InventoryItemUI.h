@@ -21,15 +21,26 @@ class UInventoryItemUI : public UUserWidget
 {
 	GENERATED_BODY()
 
+public:
+    UInventoryItemUI(const FObjectInitializer& ObjectInitializer);
+
 protected:
     virtual void NativePreConstruct() override;
     virtual void NativeConstruct() override;
 
-    void OnClicked();
-    void OnHovered();
-    void OnUnhovered();
+    UFUNCTION()
+    void OnClicked_SlotButton();
 
+    UFUNCTION()
+    void OnHovered_SlotButton();
+
+    UFUNCTION()
+    void OnUnhovered_SlotButton();
+
+    UFUNCTION()
     void OnItemInSlotChanged(FStoredItem OldItem, FStoredItem NewItem, EItemType Type, int SlotIndex, int ItemIndex);
+
+    UFUNCTION()
     void OnActiveItemChanged(FStoredItem OldItem, FStoredItem NewItem, EItemType Type, int SlotIndex, int ItemIndex);
 
 public:

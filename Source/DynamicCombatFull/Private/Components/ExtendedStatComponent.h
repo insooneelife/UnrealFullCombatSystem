@@ -28,7 +28,10 @@ public:
     UFUNCTION()
     void StartRegenerating();
 
+    UFUNCTION()
     void OnModifierAdded(EStat Type, float Value);
+
+    UFUNCTION()
     void OnModifierRemoved(EStat Type, float Value);
 
     void InitStatManager();
@@ -36,6 +39,8 @@ public:
     UFUNCTION()
     void OnGameLoaded();
     void OnGameLoadedDelayed();
+
+    UFUNCTION()
     void OnBaseValueChanged(EStat Stat, float NewValue);
 
     UFUNCTION()

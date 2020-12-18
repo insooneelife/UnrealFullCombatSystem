@@ -21,19 +21,16 @@
 #include "InventoryItemUI.h"
 #include "EquipmentSlotUI.h"
 
-
-void UEquipmentUI::NativePreConstruct()
-{
-}
-
 void UEquipmentUI::NativeConstruct()
 {
+    Super::NativeConstruct();
+
     bIsFocusable = true;
     GetOwningPlayerPawn()->GetComponentByClass(UInventoryComponent::StaticClass());
     GetOwningPlayerPawn()->GetComponentByClass(UEquipmentComponent::StaticClass());
 
     InventoryItemsGrid->OnInventoryItemClicked.AddDynamic(this, &UEquipmentUI::OnInventoryItemClicked);
-    CloseButton->OnClicked.AddDynamic(this, &UEquipmentUI::OnClickedCloseButton);
+    CloseButton->OnClicked.AddDynamic(this, &UEquipmentUI::OnClicked_CloseButton);
     Close();
 
     EquipmentKey = UDefaultGameInstance::GetFirstActionMappingKey(UDefaultGameInstance::Equipment);
@@ -48,6 +45,8 @@ void UEquipmentUI::NativeConstruct()
 
 FReply UEquipmentUI::NativeOnKeyDown(const FGeometry& InGeometry, const FKeyEvent& InKeyEvent)
 {
+    Super::NativeOnKeyDown(InGeometry, InKeyEvent);
+
     FKey InKey = UKismetInputLibrary::GetKey(InKeyEvent);
 
     if (InKey == EquipmentKey)
@@ -124,7 +123,7 @@ void UEquipmentUI::OnInventoryItemClicked(UInventoryItemUI* InItem)
     }
 }
 
-void UEquipmentUI::OnClickedCloseButton()
+void UEquipmentUI::OnClicked_CloseButton()
 {
     Close();
 }

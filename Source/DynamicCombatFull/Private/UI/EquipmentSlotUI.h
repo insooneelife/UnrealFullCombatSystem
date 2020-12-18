@@ -17,17 +17,27 @@ UCLASS()
 class UEquipmentSlotUI : public UUserWidget
 {
 	GENERATED_BODY()
-	
+public:
+    UEquipmentSlotUI(const FObjectInitializer& ObjectInitializer);
+
 protected:
     virtual void NativePreConstruct() override;
     virtual void NativeConstruct() override;
 
+    UFUNCTION()
     void OnItemInSlotChanged(FStoredItem OldItem, FStoredItem NewItem, EItemType InType, int InSlotIndex, int InItemIndex);
+
+    UFUNCTION()
     void OnActiveItemChanged(FStoredItem OldItem, FStoredItem NewItem, EItemType InType, int InSlotIndex, int InItemIndex);
 
-    void OnClickedSlotButton();
-    void OnHoveredSlotButton();
-    void OnUnhoveredSlotButton();
+    UFUNCTION()
+    void OnClicked_SlotButton();
+
+    UFUNCTION()
+    void OnHovered_SlotButton();
+
+    UFUNCTION()
+    void OnUnhovered_SlotButton();
 
 public:
     void UpdateWidget(FStoredItem InItem);

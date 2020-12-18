@@ -23,14 +23,21 @@ class UPickupUI : public UUserWidget
 {
 	GENERATED_BODY()
 
+public:
+    UPickupUI(const FObjectInitializer& ObjectInitializer);
+
 protected:
 
     virtual void NativeConstruct() override;
     virtual FReply NativeOnKeyDown(const FGeometry& InGeometry, const FKeyEvent& InKeyEvent) override;
 
     void Close();
-    void OnClickedTakeAllButton();
-    void OnClickedCloseButton();
+
+    UFUNCTION()
+    void OnClicked_TakeAllButton();
+
+    UFUNCTION()
+    void OnClicked_CloseButton();
 
 public:
     void CreateItemWidgets();

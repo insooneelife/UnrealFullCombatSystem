@@ -19,7 +19,6 @@ class UEquipmentUI : public UUserWidget
 	GENERATED_BODY()
 	
 protected:
-    virtual void NativePreConstruct() override;
     virtual void NativeConstruct() override;
 
     virtual FReply NativeOnKeyDown(const FGeometry& InGeometry, const FKeyEvent& InKeyEvent) override;
@@ -27,8 +26,11 @@ protected:
     void Open();
     void Close();
 
+    UFUNCTION()
     void OnInventoryItemClicked(UInventoryItemUI* InItem);
-    void OnClickedCloseButton();
+
+    UFUNCTION()
+    void OnClicked_CloseButton();
 
 public:
     void EquipmentSlotClicked(UEquipmentSlotUI* InSlot);
