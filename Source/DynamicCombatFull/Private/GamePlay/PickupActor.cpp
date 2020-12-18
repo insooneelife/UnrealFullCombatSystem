@@ -1,0 +1,159 @@
+// Fill out your copyright notice in the Description page of Project Settings.
+
+
+#include "PickupActor.h"
+#include "UObject/ConstructorHelpers.h"
+#include "Blueprint/UserWidget.h"
+#include "Kismet/GameplayStatics.h"
+#include "Kismet/BlueprintMapLibrary.h"
+#include "Components/InventoryComponent.h"
+
+// Sets default values
+APickupActor::APickupActor()
+{
+    // Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
+    PrimaryActorTick.bCanEverTick = false;
+    PrimaryActorTick.bStartWithTickEnabled = false;
+
+    static FString FindObj = TEXT("/Game/DynamicCombatSystem/Widgets/WB_Pickup");
+    static ConstructorHelpers::FClassFinder<UUserWidget> FindBPClass(*FindObj);
+    if (FindBPClass.Class == nullptr)
+    {
+        UE_LOG(LogTemp, Warning, TEXT("Failed to find : %s"), *FindObj);
+        return;
+    }
+
+    CreateUserWidgetClass = FindBPClass.Class;
+}
+
+// Called when the game starts or when spawned
+void APickupActor::BeginPlay()
+{
+    Super::BeginPlay();
+    RemoveInvalidItems();
+    DestroyActorIfEmpty();
+}
+
+void APickupActor::RemoveInvalidItems()
+{
+    TArray<TSubclassOf<UItemBase>> Keys;
+    Items.GetKeys(Keys);
+
+    TArray<int> Values;
+    for (auto E : Items)
+    {
+        Values.Add(E.Value);
+    }
+
+    for (int i = Keys.Num(); i >= 0; --i)
+    {
+        TSubclassOf<UItemBase> Key = Keys[i];
+        int Value = Values[i];
+
+        if (!Key->IsValidLowLevel() || Value <= 0)
+        {
+            Items.Remove(Key);
+        }
+    }
+}
+
+void APickupActor::TakeItem(TSubclassOf<UItemBase> ItemClass)
+{
+    if (Items.Contains(ItemClass))
+    {
+        int Amount = Items[ItemClass];
+
+        UItemBase* ItemBase = Cast<UItemBase>(ItemClass->GetDefaultObject());
+
+        if (ItemBase->IsValidLowLevel())
+        {
+            if (ItemBase->GetItem().bIsStackable)
+            {
+                InventoryComponent->AddItem(ItemClass, Amount);
+            }
+            else
+            {
+                for (int i = 0; i < Amount; ++i)
+                {
+                    InventoryComponent->AddItem(ItemClass, 1);
+                }
+            }
+        }
+
+        Items.Remove(ItemClass);
+        DestroyActorIfEmpty();
+    }
+    else
+    {
+
+    }
+}
+
+void APickupActor::TakeAllItems()
+{
+    for (auto e : Items)
+    {
+        TSubclassOf<UItemBase> ItemClass = e.Key;
+        int Amount = e.Value;
+
+        UItemBase* ItemBase = Cast<UItemBase>(ItemClass->GetDefaultObject());
+
+        if (ItemBase->IsValidLowLevel())
+        {
+            if (ItemBase->GetItem().bIsStackable)
+            {
+                InventoryComponent->AddItem(ItemClass, Amount);
+            }
+            else
+            {
+                for (int i = 0; i < Amount; ++i)
+                {
+                    InventoryComponent->AddItem(ItemClass, 1);
+                }
+            }
+        }
+
+        Items.Remove(ItemClass);
+        DestroyActorIfEmpty();
+    }
+}
+
+void APickupActor::AddItem(TSubclassOf<UItemBase> ItemClass, int Amount)
+{
+    if (Items.Contains(ItemClass))
+    {
+        Items[ItemClass] += Amount;
+    }
+    else
+    {
+        Items.Add(ItemClass, Amount);
+    }
+}
+
+void APickupActor::Interact(AActor* InCaller)
+{
+    UInventoryComponent* InventoryComp =
+        Cast<UInventoryComponent>(InCaller->GetComponentByClass(UInventoryComponent::StaticClass()));
+
+    if (InventoryComp->IsValidLowLevel())
+    {
+        InventoryComponent = InventoryComp;
+
+        APlayerController* PlayerCon = UGameplayStatics::GetPlayerController(GetWorld(), 0);
+
+        if (PlayerCon != nullptr)
+        {
+            // call blueprint function
+            UUserWidget* Widget = CreatePickupWidget(PlayerCon, CreateUserWidgetClass, this);
+            Widget->AddToViewport();
+        }
+    }
+}
+
+void APickupActor::DestroyActorIfEmpty()
+{
+    if (Items.Num() <= 0)
+    {
+        Destroy();
+    }
+}

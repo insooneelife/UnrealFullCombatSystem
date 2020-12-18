@@ -1,0 +1,96 @@
+// Fill out your copyright notice in the Description page of Project Settings.
+
+
+#include "MontageManagerComponent.h"
+#include "Kismet/GameplayStatics.h"
+#include "Kismet/KismetMathLibrary.h"
+#include "Kismet/KismetStringLibrary.h"
+#include "Interfaces/MontageManagerInterface.h"
+#include "GameCore/GameUtils.h"
+
+
+// Sets default values for this component's properties
+UMontageManagerComponent::UMontageManagerComponent()
+{
+    // Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
+    // off to improve performance if you don't need them.
+    PrimaryComponentTick.bCanEverTick = false;
+    PrimaryComponentTick.bStartWithTickEnabled = false;
+
+    // ...
+}
+
+
+// Called when the game starts
+void UMontageManagerComponent::BeginPlay()
+{
+    Super::BeginPlay();
+
+    IMontageManagerInterface* MontageManagerInterface = Cast<IMontageManagerInterface>(GetOwner());
+
+    if (MontageManagerInterface == nullptr)
+    {
+        FString Name = UGameplayStatics::GetObjectClass(GetOwner())->GetDisplayNameText().ToString();
+        UE_LOG(LogTemp, Warning, TEXT("Does not implement interface IMontageManager!  %s"), *Name);
+    }
+}
+
+
+UAnimMontage* UMontageManagerComponent::GetMontageForAction(EMontageAction Action, int Index)
+{
+    FMontageAction OutMontageAction;
+    LastRequestedAction = Action;
+
+    if (GetMontage(Action, OutMontageAction))
+    {
+        if (OutMontageAction.Montages[Index]->IsValidLowLevel())
+        {
+            return OutMontageAction.Montages[Index];
+        }
+    }
+    return nullptr;
+}
+
+int UMontageManagerComponent::GetMontageActionLastIndex(EMontageAction Action) const
+{
+    FMontageAction OutMontageAction;
+    if (GetMontage(Action, OutMontageAction))
+    {
+        if (OutMontageAction.Montages.Num() > 0)
+        {
+            return OutMontageAction.Montages.Num() - 1;
+        }
+    }
+    
+    return -1;
+}
+
+int UMontageManagerComponent::GetRandomMontageIndex(EMontageAction Action) const
+{
+    return UKismetMathLibrary::RandomIntegerInRange(0, GetMontageActionLastIndex(Action));
+}
+
+EMontageAction UMontageManagerComponent::GetLastRequestedAction() const
+{
+    return LastRequestedAction;
+}
+
+bool UMontageManagerComponent::GetMontage(EMontageAction Action, FMontageAction& OutMontageData) const
+{
+    IMontageManagerInterface* MontageManagerInterface = Cast<IMontageManagerInterface>(GetOwner());
+
+    FString EnumStr = GameUtils::GetEnumDisplayNameAsString("EMontageAction", Action);
+
+    FMontageAction* Item = MontageManagerInterface->GetMontages()->FindRow<FMontageAction>(FName(EnumStr), "");
+
+    if (Item != nullptr)
+    {
+        OutMontageData = *Item;
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
