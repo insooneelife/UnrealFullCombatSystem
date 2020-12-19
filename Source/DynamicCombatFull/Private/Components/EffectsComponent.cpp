@@ -27,8 +27,9 @@ void UEffectsComponent::BeginPlay()
 {
     Super::BeginPlay();
 
-    // ...
-
+    FTimerHandle TimerHandle;
+    GetWorld()->GetTimerManager().SetTimer(
+        TimerHandle, this, &UEffectsComponent::UpdateEffectsDuration, UpdateInterval, true);
 }
 
 

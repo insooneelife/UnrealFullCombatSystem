@@ -32,8 +32,13 @@ AFireballProjectileAbilityEffect::AFireballProjectileAbilityEffect()
     StopHomingDistance = 300.0f;
     ImpulsePower = 30000.0f;
 
-    HitParticle = GameUtils::LoadAssetObject<UParticleSystem>(TEXT("/Game/DynamicCombatSystem/VFX/P_FireballHit"));
-    HitSound = GameUtils::LoadAssetObject<USoundBase>(TEXT("/Game/DynamicCombatSystem/SFX/CUE/CUE_FireballHit"));
+    static UParticleSystem* LoadedParticleObject = 
+        GameUtils::LoadAssetObject<UParticleSystem>(TEXT("/Game/DynamicCombatSystem/VFX/P_FireballHit"));
+    HitParticle = LoadedParticleObject;
+
+    static USoundBase* LoadedSoundObject =
+        GameUtils::LoadAssetObject<USoundBase>(TEXT("/Game/DynamicCombatSystem/SFX/CUE/CUE_FireballHit"));
+    HitSound = LoadedSoundObject;
 }
 
 // Called when the game starts or when spawned
@@ -54,13 +59,18 @@ void AFireballProjectileAbilityEffect::EnableHomingProjectile()
 {
     if (HomingTarget->IsValidLowLevel())
     {
-        UKismetSystemLibrary::K2_SetTimer(this, FString(TEXT("UpdateHomingProjectile")), 0.016, true);
+        GetWorld()->GetTimerManager().SetTimer(
+            UpdateHomingProjectileTimerHandle,
+            this,
+            &AFireballProjectileAbilityEffect::UpdateHomingProjectile,
+            0.016f,
+            true);
     }
 }
 
 void AFireballProjectileAbilityEffect::DisableHomingProjectile()
 {
-    UKismetSystemLibrary::K2_ClearTimer(this, FString(TEXT("UpdateHomingProjectile")));
+    GetWorld()->GetTimerManager().ClearTimer(UpdateHomingProjectileTimerHandle);
 }
 
 void AFireballProjectileAbilityEffect::ApplyHitImpulse(UPrimitiveComponent* Component, FVector HitNormal, FName BoneName)
@@ -136,7 +146,7 @@ void AFireballProjectileAbilityEffect::OnHit(const FHitResult& Hit)
     }
 }
 
-bool AFireballProjectileAbilityEffect::IsEnemy(AActor* Target)
+bool AFireballProjectileAbilityEffect::IsEnemy(AActor* Target) const
 {
     UBehaviorComponent* BehaviorComp = 
         Cast<UBehaviorComponent>(GetOwner()->GetComponentByClass(UBehaviorComponent::StaticClass()));

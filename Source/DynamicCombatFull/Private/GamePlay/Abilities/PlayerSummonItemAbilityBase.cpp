@@ -6,7 +6,6 @@
 #include "Sound/SoundBase.h"
 #include "Components/AbilityComponent.h"
 #include "GamePlay/BaseCharacter.h"
-
 #include "GamePlay/AbilityEffects/SummonedItemAbilityEffect.h"
 #include "GameCore/GameUtils.h"
 
@@ -14,8 +13,17 @@ APlayerSummonItemAbilityBase::APlayerSummonItemAbilityBase()
 {
     Duration = 60.0f;
 
-    SummonCastParticle = GameUtils::LoadAssetObject<UParticleSystem>(TEXT("/Game/DynamicCombatSystem/VFX/P_Summon"));
-    Sound = GameUtils::LoadAssetObject<USoundBase>(TEXT("/Game/DynamicCombatSystem/SFX/CUE/CUE_SummonItem"));
+    static UParticleSystem* LoadedParticleObject = 
+        GameUtils::LoadAssetObject<UParticleSystem>(TEXT("/Game/DynamicCombatSystem/VFX/P_Summon"));
+    SummonCastParticle = LoadedParticleObject;
+
+    static USoundBase* LoadedSoundObject = 
+        GameUtils::LoadAssetObject<USoundBase>(TEXT("/Game/DynamicCombatSystem/SFX/CUE/CUE_SummonItem"));
+    Sound = LoadedSoundObject;
+
+    static TSubclassOf<ASummonedItemAbilityEffect> LoadedClass = GameUtils::LoadAssetClass<ASummonedItemAbilityEffect>(
+        TEXT("/Game/DynamicCombatSystem/Blueprints/AbilityEffects/AE_SummonedItem"));
+    SpawnSummonedItemAbilityEffectClass = LoadedClass;
 }
 
 void APlayerSummonItemAbilityBase::Effect()
@@ -24,9 +32,6 @@ void APlayerSummonItemAbilityBase::Effect()
     SpawnParticle();
     PlaySound();
     ConsumeMana();
-
-    SpawnSummonedItemAbilityEffectClass = GameUtils::LoadAssetClass<ASummonedItemAbilityEffect>(
-        TEXT("/Game/DynamicCombatSystem/Blueprints/AbilityEffects/AE_SummonedItem"));
 }
 
 void APlayerSummonItemAbilityBase::Released()

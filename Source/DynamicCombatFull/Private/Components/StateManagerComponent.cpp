@@ -23,7 +23,7 @@ void UStateManagerComponent::BeginPlay()
 
 void UStateManagerComponent::SetState(EState State)
 {
-    UKismetSystemLibrary::K2_ClearTimer(this, FString(TEXT("SetIdleState")));
+    GetWorld()->GetTimerManager().ClearTimer(SetIdleStateTimerHandle);
     EState PrevState = CurrentState;
     CurrentState = State;
 
@@ -68,7 +68,8 @@ void UStateManagerComponent::ResetState(float InTime)
         }
         else
         {
-            UKismetSystemLibrary::K2_SetTimer(this, TEXT("SetIdleState"), InTime, false);
+            GetWorld()->GetTimerManager().SetTimer(
+                SetIdleStateTimerHandle, this, &UStateManagerComponent::SetIdleState, InTime, false);
         }
     }
 }

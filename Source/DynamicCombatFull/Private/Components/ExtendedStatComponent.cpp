@@ -53,19 +53,20 @@ void UExtendedStatComponent::RefreshRegenTimer()
 {
     if (bDoesRegenerates)
     {
-        if (UKismetSystemLibrary::K2_IsTimerActiveHandle(GetWorld(), RegenHandle))
+        if (!GetWorld()->GetTimerManager().IsTimerActive(RegenTimerHandle))
         {
-        }
-        else
-        {
-            RegenHandle = UKismetSystemLibrary::K2_SetTimer(this, TEXT("StartRegenerating"), ReenableRegenTime, false);
+            GetWorld()->GetTimerManager().SetTimer(
+                RegenTimerHandle, this, &UExtendedStatComponent::StartRegenerating, ReenableRegenTime, false);
         }
     }
 }
 
 void UExtendedStatComponent::StartRegenerating()
 {
-    UKismetSystemLibrary::K2_SetTimer(this, TEXT("RegenTick"), RegenerationTickInterval, true);
+    FTimerHandle TimerHandle;
+
+    GetWorld()->GetTimerManager().SetTimer(
+        TimerHandle, this, &UExtendedStatComponent::RegenTick, RegenerationTickInterval, true);
 }
 
 void UExtendedStatComponent::OnModifierAdded(EStat Type, float Value)
@@ -102,9 +103,9 @@ void UExtendedStatComponent::InitStatManager()
 
 void UExtendedStatComponent::OnGameLoaded()
 {
-    FTimerHandle UnusedHandle;
+    FTimerHandle TimerHandle;
     GetWorld()->GetTimerManager().SetTimer(
-        UnusedHandle, this, &UExtendedStatComponent::OnGameLoadedDelayed, 0.0f, false);
+        TimerHandle, this, &UExtendedStatComponent::OnGameLoadedDelayed, 0.0f, false);
 }
 
 void UExtendedStatComponent::OnGameLoadedDelayed()
@@ -147,7 +148,7 @@ void UExtendedStatComponent::RegenTick()
 
 void UExtendedStatComponent::ClearRegenTimer()
 {
-    UKismetSystemLibrary::K2_ClearAndInvalidateTimerHandle(GetWorld(), RegenHandle);
+    GetWorld()->GetTimerManager().ClearTimer(RegenTimerHandle);
 }
 
 void UExtendedStatComponent::ChangeRegenPercent(int Percent)

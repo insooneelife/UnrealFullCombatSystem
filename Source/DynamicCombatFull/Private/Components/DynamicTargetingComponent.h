@@ -83,9 +83,9 @@ private:
     bool bIsTargetingEnabled;
     bool bDebug;
     ACharacter* CharacterReference;
-    FTimerHandle CheckTargetHandle;
+    FTimerHandle CheckTargetTimerHandle;
     bool bIsFreeCamera;
-    FTimerHandle DisableCameraLockHandle;
+    FTimerHandle DisableCameraLockTimerHandle;
 
 		
 };

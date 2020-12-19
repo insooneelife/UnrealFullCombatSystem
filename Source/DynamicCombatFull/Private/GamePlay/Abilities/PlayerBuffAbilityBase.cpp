@@ -15,8 +15,18 @@ APlayerBuffAbilityBase::APlayerBuffAbilityBase()
     BuffDuration = 30.0f;
     BuffColor = FLinearColor(50.0f, 1.0f, 1.0f, 1.0f);
 
-    BuffCastParticle = GameUtils::LoadAssetObject<UParticleSystem>(TEXT("/Game/DynamicCombatSystem/VFX/P_ApplyBuff"));
-    Sound = GameUtils::LoadAssetObject<USoundBase>(TEXT("/Game/DynamicCombatSystem/SFX/CUE/CUE_Buff"));
+    static UParticleSystem* LoadedParticleObject =
+        GameUtils::LoadAssetObject<UParticleSystem>(TEXT("/Game/DynamicCombatSystem/VFX/P_ApplyBuff"));
+    BuffCastParticle = LoadedParticleObject;
+
+    static USoundBase* LoadedSoundObject =
+        GameUtils::LoadAssetObject<USoundBase>(TEXT("/Game/DynamicCombatSystem/SFX/CUE/CUE_Buff"));
+    Sound = LoadedSoundObject;
+
+    static TSubclassOf<ABuffAbilityEffect> LoadedClass = GameUtils::LoadAssetClass<ABuffAbilityEffect>(
+        TEXT("/Game/DynamicCombatSystem/Blueprints/AbilityEffects/AE_Buff"));
+
+    SpawnBuffAbilityEffectClass = LoadedClass;
 }
 
 void APlayerBuffAbilityBase::Released()
@@ -25,9 +35,6 @@ void APlayerBuffAbilityBase::Released()
     {
         PlayAbilityMontage(GetAbilityMontage(0), TEXT("None"), true, 1.0f);
     }
-
-    SpawnBuffAbilityEffectClass = GameUtils::LoadAssetClass<ABuffAbilityEffect>(
-            TEXT("/Game/DynamicCombatSystem/Blueprints/AbilityEffects/AE_Buff"));
 }
 
 void APlayerBuffAbilityBase::Effect()

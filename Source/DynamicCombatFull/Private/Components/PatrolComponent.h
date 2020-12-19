@@ -22,9 +22,7 @@ protected:
 	virtual void BeginPlay() override;
 
 public:	
-	// Called every frame
-	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
-
+	
     void UpdatePatrolIndex();
     FVector GetSplinePointLocation(int InPointIndex) const;
     bool IsPatrolPathValid() const;

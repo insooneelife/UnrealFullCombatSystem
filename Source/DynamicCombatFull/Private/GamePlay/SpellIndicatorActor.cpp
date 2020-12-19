@@ -4,6 +4,7 @@
 #include "SpellIndicatorActor.h"
 #include "Components/DecalComponent.h"
 #include "Materials/MaterialInterface.h"
+#include "GameCore/GameUtils.h"
 
 // Sets default values
 ASpellIndicatorActor::ASpellIndicatorActor()
@@ -12,16 +13,11 @@ ASpellIndicatorActor::ASpellIndicatorActor()
 	PrimaryActorTick.bCanEverTick = false;
     PrimaryActorTick.bStartWithTickEnabled = false;
 
-    FString AssetReference = TEXT("/Game/DynamicCombatSystem/VFX/Materials/MI_SpellIndicatror_01");
-    ConstructorHelpers::FObjectFinder<UMaterialInterface> MaterialClass(*AssetReference);
+    static UMaterialInterface* LoadedObject = 
+        GameUtils::LoadAssetObject<UMaterialInterface>(
+            TEXT("/Game/DynamicCombatSystem/VFX/Materials/MI_SpellIndicatror_01"));
 
-    if (MaterialClass.Object == nullptr)
-    {
-        UE_LOG(LogTemp, Warning, TEXT("Failed to find %s"), *AssetReference);
-    }
-
-    DecalMaterial = MaterialClass.Object;
-
+    DecalMaterial = LoadedObject;
     Radius = 256.0f;
 }
 
@@ -33,8 +29,8 @@ void ASpellIndicatorActor::BeginPlay()
 
 void ASpellIndicatorActor::OnConstruction(const FTransform& Transform)
 {
+    Super::OnConstruction(Transform);
     SetRadius(Radius);
-
     SetMaterial(DecalMaterial);
 }
 

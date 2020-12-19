@@ -9,6 +9,7 @@
 #include "Kismet/GameplayStatics.h"
 
 #include "Materials/MaterialInstance.h"
+#include "GameCore/GameUtils.h"
 
 // Sets default values for this component's properties
 UDissolveComponent::UDissolveComponent()
@@ -17,17 +18,11 @@ UDissolveComponent::UDissolveComponent()
     // off to improve performance if you don't need them.
     PrimaryComponentTick.bCanEverTick = false;
     PrimaryComponentTick.bStartWithTickEnabled = false;
-    // ...
+    
+    static UMaterialInstance* LoadedObject = GameUtils::LoadAssetObject<UMaterialInstance>(
+        TEXT("/Game/DynamicCombatSystem/Meshes/Materials/MI_DissolveEffect"));
 
-    FString AssetReference = TEXT("/Game/DynamicCombatSystem/Meshes/Materials/MI_DissolveEffect");
-    ConstructorHelpers::FObjectFinder<UMaterialInstance> MaterialClass(*AssetReference);
-
-    if (MaterialClass.Object == nullptr)
-    {
-        UE_LOG(LogTemp, Warning, TEXT("Failed to find %s"), *AssetReference);
-    }
-
-    DissolveMaterial = MaterialClass.Object;
+    DissolveMaterial = LoadedObject;
     DissolveValueName = TEXT("amount");
     DissolveColorName = TEXT("color");
     DissolveInterpSpeed = 1.0f;
@@ -39,9 +34,6 @@ UDissolveComponent::UDissolveComponent()
 void UDissolveComponent::BeginPlay()
 {
     Super::BeginPlay();
-
-    // ...
-
 }
 
 
@@ -54,8 +46,6 @@ void UDissolveComponent::StartDessolve(UPrimitiveComponent* Component, bool bRev
         {
             DissolvedComponents[LComponentIndex].bReverse = bReversed;
             DissolvedComponents[LComponentIndex].bIsRunning = true;
-
-            UKismetSystemLibrary::K2_SetTimer(this, FString(TEXT("DissolveComponents")), 0.016, true);
         }
         else
         {
@@ -81,10 +71,10 @@ void UDissolveComponent::StartDessolve(UPrimitiveComponent* Component, bool bRev
             DissComp.bReverse = bReversed;
             DissComp.bIsRunning = true;
             DissolvedComponents.Add(DissComp);
-
-            // set dissolving timer
-            UKismetSystemLibrary::K2_SetTimer(this, FString(TEXT("DissolveComponents")), 0.016, true);
         }
+
+        GetWorld()->GetTimerManager().SetTimer(
+            DissolveComponentsTimerHandle, this, &UDissolveComponent::DissolveComponents, 0.016f, true);
     }
 }
 
@@ -155,7 +145,7 @@ void UDissolveComponent::DissolveComponents()
 
     if (!bLKeepDissolving)
     {
-        UKismetSystemLibrary::K2_ClearTimer(this, FString(TEXT("DissolveComponents")));
+        GetWorld()->GetTimerManager().ClearTimer(DissolveComponentsTimerHandle);
     }
 }
 

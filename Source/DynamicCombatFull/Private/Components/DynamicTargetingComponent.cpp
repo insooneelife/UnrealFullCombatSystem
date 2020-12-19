@@ -70,7 +70,7 @@ void UDynamicTargetingComponent::DisableCameraLock()
         {
             IsTargetable->OnDeselected();
             SelectedActor = nullptr;
-            UKismetSystemLibrary::K2_ClearAndInvalidateTimerHandle(GetWorld(), CheckTargetHandle);
+            GetWorld()->GetTimerManager().ClearTimer(CheckTargetTimerHandle);
             UpdateIgnoreLookInput();
 
             OnTargetingToggled.Broadcast(false);            
@@ -257,8 +257,7 @@ void UDynamicTargetingComponent::EnableCameraLock()
 {
     bIsTargetingEnabled = true;
 
-    UKismetSystemLibrary::K2_ClearAndInvalidateTimerHandle(GetWorld(), DisableCameraLockHandle);
-
+    GetWorld()->GetTimerManager().ClearTimer(DisableCameraLockTimerHandle);
     SetDebugMode();
 
     IIsTargetable* IsTargetable = Cast<IIsTargetable>(SelectedActor);
@@ -267,7 +266,8 @@ void UDynamicTargetingComponent::EnableCameraLock()
     {
         IsTargetable->OnSelected();
 
-        CheckTargetHandle = UKismetSystemLibrary::K2_SetTimer(this, FString(TEXT("CheckTarget")), 0.015, true);
+        GetWorld()->GetTimerManager().SetTimer(
+            CheckTargetTimerHandle, this, &UDynamicTargetingComponent::CheckTarget, 0.016f, true);
 
         UpdateIgnoreLookInput();
         OnTargetingToggled.Broadcast(true);
@@ -333,7 +333,7 @@ void UDynamicTargetingComponent::CheckTarget()
 
     if (IsAnythingBlockingTrace(SelectedActor, ActorsToIgnore))
     {
-        if (!UKismetSystemLibrary::K2_IsTimerActiveHandle(GetWorld(), DisableCameraLockHandle))
+        if (!GetWorld()->GetTimerManager().IsTimerActive(DisableCameraLockTimerHandle))
         {
             if (DisableOnBlockDelay == 0.0f)
             {
@@ -341,15 +341,19 @@ void UDynamicTargetingComponent::CheckTarget()
             }
             else
             {
-                DisableCameraLockHandle = 
-                    UKismetSystemLibrary::K2_SetTimer(this, FString(TEXT("DisableCameraLock")), DisableOnBlockDelay, false);
-                
+                GetWorld()->GetTimerManager().SetTimer(
+                    DisableCameraLockTimerHandle, 
+                    this, 
+                    &UDynamicTargetingComponent::DisableCameraLock,
+                    DisableOnBlockDelay, 
+                    false);
             }
         }
     }
     else
     {
-        UKismetSystemLibrary::K2_ClearAndInvalidateTimerHandle(GetWorld(), DisableCameraLockHandle);
+        GetWorld()->GetTimerManager().ClearTimer(DisableCameraLockTimerHandle);
+
         IIsTargetable* IsTargetable = Cast<IIsTargetable>(SelectedActor);
         if (IsTargetable != nullptr)
         {

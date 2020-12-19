@@ -22,8 +22,6 @@ UCollisionHandlerComponent::UCollisionHandlerComponent()
 void UCollisionHandlerComponent::BeginPlay()
 {
     Super::BeginPlay();
-
-    // ...
 }
 
 

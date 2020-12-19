@@ -9,19 +9,9 @@ void AMasterPoseDisplayedItem::BeginPlay()
     Super::BeginPlay();
 }
 
-
 void AMasterPoseDisplayedItem::OnConstruction(const FTransform& Transform)
 {
     Super::OnConstruction(Transform);
-}
-
-void AMasterPoseDisplayedItem::NotifyActorBeginOverlap(AActor* OtherActor)
-{
-
-}
-
-void AMasterPoseDisplayedItem::Tick(float DeltaTime)
-{
 }
 
 bool AMasterPoseDisplayedItem::Attach()

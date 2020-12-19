@@ -48,4 +48,6 @@ public:
 private:
     EState CurrentState;
     TMap<EActivity, bool> Activities;
+
+    FTimerHandle SetIdleStateTimerHandle;
 };

@@ -45,7 +45,7 @@ public:
 
     FName GetName() const { return Name; }
 
-    const TMap<TSubclassOf<UItemBase>, int>& GetItems() const { return  Items; }
+    const TMap<TSubclassOf<UItemBase>, int>& GetItems() const { return Items; }
 
 private:
     void DestroyActorIfEmpty();

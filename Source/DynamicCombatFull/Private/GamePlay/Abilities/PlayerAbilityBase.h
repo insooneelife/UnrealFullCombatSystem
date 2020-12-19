@@ -15,7 +15,7 @@ class APlayerAbilityBase : public AAbilityBase
 {
 	GENERATED_BODY()
 public:
-    APlayerAbilityBase();
+    APlayerAbilityBase() {}
 
 protected:
     // Called when the game starts or when spawned

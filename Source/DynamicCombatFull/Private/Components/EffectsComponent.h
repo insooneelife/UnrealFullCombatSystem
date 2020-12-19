@@ -75,5 +75,4 @@ private:
 
     UPROPERTY(EditAnywhere)
         float UpdateInterval;
-
 };

@@ -27,12 +27,11 @@ protected:
 	virtual void BeginPlay() override;
 
 public:
-    virtual void OnConstruction(const FTransform& Transform) override;
-
-    virtual void Released();
-    virtual void Pressed();
-    virtual void Effect();
-    virtual void Ended(EAbilityEndResult Result);
+    virtual void OnConstruction(const FTransform& Transform) override {}
+    virtual void Released() {}
+    virtual void Pressed() {}
+    virtual void Effect() {}
+    virtual void Ended(EAbilityEndResult Result) {}
 
     void ConsumeManaAmount(float Amount);
     void ConsumeMana();

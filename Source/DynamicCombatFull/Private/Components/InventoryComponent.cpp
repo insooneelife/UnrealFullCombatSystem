@@ -31,8 +31,6 @@ void UInventoryComponent::BeginPlay()
 
     ClearInventory();
 
-
-
     if (GetOwner() == UGameplayStatics::GetPlayerCharacter(GetWorld(), 0))
     {
         ADCSGameMode* GameMode = Cast<ADCSGameMode>(UGameplayStatics::GetGameMode(GetWorld()));

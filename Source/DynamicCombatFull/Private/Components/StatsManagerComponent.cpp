@@ -209,12 +209,13 @@ void UStatsManagerComponent::ChangeStatBaseValue(EStat Type, float NewValue)
 
 void UStatsManagerComponent::TakeDamage(float Damage, bool bIgnoreStamina)
 {
-    UKismetSystemLibrary::K2_ClearTimer(this, FString(TEXT("ResetRecentlyReceivedDamage")));
+    GetWorld()->GetTimerManager().ClearTimer(ResetRecentlyReceivedDamageTimerHandle);
 
     RecentlyReceivedDamage += Damage;
     RecentlyReceivedHitsCount++;
 
-    UKismetSystemLibrary::K2_SetTimer(this, FString(TEXT("ResetRecentlyReceivedDamage")), 4.0f, false);
+    GetWorld()->GetTimerManager().SetTimer(
+        ResetRecentlyReceivedDamageTimerHandle, this, &UStatsManagerComponent::ResetRecentlyReceivedDamage, 4.0f, false);
     
     UExtendedStatComponent* HealthStatComp = UDefaultGameInstance::GetExtendedStatComponent(GetOwner(), EStat::Health);
     UExtendedStatComponent* StaminaStatComp = UDefaultGameInstance::GetExtendedStatComponent(GetOwner(), EStat::Stamina);

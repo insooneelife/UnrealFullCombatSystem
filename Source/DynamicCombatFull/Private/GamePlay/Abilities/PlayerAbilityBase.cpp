@@ -13,9 +13,6 @@
 
 #include "GamePlay/BaseCharacter.h"
 
-APlayerAbilityBase::APlayerAbilityBase()
-{}
-
 void APlayerAbilityBase::BeginPlay()
 {
     Super::BeginPlay();

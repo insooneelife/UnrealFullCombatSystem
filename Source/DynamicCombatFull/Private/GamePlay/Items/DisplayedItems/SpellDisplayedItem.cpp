@@ -9,11 +9,15 @@
 
 ASpellDisplayedItem::ASpellDisplayedItem()
 {
-    HandParticle = GameUtils::LoadAssetObject<UParticleSystem>(TEXT("/Game/DynamicCombatSystem/VFX/P_ArcaneHand"));
+    static UParticleSystem* LoadedObject =
+        GameUtils::LoadAssetObject<UParticleSystem>(TEXT("/Game/DynamicCombatSystem/VFX/P_ArcaneHand"));
+
+    HandParticle = LoadedObject;
 }
 
 void ASpellDisplayedItem::OnConstruction(const FTransform& Transform)
 {
+    Super::OnConstruction(Transform);
     ParticleSystemComponent->SetTemplate(HandParticle);
 }
 

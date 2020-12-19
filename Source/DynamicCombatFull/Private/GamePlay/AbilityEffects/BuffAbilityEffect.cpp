@@ -78,15 +78,15 @@ void ABuffAbilityEffect::StartTimer()
 {
     ElapsedTime = 0.0f;
     SetLifeSpan(0.0f);
-
-    UKismetSystemLibrary::K2_SetTimer(this, TEXT("UpdateElapsedTime"), TimerInterval, true);
+    GetWorld()->GetTimerManager().SetTimer(
+        UpdateElapsedTimeTimerHandle, this, &ABuffAbilityEffect::UpdateElapsedTime, TimerInterval, true);
 
     ParticleSystemComponent->Activate();
 }
 
 void ABuffAbilityEffect::Deactivate()
 {
-    UKismetSystemLibrary::K2_ClearTimer(this, TEXT("UpdateElapsedTime"));
+    GetWorld()->GetTimerManager().ClearTimer(UpdateElapsedTimeTimerHandle);
 
     ParticleSystemComponent->Deactivate();
     SetLifeSpan(5.0f);

@@ -7,6 +7,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/BlueprintMapLibrary.h"
 #include "Components/InventoryComponent.h"
+#include "GameCore/GameUtils.h"
 
 // Sets default values
 APickupActor::APickupActor()
@@ -15,15 +16,10 @@ APickupActor::APickupActor()
     PrimaryActorTick.bCanEverTick = false;
     PrimaryActorTick.bStartWithTickEnabled = false;
 
-    static FString FindObj = TEXT("/Game/DynamicCombatSystem/Widgets/WB_Pickup");
-    static ConstructorHelpers::FClassFinder<UUserWidget> FindBPClass(*FindObj);
-    if (FindBPClass.Class == nullptr)
-    {
-        UE_LOG(LogTemp, Warning, TEXT("Failed to find : %s"), *FindObj);
-        return;
-    }
+    TSubclassOf<UUserWidget> LoadedClass = 
+        GameUtils::LoadAssetClass<UUserWidget>(TEXT("/Game/DynamicCombatSystem/Widgets/WB_Pickup"));
 
-    CreateUserWidgetClass = FindBPClass.Class;
+    CreateUserWidgetClass = LoadedClass;
 }
 
 // Called when the game starts or when spawned

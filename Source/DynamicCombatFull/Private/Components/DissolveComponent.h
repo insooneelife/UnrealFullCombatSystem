@@ -53,4 +53,6 @@ private:
 
     UPROPERTY(EditAnywhere)
         TArray<FDissolvedComponent> DissolvedComponents;
+
+    FTimerHandle DissolveComponentsTimerHandle;
 };

@@ -43,7 +43,6 @@ void ASummonedItemAbilityEffect::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
     ElapsedTime += DeltaTime;
-
 }
 
 void ASummonedItemAbilityEffect::UnsummonWeapon()
@@ -74,10 +73,13 @@ void ASummonedItemAbilityEffect::SummonWeapon()
         EquipmentComponent->SetMainHandType(CreatedItemType);
     }
 
-    UKismetSystemLibrary::K2_SetTimer(this, FString(TEXT("AttemptToUnsummon")), Duration, false);
+    FTimerHandle AttemptToUnsummonTimerHandle;
+    GetWorldTimerManager().SetTimer(
+        AttemptToUnsummonTimerHandle, this, &ASummonedItemAbilityEffect::AttemptToUnsummon, Duration, false);
 
-    UKismetSystemLibrary::K2_SetTimer(this, FString(TEXT("UnsummonWeapon")), Duration + 10.0f, false);
-
+    FTimerHandle UnsummonWeaponTimerHandle;
+    GetWorldTimerManager().SetTimer(
+        UnsummonWeaponTimerHandle, this, &ASummonedItemAbilityEffect::UnsummonWeapon, Duration + 10.0f, false);
 }
 
 void ASummonedItemAbilityEffect::AttemptToUnsummon()
@@ -90,9 +92,9 @@ void ASummonedItemAbilityEffect::AttemptToUnsummon()
         }
         else
         {
-            FTimerHandle UnusedHandle;
+            FTimerHandle TimerHandle;
             GetWorldTimerManager().SetTimer(
-                UnusedHandle, this, &ASummonedItemAbilityEffect::AttemptToUnsummon, 0.1f, false);
+                TimerHandle, this, &ASummonedItemAbilityEffect::AttemptToUnsummon, 0.1f, false);
         }
     }
     else

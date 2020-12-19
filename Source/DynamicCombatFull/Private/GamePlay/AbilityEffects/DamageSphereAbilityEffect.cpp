@@ -20,7 +20,7 @@ void ADamageSphereAbilityEffect::BeginPlay()
 	
 }
 
-void ADamageSphereAbilityEffect::GetTraceObjects(TArray<FHitResult>& OutHits)
+void ADamageSphereAbilityEffect::GetTraceObjects(TArray<FHitResult>& OutHits) const
 {
     FVector Start = GetActorLocation();
     FVector End = GetActorLocation() + FVector(0, 0, 1);

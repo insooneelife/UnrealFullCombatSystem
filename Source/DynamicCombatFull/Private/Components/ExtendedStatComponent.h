@@ -25,7 +25,6 @@ protected:
 public:
     void RefreshRegenTimer();
 
-    UFUNCTION()
     void StartRegenerating();
 
     UFUNCTION()
@@ -38,12 +37,12 @@ public:
 
     UFUNCTION()
     void OnGameLoaded();
+
     void OnGameLoadedDelayed();
 
     UFUNCTION()
     void OnBaseValueChanged(EStat Stat, float NewValue);
 
-    UFUNCTION()
     void RegenTick();
 
     void ClearRegenTimer();
@@ -76,6 +75,6 @@ private:
     bool bDoesRegenerates;
     float RegenValue;
     float ReenableRegenTime;
-    FTimerHandle RegenHandle;
+    FTimerHandle RegenTimerHandle;
     float InitialRegenValue;
 };

@@ -17,7 +17,6 @@ UMontageManagerComponent::UMontageManagerComponent()
     PrimaryComponentTick.bCanEverTick = false;
     PrimaryComponentTick.bStartWithTickEnabled = false;
 
-    // ...
 }
 
 

@@ -28,11 +28,17 @@ protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
 
-public:	
-	
+    UFUNCTION()
     void OnActiveItemChanged(FStoredItem OldItem, FStoredItem NewItem, EItemType SlotType, int SlotIndex, int ActiveIndex);
+
+    UFUNCTION()
     void OnSlotHiddenChanged(EItemType SlotType, int SlotIndex, FStoredItem ActiveItem, bool bIsHidden);
+
+    UFUNCTION()
     void OnMainHandTypeSwitched(EItemType SlotType);
+
+public:	
+
     void Initialize();
 
     void ExcludeItemModifiers(TSubclassOf<UItemBase> Item);
@@ -73,4 +79,6 @@ private:
     int RecentlyReceivedHitsCount;
     float RecentlyReceivedSuccessfulDamage;
     int RecentlyReceivedSuccessfulHitsCount;
+
+    FTimerHandle ResetRecentlyReceivedDamageTimerHandle;
 };

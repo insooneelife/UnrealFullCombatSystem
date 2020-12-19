@@ -25,7 +25,7 @@ protected:
 	virtual void BeginPlay() override;
 
 public:	
-    virtual void GetTraceObjects(TArray<FHitResult>& OutHits) override;
+    virtual void GetTraceObjects(TArray<FHitResult>& OutHits) const override;
 
     UFUNCTION()
     void OnComponentBeginOverlap(

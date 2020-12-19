@@ -20,7 +20,7 @@ void ADamageCapsuleAbilityEffect::BeginPlay()
 	Super::BeginPlay();
 }
 
-void ADamageCapsuleAbilityEffect::GetTraceObjects(TArray<FHitResult>& OutHits)
+void ADamageCapsuleAbilityEffect::GetTraceObjects(TArray<FHitResult>& OutHits) const
 {
     FVector Start = GetActorLocation();
     FVector End = GetActorLocation() + FVector(0, 0, 1);

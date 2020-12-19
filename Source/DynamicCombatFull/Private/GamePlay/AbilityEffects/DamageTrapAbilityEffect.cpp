@@ -17,15 +17,19 @@ ADamageTrapAbilityEffect::ADamageTrapAbilityEffect()
 	PrimaryActorTick.bCanEverTick = false;
     PrimaryActorTick.bStartWithTickEnabled = false;
     
-    HitParticle = GameUtils::LoadAssetObject<UParticleSystem>(TEXT("/Game/DynamicCombatSystem/VFX/P_Explosion"));
     Damage = 15.0f;
     Impulse = 40000.0f;
     Duration = 60.0f;
     ActivationDelay = 1.0f;
     Color = FLinearColor(10.0f, 1.0f, 0.0f, 1.0f);
 
-    ExplosionSound = GameUtils::LoadAssetObject<USoundBase>(
-        TEXT("/Game/DynamicCombatSystem/SFX/CUE/CUE_GroundExplosion"));
+    static UParticleSystem* LoadedParticleObject = 
+        GameUtils::LoadAssetObject<UParticleSystem>(TEXT("/Game/DynamicCombatSystem/VFX/P_Explosion"));
+    HitParticle = LoadedParticleObject;
+
+    static USoundBase* LoadedSoundObject = 
+        GameUtils::LoadAssetObject<USoundBase>(TEXT("/Game/DynamicCombatSystem/SFX/CUE/CUE_GroundExplosion"));
+    ExplosionSound = LoadedSoundObject;
     
 }
 
@@ -43,7 +47,7 @@ void ADamageTrapAbilityEffect::BeginPlay()
 }
 
 
-void ADamageTrapAbilityEffect::GetTraceObjects(TArray<FHitResult>& OutHits)
+void ADamageTrapAbilityEffect::GetTraceObjects(TArray<FHitResult>& OutHits) const
 {
     FVector Start = GetActorLocation();
     FVector End = GetActorLocation() + FVector(0, 0, 1);

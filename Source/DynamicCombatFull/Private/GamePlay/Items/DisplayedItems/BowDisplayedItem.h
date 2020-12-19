@@ -29,6 +29,7 @@ public:
 
     virtual UPrimitiveComponent* GetPrimaryComponent() const;
 
+    UFUNCTION()
     void OnActiveItemChanged(
         FStoredItem InOldItem, FStoredItem InNewItem, EItemType InType, int InSlotIndex, int InActiveIndex);
     

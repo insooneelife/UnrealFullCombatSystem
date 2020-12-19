@@ -31,8 +31,10 @@ public:
     void DisableHomingProjectile();
 
     void ApplyHitImpulse(UPrimitiveComponent* Component, FVector HitNormal, FName BoneName);
+
+    UFUNCTION()
     void OnHit(const FHitResult& Hit);
-    bool IsEnemy(AActor* Target);
+    bool IsEnemy(AActor* Target) const;
     void UpdateHomingProjectile();
 
 public:
@@ -95,5 +97,7 @@ private:
 
     UPROPERTY()
     UProjectileMovementComponent* ProjectileMovement;
+
+    FTimerHandle UpdateHomingProjectileTimerHandle;
 
 };

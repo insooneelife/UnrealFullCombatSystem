@@ -73,4 +73,6 @@ public:
     FName AttachmentSocket;
 
     float TimerInterval;
+
+    FTimerHandle UpdateElapsedTimeTimerHandle;
 };

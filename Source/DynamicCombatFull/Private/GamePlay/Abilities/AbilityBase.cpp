@@ -26,8 +26,10 @@ AAbilityBase::AAbilityBase()
 	PrimaryActorTick.bCanEverTick = false;
     PrimaryActorTick.bStartWithTickEnabled = false;
 
-    CrosshairTexture = GameUtils::LoadAssetObject<UTexture2D>(
+    static UTexture2D* LoadedTextureObject = GameUtils::LoadAssetObject<UTexture2D>(
         TEXT("/Game/DynamicCombatSystem/Widgets/Textures/T_AbilityCrosshair"));
+
+    CrosshairTexture = LoadedTextureObject;
 
     bIncludeOwnerDamage = true;
     OwnerDamageScalar = 1.0f;
@@ -38,8 +40,10 @@ AAbilityBase::AAbilityBase()
     BeamSocket = TEXT("magic_beam");
 
     IndicatorRadius = 250.0f;
-    IndicatorMaterial = GameUtils::LoadAssetObject<UMaterialInterface>(
+
+    static UMaterialInterface* LoadedMaterialObject = GameUtils::LoadAssetObject<UMaterialInterface>(
         TEXT("/Game/DynamicCombatSystem/VFX/Materials/MI_SpellIndicatror_01"));
+    IndicatorMaterial = LoadedMaterialObject;
 
     bRotateOnPressed = true;
 }
@@ -50,26 +54,6 @@ void AAbilityBase::BeginPlay()
 	Super::BeginPlay();
 
     Character = AbilityComponent->GetCharacter();
-}
-
-void AAbilityBase::OnConstruction(const FTransform& Transform)
-{
-}
-
-void AAbilityBase::Released()
-{
-}
-
-void AAbilityBase::Pressed()
-{
-}
-
-void AAbilityBase::Effect()
-{
-}
-
-void AAbilityBase::Ended(EAbilityEndResult Result)
-{
 }
 
 void AAbilityBase::ConsumeManaAmount(float Amount)

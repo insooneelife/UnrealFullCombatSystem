@@ -21,7 +21,7 @@ protected:
 	virtual void BeginPlay() override;
 
 public:	
-    virtual void GetTraceObjects(TArray<FHitResult>& OutHits) override;
+    virtual void GetTraceObjects(TArray<FHitResult>& OutHits) const override;
 
     float GetHalfHeight() const { return HalfHeight; }
 
