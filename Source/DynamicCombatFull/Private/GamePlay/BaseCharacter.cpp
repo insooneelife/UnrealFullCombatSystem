@@ -14,6 +14,41 @@ ABaseCharacter::ABaseCharacter()
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
+    ReceivedHitDirection = EDirection::Front;
+
+    LeftHandCollisionSockets = 
+    {
+        FName(TEXT("left_hand_1")),
+        FName(TEXT("left_hand_2")),
+    };
+
+    RightHandCollisionSockets =
+    {
+        FName(TEXT("right_hand_1")),
+        FName(TEXT("right_hand_2")),
+    };
+
+    RightFootCollisionSockets =
+    {
+        FName(TEXT("right_foot_1")),
+        FName(TEXT("right_foot_2")),
+    };
+
+    LeftFootCollisionSockets =
+    {
+        FName(TEXT("left_foot_1")),
+        FName(TEXT("left_foot_2")),
+    };
+
+    SlowMotionTimeDilation = 0.4f;
+    SlowMotionStaminaCost = 1.0f;
+    ZoomCameraArmLength = 150.0f;
+
+    HorizontalLookRate = 45.0f;
+    VerticalLookRate = 45.0f;
+    StoredMovementState = EMovementState::Idle;
+    RollStaminaCost = 25.0f;
+    SprintStaminaCost = 0.5f;
 }
 
 // Called when the game starts or when spawned
