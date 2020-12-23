@@ -82,32 +82,6 @@ FReply UEquipmentUI::NativeOnKeyDown(const FGeometry& InGeometry, const FKeyEven
     }
 }
 
-void UEquipmentUI::Open()
-{
-    SetVisibility(ESlateVisibility::Visible);
-
-    UWidgetBlueprintLibrary::SetInputMode_UIOnlyEx(GetOwningPlayer(), this, EMouseLockMode::LockAlways);
-    SetActiveWidget(0);
-    
-    ICanOpenUI* CanOpenUI = Cast<ICanOpenUI>(GetOwningPlayerPawn());
-
-    if (CanOpenUI != nullptr)
-    {
-        CanOpenUI->OpenedUI();
-    }
-}
-
-void UEquipmentUI::Close()
-{
-    SetVisibility(ESlateVisibility::Hidden);
-
-    UWidgetBlueprintLibrary::SetInputMode_GameOnly(GetOwningPlayer());
-    ICanOpenUI* CanOpenUI = Cast<ICanOpenUI>(GetOwningPlayerPawn());
-    if (CanOpenUI != nullptr)
-    {
-        CanOpenUI->ClosedUI();
-    }
-}
 
 void UEquipmentUI::OnInventoryItemClicked(UInventoryItemUI* InItem)
 {
@@ -126,6 +100,33 @@ void UEquipmentUI::OnInventoryItemClicked(UInventoryItemUI* InItem)
 void UEquipmentUI::OnClicked_CloseButton()
 {
     Close();
+}
+
+void UEquipmentUI::Open()
+{
+    SetVisibility(ESlateVisibility::Visible);
+
+    UWidgetBlueprintLibrary::SetInputMode_UIOnlyEx(GetOwningPlayer(), this, EMouseLockMode::LockAlways);
+    SetActiveWidget(0);
+
+    ICanOpenUI* CanOpenUI = Cast<ICanOpenUI>(GetOwningPlayerPawn());
+
+    if (CanOpenUI != nullptr)
+    {
+        CanOpenUI->OpenedUI();
+    }
+}
+
+void UEquipmentUI::Close()
+{
+    SetVisibility(ESlateVisibility::Hidden);
+
+    UWidgetBlueprintLibrary::SetInputMode_GameOnly(GetOwningPlayer());
+    ICanOpenUI* CanOpenUI = Cast<ICanOpenUI>(GetOwningPlayerPawn());
+    if (CanOpenUI != nullptr)
+    {
+        CanOpenUI->ClosedUI();
+    }
 }
 
 void UEquipmentUI::EquipmentSlotClicked(UEquipmentSlotUI* InSlot)

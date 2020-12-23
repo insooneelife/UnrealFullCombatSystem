@@ -36,7 +36,7 @@ protected:
 
 public:
 
-    void Initialize();
+    void Init();
 
     UFUNCTION()
     void OnItemModified(FStoredItem InItem);

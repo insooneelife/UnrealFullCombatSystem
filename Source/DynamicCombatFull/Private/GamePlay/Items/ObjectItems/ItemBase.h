@@ -10,7 +10,7 @@
 /**
  * 
  */
-UCLASS()
+UCLASS(Blueprintable)
 class UItemBase : public UObject
 {
 	GENERATED_BODY()

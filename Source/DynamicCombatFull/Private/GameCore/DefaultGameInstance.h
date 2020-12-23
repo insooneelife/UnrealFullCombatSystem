@@ -49,7 +49,7 @@ public:
 
     static EDirection GetHitDirection(FVector HitFromDirection, AActor* AttackedActor);
 
-    static float ScaleMeleeAttackStaminaCostByType(FVector Cost, EMeleeAttackType MeleeAttackType);
+    static float ScaleMeleeAttackStaminaCostByType(float Cost, EMeleeAttackType MeleeAttackType);
 
     static float ScaleMeleeDamageByType(float Damage, EMeleeAttackType MeleeAttackType);
 

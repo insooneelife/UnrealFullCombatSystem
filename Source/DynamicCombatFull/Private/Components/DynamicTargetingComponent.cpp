@@ -49,7 +49,7 @@ void UDynamicTargetingComponent::TickComponent(float DeltaTime, ELevelTick TickT
     UpdateCameraLock();
 }
 
-void UDynamicTargetingComponent::Initialize(UArrowComponent* InArrowComp)
+void UDynamicTargetingComponent::Init(UArrowComponent* InArrowComp)
 {
     if (InArrowComp->IsValidLowLevel())
     {

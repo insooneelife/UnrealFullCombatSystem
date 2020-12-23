@@ -26,5 +26,5 @@ class IMontageManagerInterface
 	// Add interface functions to this class. This is the class that will be inherited to implement this interface.
 public:
 
-    virtual UDataTable* GetMontages() const = 0;
+    virtual UDataTable* GetMontages(EMontageAction InAction) const = 0;
 };

@@ -39,7 +39,7 @@ protected:
 
 public:	
 
-    void Initialize();
+    void Init();
 
     void ExcludeItemModifiers(TSubclassOf<UItemBase> Item);
     void IncludeItemModifiers(TSubclassOf<UItemBase> Item);

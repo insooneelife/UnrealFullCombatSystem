@@ -15,7 +15,7 @@
 
 class UAbilityComponent;
 class ACharacter;
-class UTextrue2D;
+class UTexture2D;
 class UMaterialInterface;
 class UAnimMontage;
 

@@ -109,7 +109,7 @@ void UEquipmentComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
     DisplayedItems.Empty();
 }
 
-void UEquipmentComponent::Initialize()
+void UEquipmentComponent::Init()
 {
     // inventory events
     Inventory = Cast <UInventoryComponent> (GetOwner()->GetComponentByClass(UInventoryComponent::StaticClass()));

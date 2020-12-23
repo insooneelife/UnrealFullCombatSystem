@@ -9,6 +9,7 @@
 #include "Interfaces/ItemHasModifiers.h"
 #include "GameCore/DefaultGameInstance.h"
 #include "Components/ExtendedStatComponent.h"
+#include "GamePlay/Items/ObjectItems/ItemBase.h"
 
 // Sets default values for this component's properties
 UStatsManagerComponent::UStatsManagerComponent()
@@ -72,7 +73,7 @@ void UStatsManagerComponent::OnMainHandTypeSwitched(EItemType SlotType)
     UpdateBlockBaseValue();
 }
 
-void UStatsManagerComponent::Initialize()
+void UStatsManagerComponent::Init()
 {
     InitialBlockValue = GetStatValue(EStat::Block, false);
     EquipmentComponent = Cast<UEquipmentComponent>(GetOwner()->GetComponentByClass(UEquipmentComponent::StaticClass()));

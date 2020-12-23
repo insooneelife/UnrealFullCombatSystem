@@ -26,9 +26,6 @@ protected:
     virtual void NativeConstruct() override;
     virtual FReply NativeOnKeyDown(const FGeometry& InGeometry, const FKeyEvent& InKeyEvent);
 
-    void Open();
-    void Close();
-
     UFUNCTION()
     void FocusSelf();
 
@@ -39,6 +36,9 @@ protected:
     void OnClicked_CloseButton();
 
 public:
+    void Open();
+    void Close();
+
     void CategoryButtonClicked(UCategoryButtonUI* Button);
     void SetCategoryButton(UCategoryButtonUI* Button);
 

@@ -80,7 +80,7 @@ bool UMontageManagerComponent::GetMontage(EMontageAction Action, FMontageAction&
 
     FString EnumStr = GameUtils::GetEnumDisplayNameAsString("EMontageAction", Action);
 
-    FMontageAction* Item = MontageManagerInterface->GetMontages()->FindRow<FMontageAction>(FName(EnumStr), "");
+    FMontageAction* Item = MontageManagerInterface->GetMontages(Action)->FindRow<FMontageAction>(FName(EnumStr), "");
 
     if (Item != nullptr)
     {

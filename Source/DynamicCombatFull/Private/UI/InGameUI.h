@@ -25,6 +25,13 @@ protected:
 
 public:
 
+    UInteractionMessageUI* GetInteractionMessage() const { return InteractionMessage; }
+
+    UInventoryUI* GetInventory() const { return Inventory; }
+    UEquipmentUI* GetEquipment() const { return Equipment; }
+
+    UImage* GetCrosshair() const { return Crosshair; }
+
 private:
 
     UPROPERTY(meta = (BindWidget))

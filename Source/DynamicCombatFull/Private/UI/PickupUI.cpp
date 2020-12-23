@@ -2,7 +2,6 @@
 
 
 #include "PickupUI.h"
-
 #include "Kismet/KismetInputLibrary.h"
 #include "Kismet/KismetTextLibrary.h"
 #include "Blueprint/WidgetBlueprintLibrary.h"
@@ -13,9 +12,7 @@
 #include "Components/TextBlock.h"
 #include "Components/VerticalBox.h"
 #include "Components/ScrollBox.h"
-
 #include "Components/InventoryComponent.h"
-
 #include "GameCore/DefaultGameInstance.h"
 #include "GameCore/GameUtils.h"
 #include "InputHelpersUI.h"

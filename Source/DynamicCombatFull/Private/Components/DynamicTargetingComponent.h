@@ -32,7 +32,7 @@ public:
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
-    void Initialize(UArrowComponent* InArrowComp);
+    void Init(UArrowComponent* InArrowComp);
     void DisableCameraLock();
     void FindTargetWithAxisInput(float AxisValue);
     void ToggleCameraLock();
@@ -65,6 +65,9 @@ public:
 
     UPROPERTY(BlueprintAssignable)
     FTargetingToggledSignature OnTargetingToggled;
+
+public:
+    AActor* GetSelectedActor() const { return SelectedActor; }
 
 private:
     UPROPERTY()

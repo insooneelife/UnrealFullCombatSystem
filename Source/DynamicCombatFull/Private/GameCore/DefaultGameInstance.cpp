@@ -12,6 +12,9 @@
 #include "Components/ExtendedStatComponent.h"
 #include "Components/BehaviorComponent.h"
 #include "GameCore/DefaultGameInstance.h"
+#include "GameCore/GameUtils.h"
+
+#include "GamePlay/Items/ObjectItems/ArrowItem.h"
 
 const FName UDefaultGameInstance::Inventory = FName("Inventory");
 const FName UDefaultGameInstance::UIBack = FName("UIBack");
@@ -23,6 +26,24 @@ const FName UDefaultGameInstance::Back = FName("Back");
 
 UDefaultGameInstance::UDefaultGameInstance(const FObjectInitializer& ObjectInitializer)
 {
+
+
+    /*
+    TSubclassOf<UItemBase> ArrowItemClass = GameUtils::LoadAssetClass<UItemBase>(
+        "/Game/DynamicCombatSystem/Blueprints/Test/TestTestItem");
+
+    UItemBase* ArrowItem = Cast<UItemBase>(ArrowItemClass->GetDefaultObject());
+
+    if (ArrowItem->IsValidLowLevel())
+    {
+        UE_LOG(LogTemp, Warning, TEXT("%s"), *ArrowItem->GetFName().ToString());
+    }
+    else
+    {
+        UE_LOG(LogTemp, Warning, TEXT("Not Valid Arrow Item!!!!!!"));
+    }
+    */
+
     FString FindObjName = TEXT("/Game/DynamicCombatSystem/SFX/CUE/CUE_HitHands");
     ConstructorHelpers::FObjectFinder<USoundBase> DefaultHitSoundObjFinder(*FindObjName);
     if (DefaultHitSoundObjFinder.Object == nullptr)
@@ -331,7 +352,7 @@ EDirection UDefaultGameInstance::GetHitDirection(FVector HitFromDirection, AActo
     }
 }
 
-float UDefaultGameInstance::ScaleMeleeAttackStaminaCostByType(FVector Cost, EMeleeAttackType MeleeAttackType)
+float UDefaultGameInstance::ScaleMeleeAttackStaminaCostByType(float Cost, EMeleeAttackType MeleeAttackType)
 {
     float Ret = 1.0f;
     if (MeleeAttackType == EMeleeAttackType::None)
@@ -359,7 +380,7 @@ float UDefaultGameInstance::ScaleMeleeAttackStaminaCostByType(FVector Cost, EMel
         Ret = 0.75f;
     }
 
-    return Ret;
+    return Ret * Cost;
 }
 
 float UDefaultGameInstance::ScaleMeleeDamageByType(float Damage, EMeleeAttackType MeleeAttackType)

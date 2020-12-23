@@ -13,6 +13,7 @@
 #include "Interfaces/IsArcher.h"
 #include "Interfaces/CanOpenUI.h"
 #include "Interfaces/AbilityInterface.h"
+#include "Components/TimelineComponent.h"
 
 #include "BaseCharacter.generated.h"
 
@@ -38,7 +39,7 @@ class UAbilityComponent;
 class UTimelineComponent;
 class UInGameUI;
 class UKeybindingsUI;
-
+class UTexture2D;
 class AAbilityBase;
 
 UCLASS()
@@ -90,11 +91,28 @@ protected:
 
     // zoom events
     void UpdateZoom();
+
+    // return true if completed
+    UFUNCTION(BlueprintImplementableEvent, Category = "Blueprint")
+    bool UpdateZoomTimeline(
+        bool bInCondition,
+        TEnumAsByte<ETimelineDirection::Type>& OutDirection,
+        float& OutAlpha);
+
     void OnActionPressed_Zoom();
     void OnActionReleased_Zoom();
 
     // block events
     void UpdateBlocking();
+
+    // return true if completed
+    UFUNCTION(BlueprintImplementableEvent, Category = "Blueprint")
+    bool UpdateBlockingTimeline(
+        bool bInCondition,
+        TEnumAsByte<ETimelineDirection::Type>& OutDirection,
+        float& OutAlpha);
+
+
     void OnActionPressed_Block();
     void OnActionReleased_Block();
 
@@ -191,6 +209,7 @@ protected:
 
     void PlayBowDrawSound();
     void AttemptPlayBowDrawSound();
+    void AttemptPlayBowDrawSoundDelayed();
 
     void ShootArrow();
     void StopBowDrawSound();
@@ -231,13 +250,21 @@ protected:
 
     void OnKeyPressed_P();
     void OnKeyPressed_K();
+    void OnKeyReleased_K();
     void OnKeyPressed_L();
     void OnKeyPressed_O();
     void CreateKeybindings();
 
 public:
 
-    FTransform GetSpawnedArrowTransform() const;
+    FTransform GetSpawnArrowTransform() const;
+
+    FRotator GetArrowSpawnDirection(
+        FVector InCameraDirection,
+        FVector InCurrentTraceDirection, 
+        FVector InImpactPoint, 
+        FVector InArrowSpawnLocation) const;
+
     FHitData MakeMeleeHitData(AActor* HitActor);
     void ApplyHitImpulseToCharacter(AActor* HitActor, FVector HitNormal, float ImpulsePower);
 
@@ -258,7 +285,7 @@ public:
     bool CanBowAttack() const;
     bool CanEnterSlowMotion() const;
 
-    UAnimMontage* GetMeleeAttackMontage(EMeleeAttackType AttackType) const;
+    UAnimMontage* GetMeleeAttackMontage(EMeleeAttackType AttackType);
     UAnimMontage* GetRollMontage() const;
     UAnimMontage* GetStunMontage(EDirection Direction) const;
     UAnimMontage* GetBlockMontage() const;
@@ -307,7 +334,7 @@ public:
     virtual FRotator GetDesiredRotation() const override;
 
     // IMontageManagerInterface
-    virtual UDataTable* GetMontages() const override;
+    virtual UDataTable* GetMontages(EMontageAction InAction) const override;
 
     // IIsArcher
     virtual float GetAimAlpha() const override;
@@ -323,10 +350,28 @@ public:
     virtual float GetMagicDamage() const override;
     virtual float GetCastingSpeed() const override;
 
+public:
+    bool IsStateEqualPure(EState InState) const;
+    bool IsEnoughStamina(float InValue) const;
+    void LineTraceForInteractable();
+    void GetMovementVectors(FVector& InOutForward, FVector& InOutRight) const;
+    bool IsCombatTypePure(ECombatType InType) const;
+    bool IsActivityPure(EActivity InActivity) const;
+    bool IsIdleAndNotFalling() const;
+    bool HasMovementInput() const;
+    bool IsCharacterAlive() const;
+    void UpdateReceivedHitDirection(FVector InHitFromDirection);
+    bool CanUseOrSwitch() const;
+    bool CanBeInterrupted() const;
+
 
 public:
     UCameraComponent* GetFollowCamera() const { return FollowCamera; }
     USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
+
+private:
+    void SetTimerRetriggerable(FTimerHandle& TimerHandle, TBaseDelegate<void> ObjectDelegate, float Time, bool bLoop);
+
 
 private:
 
@@ -337,6 +382,7 @@ private:
         USpringArmComponent* CameraBoom;
 
     int MeleeAttackCounter;
+    EMeleeAttackType MeleeAttackType;
     float BlockAlpha;
 
     UPROPERTY()
@@ -406,12 +452,6 @@ private:
     UPROPERTY()
     UAbilityComponent* AbilityComponent;
 
-    UPROPERTY()
-    UTimelineComponent* BlockingTimeline;
-    
-    UPROPERTY()
-    UTimelineComponent* ZoomingTimeline;
-
     bool IsCrosshairVisible;
     float AimAlpha;
     bool bIsInSlowMotion;
@@ -446,4 +486,47 @@ private:
     float RollStaminaCost;
     float SprintStaminaCost;
 
+    UPROPERTY(EditAnywhere)
+    TSubclassOf<UUserWidget> InGameUIClass;
+
+    UPROPERTY(EditAnywhere)
+    UTexture2D* CrosshairTexture;
+
+    FTimerHandle SprintLoopTimerHandle;
+    FTimerHandle StopLookingForwardTimerHandle;
+    FTimerHandle HideCrosshairTimerHandle;
+    FTimerHandle UpdateZoomTimerHandle;
+
+    FTimerHandle CheckForInteractableTimerHandle;
+    FTimerHandle PlayBowDrawSoundTimerHandle;
+
+    FTimerHandle RetriggerableDelayTimerHandle;
+
+    FTimerHandle ResetMeleeAttackCounterTimerHandle;
+
+    FTimerHandle LoopSlowMotionTimerHandle;
+
+    FTimerHandle UpdateCameraLagTimerHandle;
+
+    UPROPERTY(EditAnywhere)
+    TSubclassOf<UKeybindingsUI> KeybindingsUIClass;
+
+    UPROPERTY(EditAnywhere)
+        UTexture2D* DefaultCrosshairTextureObject;
+
+
+    UPROPERTY(EditAnywhere)
+        UDataTable* PlayerMeleeMontages;
+
+    UPROPERTY(EditAnywhere)
+        UDataTable* PlayerArcherMontages;
+
+    UPROPERTY(EditAnywhere)
+        UDataTable* PlayerCommonMontages;
+
+    UPROPERTY(EditAnywhere)
+        UDataTable* PlayerMagicMontages;
+
+    UPROPERTY(EditAnywhere)
+        UDataTable* PlayerUnarmedMontages;
 };

@@ -72,33 +72,6 @@ FReply UInventoryUI::NativeOnKeyDown(const FGeometry& InGeometry, const FKeyEven
     }
 }
 
-void UInventoryUI::Open()
-{
-    SetVisibility(ESlateVisibility::Visible);
-    InventoryItemsGrid->CreateItemWidgets();
-    InventoryItemsGrid->UpdateItemWidgets(GetDisplayedType());
-    
-    FocusSelf();
-
-    ICanOpenUI* CanOpenUI = Cast<ICanOpenUI>(GetOwningPlayerPawn());
-
-    if (CanOpenUI != nullptr)
-    {
-        CanOpenUI->OpenedUI();
-    }
-}
-
-void UInventoryUI::Close()
-{
-    SetVisibility(ESlateVisibility::Hidden);
-    UWidgetBlueprintLibrary::SetInputMode_GameOnly(GetOwningPlayer());
-    
-    ICanOpenUI* CanOpenUI = Cast<ICanOpenUI>(GetOwningPlayerPawn());
-    if (CanOpenUI != nullptr)
-    {
-        CanOpenUI->ClosedUI();
-    }
-}
 
 void UInventoryUI::FocusSelf()
 {
@@ -119,6 +92,35 @@ void UInventoryUI::OnClicked_CloseButton()
 {
     Close();
 }
+
+void UInventoryUI::Open()
+{
+    SetVisibility(ESlateVisibility::Visible);
+    InventoryItemsGrid->CreateItemWidgets();
+    InventoryItemsGrid->UpdateItemWidgets(GetDisplayedType());
+
+    FocusSelf();
+
+    ICanOpenUI* CanOpenUI = Cast<ICanOpenUI>(GetOwningPlayerPawn());
+
+    if (CanOpenUI != nullptr)
+    {
+        CanOpenUI->OpenedUI();
+    }
+}
+
+void UInventoryUI::Close()
+{
+    SetVisibility(ESlateVisibility::Hidden);
+    UWidgetBlueprintLibrary::SetInputMode_GameOnly(GetOwningPlayer());
+
+    ICanOpenUI* CanOpenUI = Cast<ICanOpenUI>(GetOwningPlayerPawn());
+    if (CanOpenUI != nullptr)
+    {
+        CanOpenUI->ClosedUI();
+    }
+}
+
 
 void UInventoryUI::CategoryButtonClicked(UCategoryButtonUI* Button)
 {

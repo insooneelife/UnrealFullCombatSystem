@@ -23,10 +23,13 @@ public:
 
     UArrowItem(const FObjectInitializer& ObjectInitializer);
 
+    void Init(UStaticMesh* InArrowMesh) { ArrowMesh = InArrowMesh; }
+
     virtual const TArray<FModifier>& GetModifiers() const override { return Modifiers; }
     virtual TSubclassOf<ADisplayedItem> GetDisplayedItem() const override { return DisplayedItemClass; }
 
     UStaticMesh* GetArrowMesh() const { return ArrowMesh; }
+    TSubclassOf<AActor> GetProjectile() const { return Projectile; }
 private:
 
     UPROPERTY(EditAnywhere)
