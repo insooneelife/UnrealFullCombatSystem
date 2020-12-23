@@ -64,10 +64,13 @@ private:
 
     float SlotSize;
 
+    UPROPERTY(EditAnywhere)
     EItemType ItemType;
 
+    UPROPERTY(EditAnywhere)
     int SlotIndex;
 
+    UPROPERTY(EditAnywhere)
     int ItemIndex;
 
     FStoredItem Item;

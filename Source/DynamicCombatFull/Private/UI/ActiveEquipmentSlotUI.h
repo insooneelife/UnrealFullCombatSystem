@@ -30,6 +30,8 @@ protected:
 
 public:
     void UpdateWidget(FStoredItem InItem);
+    UFUNCTION(BlueprintImplementableEvent, Category = "Blueprint")
+        void PlayBlinkBorderAnimation();
     void UpdateAmountText();
     void UpdateItemImage();
     bool SetIsHidden(bool bIsHidden);
@@ -42,9 +44,6 @@ private:
 
     UPROPERTY()
         class UEquipmentComponent* EquipmentComponent;
-
-    UPROPERTY(EditAnywhere)
-    UWidgetAnimation* BlinkBorder;
 
     UPROPERTY(EditAnywhere)
     EItemType SlotType;

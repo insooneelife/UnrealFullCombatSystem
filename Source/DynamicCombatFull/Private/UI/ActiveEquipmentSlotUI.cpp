@@ -82,7 +82,7 @@ void UActiveEquipmentSlotUI::UpdateWidget(FStoredItem InItem)
     Item = InItem;
     UpdateItemImage();
     UpdateAmountText();
-    PlayAnimation(BlinkBorder);
+    PlayBlinkBorderAnimation();
 }
 
 void UActiveEquipmentSlotUI::UpdateAmountText()

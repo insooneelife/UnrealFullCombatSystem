@@ -121,7 +121,7 @@ private:
     UPROPERTY(meta = (BindWidget))
         UCategoryButtonUI* TopCategoryButton;
 
-    UPROPERTY(meta = (BindWidget))
-        UCategoryButtonUI* SelectedCategoryButton;
+    UPROPERTY()
+    UCategoryButtonUI* SelectedCategoryButton;
 
 };

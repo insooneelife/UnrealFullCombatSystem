@@ -29,6 +29,6 @@ private:
     UPROPERTY(meta = (BindWidget))
     UInputHelpersUI* InputHelpers;
 
-    UPROPERTY(meta = (BindWidget))
+    UPROPERTY()
     UInputHelperUI* InteractInputHelper;
 };

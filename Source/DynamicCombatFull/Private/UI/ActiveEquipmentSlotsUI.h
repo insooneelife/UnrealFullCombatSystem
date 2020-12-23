@@ -18,21 +18,13 @@ class UActiveEquipmentSlotsUI : public UUserWidget
 	GENERATED_BODY()
 	
 public:
-
-    void Init(
-        UActiveEquipmentSlotUI* InToolSlot,
-        UActiveEquipmentSlotUI* InShieldSlot,
-        UActiveEquipmentSlotUI* InArrowsSlot,
-        UActiveEquipmentSlotUI* InRangeWeaponSlot,
-        UActiveEquipmentSlotUI* InSpellSlot,
-        UActiveEquipmentSlotUI* InMeleeWeaponSlot);
-
-    UActiveEquipmentSlotUI* GetToolSlot() const { return ToolSlot; }
-    UActiveEquipmentSlotUI* GetShieldSlot() const{ return ToolSlot; }
-    UActiveEquipmentSlotUI* GetArrowsSlot() const{ return ToolSlot; }
-    UActiveEquipmentSlotUI* GetRangeWeaponSlot() const { return ToolSlot; }
-    UActiveEquipmentSlotUI* GetSpellSlot() const { return ToolSlot; }
-    UActiveEquipmentSlotUI* GetMeleeWeaponSlot() const { return ToolSlot; }
+        
+    //UActiveEquipmentSlotUI* GetToolSlot() const { return ToolSlot; }
+    //UActiveEquipmentSlotUI* GetShieldSlot() const{ return ToolSlot; }
+    //UActiveEquipmentSlotUI* GetArrowsSlot() const{ return ToolSlot; }
+    //UActiveEquipmentSlotUI* GetRangeWeaponSlot() const { return ToolSlot; }
+    //UActiveEquipmentSlotUI* GetSpellSlot() const { return ToolSlot; }
+    //UActiveEquipmentSlotUI* GetMeleeWeaponSlot() const { return ToolSlot; }
 
 private:
 

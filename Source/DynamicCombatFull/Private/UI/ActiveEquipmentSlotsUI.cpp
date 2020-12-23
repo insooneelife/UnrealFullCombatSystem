@@ -2,7 +2,7 @@
 
 
 #include "ActiveEquipmentSlotsUI.h"
-
+/*
 void UActiveEquipmentSlotsUI::Init(
     UActiveEquipmentSlotUI* InToolSlot,
     UActiveEquipmentSlotUI* InShieldSlot,
@@ -18,3 +18,4 @@ void UActiveEquipmentSlotsUI::Init(
     SpellSlot = InSpellSlot;
     MeleeWeaponSlot = InMeleeWeaponSlot;
 }
+*/
