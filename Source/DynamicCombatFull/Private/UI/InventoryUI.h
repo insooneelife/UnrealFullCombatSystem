@@ -21,6 +21,9 @@ UCLASS()
 class UInventoryUI : public UUserWidget
 {
 	GENERATED_BODY()
+public:
+    UInventoryUI(const FObjectInitializer& ObjectInitializer);
+
 protected:
 
     virtual void NativeConstruct() override;
@@ -46,8 +49,7 @@ public:
 
 private:
 
-    UPROPERTY(EditAnywhere)
-        TSubclassOf<UItemActionsUI> ItemActionsUIClass;
+    TSubclassOf<UItemActionsUI> ItemActionsUIClass;
 
     UPROPERTY()
         class UInventoryComponent* InventoryComponent;

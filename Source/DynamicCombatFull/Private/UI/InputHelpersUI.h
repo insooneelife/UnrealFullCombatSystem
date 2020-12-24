@@ -15,7 +15,9 @@ UCLASS()
 class UInputHelpersUI : public UUserWidget
 {
 	GENERATED_BODY()
-	
+public:
+    UInputHelpersUI(const FObjectInitializer& ObjectInitializer);
+
 protected:
 public:
     UInputHelperUI* AddInputHelper(FText InKey, FText InAction);
@@ -27,6 +29,5 @@ private:
     UPROPERTY(meta = (BindWidget))
     UHorizontalBox* InputHelpersHorizontalBox;
 
-    UPROPERTY(EditAnywhere)
-    TSubclassOf<UInputHelperUI> CreateUIClass;
+    TSubclassOf<UInputHelperUI> InputHelperUIClass;
 };

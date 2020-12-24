@@ -161,8 +161,6 @@ public:
         FWeaponTypeChangedSignature OnWeaponTypeChanged;
 
 private:
-    UPROPERTY(EditAnywhere)
-        TSubclassOf<ADisplayedItem> SpawnDisplayedItemClass;
 
     UPROPERTY()
     UInventoryComponent* Inventory;

@@ -31,6 +31,7 @@ private:
     UPROPERTY(EditAnywhere)
     TSubclassOf<AAbilityBase> AbilityClass;
 
+    // Blueprint'/Game/DynamicCombatSystem/Blueprints/Items/DisplayedItems/DI_SpellBP.DI_SpellBP'
     UPROPERTY(EditAnywhere)
     TSubclassOf<ADisplayedItem> DisplayedItemClass;
 };

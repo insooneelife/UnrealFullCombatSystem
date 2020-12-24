@@ -26,24 +26,6 @@ const FName UDefaultGameInstance::Back = FName("Back");
 
 UDefaultGameInstance::UDefaultGameInstance(const FObjectInitializer& ObjectInitializer)
 {
-
-
-    /*
-    TSubclassOf<UItemBase> ArrowItemClass = GameUtils::LoadAssetClass<UItemBase>(
-        "/Game/DynamicCombatSystem/Blueprints/Test/TestTestItem");
-
-    UItemBase* ArrowItem = Cast<UItemBase>(ArrowItemClass->GetDefaultObject());
-
-    if (ArrowItem->IsValidLowLevel())
-    {
-        UE_LOG(LogTemp, Warning, TEXT("%s"), *ArrowItem->GetFName().ToString());
-    }
-    else
-    {
-        UE_LOG(LogTemp, Warning, TEXT("Not Valid Arrow Item!!!!!!"));
-    }
-    */
-
     FString FindObjName = TEXT("/Game/DynamicCombatSystem/SFX/CUE/CUE_HitHands");
     ConstructorHelpers::FObjectFinder<USoundBase> DefaultHitSoundObjFinder(*FindObjName);
     if (DefaultHitSoundObjFinder.Object == nullptr)

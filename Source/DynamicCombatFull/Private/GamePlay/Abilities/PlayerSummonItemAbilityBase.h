@@ -34,10 +34,13 @@ private:
     UPROPERTY(EditAnywhere)
     TSubclassOf<ASummonedItemAbilityEffect> SpawnSummonedItemAbilityEffectClass;
 
+    UPROPERTY(EditAnywhere)
     TArray<TSubclassOf<UItemBase>> SummonedItemClasses;
 
+    UPROPERTY(EditAnywhere)
     float Duration;
 
+    UPROPERTY(EditAnywhere)
     bool bAutoSwap;
 
     UPROPERTY()

@@ -35,6 +35,7 @@ private:
     UPROPERTY(EditAnywhere)
     UStaticMesh* ArrowMesh;
 
+    // Blueprint'/Game/DynamicCombatSystem/Blueprints/Projectiles/BP_BasicArrowProjectile.BP_BasicArrowProjectile'
     UPROPERTY(EditAnywhere)
     TSubclassOf<AActor> Projectile;
 

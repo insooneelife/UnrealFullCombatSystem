@@ -74,6 +74,7 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+    virtual void OnMovementModeChanged(EMovementMode PrevMovementMode, uint8 PreviousCustomMode) override;
 
 protected:
     // effects events
@@ -161,9 +162,6 @@ protected:
     void OnActionPressed_Roll();
     void OnActionPressed_Jump();
     void OnActionReleased_Jump();
-
-    void OnMovementModeChanged(
-        class ACharacter* InCharacter, EMovementMode PrevMovementMode, uint8 PreviousCustomMode);
 
     // state machine events
     void OnStateChanged(EState PrevState, EState NewState);
@@ -486,11 +484,21 @@ private:
     float RollStaminaCost;
     float SprintStaminaCost;
 
+    // WidgetBlueprint'/Game/DynamicCombatSystem/Widgets/InGameWB.InGameWB'
     UPROPERTY(EditAnywhere)
     TSubclassOf<UUserWidget> InGameUIClass;
 
+    // WidgetBlueprint'/Game/DynamicCombatSystem/Widgets/KeybindingsWB.KeybindingsWB'
+    UPROPERTY(EditAnywhere)
+        TSubclassOf<UKeybindingsUI> KeybindingsUIClass;
+
+    // Texture2D'/Game/DynamicCombatSystem/Widgets/Textures/T_AbilityCrosshair.T_AbilityCrosshair'
     UPROPERTY(EditAnywhere)
     UTexture2D* CrosshairTexture;
+
+    // Texture2D'/Game/DynamicCombatSystem/Widgets/Textures/T_Crosshair.T_Crosshair'
+    UPROPERTY(EditAnywhere)
+        UTexture2D* DefaultCrosshairTextureObject;
 
     FTimerHandle SprintLoopTimerHandle;
     FTimerHandle StopLookingForwardTimerHandle;
@@ -508,11 +516,7 @@ private:
 
     FTimerHandle UpdateCameraLagTimerHandle;
 
-    UPROPERTY(EditAnywhere)
-    TSubclassOf<UKeybindingsUI> KeybindingsUIClass;
-
-    UPROPERTY(EditAnywhere)
-        UTexture2D* DefaultCrosshairTextureObject;
+    
 
 
     UPROPERTY(EditAnywhere)

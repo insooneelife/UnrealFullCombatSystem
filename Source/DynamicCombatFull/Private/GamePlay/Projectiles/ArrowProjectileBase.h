@@ -70,6 +70,7 @@ public:
     UPROPERTY(BlueprintReadOnly)
     UProjectileMovementComponent* ProjectileMovement;
 
+    // Blueprint'/Game/DynamicCombatSystem/Blueprints/Projectiles/BP_ImpaledArrow.BP_ImpaledArrow'
     UPROPERTY(EditAnywhere, BlueprintReadOnly)
     TSubclassOf<UArrowItem> SpawnImpaledArrowClass;
 };

@@ -19,6 +19,16 @@
 #include "ItemActionsUI.h"
 #include "GameCore/DefaultGameInstance.h"
 #include "Interfaces/CanOpenUI.h"
+#include "GameCore/GameUtils.h"
+
+UInventoryUI::UInventoryUI(const FObjectInitializer& ObjectInitializer)
+    :Super(ObjectInitializer)
+{
+    static TSubclassOf<UItemActionsUI> LoadedClass =
+        GameUtils::LoadAssetClass<UItemActionsUI>("/Game/DynamicCombatSystem/Widgets/ItemActionsWB");
+
+    ItemActionsUIClass = LoadedClass;
+}
 
 void UInventoryUI::NativeConstruct()
 {

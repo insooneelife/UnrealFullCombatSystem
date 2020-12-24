@@ -19,6 +19,7 @@
 #include "PickupItemUI.h"
 #include "GamePlay/PickupActor.h"
 #include "Interfaces/CanOpenUI.h"
+#include "GameCore/GameUtils.h"
 
 
 UPickupUI::UPickupUI(const FObjectInitializer& ObjectInitializer)
@@ -26,6 +27,10 @@ UPickupUI::UPickupUI(const FObjectInitializer& ObjectInitializer)
     Super(ObjectInitializer), 
     TakeAllKey(EKeys::SpaceBar)
 {
+    static TSubclassOf<UPickupItemUI> LoadedClass =
+        GameUtils::LoadAssetClass<UPickupItemUI>("/Game/DynamicCombatSystem/Widgets/PickupItemWB");
+
+    PickupItemUIClass = LoadedClass;
 }
 
 void UPickupUI::NativeConstruct()

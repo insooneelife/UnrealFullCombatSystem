@@ -45,8 +45,8 @@ public:
         FInventoryItemClickedSignature OnInventoryItemClicked;
 
 private:
-    UPROPERTY(EditAnywhere)
-        TSubclassOf<UInventoryItemUI> InventoryItemUIClass;
+
+    TSubclassOf<UInventoryItemUI> InventoryItemUIClass;
 
     UPROPERTY()
         class UInventoryComponent* InventoryComponent;

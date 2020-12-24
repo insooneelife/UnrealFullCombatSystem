@@ -19,8 +19,8 @@ UInventoryComponent::UInventoryComponent()
     PrimaryComponentTick.bCanEverTick = false;
     PrimaryComponentTick.bStartWithTickEnabled = false;
 
-    //SpawnPickupActorClass =
-    //    GameUtils::LoadAssetClass<APickupActor>(TEXT("/Game/DynamicCombatSystem/Blueprints/BP_PickupActor"));
+    SpawnPickupActorClass =
+        GameUtils::LoadAssetClass<APickupActor>(TEXT("/Game/DynamicCombatSystem/Blueprints/BP_PickupActor"));
 }
 
 

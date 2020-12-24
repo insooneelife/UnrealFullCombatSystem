@@ -181,8 +181,8 @@ void UEquipmentComponent::UpdateDisplayedItem(EItemType Type, int SlotIndex)
 
             if (ItemIsDisplayed != nullptr)
             {
-                TSubclassOf<ADisplayedItem> DisplayedItemType = ItemIsDisplayed->GetDisplayedItem();
-                if (UKismetSystemLibrary::IsValidClass(DisplayedItemType))
+                TSubclassOf<ADisplayedItem> DisplayedItemClass = ItemIsDisplayed->GetDisplayedItem();
+                if (UKismetSystemLibrary::IsValidClass(DisplayedItemClass))
                 {
                     FActorSpawnParameters SpawnParameters = FActorSpawnParameters();
 
@@ -191,7 +191,7 @@ void UEquipmentComponent::UpdateDisplayedItem(EItemType Type, int SlotIndex)
 
                     ADisplayedItem* SpawnedActor = 
                         GetWorld()->SpawnActor<ADisplayedItem>(
-                            SpawnDisplayedItemClass, FTransform::Identity, SpawnParameters);
+                            DisplayedItemClass, FTransform::Identity, SpawnParameters);
 
                     SpawnedActor->SetEquipmentComponent(this);
                     SpawnedActor->SetType(Type);

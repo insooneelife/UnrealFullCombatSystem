@@ -22,8 +22,8 @@ UAbilityComponent::UAbilityComponent()
     PrimaryComponentTick.bStartWithTickEnabled = false;
 
     bUpdateEquipmentAbility = true;
-    //SpawnIndicatorClass =
-    //    GameUtils::LoadAssetClass<ASpellIndicatorActor>(TEXT("/Game/DynamicCombatSystem/Blueprints/BP_SpellIndicator"));
+    SpawnIndicatorClass =
+        GameUtils::LoadAssetClass<ASpellIndicatorActor>(TEXT("/Game/DynamicCombatSystem/Blueprints/BP_SpellIndicator"));
 }
 
 

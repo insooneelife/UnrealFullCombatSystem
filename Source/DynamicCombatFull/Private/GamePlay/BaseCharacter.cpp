@@ -130,8 +130,6 @@ void ABaseCharacter::BeginPlay()
     MovementSpeed->OnMovementStateStart.AddDynamic(this, &ABaseCharacter::OnMovementStateStart);
     MovementSpeed->OnMovementStateEnd.AddDynamic(this, &ABaseCharacter::OnMovementStateEnd);
 
-    MovementModeChangedDelegate.AddDynamic(this, &ABaseCharacter::OnMovementModeChanged);
-
     StateManager->OnStateChanged.AddDynamic(this, &ABaseCharacter::OnStateChanged);
     StateManager->OnActivityChanged.AddDynamic(this, &ABaseCharacter::OnActivityChanged);
 
@@ -230,6 +228,23 @@ void ABaseCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
     PlayerInputComponent->BindKey(EKeys::K, IE_Released, this, &ABaseCharacter::OnKeyReleased_K);
     PlayerInputComponent->BindKey(EKeys::L, IE_Pressed, this, &ABaseCharacter::OnKeyPressed_L);
     PlayerInputComponent->BindKey(EKeys::O, IE_Pressed, this, &ABaseCharacter::OnKeyPressed_O);
+}
+
+void ABaseCharacter::OnMovementModeChanged(EMovementMode PrevMovementMode, uint8 PreviousCustomMode)
+{
+    EMovementMode NewMovementMode = GetCharacterMovement()->MovementMode;
+
+    UpdateRotationSettings();
+    UpdateZoom();
+
+    AbilityOnMovementModeChanged(PrevMovementMode, NewMovementMode);
+
+    StopBowDrawSound();
+    if (NewMovementMode == EMovementMode::MOVE_Walking)
+    {
+        AttemptPlayBowDrawSound();
+    }
+
 }
 
 void ABaseCharacter::OnEffectApplied(EEffectType InType)
@@ -759,24 +774,6 @@ void ABaseCharacter::OnActionPressed_Jump()
 void ABaseCharacter::OnActionReleased_Jump()
 {
     StopJumping();
-}
-
-void ABaseCharacter::OnMovementModeChanged(
-    ACharacter* InCharacter, EMovementMode PrevMovementMode, uint8 PreviousCustomMode)
-{
-    EMovementMode NewMovementMode = GetCharacterMovement()->MovementMode;
-
-    UpdateRotationSettings();
-    UpdateZoom();
-
-    AbilityOnMovementModeChanged(PrevMovementMode, NewMovementMode);
-
-    StopBowDrawSound();
-    if (NewMovementMode == EMovementMode::MOVE_Walking)
-    {
-        AttemptPlayBowDrawSound();
-    }
-
 }
 
 void ABaseCharacter::OnStateChanged(EState PrevState, EState NewState)

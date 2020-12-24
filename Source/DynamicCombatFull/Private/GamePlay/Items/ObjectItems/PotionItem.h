@@ -25,9 +25,11 @@ public:
     void UseItem(AActor* Caller);
 
 private:
+    // AnimMontage'/Game/DynamicCombatSystem/Montages/Player/Common/M_DrinkPotion.M_DrinkPotion'
     UPROPERTY(EditAnywhere)
     UAnimMontage* UseMontage;
 
+    // Blueprint'/Game/DynamicCombatSystem/Blueprints/Items/DisplayedItems/Instances/DI_Potion.DI_Potion'
     UPROPERTY(EditAnywhere)
     TSubclassOf<ADisplayedItem> DisplayedItemClass;
 
