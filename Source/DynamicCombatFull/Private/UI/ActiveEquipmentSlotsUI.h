@@ -18,13 +18,7 @@ class UActiveEquipmentSlotsUI : public UUserWidget
 	GENERATED_BODY()
 	
 public:
-        
-    //UActiveEquipmentSlotUI* GetToolSlot() const { return ToolSlot; }
-    //UActiveEquipmentSlotUI* GetShieldSlot() const{ return ToolSlot; }
-    //UActiveEquipmentSlotUI* GetArrowsSlot() const{ return ToolSlot; }
-    //UActiveEquipmentSlotUI* GetRangeWeaponSlot() const { return ToolSlot; }
-    //UActiveEquipmentSlotUI* GetSpellSlot() const { return ToolSlot; }
-    //UActiveEquipmentSlotUI* GetMeleeWeaponSlot() const { return ToolSlot; }
+       
 
 private:
 

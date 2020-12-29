@@ -118,9 +118,18 @@ struct FStoredItem
     GENERATED_BODY()
 
 public:
-    FStoredItem() {}
+    FStoredItem() : Amount(0) { }
     FStoredItem(const FGuid& Id, TSubclassOf<UItemBase> ItemClass, int Amount)
         :Id(Id), ItemClass(ItemClass), Amount(Amount) {}
+
+    FORCEINLINE FStoredItem& operator=(const FStoredItem& Other)
+    {
+        this->Id = Other.Id;
+        this->ItemClass = Other.ItemClass;
+        this->Amount = Other.Amount;
+
+        return *this;
+    }
 
     UPROPERTY(EditAnywhere)
         FGuid Id;
@@ -140,9 +149,19 @@ struct FEquipmentSlot
 
 public:
 
-    FEquipmentSlot() {}
+    FEquipmentSlot() : ActiveItemIndex(0), bIsHidden(false){}
     FEquipmentSlot(const TArray<FStoredItem>& Items, int ActiveItemIndex, bool bIsHidden)
         :Items(Items), ActiveItemIndex(ActiveItemIndex), bIsHidden(bIsHidden) {}
+
+    FORCEINLINE FEquipmentSlot& operator=(const FEquipmentSlot& Other)
+    {
+        this->Items.Reset(Other.Items.Num());
+        this->Items.Append(Other.Items);
+        this->ActiveItemIndex = Other.ActiveItemIndex;
+        this->bIsHidden = Other.bIsHidden;
+
+        return *this;
+    }
 
     UPROPERTY(EditAnywhere)
         TArray<FStoredItem> Items;
@@ -161,7 +180,7 @@ struct FEquipmentSlots
     GENERATED_BODY()
 
 public:
-    FEquipmentSlots() {}
+    FEquipmentSlots() : Type(EItemType::None) {}
 
     FEquipmentSlots(EItemType Type, const TArray<FEquipmentSlot>& Slots) : Type(Type), Slots(Slots) {}
 
@@ -180,10 +199,12 @@ struct FHitData
 
 public:
     FHitData() 
-    {
-        bCanBeBlocked = true;
-        bCanReceiveImpact = true;
-    }
+        :
+        Damage(0),
+        bCanBeParried(false),
+        bCanBeBlocked(true),
+        bCanReceiveImpact(true)
+    {}
 
     FHitData(
         float Damage,
@@ -227,7 +248,10 @@ struct FItem
     GENERATED_BODY()
 
 public:
-    FItem() {}
+    FItem() 
+        :
+        Type(EItemType::None), bIsStackable(false), bIsDroppable(true), bIsConsumable(false)
+    {}
     FItem(const FName& Name, const FText& Description, EItemType Type, bool bIsStackable, bool bIsDroppable, bool bIsConsumable, UTexture2D* Image)
         :
         Name(Name), Description(Description), Type(Type), bIsStackable(bIsStackable), bIsDroppable(bIsDroppable), bIsConsumable(bIsConsumable), Image(Image)
@@ -246,7 +270,7 @@ public:
         bool bIsStackable;
 
     UPROPERTY(EditAnywhere)
-        bool bIsDroppable = true;
+        bool bIsDroppable;
 
     UPROPERTY(EditAnywhere)
         bool bIsConsumable;
@@ -262,7 +286,7 @@ struct FModifier
     GENERATED_BODY()
 
 public:
-    FModifier() {}
+    FModifier() : Type(EStat::None), Value(0.0f) {}
     FModifier(EStat Type, float Value) : Type(Type), Value(Value){}
 
 
@@ -293,7 +317,7 @@ struct FStat
     GENERATED_BODY()
 
 public:
-    FStat() {}
+    FStat() : Type(EStat::None), BaseValue(0.0f), ModifiersValue(0.0f) {}
 
     FStat(EStat Type, float BaseValue, float ModifiersValue)
         :Type(Type), BaseValue(BaseValue), ModifiersValue(ModifiersValue)

@@ -12,7 +12,10 @@
 #include "GamePlay/Items/ObjectItems/ItemBase.h"
 #include "PickupActor.generated.h"
 
-UCLASS()
+class UBoxComponent;
+class UParticleSystemComponent;
+
+UCLASS(BlueprintType, Blueprintable)
 class APickupActor : public AActor, public IIsInteractable
 {
     GENERATED_BODY()
@@ -57,12 +60,21 @@ private:
     UPROPERTY()
         UInventoryComponent* InventoryComponent;
 
-    UPROPERTY(EditAnywhere)
+    UPROPERTY(EditAnywhere, Category = "Default")
         FName Name;
 
-    UPROPERTY(EditAnywhere)
+    UPROPERTY(EditAnywhere, Category = "Default")
         TMap<TSubclassOf<UItemBase>, int> Items;
 
     UPROPERTY()
         AActor* Caller;
+
+    UPROPERTY(EditAnywhere)
+    USceneComponent* Scene;
+
+    UPROPERTY(EditAnywhere)
+    UBoxComponent* Box;
+
+    UPROPERTY(EditAnywhere)
+        UParticleSystemComponent* ParticleSystem;
 };

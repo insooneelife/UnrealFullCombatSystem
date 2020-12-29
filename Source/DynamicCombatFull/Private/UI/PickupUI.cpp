@@ -66,6 +66,14 @@ void UPickupUI::NativeConstruct()
     CloseButton->OnClicked.AddDynamic(this, &UPickupUI::OnClicked_CloseButton);
 }
 
+void UPickupUI::NativeDestruct()
+{
+    TakeAllButton->OnClicked.RemoveDynamic(this, &UPickupUI::OnClicked_TakeAllButton);
+    CloseButton->OnClicked.RemoveDynamic(this, &UPickupUI::OnClicked_CloseButton);
+
+    Super::NativeDestruct();
+}
+
 FReply UPickupUI::NativeOnKeyDown(const FGeometry& InGeometry, const FKeyEvent& InKeyEvent)
 {
     Super::NativeOnKeyDown(InGeometry, InKeyEvent);

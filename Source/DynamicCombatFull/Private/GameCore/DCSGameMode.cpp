@@ -82,7 +82,7 @@ void ADCSGameMode::LoadGame()
 
     if (SavedGame == nullptr)
     {
-        UE_LOG(LogTemp, Warning, TEXT("Load Failed!"));
+        UE_LOG(LogTemp, Error, TEXT("Load Failed!"));
     }
     else
     {

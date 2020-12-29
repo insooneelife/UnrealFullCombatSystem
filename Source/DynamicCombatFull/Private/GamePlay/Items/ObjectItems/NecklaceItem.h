@@ -13,7 +13,7 @@
 /**
  * 
  */
-UCLASS()
+UCLASS(Blueprintable)
 class UNecklaceItem : public UItemBase, public IItemHasModifiers
 {
 	GENERATED_BODY()
@@ -24,7 +24,7 @@ public:
     virtual const TArray<FModifier>& GetModifiers() const override { return Modifiers; }
 private:
 
-    UPROPERTY(EditAnywhere)
+    UPROPERTY(EditAnywhere, Category = "Modifiers")
     TArray<FModifier> Modifiers;
 };
 

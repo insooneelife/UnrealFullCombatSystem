@@ -2,6 +2,7 @@
 
 
 #include "DisplayedItem.h"
+#include "Components/SceneComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Particles/ParticleSystemComponent.h"
@@ -10,6 +11,9 @@
 // Sets default values
 ADisplayedItem::ADisplayedItem()
 {
+    Scene = CreateDefaultSubobject<USceneComponent>("Scene");
+    RootComponent = Scene;
+
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = false;
     PrimaryActorTick.bStartWithTickEnabled = false;
@@ -19,7 +23,6 @@ ADisplayedItem::ADisplayedItem()
 void ADisplayedItem::BeginPlay()
 {
 	Super::BeginPlay();
-	
 }
 
 void ADisplayedItem::OnConstruction(const FTransform& Transform)
@@ -89,4 +92,9 @@ void ADisplayedItem::SimulatePhysics()
     GetPrimaryComponent()->SetSimulatePhysics(true);
 }
 
-
+void ADisplayedItem::Init(UEquipmentComponent* InEquipmentComponent, EItemType InType, int InSlotIndex)
+{
+    EquipmentComponent = InEquipmentComponent;
+    Type = InType;
+    SlotIndex = InSlotIndex;
+}

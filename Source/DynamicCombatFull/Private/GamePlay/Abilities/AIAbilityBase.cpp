@@ -10,7 +10,11 @@
 void AAIAbilityBase::BeginPlay()
 {
     Super::BeginPlay();
+}
 
+void AAIAbilityBase::Init(UAbilityComponent* InAbilityComponent)
+{
+    Super::Init(InAbilityComponent);
     AICharacter = Cast<AAICharacter>(Character);
 }
 

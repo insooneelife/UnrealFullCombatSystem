@@ -4,6 +4,8 @@
 #include "PlayerSummonItemAbilityBase.h"
 #include "Kismet/GameplayStatics.h"
 #include "Sound/SoundBase.h"
+#include "Animation/AnimMontage.h"
+#include "Particles/ParticleSystem.h"
 #include "Components/AbilityComponent.h"
 #include "GamePlay/BaseCharacter.h"
 #include "GamePlay/AbilityEffects/SummonedItemAbilityEffect.h"
@@ -11,6 +13,13 @@
 
 APlayerSummonItemAbilityBase::APlayerSummonItemAbilityBase()
 {
+    static UAnimMontage* LoadedAnimMontageObject =
+        GameUtils::LoadAssetObject<UAnimMontage>(TEXT("/Game/DynamicCombatSystem/Montages/Player/Magic/M_MG_SummonItem"));
+
+    AbilityMontages = { LoadedAnimMontageObject };
+
+    bRotateOnPressed = false;
+    ManaCost = 40.0f;
     Duration = 60.0f;
 
     static UParticleSystem* LoadedParticleObject = 
@@ -22,7 +31,7 @@ APlayerSummonItemAbilityBase::APlayerSummonItemAbilityBase()
     Sound = LoadedSoundObject;
 
     static TSubclassOf<ASummonedItemAbilityEffect> LoadedClass = GameUtils::LoadAssetClass<ASummonedItemAbilityEffect>(
-        TEXT("/Game/DynamicCombatSystem/Blueprints/AbilityEffects/AE_SummonedItem"));
+        TEXT("/Game/DynamicCombatSystem/Blueprints/AbilityEffects/SummonedItemEffectBP"));
     SpawnSummonedItemAbilityEffectClass = LoadedClass;
 }
 

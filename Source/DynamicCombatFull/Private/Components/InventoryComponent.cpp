@@ -19,8 +19,11 @@ UInventoryComponent::UInventoryComponent()
     PrimaryComponentTick.bCanEverTick = false;
     PrimaryComponentTick.bStartWithTickEnabled = false;
 
-    SpawnPickupActorClass =
-        GameUtils::LoadAssetClass<APickupActor>(TEXT("/Game/DynamicCombatSystem/Blueprints/BP_PickupActor"));
+    static TSubclassOf<APickupActor> LoadedClass =
+        GameUtils::LoadAssetClass<APickupActor>(TEXT("/Game/DynamicCombatSystem/Blueprints/PickupActorBP"));
+
+    SpawnPickupActorClass = LoadedClass;
+
 }
 
 
@@ -34,12 +37,25 @@ void UInventoryComponent::BeginPlay()
     if (GetOwner() == UGameplayStatics::GetPlayerCharacter(GetWorld(), 0))
     {
         ADCSGameMode* GameMode = Cast<ADCSGameMode>(UGameplayStatics::GetGameMode(GetWorld()));
-
-        if (GameMode != nullptr)
+        if (GameMode->IsValidLowLevel())
         {
             GameMode->OnGameLoaded.AddDynamic(this, &UInventoryComponent::OnGameLoaded);
         }
     }
+}
+
+void UInventoryComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+    if (GetOwner() == UGameplayStatics::GetPlayerCharacter(GetWorld(), 0))
+    {
+        ADCSGameMode* GameMode = Cast<ADCSGameMode>(UGameplayStatics::GetGameMode(GetWorld()));
+        if (GameMode->IsValidLowLevel())
+        {
+            GameMode->OnGameLoaded.RemoveDynamic(this, &UInventoryComponent::OnGameLoaded);
+        }
+    }
+
+    Super::EndPlay(EndPlayReason);
 }
 
 void UInventoryComponent::OnGameLoaded()
@@ -96,38 +112,6 @@ void UInventoryComponent::AddItem(TSubclassOf<UItemBase> InItemClass, int InAmou
     }
 }
 
-void UInventoryComponent::RemoveItem(TSubclassOf<UItemBase> InItemClass, int InAmount)
-{
-    if (InAmount > 0)
-    {
-        UItemBase* ItemBase = Cast<UItemBase>(InItemClass->GetDefaultObject());
-        int Index = FindIndexByClass(InItemClass);
-
-        if (ItemBase->GetItem().bIsStackable)
-        {
-
-
-            if (Index >= 0)
-            {
-                Inventory[Index].Amount -= InAmount;
-                ClearInventory();
-            }
-        }
-        else
-        {
-            if (Index >= 0)
-            {
-                for (int i = 1; i < InAmount; ++i)
-                {
-                    Inventory[i] = FStoredItem();
-                }
-            }
-            
-            ClearInventory();
-        }
-    }
-}
-
 
 void UInventoryComponent::ClearInventory()
 {
@@ -139,13 +123,11 @@ void UInventoryComponent::ClearInventory()
         }
         else
         {
-            UItemBase* ItemBase = Cast<UItemBase>(Inventory[i].ItemClass->GetDefaultObject());
-            if (ItemBase != nullptr)
+            const FItem& Item = GameUtils::GetDefaultItemFromStoredItem(Inventory[i]);
+            
+            if (!Item.bIsStackable)
             {
-                if (!ItemBase->GetItem().bIsStackable)
-                {
-                    Inventory[i].Amount = 1;
-                }
+                Inventory[i].Amount = 1;
             }
         }
     }
@@ -159,9 +141,11 @@ void UInventoryComponent::RemoveItemAtIndex(int Index, int InAmount)
         {
             Inventory[Index].Amount -= InAmount;
 
+            FStoredItem SavedItem = Inventory[Index];
+
             ClearInventory();
 
-            OnItemRemoved.Broadcast(Inventory[Index]);
+            OnItemRemoved.Broadcast(SavedItem);
         }
     }
 }
@@ -175,6 +159,7 @@ void UInventoryComponent::DropItem(FStoredItem InItem)
 
     RemoveItemAtIndex(Index, InItem.Amount);
 
+    // If there is any Pickup Actor around owner, choose closer one and add dropped item to it, otherwise spawn new PickupActor
     TArray<AActor*> Actors;
     UGameplayStatics::GetAllActorsOfClass(GetWorld(), APickupActor::StaticClass(), Actors);
 
@@ -197,6 +182,7 @@ void UInventoryComponent::DropItem(FStoredItem InItem)
     }
     else
     {
+        // Find spot to spawn new pickup actor
         FVector Loc = GetOwner()->GetActorLocation();
         FVector Forward = GetOwner()->GetActorForwardVector() * 150.0f;
         FVector Up = GetOwner()->GetActorUpVector() * (-250.0f);
@@ -237,27 +223,21 @@ void UInventoryComponent::UseItem(FGuid ItemId)
 {
     int Index = FindIndexById(ItemId);
 
-    if (IsSlotEmpty(Index))
+    if (!IsSlotEmpty(Index))
     {
-
-
         UItemBase* ItemBase = NewObject<UItemBase>(GetOwner(), Inventory[Index].ItemClass);
 
         if (ItemBase != nullptr)
         {
+            const FItem& UseItemData = ItemBase->GetItem();
             ItemBase->UseItem(GetOwner());
 
-
-            UItemBase* DefaultItem = Cast<UItemBase>(Inventory[Index].ItemClass->GetDefaultObject());
-
-            if (DefaultItem->GetItem().bIsConsumable)
+            if (UseItemData.bIsConsumable)
             {
                 RemoveItemAtIndex(Index, 1);
             }
-
         }
     }
-
 }
 
 FStoredItem UInventoryComponent::GetItemAtIndex(int Index) const

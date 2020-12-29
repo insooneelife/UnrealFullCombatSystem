@@ -15,7 +15,7 @@ class ADisplayedItem;
 /**
  * 
  */
-UCLASS()
+UCLASS(Blueprintable)
 class URangeWeaponItem 
     : 
     public UWeaponItem,
@@ -39,16 +39,16 @@ public:
 
 private:
 
-    UPROPERTY(EditAnywhere)
+    UPROPERTY(EditAnywhere, Category = "Weapon")
     bool bIsTwoHanded;
 
-    UPROPERTY(EditAnywhere)
+    UPROPERTY(EditAnywhere, Category = "Modifiers")
     TArray<FModifier> Modifiers;
 
-    UPROPERTY(EditAnywhere)
+    UPROPERTY(EditAnywhere, Category = "Ability")
     TSubclassOf<AAbilityBase> Ability;
 
-    UPROPERTY(EditAnywhere)
+    UPROPERTY(EditAnywhere, Category = "Display")
     TSubclassOf<ADisplayedItem> DisplayedItemClass;
 
 };

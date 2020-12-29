@@ -35,6 +35,14 @@ void UItemActionsUI::NativeConstruct()
     DropButton->OnClicked.AddDynamic(this, &UItemActionsUI::OnClicked_DropButton);
 }
 
+void UItemActionsUI::NativeDestruct()
+{
+    UseButton->OnClicked.RemoveDynamic(this, &UItemActionsUI::OnClicked_UseButton);
+    DropButton->OnClicked.RemoveDynamic(this, &UItemActionsUI::OnClicked_DropButton);
+
+    Super::NativeDestruct();
+}
+
 void UItemActionsUI::Close()
 {
     OnWidgetRemoved.Broadcast();

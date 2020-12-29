@@ -32,6 +32,11 @@ AFireballProjectileAbilityEffect::AFireballProjectileAbilityEffect()
     StopHomingDistance = 300.0f;
     ImpulsePower = 30000.0f;
 
+    CollisionHandler = CreateDefaultSubobject<UCollisionHandlerComponent>("CollisionHandler");
+    ProjectileMovement = CreateDefaultSubobject<UProjectileMovementComponent>("Projectile");
+    RootComponent = CollisionSphere = CreateDefaultSubobject<UStaticMeshComponent>("CollisionSphere");
+    ParticleSystem = CreateDefaultSubobject<UParticleSystemComponent>("ParticleSystem");
+
     static UParticleSystem* LoadedParticleObject = 
         GameUtils::LoadAssetObject<UParticleSystem>(TEXT("/Game/DynamicCombatSystem/VFX/P_FireballHit"));
     HitParticle = LoadedParticleObject;
@@ -39,6 +44,10 @@ AFireballProjectileAbilityEffect::AFireballProjectileAbilityEffect()
     static USoundBase* LoadedSoundObject =
         GameUtils::LoadAssetObject<USoundBase>(TEXT("/Game/DynamicCombatSystem/SFX/CUE/CUE_FireballHit"));
     HitSound = LoadedSoundObject;
+
+    static UParticleSystem* LoadedFireballParticleObject =
+        GameUtils::LoadAssetObject<UParticleSystem>(TEXT("/Game/DynamicCombatSystem/VFX/P_FireballHit"));
+    FireballHitParticle = LoadedFireballParticleObject;
 }
 
 // Called when the game starts or when spawned

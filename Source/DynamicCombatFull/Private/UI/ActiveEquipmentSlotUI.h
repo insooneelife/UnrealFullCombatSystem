@@ -21,6 +21,7 @@ public:
 protected:
     virtual void NativePreConstruct() override;
     virtual void NativeConstruct() override;
+    virtual void NativeDestruct() override;
 
     UFUNCTION()
     void OnActiveItemChanged(FStoredItem InOldItem, FStoredItem InNewItem, EItemType InType, int InSlotIndex, int InItemIndex);

@@ -22,11 +22,18 @@ protected:
     virtual void BeginPlay() override;
 
 public:
+    virtual void Init(UAbilityComponent* InAbilityComponent) override;
 
+    UFUNCTION(BlueprintCallable)
     FTransform GetSurfaceTransform(float Range, float MaxSurfaceAngle, float MaxHeightDeviation) const;
+
+    UFUNCTION(BlueprintCallable)
     FTransform GetCrosshairTransform(FName SpawnSocket) const;
+
+    UFUNCTION(BlueprintCallable)
     FTransform GetBeamTransform(float Range, float Radius, FName SpawnSocket, bool bGoesThroughObjects)const;
 
+    UFUNCTION(BlueprintCallable)
     ABaseCharacter* GetPlayerCharacter() const { return PlayerCharacter; }
 
 private:

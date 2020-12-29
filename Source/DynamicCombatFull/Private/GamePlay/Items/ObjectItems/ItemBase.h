@@ -21,6 +21,6 @@ public:
     const FItem& GetItem() const { return Item; }
 
 protected:
-    UPROPERTY()
+    UPROPERTY(EditAnywhere, Category = "Details")
     FItem Item;
 };

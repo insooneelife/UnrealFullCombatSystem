@@ -4,6 +4,8 @@
 #include "PlayerBuffAbilityBase.h"
 #include "Kismet/GameplayStatics.h"
 #include "Sound/SoundBase.h"
+#include "Animation/AnimMontage.h"
+#include "Particles/ParticleSystem.h"
 #include "Components/AbilityComponent.h"
 #include "GamePlay/BaseCharacter.h"
 #include "GamePlay/AbilityEffects/BuffAbilityEffect.h"
@@ -11,6 +13,14 @@
 
 APlayerBuffAbilityBase::APlayerBuffAbilityBase()
 {
+    static UAnimMontage* LoadedAnimMontageObject =
+        GameUtils::LoadAssetObject<UAnimMontage>(TEXT("/Game/DynamicCombatSystem/Montages/Player/Magic/M_MG_Buff"));
+
+    AbilityMontages = { LoadedAnimMontageObject };
+
+    bRotateOnPressed = false;
+    ManaCost = 40.0f;
+
     BuffValue = 10.0f;
     BuffDuration = 30.0f;
     BuffColor = FLinearColor(50.0f, 1.0f, 1.0f, 1.0f);
@@ -24,7 +34,7 @@ APlayerBuffAbilityBase::APlayerBuffAbilityBase()
     Sound = LoadedSoundObject;
 
     static TSubclassOf<ABuffAbilityEffect> LoadedClass = GameUtils::LoadAssetClass<ABuffAbilityEffect>(
-        TEXT("/Game/DynamicCombatSystem/Blueprints/AbilityEffects/AE_Buff"));
+        TEXT("/Game/DynamicCombatSystem/Blueprints/AbilityEffects/BuffAbilityEffectBP"));
 
     SpawnBuffAbilityEffectClass = LoadedClass;
 }

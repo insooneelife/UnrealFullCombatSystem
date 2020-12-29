@@ -73,18 +73,38 @@ private:
     UPROPERTY()
     UArrowComponent* ArrowComponent;
 
+    UPROPERTY(EditAnywhere)
     float AxisInputSensitivity;
+
+    UPROPERTY(EditAnywhere)
     float TargetingMaxDistance;
+
+    UPROPERTY(EditAnywhere)
     float TargetingMaxHeight;
+
+    UPROPERTY(EditAnywhere)
     float TraceDepthOffset;
+
+    UPROPERTY(EditAnywhere)
     float TraceHeightOffset;
+
+    UPROPERTY(EditAnywhere)
     TArray<TEnumAsByte<EObjectTypeQuery>> AllowedCollisionTypes;
+
+    UPROPERTY(EditAnywhere)
     TArray<TEnumAsByte<EObjectTypeQuery>> BlockingCollisionTypes;
+
+    UPROPERTY(EditAnywhere)
     float DisableOnBlockDelay;
+
+
     EDrawDebugTrace::Type DebugMode;
     AActor* SelectedActor;
     bool bIsTargetingEnabled;
+
+    UPROPERTY(EditAnywhere)
     bool bDebug;
+
     ACharacter* CharacterReference;
     FTimerHandle CheckTargetTimerHandle;
     bool bIsFreeCamera;

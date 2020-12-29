@@ -3,22 +3,45 @@
 
 #include "BowDisplayedItem.h"
 #include "Components/StaticMeshComponent.h"
+#include "Components/SkeletalMeshComponent.h"
 #include "GameFramework/Character.h"
 #include "Components/EquipmentComponent.h"
 #include "GamePlay/Items/ObjectItems/ArrowItem.h"
 #include "Interfaces/IsArcher.h"
 
+ABowDisplayedItem::ABowDisplayedItem()
+{
+    ArrowSocketName = FName("arrow");
+    HandAttachmentSocket = FName("bow_use");
+    AttachmentSocket = FName("bow");
+
+    BowMesh = CreateDefaultSubobject<USkeletalMeshComponent>("BowMesh");
+    ArrowMesh = CreateDefaultSubobject<UStaticMeshComponent>("ArrowMesh");
+    ArrowMesh->SetupAttachment(BowMesh);
+}
+
 void ABowDisplayedItem::BeginPlay()
 {
     Super::BeginPlay();
-    UpdateArrowMesh();
+}
 
-    GetEquipmentComponent()->OnActiveItemChanged.AddDynamic(this, &ABowDisplayedItem::OnActiveItemChanged);
+void ABowDisplayedItem::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+    EquipmentComponent->OnActiveItemChanged.RemoveDynamic(this, &ABowDisplayedItem::OnActiveItemChanged);
+
+    Super::EndPlay(EndPlayReason);
 }
 
 void ABowDisplayedItem::OnConstruction(const FTransform& Transform)
 {
     Super::OnConstruction(Transform);
+}
+
+void ABowDisplayedItem::Init(UEquipmentComponent* InEquipmentComponent, EItemType InType, int InSlotIndex)
+{
+    Super::Init(InEquipmentComponent, InType, InSlotIndex);
+    UpdateArrowMesh();
+    EquipmentComponent->OnActiveItemChanged.AddDynamic(this, &ABowDisplayedItem::OnActiveItemChanged);
 }
 
 void ABowDisplayedItem::SimulatePhysics()
@@ -31,9 +54,9 @@ void ABowDisplayedItem::SimulatePhysics()
 
 bool ABowDisplayedItem::Attach()
 {
-    ECombatType CombatType = GetEquipmentComponent()->GetCombatType();
+    ECombatType CombatType = EquipmentComponent->GetCombatType();
 
-    if (GetEquipmentComponent()->IsInCombat() && CombatType == ECombatType::Range)
+    if (EquipmentComponent->IsInCombat() && CombatType == ECombatType::Range)
     {
         UpdateArrowVisibility(true);
     }

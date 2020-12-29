@@ -82,7 +82,7 @@ public:
 
     bool FindItem(FStoredItem Item, EItemType& OutType, int& OutSlotIndex, int& OutItemIndex);
 
-    void BuildEquipment(const TArray<FEquipmentSlots>& Equipment);
+    void BuildEquipment(const TArray<FEquipmentSlots>& InEquipment);
 
     FStoredItem GetItemInSlot(EItemType Type, int SlotIndex, int ItemIndex) const;
 
@@ -167,7 +167,7 @@ private:
 
     TMap<EItemType, FDisplayedItems> DisplayedItems;
 
-    UPROPERTY()
+    UPROPERTY(EditAnywhere)
     TArray<FEquipmentSlots> EquipmentSlots;
 
     TArray<EItemType> MainHandTypes;

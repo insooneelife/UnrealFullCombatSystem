@@ -1,14 +1,16 @@
 // Fill out your copyright notice in the Description page of Project Settings.
-
-
 #include "WandItem.h"
+#include "GameCore/GameUtils.h"
 
 UWandItem::UWandItem(const FObjectInitializer& ObjectInitializer)
 {
+    static UTexture2D* LoadTexture =
+        GameUtils::LoadAssetObject<UTexture2D>("/Game/DynamicCombatSystem/Widgets/Textures/T_Wand");
+
     Item = FItem(
         FName(TEXT("Base Wand")),
         FText::FromString(TEXT("Item description")),
-        EItemType::Shield, false, true, false, nullptr);
+        EItemType::Shield, false, true, false, LoadTexture);
 
 
     Modifiers =

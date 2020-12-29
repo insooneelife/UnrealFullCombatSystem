@@ -14,6 +14,7 @@
 #include "GamePlay/Items/ObjectItems/ArrowItem.h"
 #include "GameCore/DefaultGameInstance.h"
 #include "Interfaces/CanBeAttacked.h"
+#include "GameCore/GameUtils.h"
 
 // Sets default values
 AArrowProjectileBase::AArrowProjectileBase()
@@ -26,6 +27,13 @@ AArrowProjectileBase::AArrowProjectileBase()
     InitialSpeed = 7000.0f;
     LifeTime = 15.0f;
     ImpulsePower = 20000.0f;
+
+    StaticMesh = CreateDefaultSubobject<UStaticMeshComponent>("StaticMesh");
+    RootComponent = StaticMesh;
+    ParticleSystem = CreateDefaultSubobject<UParticleSystemComponent>("Particle");
+
+    ProjectileMovement = CreateDefaultSubobject<UProjectileMovementComponent>("ProjectileMovement");
+    CollisionHandler = CreateDefaultSubobject<UCollisionHandlerComponent>("CollisionHandler");
 }
 
 // Called when the game starts or when spawned
@@ -39,9 +47,17 @@ void AArrowProjectileBase::BeginPlay()
     SetLifeSpan(LifeTime);
     CollisionHandler->SetCollisionMesh(StaticMesh, StaticMesh->GetAllSocketNames());
     CollisionHandler->ActivateCollision(ECollisionPart::None);
+    CollisionHandler->OnHit.AddDynamic(this, &AArrowProjectileBase::OnHit);
 
     FTimerHandle Unused;
     GetWorld()->GetTimerManager().SetTimer(Unused, this, &AArrowProjectileBase::BeginPlayDelayed, 0.3f, false);
+}
+
+void AArrowProjectileBase::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+    CollisionHandler->OnHit.RemoveDynamic(this, &AArrowProjectileBase::OnHit);
+
+    Super::EndPlay(EndPlayReason);
 }
 
 void AArrowProjectileBase::BeginPlayDelayed()
@@ -49,41 +65,7 @@ void AArrowProjectileBase::BeginPlayDelayed()
     ProjectileMovement->ProjectileGravityScale = 0.3f;
 }
 
-void AArrowProjectileBase::OnHit(const FHitResult& Hit)
-{
-    OnArrowHit(Hit);
-}
-
-void AArrowProjectileBase::Init(float InDamage, float InInitialSpeed)
-{
-    Damage = InDamage;
-    InitialSpeed = InInitialSpeed;
-}
-
-void AArrowProjectileBase::ApplyHitImpulse(UPrimitiveComponent* InComponent, FVector InHitNormal, FName InBoneName)
-{
-    if (InComponent->IsAnySimulatingPhysics())
-    {
-        FVector Impulse = InHitNormal * -1.0f * ImpulsePower;
-        InComponent->AddImpulse(Impulse, InBoneName);
-    }
-}
-
-void AArrowProjectileBase::UpdateArrowMesh()
-{
-    UEquipmentComponent* EquipmentComponent = 
-        Cast<UEquipmentComponent>(GetOwner()->GetComponentByClass(UEquipmentComponent::StaticClass()));
-
-    if (EquipmentComponent->IsValidLowLevel())
-    {
-        TSubclassOf<UItemBase> ItemClass = EquipmentComponent->GetActiveItem(EItemType::Arrows, 0).ItemClass;
-        UArrowItem* ArrowItem = NewObject<UArrowItem>(GetOwner(), ItemClass);
-
-        StaticMesh->SetStaticMesh(ArrowItem->GetArrowMesh());
-    }
-}
-
-void AArrowProjectileBase::OnArrowHit(const FHitResult& InHit)
+void AArrowProjectileBase::OnHit(const FHitResult& InHit)
 {
     FVector HitLocation = InHit.Location;
     FVector HitNormal = InHit.Normal;
@@ -120,7 +102,7 @@ void AArrowProjectileBase::OnArrowHit(const FHitResult& InHit)
 
                         DefaultGameInstance->PlayHitSound(GetOwner(), HitActor, HitLocation);
 
-                        UEffectsComponent* EffectsComponent = 
+                        UEffectsComponent* EffectsComponent =
                             Cast<UEffectsComponent>(HitActor->GetComponentByClass(UEffectsComponent::StaticClass()));
 
                         if (EffectsComponent->IsValidLowLevel())
@@ -143,6 +125,35 @@ void AArrowProjectileBase::OnArrowHit(const FHitResult& InHit)
             ApplyHitImpulse(HitComponent, HitNormal, HitBoneName);
             Destroy();
         }
+    }
+}
+
+void AArrowProjectileBase::Init(float InDamage, float InInitialSpeed)
+{
+    Damage = InDamage;
+    InitialSpeed = InInitialSpeed;
+}
+
+void AArrowProjectileBase::ApplyHitImpulse(UPrimitiveComponent* InComponent, FVector InHitNormal, FName InBoneName)
+{
+    if (InComponent->IsAnySimulatingPhysics())
+    {
+        FVector Impulse = InHitNormal * -1.0f * ImpulsePower;
+        InComponent->AddImpulse(Impulse, InBoneName);
+    }
+}
+
+void AArrowProjectileBase::UpdateArrowMesh()
+{
+    UEquipmentComponent* EquipmentComponent = 
+        Cast<UEquipmentComponent>(GetOwner()->GetComponentByClass(UEquipmentComponent::StaticClass()));
+
+    if (EquipmentComponent->IsValidLowLevel())
+    {
+        TSubclassOf<UItemBase> ItemClass = EquipmentComponent->GetActiveItem(EItemType::Arrows, 0).ItemClass;
+        UArrowItem* ArrowItem = NewObject<UArrowItem>(GetOwner(), ItemClass);
+
+        StaticMesh->SetStaticMesh(ArrowItem->GetArrowMesh());
     }
 }
 

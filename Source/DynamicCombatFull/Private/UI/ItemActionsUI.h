@@ -23,7 +23,9 @@ class UItemActionsUI : public UUserWidget
 	GENERATED_BODY()
 	
 protected:
+    // called one tick after Spawn, so Init is called before this 
     virtual void NativeConstruct() override;
+    virtual void NativeDestruct() override;
 
     void Close();
 

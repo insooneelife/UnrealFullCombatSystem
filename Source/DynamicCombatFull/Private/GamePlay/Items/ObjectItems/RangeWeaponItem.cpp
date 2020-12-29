@@ -2,13 +2,17 @@
 
 
 #include "RangeWeaponItem.h"
+#include "GameCore/GameUtils.h"
 
 URangeWeaponItem::URangeWeaponItem(const FObjectInitializer& ObjectInitializer)
 {
+    static UTexture2D* LoadTexture =
+        GameUtils::LoadAssetObject<UTexture2D>("/Game/DynamicCombatSystem/Widgets/Textures/T_RangeWeapon");
+
     Item = FItem(
         FName(TEXT("Base Range Weapon")),
         FText::FromString(TEXT("Item description")),
-        EItemType::RangeWeapon, false, true, false, nullptr);
+        EItemType::RangeWeapon, false, true, false, LoadTexture);
 
     Modifiers =
     {

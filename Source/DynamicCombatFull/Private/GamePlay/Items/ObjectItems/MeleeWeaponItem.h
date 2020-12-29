@@ -16,7 +16,7 @@
 /**
  * 
  */
-UCLASS()
+UCLASS(Blueprintable)
 class UMeleeWeaponItem 
     : 
     public UWeaponItem, 
@@ -40,18 +40,18 @@ public:
     virtual TSubclassOf<ADisplayedItem> GetDisplayedItem() const override { return DisplayedItemClass; }
 
 private:
-    UPROPERTY(EditAnywhere)
+    UPROPERTY(EditAnywhere, Category = "Weapon")
     bool bIsTwoHanded;
 
-    UPROPERTY(EditAnywhere)
+    UPROPERTY(EditAnywhere, Category = "Weapon")
     float BlockValue;
 
-    UPROPERTY(EditAnywhere)
+    UPROPERTY(EditAnywhere, Category = "Modifiers")
     TArray<FModifier> Modifiers;
 
-    UPROPERTY(EditAnywhere)
+    UPROPERTY(EditAnywhere, Category = "Ability")
     TSubclassOf<AAbilityBase> AbilityClass;
 
-    UPROPERTY(EditAnywhere)
+    UPROPERTY(EditAnywhere, Category = "Display")
     TSubclassOf<ADisplayedItem> DisplayedItemClass;
 };

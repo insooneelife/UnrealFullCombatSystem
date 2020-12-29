@@ -42,10 +42,35 @@ void UExtendedStatComponent::BeginPlay()
     if (GetOwner() == UGameplayStatics::GetPlayerCharacter(GetWorld(), 0))
     {
         ADCSGameMode* GameMode = Cast<ADCSGameMode>(UGameplayStatics::GetGameMode(GetWorld()));
+        if (GameMode->IsValidLowLevel())
+        {
+            GameMode->OnGameLoaded.AddDynamic(this, &UExtendedStatComponent::OnGameLoaded);
+        }
+    }
+}
 
-        GameMode->OnGameLoaded.AddDynamic(this, &UExtendedStatComponent::OnGameLoaded);
+void UExtendedStatComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+    if (GetOwner() == UGameplayStatics::GetPlayerCharacter(GetWorld(), 0))
+    {
+        ADCSGameMode* GameMode = Cast<ADCSGameMode>(UGameplayStatics::GetGameMode(GetWorld()));
+        if (GameMode->IsValidLowLevel())
+        {
+            GameMode->OnGameLoaded.RemoveDynamic(this, &UExtendedStatComponent::OnGameLoaded);
+        }
     }
 
+    UStatsManagerComponent* StatsManagerComp =
+        Cast<UStatsManagerComponent>(GetOwner()->GetComponentByClass(UStatsManagerComponent::StaticClass()));
+
+    if (StatsManagerComp->IsValidLowLevel())
+    {
+        StatsManagerComp->OnModifierAdded.RemoveDynamic(this, &UExtendedStatComponent::OnModifierAdded);
+        StatsManagerComp->OnModifierRemoved.RemoveDynamic(this, &UExtendedStatComponent::OnModifierRemoved);
+        StatsManagerComp->OnBaseValueChanged.RemoveDynamic(this, &UExtendedStatComponent::OnBaseValueChanged);
+    }
+
+    Super::EndPlay(EndPlayReason);
 }
 
 

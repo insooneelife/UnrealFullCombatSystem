@@ -61,24 +61,33 @@ public:
 
     void HideSpellIndicator();
 
+    UFUNCTION(BlueprintCallable)
     void UpdateSpellIndicatorLocation(FVector NewLocation);
 
     void UpdateAbility(TSubclassOf<AAbilityBase> Ability);
 
+    UFUNCTION(BlueprintCallable)
     bool StartAbility();
 
     float PlayAbilityMontage(UAnimMontage* Montage, float PlayRate, FName Section);
 
     void StopAbilityMontage();
 
+    UFUNCTION(BlueprintCallable)
     void EndAbility(EAbilityEndResult Result);
 
 public:
     AAbilityBase* GetCurrentAbility() const;
     bool IsAbilityUsingCrosshair() const;
     FTransform GetEffectTransform() const;
+
+    UFUNCTION(BlueprintCallable)
     bool GetIsCasting() const;
+
+    UFUNCTION(BlueprintCallable)
     bool GetIsPressed() const;
+
+    UFUNCTION(BlueprintCallable)
     bool IsUsingAbility() const;
     float GetManaCost() const;
     bool CanAbilityBeCancelled() const;
@@ -137,5 +146,6 @@ private:
     UPROPERTY()
     UAnimMontage* RecentlyPlayedMontage;
 
+    UPROPERTY(EditAnywhere)
     bool bUpdateEquipmentAbility;
 };

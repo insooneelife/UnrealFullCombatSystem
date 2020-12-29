@@ -22,8 +22,11 @@ UAbilityComponent::UAbilityComponent()
     PrimaryComponentTick.bStartWithTickEnabled = false;
 
     bUpdateEquipmentAbility = true;
-    SpawnIndicatorClass =
-        GameUtils::LoadAssetClass<ASpellIndicatorActor>(TEXT("/Game/DynamicCombatSystem/Blueprints/BP_SpellIndicator"));
+
+    TSubclassOf<ASpellIndicatorActor> LoadedClass =
+        GameUtils::LoadAssetClass<ASpellIndicatorActor>(TEXT("/Game/DynamicCombatSystem/Blueprints/SpellIndicatorActorBP"));
+    SpawnIndicatorClass = LoadedClass;
+        
 }
 
 
@@ -50,6 +53,14 @@ void UAbilityComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
     {
         CurrentAbility->Destroy();
     }
+
+    if (EquipmentComponent->IsValidLowLevel())
+    {
+        EquipmentComponent->OnActiveItemChanged.RemoveDynamic(this, &UAbilityComponent::OnActiveItemChanged);
+        EquipmentComponent->OnMainHandTypeChanged.RemoveDynamic(this, &UAbilityComponent::OnMainHandTypeChanged);
+    }
+
+    Super::EndPlay(EndPlayReason);
 }
 
 
@@ -210,7 +221,7 @@ void UAbilityComponent::UpdateAbility(TSubclassOf<AAbilityBase> AbilityClass)
         Params.Instigator = nullptr;
 
         AAbilityBase* Ability = GetWorld()->SpawnActor<AAbilityBase>(AbilityClass, FTransform::Identity, Params);
-        Ability->SetAbilityComponent(this);
+        Ability->Init(this);
 
         CurrentAbility = Ability;
     }

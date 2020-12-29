@@ -28,17 +28,24 @@ public:
     void ApplyBuff();
 
 private:
-    UPROPERTY(EditAnywhere)
+    UPROPERTY()
     TSubclassOf<ABuffAbilityEffect> SpawnBuffAbilityEffectClass;
 
+    UPROPERTY(EditAnywhere, Category = "Ability\|Custom")
     EStat StatType;
+
+    UPROPERTY(EditAnywhere, Category = "Ability\|Custom")
     float BuffValue;
+
+    UPROPERTY(EditAnywhere, Category = "Ability\|Custom")
     float BuffDuration;
+
+    UPROPERTY(EditAnywhere, Category = "Ability\|Custom")
     FLinearColor BuffColor;
     
-    UPROPERTY()
+    UPROPERTY(EditAnywhere, Category = "Ability\|Custom")
     UParticleSystem* BuffCastParticle;
     
-    UPROPERTY()
+    UPROPERTY(EditAnywhere, Category = "Ability\|Custom")
     USoundBase* Sound;
 };

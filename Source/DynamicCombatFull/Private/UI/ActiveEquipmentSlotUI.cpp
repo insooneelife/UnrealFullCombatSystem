@@ -15,8 +15,6 @@
 #include "GamePlay/Items/ObjectItems/ItemBase.h"
 #include "GameCore/GameUtils.h"
 
-
-
 UActiveEquipmentSlotUI::UActiveEquipmentSlotUI(const FObjectInitializer& ObjectInitializer)
     : 
     Super(ObjectInitializer),
@@ -57,6 +55,17 @@ void UActiveEquipmentSlotUI::NativeConstruct()
         EquipmentComponent->OnSlotHiddenChanged.AddDynamic(this, &UActiveEquipmentSlotUI::OnSlotHiddenChanged);
     }
 
+}
+
+void UActiveEquipmentSlotUI::NativeDestruct()
+{
+    if (EquipmentComponent->IsValidLowLevel())
+    {
+        EquipmentComponent->OnActiveItemChanged.RemoveDynamic(this, &UActiveEquipmentSlotUI::OnActiveItemChanged);
+        EquipmentComponent->OnSlotHiddenChanged.RemoveDynamic(this, &UActiveEquipmentSlotUI::OnSlotHiddenChanged);
+    }
+
+    Super::NativeDestruct();
 }
 
 void UActiveEquipmentSlotUI::OnActiveItemChanged(

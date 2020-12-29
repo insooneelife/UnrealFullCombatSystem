@@ -43,6 +43,17 @@ void UStatsManagerComponent::BeginPlay()
 	Super::BeginPlay();
 }
 
+void UStatsManagerComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+    if (EquipmentComponent->IsValidLowLevel())
+    {
+        EquipmentComponent->OnActiveItemChanged.RemoveDynamic(this, &UStatsManagerComponent::OnActiveItemChanged);
+        EquipmentComponent->OnSlotHiddenChanged.RemoveDynamic(this, &UStatsManagerComponent::OnSlotHiddenChanged);
+        EquipmentComponent->OnMainHandTypeChanged.RemoveDynamic(this, &UStatsManagerComponent::OnMainHandTypeSwitched);
+    }
+
+    Super::EndPlay(EndPlayReason);
+}
 
 void UStatsManagerComponent::OnActiveItemChanged(
     FStoredItem OldItem, FStoredItem NewItem, EItemType SlotType, int SlotIndex, int ActiveIndex)

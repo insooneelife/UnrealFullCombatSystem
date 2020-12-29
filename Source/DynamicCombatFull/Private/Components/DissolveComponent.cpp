@@ -26,7 +26,7 @@ UDissolveComponent::UDissolveComponent()
     DissolveValueName = TEXT("amount");
     DissolveColorName = TEXT("color");
     DissolveInterpSpeed = 1.0f;
-    DissolveColor = FLinearColor(5.0f, 0.0f, 0.0f);
+    DissolveColor = FLinearColor(5.0f, 0.0f, 0.0f, 0.0f);
 }
 
 

@@ -23,6 +23,7 @@ public:
 protected:
     virtual void NativePreConstruct() override;
     virtual void NativeConstruct() override;
+    virtual void NativeDestruct() override;
 
     UFUNCTION()
     void OnClicked_SlotButton();
@@ -34,11 +35,15 @@ protected:
     void OnUnhovered_SlotButton();
 
 public:
+    void Init(UInventoryUI* InInventoryUI);
     void SetActiveBorder(bool bVisible);
 
     EItemType GetItemType() const { return  ItemType; }
 
 private:
+    UPROPERTY(EditAnywhere)
+        TSubclassOf<UInventoryUI> InventoryUIClass;
+
     UPROPERTY(EditAnywhere)
     EItemType ItemType;
 

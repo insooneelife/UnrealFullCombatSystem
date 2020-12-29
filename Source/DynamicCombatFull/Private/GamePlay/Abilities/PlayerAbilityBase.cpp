@@ -16,7 +16,11 @@
 void APlayerAbilityBase::BeginPlay()
 {
     Super::BeginPlay();
+}
 
+void APlayerAbilityBase::Init(UAbilityComponent* InAbilityComponent)
+{
+    Super::Init(InAbilityComponent);
     PlayerCharacter = Cast<ABaseCharacter>(Character);
 }
 

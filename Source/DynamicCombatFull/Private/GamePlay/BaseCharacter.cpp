@@ -90,12 +90,42 @@ ABaseCharacter::ABaseCharacter()
     static UTexture2D* LoadedObject =
         GameUtils::LoadAssetObject<UTexture2D>("/Game/DynamicCombatSystem/Widgets/Textures/T_Crosshair");
     DefaultCrosshairTextureObject = LoadedObject;
+
+    InGameUIClass = GameUtils::LoadAssetClass<UUserWidget>("/Game/DynamicCombatSystem/Widgets/InGameWB");
+
+    KeybindingsUIClass = GameUtils::LoadAssetClass<UKeybindingsUI>(
+        "/Game/DynamicCombatSystem/Widgets/KeybindingsWB");
+
+    CrosshairTexture = GameUtils::LoadAssetObject<UTexture2D>(
+        "/Game/DynamicCombatSystem/Widgets/Textures/T_AbilityCrosshair");
+
+    DefaultCrosshairTextureObject = GameUtils::LoadAssetObject<UTexture2D>(
+        "/Game/DynamicCombatSystem/Widgets/Textures/T_Crosshair");
+
+    StateManager = CreateDefaultSubobject<UStateManagerComponent>("StateManager");
+    InputBuffer = CreateDefaultSubobject<UInputBufferComponent>("InputBuffer");
+    MeleeCollisionHandler = CreateDefaultSubobject<UCollisionHandlerComponent>("MeleeCollisionHandler");
+    ExtendedHealth = CreateDefaultSubobject<UExtendedStatComponent>("ExtendedHealth");
+    ExtendedStamina = CreateDefaultSubobject<UExtendedStatComponent>("ExtendedStamina");
+    MontageManager = CreateDefaultSubobject<UMontageManagerComponent>("MontageManager");
+    DynamicTargeting = CreateDefaultSubobject<UDynamicTargetingComponent>("DynamicTargeting");
+    Effects = CreateDefaultSubobject<UEffectsComponent>("Effects");
+    MovementSpeed = CreateDefaultSubobject<UMovementSpeedComponent>("MovementSpeed");
+    StatsManager = CreateDefaultSubobject<UStatsManagerComponent>("StatsManager");
+    Dissolve = CreateDefaultSubobject<UDissolveComponent>("Dissolve");
+    Inventory = CreateDefaultSubobject<UInventoryComponent>("Inventory");
+    Equipment = CreateDefaultSubobject<UEquipmentComponent>("Equipment");
+    Rotating = CreateDefaultSubobject<URotatingComponent>("Rotating");
+    AbilityComponent = CreateDefaultSubobject<UAbilityComponent>("AbilityComponent");
+    ExtendedMana = CreateDefaultSubobject<UExtendedStatComponent>("ExtendedMana");
 }
 
 // Called when the game starts or when spawned
 void ABaseCharacter::BeginPlay()
 {
 	Super::BeginPlay();
+
+    
 
     DynamicTargeting->Init(TargetingArrow);
 
@@ -148,8 +178,49 @@ void ABaseCharacter::BeginPlay()
 
 void ABaseCharacter::OnConstruction(const FTransform& Transform)
 {
-    InitialCameraArmLength = CameraBoom->TargetArmLength;
-    InitialCameraLagSpeed = CameraBoom->CameraLagSpeed;
+    UArrowComponent* ArrowComp = Cast<UArrowComponent>(GetComponentByClass(UArrowComponent::StaticClass()));
+    TargetingArrow = ArrowComp;
+
+    if (!TargetingArrow->IsValidLowLevel())
+    {
+        UE_LOG(LogTemp, Error, TEXT("TargetingArrow is not valid!"));
+    }
+
+    UCameraComponent* Camera = Cast<UCameraComponent>(GetComponentByClass(UCameraComponent::StaticClass()));
+    FollowCamera = Camera;
+
+    if (!FollowCamera->IsValidLowLevel())
+    {
+        UE_LOG(LogTemp, Error, TEXT("FollowCamera is not valid!"));
+    }
+
+    USpringArmComponent* Boom = Cast<USpringArmComponent>(GetComponentByClass(USpringArmComponent::StaticClass()));
+    CameraBoom = Boom;
+
+    if (!CameraBoom->IsValidLowLevel())
+    {
+        UE_LOG(LogTemp, Error, TEXT("CameraBoom is not valid!"));
+    }
+    else
+    {
+        InitialCameraArmLength = CameraBoom->TargetArmLength;
+        InitialCameraLagSpeed = CameraBoom->CameraLagSpeed;
+    }
+
+    UAudioComponent* Audio = Cast<UAudioComponent>(GetComponentByClass(UAudioComponent::StaticClass()));
+    EffectsAudio = Audio;
+    if (!EffectsAudio->IsValidLowLevel())
+    {
+        UE_LOG(LogTemp, Error, TEXT("EffectsAudio is not valid!"));
+    }
+
+    USceneComponent* Scene = Cast<USceneComponent>(GetComponentByClass(USceneComponent::StaticClass()));
+    ArrowSpawnLocation = Scene;
+
+    if (!ArrowSpawnLocation->IsValidLowLevel())
+    {
+        UE_LOG(LogTemp, Error, TEXT("ArrowSpawnLocation is not valid!"));
+    }
 }
 
 // Called every frame

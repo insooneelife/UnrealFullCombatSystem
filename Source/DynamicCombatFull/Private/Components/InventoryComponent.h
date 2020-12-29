@@ -26,13 +26,14 @@ public:
 protected:
     // Called when the game starts
     virtual void BeginPlay() override;
+    virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
     UFUNCTION()
         void OnGameLoaded();
 
 public:
     void AddItem(TSubclassOf<UItemBase> InItemClass, int InAmount);
-    void RemoveItem(TSubclassOf<UItemBase> InItemClass, int InAmount);
+    //void RemoveItem(TSubclassOf<UItemBase> InItemClass, int InAmount);
 
     void ClearInventory();
     void RemoveItemAtIndex(int Index, int InAmount);
@@ -65,6 +66,7 @@ private:
     UPROPERTY(EditAnywhere)
         TSubclassOf<APickupActor> SpawnPickupActorClass;
 
+    UPROPERTY(EditAnywhere)
     TArray<FStoredItem> Inventory;
 
 };

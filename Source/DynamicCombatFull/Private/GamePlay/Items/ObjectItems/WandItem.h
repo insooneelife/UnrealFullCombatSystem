@@ -11,7 +11,7 @@
 /**
  * 
  */
-UCLASS()
+UCLASS(Blueprintable)
 class UWandItem 
     : 
     public UItemBase,
@@ -27,9 +27,9 @@ public:
 
 private:
 
-    UPROPERTY(EditAnywhere)
+    UPROPERTY(EditAnywhere, Category = "Modifiers")
     TArray<FModifier> Modifiers;
 
-    UPROPERTY(EditAnywhere)
+    UPROPERTY(EditAnywhere, Category = "Display")
     TSubclassOf<ADisplayedItem> DisplayedItemClass;
 };

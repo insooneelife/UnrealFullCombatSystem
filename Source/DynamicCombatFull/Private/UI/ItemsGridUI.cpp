@@ -51,6 +51,17 @@ void UItemsGridUI::NativeConstruct()
     }
 }
 
+void UItemsGridUI::NativeDestruct()
+{
+    if (InventoryComponent->IsValidLowLevel())
+    {
+        InventoryComponent->OnItemAdded.RemoveDynamic(this, &UItemsGridUI::OnItemAdded);
+        InventoryComponent->OnItemRemoved.RemoveDynamic(this, &UItemsGridUI::OnItemRemoved);
+    }
+
+    Super::NativeDestruct();
+}
+
 void UItemsGridUI::InventoryItemClicked(UInventoryItemUI* InItem)
 {
     OnInventoryItemClicked.Broadcast(InItem);
@@ -62,7 +73,7 @@ void UItemsGridUI::CreateItemWidgets()
 
     if (NeededSlots > 0)
     {
-        for (int i = 1; i <= NeededSlots; ++i)
+        for (int i = 0; i < NeededSlots; ++i)
         {
             UInventoryItemUI* CreatedUI = Cast<UInventoryItemUI> (CreateWidget(GetOwningPlayer(), InventoryItemUIClass));
             CreatedUI->Init(InventoryComponent, EquipmentComponent, this);
@@ -85,8 +96,9 @@ void UItemsGridUI::UpdateItemWidgets(EItemType InType)
 
         if ((DefaultItem.Type == InType || InType == EItemType::None) && Item.Amount > 0)
         {
+            ItemWidgets[ValidSlots]->UpdateWidget(Item);
             UUniformGridSlot* UniformGrid = ItemsGrid->AddChildToUniformGrid(ItemWidgets[ValidSlots]);
-            UniformGrid->SetColumn(ValidSlots / GridColumns);
+            UniformGrid->SetColumn(ValidSlots % GridColumns);
             UniformGrid->SetRow(ValidSlots / GridColumns);
 
             ValidSlots++;
@@ -149,8 +161,8 @@ void UItemsGridUI::OnItemRemoved(FStoredItem InItem)
         return;
     }
 
+    // find target ui
     UInventoryItemUI* TargetItemUI = nullptr;
-
     for (UInventoryItemUI* ItemUI : ItemWidgets)
     {
         if (ItemUI->GetItem().Id == InItem.Id)

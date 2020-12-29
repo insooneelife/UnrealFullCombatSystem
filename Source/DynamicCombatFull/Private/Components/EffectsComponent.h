@@ -70,9 +70,7 @@ private:
     UPROPERTY(EditAnywhere)
         float BurningDamage;
 
-    UPROPERTY(EditAnywhere)
-        TArray<FEffect> AppliedEffects;
+    TArray<FEffect> AppliedEffects;
 
-    UPROPERTY(EditAnywhere)
-        float UpdateInterval;
+    float UpdateInterval;
 };

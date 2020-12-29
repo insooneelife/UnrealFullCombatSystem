@@ -36,13 +36,14 @@ void UDynamicTargetingComponent::BeginPlay()
     CharacterReference = Cast<ACharacter>(GetOwner());
     if (CharacterReference == nullptr)
     {
-        UE_LOG(LogTemp, Warning, TEXT("Casting to owner as character has FAILED"));
+        UE_LOG(LogTemp, Error, TEXT("Casting to owner as character has failed!!"));
     }
 }
 
 
 // Called every frame
-void UDynamicTargetingComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+void UDynamicTargetingComponent::TickComponent(
+    float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 

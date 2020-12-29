@@ -6,6 +6,9 @@
 #include "Blueprint/UserWidget.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/BlueprintMapLibrary.h"
+#include "Components/SceneComponent.h"
+#include "Components/BoxComponent.h"
+#include "Particles/ParticleSystemComponent.h"
 #include "Components/InventoryComponent.h"
 #include "GameCore/GameUtils.h"
 
@@ -17,9 +20,14 @@ APickupActor::APickupActor()
     PrimaryActorTick.bStartWithTickEnabled = false;
 
     TSubclassOf<UUserWidget> LoadedClass = 
-        GameUtils::LoadAssetClass<UUserWidget>(TEXT("/Game/DynamicCombatSystem/Widgets/WB_Pickup"));
+        GameUtils::LoadAssetClass<UUserWidget>(TEXT("/Game/DynamicCombatSystem/Widgets/PickupWB"));
 
     CreateUserWidgetClass = LoadedClass;
+
+    Scene = CreateDefaultSubobject<USceneComponent>("Scene");
+    Box = CreateDefaultSubobject<UBoxComponent>("Box");
+    ParticleSystem = CreateDefaultSubobject<UParticleSystemComponent>("ParticleSystem");
+    ParticleSystem->SetupAttachment(Box);
 }
 
 // Called when the game starts or when spawned
@@ -41,7 +49,7 @@ void APickupActor::RemoveInvalidItems()
         Values.Add(E.Value);
     }
 
-    for (int i = Keys.Num(); i >= 0; --i)
+    for (int i = Keys.Num() - 1; i >= 0; --i)
     {
         TSubclassOf<UItemBase> Key = Keys[i];
         int Value = Values[i];

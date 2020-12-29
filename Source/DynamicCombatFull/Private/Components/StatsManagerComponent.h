@@ -27,6 +27,7 @@ public:
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
+    virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
     UFUNCTION()
     void OnActiveItemChanged(FStoredItem OldItem, FStoredItem NewItem, EItemType SlotType, int SlotIndex, int ActiveIndex);
@@ -73,7 +74,9 @@ private:
     UPROPERTY()
     UEquipmentComponent* EquipmentComponent;
 
+    UPROPERTY(EditAnywhere)
     TArray<FStat> Stats;
+
     float InitialBlockValue;
     float RecentlyReceivedDamage;
     int RecentlyReceivedHitsCount;

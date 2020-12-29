@@ -23,6 +23,7 @@ public:
 protected:
     virtual void NativePreConstruct() override;
     virtual void NativeConstruct() override;
+    virtual void NativeDestruct() override;
 
     UFUNCTION()
     void OnItemInSlotChanged(FStoredItem OldItem, FStoredItem NewItem, EItemType InType, int InSlotIndex, int InItemIndex);
@@ -56,6 +57,9 @@ public:
     const FStoredItem& GetItem() const { return Item; }
 
 private:
+    UPROPERTY(EditAnywhere)
+    TSubclassOf<UEquipmentUI> EquipmentUIClass;
+
     UPROPERTY()
     UEquipmentComponent* EquipmentComponent;
 

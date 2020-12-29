@@ -14,7 +14,7 @@
 /**
  * 
  */
-UCLASS()
+UCLASS(Blueprintable)
 class UArmorItem : public UItemBase, public IItemHasModifiers, public IItemIsDisplayed
 {
 	GENERATED_BODY()
@@ -26,9 +26,9 @@ public:
     virtual TSubclassOf<ADisplayedItem> GetDisplayedItem() const override { return DisplayedItemClass; }
 
 private:
-    UPROPERTY(EditAnywhere)
+    UPROPERTY(EditAnywhere, Category = "Modifiers")
     TArray<FModifier> Modifiers;
 
-    UPROPERTY(EditAnywhere)
+    UPROPERTY(EditAnywhere, Category = "Display")
     TSubclassOf<ADisplayedItem> DisplayedItemClass;
 };

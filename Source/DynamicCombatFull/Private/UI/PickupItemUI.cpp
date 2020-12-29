@@ -19,6 +19,13 @@ void UPickupItemUI::NativeConstruct()
     ItemButton->OnClicked.AddDynamic(this, &UPickupItemUI::OnClicked_ItemButton);
 }
 
+void UPickupItemUI::NativeDestruct()
+{
+    ItemButton->OnClicked.RemoveDynamic(this, &UPickupItemUI::OnClicked_ItemButton);
+
+    Super::NativeDestruct();
+}
+
 void UPickupItemUI::OnClicked_ItemButton()
 {
     PickupUI->PickupItemClicked(this);

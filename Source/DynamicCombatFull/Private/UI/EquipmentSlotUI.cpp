@@ -45,11 +45,6 @@ void UEquipmentSlotUI::NativeConstruct()
     EquipmentComponent = Cast<UEquipmentComponent>(
         GetOwningPlayerPawn()->GetComponentByClass(UEquipmentComponent::StaticClass()));
 
-    TArray<UUserWidget*> FoundWidgets;
-    UWidgetBlueprintLibrary::GetAllWidgetsOfClass(GetWorld(), FoundWidgets, UEquipmentUI::StaticClass(), false);
-
-    EquipmentUI = Cast<UEquipmentUI>(FoundWidgets[0]);
-
     if (EquipmentComponent->IsValidLowLevel())
     {
         FStoredItem SlotItem = EquipmentComponent->GetItemInSlot(ItemType, SlotIndex, ItemIndex);
@@ -65,6 +60,35 @@ void UEquipmentSlotUI::NativeConstruct()
     SlotButton->OnClicked.AddDynamic(this, &UEquipmentSlotUI::OnClicked_SlotButton);
     SlotButton->OnHovered.AddDynamic(this, &UEquipmentSlotUI::OnHovered_SlotButton);
     SlotButton->OnUnhovered.AddDynamic(this, &UEquipmentSlotUI::OnUnhovered_SlotButton);
+
+    TArray<UUserWidget*> FoundWidgets;
+    UWidgetBlueprintLibrary::GetAllWidgetsOfClass(GetWorld(), FoundWidgets, EquipmentUIClass, false);
+
+    if (FoundWidgets.Num() == 0)
+    {
+        UE_LOG(LogTemp, Error, TEXT("FoundWidgets is empty!!  %s"), *this->GetName());
+        return;
+    }
+    else
+    {
+        EquipmentUI = Cast<UEquipmentUI>(FoundWidgets[0]);
+    }
+
+}
+
+void UEquipmentSlotUI::NativeDestruct()
+{
+    if (EquipmentComponent->IsValidLowLevel())
+    {
+        EquipmentComponent->OnItemInSlotChanged.RemoveDynamic(this, &UEquipmentSlotUI::OnItemInSlotChanged);
+        EquipmentComponent->OnActiveItemChanged.RemoveDynamic(this, &UEquipmentSlotUI::OnActiveItemChanged);
+    }
+
+    SlotButton->OnClicked.RemoveDynamic(this, &UEquipmentSlotUI::OnClicked_SlotButton);
+    SlotButton->OnHovered.RemoveDynamic(this, &UEquipmentSlotUI::OnHovered_SlotButton);
+    SlotButton->OnUnhovered.RemoveDynamic(this, &UEquipmentSlotUI::OnUnhovered_SlotButton);
+
+    Super::NativeDestruct();
 }
 
 void UEquipmentSlotUI::OnClicked_SlotButton()

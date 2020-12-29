@@ -26,38 +26,18 @@ const FName UDefaultGameInstance::Back = FName("Back");
 
 UDefaultGameInstance::UDefaultGameInstance(const FObjectInitializer& ObjectInitializer)
 {
-    FString FindObjName = TEXT("/Game/DynamicCombatSystem/SFX/CUE/CUE_HitHands");
-    ConstructorHelpers::FObjectFinder<USoundBase> DefaultHitSoundObjFinder(*FindObjName);
-    if (DefaultHitSoundObjFinder.Object == nullptr)
-    {
-        UE_LOG(LogTemp, Warning, TEXT("Cannot find : %s"), *FindObjName);
-        return;
-    }
+    static USoundBase* LoadedHitHandsSoundObject =
+        GameUtils::LoadAssetObject<USoundBase>("/Game/DynamicCombatSystem/SFX/CUE/CUE_HitHands");
+    DefaultHitSound = LoadedHitHandsSoundObject;
 
-    DefaultHitSound = DefaultHitSoundObjFinder.Object;
+    static USoundBase* LoadedHitSwordSoundObject =
+        GameUtils::LoadAssetObject<USoundBase>("/Game/DynamicCombatSystem/SFX/CUE/CUE_HitSword");
+    SwordHitSound = LoadedHitSwordSoundObject;
+    AxeHitSound = LoadedHitSwordSoundObject;
 
-
-    FindObjName = TEXT("/Game/DynamicCombatSystem/SFX/CUE/CUE_HitSword");
-    ConstructorHelpers::FObjectFinder<USoundBase> SwordHitSoundObjFinder(*FindObjName);
-    if (SwordHitSoundObjFinder.Object == nullptr)
-    {
-        UE_LOG(LogTemp, Warning, TEXT("Cannot find : %s"), *FindObjName);
-        return;
-    }
-
-    SwordHitSound = SwordHitSoundObjFinder.Object;
-
-    AxeHitSound = SwordHitSoundObjFinder.Object;
-
-    FindObjName = TEXT("/Game/DynamicCombatSystem/SFX/CUE/Cue_BlockShieldMetal");
-    ConstructorHelpers::FObjectFinder<USoundBase> BlockShieldSoundObjFinder(*FindObjName);
-    if (BlockShieldSoundObjFinder.Object == nullptr)
-    {
-        UE_LOG(LogTemp, Warning, TEXT("Cannot find : %s"), *FindObjName);
-        return;
-    }
-
-    BlockShieldSound = BlockShieldSoundObjFinder.Object;
+    static USoundBase* LoadedBlockShieldSoundObject =
+        GameUtils::LoadAssetObject<USoundBase>("/Game/DynamicCombatSystem/SFX/CUE/Cue_BlockShieldMetal");
+    BlockShieldSound = LoadedBlockShieldSoundObject;
 }
 
 

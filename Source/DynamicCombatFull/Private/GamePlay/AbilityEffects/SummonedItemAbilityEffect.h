@@ -74,16 +74,21 @@ private:
     UPROPERTY(EditAnywhere)
     int Amount;
 
+    UPROPERTY(EditAnywhere)
     FStoredItem SummonedItem;
 
+    UPROPERTY(EditAnywhere)
     int ItemIndex;
 
+    UPROPERTY(EditAnywhere)
     int SlotIndex;
 
+    UPROPERTY(EditAnywhere)
     float ElapsedTime;
 
     UPROPERTY(EditAnywhere)
     bool bAutoSwap;
 
+    UPROPERTY(EditAnywhere)
     FStoredItem ItemBeforeSummon;
 };

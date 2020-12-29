@@ -24,7 +24,20 @@ const FItem& GameUtils::GetDefaultItemFromItemClass(TSubclassOf<UItemBase> ItemC
     return DefaultItem->GetItem();
 }
 
-
+void GameUtils::PrintStoredItem(const FStoredItem& StoredItem)
+{
+    if (StoredItem.ItemClass->IsValidLowLevel())
+    {
+        UE_LOG(LogTemp, Warning, TEXT("Print StoredItem  Id : %s  ItemClass : %s  Amount : %d"),
+            *StoredItem.Id.ToString(),
+            *StoredItem.ItemClass->GetName(),
+            StoredItem.Amount);
+    }
+    else
+    {
+        UE_LOG(LogTemp, Warning, TEXT("StoredItem is not valid!!  Id : %s"), *StoredItem.Id.ToString());
+    }
+}
 
 
 

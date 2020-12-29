@@ -10,7 +10,7 @@
 #include "PotionItem.generated.h"
 
 class UAnimMontage;
-UCLASS()
+UCLASS(Blueprintable)
 class UPotionItem : public UItemBase, public IItemHasUseMontage, public IItemIsDisplayed
 {
 	GENERATED_BODY()
@@ -25,17 +25,15 @@ public:
     void UseItem(AActor* Caller);
 
 private:
-    // AnimMontage'/Game/DynamicCombatSystem/Montages/Player/Common/M_DrinkPotion.M_DrinkPotion'
-    UPROPERTY(EditAnywhere)
-    UAnimMontage* UseMontage;
-
-    // Blueprint'/Game/DynamicCombatSystem/Blueprints/Items/DisplayedItems/Instances/DI_Potion.DI_Potion'
-    UPROPERTY(EditAnywhere)
+    UPROPERTY(EditAnywhere, Category = "Display")
     TSubclassOf<ADisplayedItem> DisplayedItemClass;
 
-    UPROPERTY(EditAnywhere)
+    UPROPERTY(EditAnywhere, Category = "Potion")
+    UAnimMontage* UseMontage;
+
+    UPROPERTY(EditAnywhere, Category = "Potion")
     EStat Type;
 
-    UPROPERTY(EditAnywhere)
+    UPROPERTY(EditAnywhere, Category = "Potion")
     float Value;
 };

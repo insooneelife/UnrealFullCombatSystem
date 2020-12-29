@@ -18,18 +18,18 @@ class UDCSSaveGame : public USaveGame
 	
 
 public:
-    UPROPERTY()
+    UPROPERTY(EditAnywhere)
     TArray<FStoredItem> Inventory;
 
-    UPROPERTY()
+    UPROPERTY(EditAnywhere)
     TArray<FEquipmentSlots> EquipmentSlots;
 
-    UPROPERTY()
+    UPROPERTY(EditAnywhere)
     bool bIsInCombat;
 
-    UPROPERTY()
+    UPROPERTY(EditAnywhere)
     EItemType SelectedMainHandSlotType;
 
-    UPROPERTY()
+    UPROPERTY(EditAnywhere)
     TMap<EStat, float> CurrentStatValues;
 };

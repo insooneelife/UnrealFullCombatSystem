@@ -12,7 +12,7 @@
 /**
  *
  */
-UCLASS()
+UCLASS(Blueprintable)
 class UShieldItem
     : public UItemBase, public IItemCanBlock, public IItemIsDisplayed
 {
@@ -26,9 +26,9 @@ public:
 
 private:
 
-    UPROPERTY(EditAnywhere)
+    UPROPERTY(EditAnywhere, Category = "Shield")
     float BlockValue;
 
-    UPROPERTY(EditAnywhere)
+    UPROPERTY(EditAnywhere, Category = "Display")
     TSubclassOf<ADisplayedItem> DisplayedItemClass;
 };

@@ -45,6 +45,18 @@ void UInventoryItemUI::NativeConstruct()
     SlotButton->OnUnhovered.AddDynamic(this, &UInventoryItemUI::OnUnhovered_SlotButton);
 }
 
+void UInventoryItemUI::NativeDestruct()
+{
+    EquipmentComponent->OnItemInSlotChanged.RemoveDynamic(this, &UInventoryItemUI::OnItemInSlotChanged);
+    EquipmentComponent->OnActiveItemChanged.RemoveDynamic(this, &UInventoryItemUI::OnActiveItemChanged);
+
+    SlotButton->OnClicked.RemoveDynamic(this, &UInventoryItemUI::OnClicked_SlotButton);
+    SlotButton->OnHovered.RemoveDynamic(this, &UInventoryItemUI::OnHovered_SlotButton);
+    SlotButton->OnUnhovered.RemoveDynamic(this, &UInventoryItemUI::OnUnhovered_SlotButton);
+
+    Super::NativeDestruct();
+}
+
 void UInventoryItemUI::OnClicked_SlotButton()
 {
     ItemsGridUI->InventoryItemClicked(this);
@@ -140,7 +152,7 @@ void UInventoryItemUI::UpdateIsEquippedImage()
 
 void UInventoryItemUI::SetFocusedImage(bool bVisible)
 {
-    ESlateVisibility FocusedImageVisibility = bVisible ? ESlateVisibility::Hidden : ESlateVisibility::HitTestInvisible;
+    ESlateVisibility FocusedImageVisibility = bVisible ? ESlateVisibility::HitTestInvisible : ESlateVisibility::Hidden;
     FocusedImage->SetVisibility(FocusedImageVisibility);
 }
 

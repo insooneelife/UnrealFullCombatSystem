@@ -23,6 +23,7 @@ public:
 protected:
     virtual void NativePreConstruct() override;
     virtual void NativeConstruct() override;
+    virtual void NativeDestruct() override;
 
     UFUNCTION()
     void OnItemInSlotChanged(FStoredItem InOldItem, FStoredItem InNewItem, EItemType InType, int InSlotIndex, int InItemIndex);
@@ -40,9 +41,6 @@ private:
 
     UPROPERTY()
     UEquipmentComponent* EquipmentComponent;
-
-    UPROPERTY()
-    UEquipmentUI* EquipmentUI;
 
     float SlotSize;
 

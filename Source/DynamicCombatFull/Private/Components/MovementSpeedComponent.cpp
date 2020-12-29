@@ -30,11 +30,20 @@ void UMovementSpeedComponent::BeginPlay()
 
     MovementState = StartMovementState;
     SetMovementState(MovementState);
+
+    Movement = Cast<UCharacterMovementComponent>(
+        GetOwner()->GetComponentByClass(UCharacterMovementComponent::StaticClass()));
+
+    if (!Movement->IsValidLowLevel())
+    {
+        UE_LOG(LogTemp, Error, TEXT("Movement is not valid!!"));
+    }
 }
 
 
 // Called every frame
-void UMovementSpeedComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+void UMovementSpeedComponent::TickComponent(
+    float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
@@ -49,9 +58,6 @@ EMovementState UMovementSpeedComponent::GetMovementState() const
 
 void UMovementSpeedComponent::SetMovementState(EMovementState State)
 {
-    UCharacterMovementComponent* Movement = 
-        Cast<UCharacterMovementComponent>(GetOwner()->GetComponentByClass(UCharacterMovementComponent::StaticClass()));
-
     if (Movement->IsValidLowLevel())
     {
         OnMovementStateEnd.Broadcast(MovementState);
@@ -85,10 +91,7 @@ void UMovementSpeedComponent::UpdateMaxSpeed()
 {
     if (bIsUpdatingSpeed)
     {
-        UCharacterMovementComponent* Movement =
-            Cast<UCharacterMovementComponent>(GetOwner()->GetComponentByClass(UCharacterMovementComponent::StaticClass()));
-
-        if (Movement != nullptr)
+        if (Movement->IsValidLowLevel())
         {
             Movement->MaxWalkSpeed = UKismetMathLibrary::FInterpTo(
                 Movement->MaxWalkSpeed, 
@@ -130,9 +133,6 @@ void UMovementSpeedComponent::ToggleState()
 
 float UMovementSpeedComponent::GetMaxPossibleSpeed() const
 {
-    UCharacterMovementComponent* Movement =
-        Cast<UCharacterMovementComponent>(GetOwner()->GetComponentByClass(UCharacterMovementComponent::StaticClass()));
-
     if (Movement->IsValidLowLevel())
     {
         return Movement->MaxWalkSpeed;

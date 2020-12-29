@@ -26,7 +26,6 @@ public:
     virtual void OnConstruction(const FTransform& Transform) override;
 
     void SetRadius(float NewRadius);
-
     void SetMaterial(UMaterialInterface* NewMaterial);
 
     void Show();
@@ -34,12 +33,13 @@ public:
 
 
 private:
-    UPROPERTY()
+    UPROPERTY(EditAnywhere)
+    USceneComponent* Scene;
+
+    UPROPERTY(EditAnywhere)
     UDecalComponent* Decal;
 
-    UPROPERTY()
-    UMaterialInterface* DecalMaterial;
-
+    UPROPERTY(EditAnywhere)
     float Radius;
 
 };

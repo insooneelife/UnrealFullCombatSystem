@@ -8,6 +8,8 @@
 #include "GameCore/CustomStructs.h"
 #include "MovementSpeedComponent.generated.h"
 
+class UCharacterMovementComponent;
+
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FMovementStateStartSignature, EMovementState, State);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FMovementStateEndSignature, EMovementState, State);
 
@@ -47,14 +49,31 @@ public:
     FMovementStateEndSignature OnMovementStateEnd;
 
 private:
+    UPROPERTY()
+        UCharacterMovementComponent* Movement;
+
     EMovementState MovementState;
+
+    UPROPERTY(EditAnywhere)
     EMovementState StartMovementState;
+
+    UPROPERTY(EditAnywhere)
     float WalkSpeed;
+
+    UPROPERTY(EditAnywhere)
     float JogSpeed;
+
+    UPROPERTY(EditAnywhere)
     float SprintSpeed;
+
     float TargetSpeed;
+
+    UPROPERTY(EditAnywhere)
     float SpeedChangeInterpSpeed;
+
+    UPROPERTY(EditAnywhere)
     TArray<EMovementState> StatesToToggle;
+
     bool bIsUpdatingSpeed;
 		
 };

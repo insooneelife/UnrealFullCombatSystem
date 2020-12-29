@@ -42,24 +42,28 @@ void UEquipmentSlotOnlyDisplayUI::NativeConstruct()
     EquipmentComponent = 
         Cast<UEquipmentComponent>(GetOwningPlayerPawn()->GetComponentByClass(UEquipmentComponent::StaticClass()));
 
-    TArray<UUserWidget*> FoundWidgets;
-    UWidgetBlueprintLibrary::GetAllWidgetsOfClass(GetWorld(), FoundWidgets, UEquipmentUI::StaticClass());
-
-    EquipmentUI = Cast<UEquipmentUI>(FoundWidgets[0]);
-
-    if (EquipmentUI->IsValidLowLevel())
-    {
-        UpdateWidget(EquipmentComponent->GetItemInSlot(ItemType, SlotIndex, ItemIndex));
-        SetActiveWidget(EquipmentComponent->IsActiveItemIndex(ItemType, SlotIndex, ItemIndex));
-    }
-
     if (EquipmentComponent->IsValidLowLevel())
     {
         EquipmentComponent->OnItemInSlotChanged.AddDynamic(this, &UEquipmentSlotOnlyDisplayUI::OnItemInSlotChanged);
         EquipmentComponent->OnActiveItemChanged.AddDynamic(this, &UEquipmentSlotOnlyDisplayUI::OnActiveItemChanged);
     }
 
+    UE_LOG(LogTemp, Error, TEXT("UEquipmentSlotOnlyDisplayUI  EquipmentComponent  %s"),
+        *EquipmentComponent->GetName());
 
+    UpdateWidget(EquipmentComponent->GetItemInSlot(ItemType, SlotIndex, ItemIndex));
+    SetActiveWidget(EquipmentComponent->IsActiveItemIndex(ItemType, SlotIndex, ItemIndex));
+}
+
+void UEquipmentSlotOnlyDisplayUI::NativeDestruct()
+{
+    if (EquipmentComponent->IsValidLowLevel())
+    {
+        EquipmentComponent->OnItemInSlotChanged.RemoveDynamic(this, &UEquipmentSlotOnlyDisplayUI::OnItemInSlotChanged);
+        EquipmentComponent->OnActiveItemChanged.RemoveDynamic(this, &UEquipmentSlotOnlyDisplayUI::OnActiveItemChanged);
+    }
+
+    Super::NativeDestruct();
 }
 
 void UEquipmentSlotOnlyDisplayUI::OnItemInSlotChanged(FStoredItem InOldItem, FStoredItem InNewItem, EItemType InType, int InSlotIndex, int InItemIndex)
@@ -111,7 +115,7 @@ void UEquipmentSlotOnlyDisplayUI::UpdateAmountText()
 
 void UEquipmentSlotOnlyDisplayUI::UpdateImage()
 {
-    if (UKismetSystemLibrary::IsValidClass(Item.ItemClass) && Item.Amount > 1)
+    if (UKismetSystemLibrary::IsValidClass(Item.ItemClass) && Item.Amount >= 1)
     {
         FItem DefaultItem = GameUtils::GetDefaultItemFromStoredItem(Item);
         ItemImage->SetBrushFromTexture(DefaultItem.Image);

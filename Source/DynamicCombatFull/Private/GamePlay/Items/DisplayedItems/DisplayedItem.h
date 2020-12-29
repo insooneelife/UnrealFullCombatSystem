@@ -7,6 +7,7 @@
 #include "GameCore/DataTypes.h"
 #include "DisplayedItem.generated.h"
 
+class USceneComponent;
 class UEquipmentComponent;
 class UPrimitiveComponent;
 
@@ -24,9 +25,10 @@ protected:
 	virtual void BeginPlay() override;
 
 public:
-    
     virtual void NotifyActorBeginOverlap(AActor* OtherActor) override { Super::NotifyActorBeginOverlap(OtherActor); }
     virtual void OnConstruction(const FTransform& Transform) override;
+
+    virtual void Init(UEquipmentComponent* InEquipmentComponent, EItemType InType, int InSlotIndex);
 
     virtual UPrimitiveComponent* GetPrimaryComponent() const;
 
@@ -37,17 +39,14 @@ public:
     virtual void SimulatePhysics();
 
 public:
-
     UEquipmentComponent* GetEquipmentComponent() const { return EquipmentComponent; }
-    void SetEquipmentComponent(UEquipmentComponent* InEquipmentComponent) { EquipmentComponent = InEquipmentComponent; }
-
     EItemType GetType() const { return Type; }
-    void SetType(EItemType InType) { Type = InType; }
-
     int GetSlotIndex() const { return SlotIndex; }
-    void SetSlotIndex(int InSlotIndex) { SlotIndex = InSlotIndex; }
 
 protected:
+    UPROPERTY(EditAnywhere)
+        USceneComponent* Scene;
+
     UPROPERTY(EditAnywhere, Category = "Sockets")
         FName AttachmentSocket;
 

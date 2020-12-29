@@ -22,6 +22,8 @@ public:
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
+    virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
+
 public:
     void RefreshRegenTimer();
 
@@ -67,14 +69,23 @@ public:
     FValueChangedSignature OnValueChanged;
 
 private:
+    UPROPERTY(EditAnywhere)
     EStat StatType;
+
     float RegenerationTickInterval;
     float CurrentValue;
     float TopValue;
     float ModifierValue;
+
+    UPROPERTY(EditAnywhere)
     bool bDoesRegenerates;
+
+    UPROPERTY(EditAnywhere)
     float RegenValue;
+
+    UPROPERTY(EditAnywhere)
     float ReenableRegenTime;
+
     FTimerHandle RegenTimerHandle;
     float InitialRegenValue;
 };

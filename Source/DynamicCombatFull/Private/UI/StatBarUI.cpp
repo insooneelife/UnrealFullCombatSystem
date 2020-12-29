@@ -33,6 +33,11 @@ void UStatBarUI::NativeConstruct()
     Init(Comp);
 }
 
+void UStatBarUI::NativeDestruct()
+{
+    Super::NativeDestruct();
+}
+
 void UStatBarUI::OnValueChanged(float InNewValue, float InMaxValue)
 {
     CurrentValue = InNewValue;

@@ -17,69 +17,63 @@
 
 // Sets default values for this component's properties
 UEquipmentComponent::UEquipmentComponent()
+:
+    EquipmentSlots(
+{
+    FEquipmentSlots(EItemType::Spell, TArray<FEquipmentSlot> {
+        FEquipmentSlot(TArray<FStoredItem>{FStoredItem(), FStoredItem(), FStoredItem(), FStoredItem(), FStoredItem()}, 0, false)
+    }),
+    FEquipmentSlots(EItemType::Shield, TArray<FEquipmentSlot> {
+        FEquipmentSlot(TArray<FStoredItem>{FStoredItem()}, 0, false)
+    }),
+    FEquipmentSlots(EItemType::Head, TArray<FEquipmentSlot> {
+        FEquipmentSlot(TArray<FStoredItem>{FStoredItem()}, 0, false)
+    }),
+    FEquipmentSlots(EItemType::Top, TArray<FEquipmentSlot> {
+        FEquipmentSlot(TArray<FStoredItem>{FStoredItem()}, 0, false)
+    }),
+    FEquipmentSlots(EItemType::Legs, TArray<FEquipmentSlot> {
+        FEquipmentSlot(TArray<FStoredItem>{FStoredItem()}, 0, false)
+    }),
+    FEquipmentSlots(EItemType::Hands, TArray<FEquipmentSlot> {
+        FEquipmentSlot(TArray<FStoredItem>{FStoredItem()}, 0, false)
+    }),
+    FEquipmentSlots(EItemType::Feet, TArray<FEquipmentSlot> {
+        FEquipmentSlot(TArray<FStoredItem>{FStoredItem()}, 0, false)
+    }),
+    FEquipmentSlots(EItemType::Arrows, TArray<FEquipmentSlot> {
+        FEquipmentSlot(TArray<FStoredItem>{FStoredItem(), FStoredItem()}, 0, false)
+    }),
+    FEquipmentSlots(EItemType::Tool, TArray<FEquipmentSlot> {
+        FEquipmentSlot(TArray<FStoredItem>{FStoredItem(), FStoredItem(), FStoredItem(), FStoredItem(), FStoredItem(), FStoredItem(), FStoredItem(), FStoredItem(), FStoredItem(), FStoredItem()}, 0, false)
+    }),
+    FEquipmentSlots(EItemType::Ring, TArray<FEquipmentSlot> {
+        FEquipmentSlot(TArray<FStoredItem>{FStoredItem()}, 0, false),
+        FEquipmentSlot(TArray<FStoredItem>{FStoredItem()}, 0, false),
+        FEquipmentSlot(TArray<FStoredItem>{FStoredItem()}, 0, false),
+        FEquipmentSlot(TArray<FStoredItem>{FStoredItem()}, 0, false)
+    }),
+    FEquipmentSlots(EItemType::MeleeWeapon, TArray<FEquipmentSlot> {
+        FEquipmentSlot(TArray<FStoredItem>{FStoredItem(), FStoredItem(), FStoredItem()}, 0, false)
+    }),
+    FEquipmentSlots(EItemType::RangeWeapon, TArray<FEquipmentSlot> {
+        FEquipmentSlot(TArray<FStoredItem>{FStoredItem(), FStoredItem(), FStoredItem()}, 0, false)
+    }),
+    FEquipmentSlots(EItemType::Necklace, TArray<FEquipmentSlot> {
+        FEquipmentSlot(TArray<FStoredItem>{FStoredItem()}, 0, false)
+    }),
+})
 {
 	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
 	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = false;
     PrimaryComponentTick.bStartWithTickEnabled = false;
-	
     
     DisplayedItems = { {EItemType::Ring, FDisplayedItems(TArray<ADisplayedItem*>{nullptr, nullptr, nullptr})} };
-
-    FStoredItem EmptyItem;
-
-    EquipmentSlots = 
-    { 
-        FEquipmentSlots(EItemType::Spell, TArray<FEquipmentSlot> { 
-            FEquipmentSlot(TArray<FStoredItem>{EmptyItem, EmptyItem, EmptyItem, EmptyItem, EmptyItem}, 0, false) 
-        }),
-        FEquipmentSlots(EItemType::Shield, TArray<FEquipmentSlot> {
-            FEquipmentSlot(TArray<FStoredItem>{EmptyItem}, 0, false)
-        }),
-        FEquipmentSlots(EItemType::Head, TArray<FEquipmentSlot> {
-            FEquipmentSlot(TArray<FStoredItem>{EmptyItem}, 0, false)
-        }),
-        FEquipmentSlots(EItemType::Top, TArray<FEquipmentSlot> {
-            FEquipmentSlot(TArray<FStoredItem>{EmptyItem}, 0, false)
-        }),
-        FEquipmentSlots(EItemType::Legs, TArray<FEquipmentSlot> {
-            FEquipmentSlot(TArray<FStoredItem>{EmptyItem}, 0, false)
-        }),
-        FEquipmentSlots(EItemType::Hands, TArray<FEquipmentSlot> {
-            FEquipmentSlot(TArray<FStoredItem>{EmptyItem}, 0, false)
-        }),
-        FEquipmentSlots(EItemType::Feet, TArray<FEquipmentSlot> {
-            FEquipmentSlot(TArray<FStoredItem>{EmptyItem}, 0, false)
-        }),
-        FEquipmentSlots(EItemType::Arrows, TArray<FEquipmentSlot> {
-            FEquipmentSlot(TArray<FStoredItem>{EmptyItem, EmptyItem}, 0, false)
-        }),
-        FEquipmentSlots(EItemType::Tool, TArray<FEquipmentSlot> {
-            FEquipmentSlot(TArray<FStoredItem>{EmptyItem, EmptyItem, EmptyItem, EmptyItem, EmptyItem, EmptyItem, EmptyItem, EmptyItem, EmptyItem, EmptyItem}, 0, false)
-        }),
-        FEquipmentSlots(EItemType::Ring, TArray<FEquipmentSlot> {
-            FEquipmentSlot(TArray<FStoredItem>{EmptyItem}, 0, false),
-            FEquipmentSlot(TArray<FStoredItem>{EmptyItem}, 0, false),
-            FEquipmentSlot(TArray<FStoredItem>{EmptyItem}, 0, false),
-            FEquipmentSlot(TArray<FStoredItem>{EmptyItem}, 0, false)
-        }),
-        FEquipmentSlots(EItemType::MeleeWeapon, TArray<FEquipmentSlot> {
-            FEquipmentSlot(TArray<FStoredItem>{EmptyItem, EmptyItem, EmptyItem}, 0, false)
-        }),
-        FEquipmentSlots(EItemType::RangeWeapon, TArray<FEquipmentSlot> {
-            FEquipmentSlot(TArray<FStoredItem>{EmptyItem, EmptyItem, EmptyItem}, 0, false)
-        }),
-        FEquipmentSlots(EItemType::Necklace, TArray<FEquipmentSlot> {
-            FEquipmentSlot(TArray<FStoredItem>{EmptyItem}, 0, false)
-        }),
-    };
 
     MainHandTypes = { EItemType::MeleeWeapon };
 
     SelectedMainHandType = EItemType::MeleeWeapon;
-
-    //SpawnDisplayedItemClass =
-    //    GameUtils::LoadAssetClass<ADisplayedItem>(TEXT("/Game/DynamicCombatSystem/Blueprints/BP_PickupActor"));
 }
 
 
@@ -91,8 +85,6 @@ void UEquipmentComponent::BeginPlay()
 
 void UEquipmentComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
-    Super::EndPlay(EndPlayReason);
-
     for (auto E : DisplayedItems)
     {
         const FDisplayedItems& Item = E.Value;
@@ -107,6 +99,23 @@ void UEquipmentComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
     }
 
     DisplayedItems.Empty();
+
+    if (Inventory->IsValidLowLevel())
+    {
+        Inventory->OnItemRemoved.RemoveDynamic(this, &UEquipmentComponent::OnItemModified);
+        Inventory->OnItemAdded.RemoveDynamic(this, &UEquipmentComponent::OnItemModified);
+    }
+
+    if (GetOwner() == UGameplayStatics::GetPlayerCharacter(GetWorld(), 0))
+    {
+        ADCSGameMode* GameMode = Cast<ADCSGameMode>(UGameplayStatics::GetGameMode(GetWorld()));
+        if (GameMode->IsValidLowLevel())
+        {
+            GameMode->OnGameLoaded.RemoveDynamic(this, &UEquipmentComponent::OnGameLoaded);
+        }
+    }
+
+    Super::EndPlay(EndPlayReason);
 }
 
 void UEquipmentComponent::Init()
@@ -124,11 +133,10 @@ void UEquipmentComponent::Init()
     BuildEquipment(EquipmentSlots);
 
     // if owner is a player, rebuild equipment on game load
-    if (UKismetMathLibrary::EqualEqual_ObjectObject(GetOwner(), UGameplayStatics::GetPlayerCharacter(GetWorld(), 0)))
+    if (GetOwner() == UGameplayStatics::GetPlayerCharacter(GetWorld(), 0))
     {
         ADCSGameMode* GameMode = Cast<ADCSGameMode>(UGameplayStatics::GetGameMode(GetWorld()));
-
-        if (GameMode != nullptr)
+        if (GameMode->IsValidLowLevel())
         {
             GameMode->OnGameLoaded.AddDynamic(this, &UEquipmentComponent::OnGameLoaded);
         }        
@@ -193,10 +201,7 @@ void UEquipmentComponent::UpdateDisplayedItem(EItemType Type, int SlotIndex)
                         GetWorld()->SpawnActor<ADisplayedItem>(
                             DisplayedItemClass, FTransform::Identity, SpawnParameters);
 
-                    SpawnedActor->SetEquipmentComponent(this);
-                    SpawnedActor->SetType(Type);
-                    SpawnedActor->SetSlotIndex(SlotIndex);
-
+                    SpawnedActor->Init(this, Type, SlotIndex);
                     ItemsValue->DisplayedItems[SlotIndex] = SpawnedActor;
                 }
             }
@@ -533,8 +538,11 @@ bool UEquipmentComponent::FindItem(FStoredItem Item, EItemType& OutType, int& Ou
     return false;
 }
 
-void UEquipmentComponent::BuildEquipment(const TArray<FEquipmentSlots>& Equipment)
+void UEquipmentComponent::BuildEquipment(const TArray<FEquipmentSlots>& InEquipment)
 {
+    TArray<FEquipmentSlots> Equipment(InEquipment);
+
+    // clear and rebuild displayed items array
     for (auto E : DisplayedItems)
     {
         const TArray<ADisplayedItem*>& DisplayedItemActors = E.Value.DisplayedItems;
@@ -551,15 +559,22 @@ void UEquipmentComponent::BuildEquipment(const TArray<FEquipmentSlots>& Equipmen
     DisplayedItems.Empty();
     
 
-    // unequip all items
+
     for (const FEquipmentSlots& Slots : Equipment)
     {
         FDisplayedItems Items;
         Items.DisplayedItems.Empty(Slots.Slots.Num());
 
+        for (int i = 0; i < Slots.Slots.Num(); ++i)
+        {
+            Items.DisplayedItems.Add(nullptr);
+        }
+
         DisplayedItems.Add(Slots.Type, Items);
     }
 
+
+    // unequip all items
     for (int i = 0; i < EquipmentSlots.Num(); ++i)
     {
         const FEquipmentSlots& Slots = EquipmentSlots[i];
@@ -641,14 +656,12 @@ void UEquipmentComponent::BuildEquipment(const TArray<FEquipmentSlots>& Equipmen
                             FoundItemIndex = Inventory->FindIndexByClass(Item.ItemClass);
                         }
 
-
                         if (FoundItemIndex >= 0)
                         {
-                            UpdateItemInSlot(Type, SlotIndex, ItemIndex, Item, EHandleSameItemMethod::Update);
+                            FStoredItem InventoryItem = Inventory->GetItemAtIndex(FoundItemIndex);
+                            UpdateItemInSlot(Type, SlotIndex, ItemIndex, InventoryItem, EHandleSameItemMethod::Update);
                         }
                     }
-
-
                 }
                 else
                 {
@@ -661,7 +674,7 @@ void UEquipmentComponent::BuildEquipment(const TArray<FEquipmentSlots>& Equipmen
         }
     }
 
-    
+    UpdateCombatType();
 
 }
 

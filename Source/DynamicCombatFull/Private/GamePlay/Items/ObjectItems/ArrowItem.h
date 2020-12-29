@@ -12,10 +12,11 @@
 #include "Engine/StaticMesh.h"
 #include "ArrowItem.generated.h"
 
+class AArrowProjectileBase;
 /**
  *
  */
-UCLASS()
+UCLASS(Blueprintable)
 class UArrowItem : public UItemBase, public IItemHasModifiers, public IItemIsDisplayed
 {
     GENERATED_BODY()
@@ -29,20 +30,19 @@ public:
     virtual TSubclassOf<ADisplayedItem> GetDisplayedItem() const override { return DisplayedItemClass; }
 
     UStaticMesh* GetArrowMesh() const { return ArrowMesh; }
-    TSubclassOf<AActor> GetProjectile() const { return Projectile; }
+    TSubclassOf<AArrowProjectileBase> GetProjectile() const { return Projectile; }
 private:
 
-    UPROPERTY(EditAnywhere)
+    UPROPERTY(EditAnywhere, Category = "Arrow")
     UStaticMesh* ArrowMesh;
 
-    // Blueprint'/Game/DynamicCombatSystem/Blueprints/Projectiles/BP_BasicArrowProjectile.BP_BasicArrowProjectile'
-    UPROPERTY(EditAnywhere)
-    TSubclassOf<AActor> Projectile;
+    UPROPERTY(EditAnywhere, Category = "Arrow")
+    TSubclassOf<AArrowProjectileBase> Projectile;
 
-    UPROPERTY(EditAnywhere)
+    UPROPERTY(EditAnywhere, Category = "Modifiers")
     TArray<FModifier> Modifiers;
 
-    UPROPERTY(EditAnywhere)
+    UPROPERTY(EditAnywhere, Category = "Display")
     TSubclassOf<ADisplayedItem> DisplayedItemClass;
 
 

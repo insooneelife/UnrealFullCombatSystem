@@ -68,10 +68,13 @@ public:
     UPROPERTY(EditAnywhere)
     FLinearColor Color;
 
+    UPROPERTY(EditAnywhere)
     float ElapsedTime;
 
+    UPROPERTY(EditAnywhere)
     FName AttachmentSocket;
 
+    UPROPERTY(EditAnywhere)
     float TimerInterval;
 
     FTimerHandle UpdateElapsedTimeTimerHandle;

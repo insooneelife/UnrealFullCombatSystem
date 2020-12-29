@@ -37,18 +37,15 @@ void UCategoryButtonUI::NativeConstruct()
     SlotButton->OnClicked.AddDynamic(this, &UCategoryButtonUI::OnClicked_SlotButton);
     SlotButton->OnHovered.AddDynamic(this, &UCategoryButtonUI::OnHovered_SlotButton);
     SlotButton->OnUnhovered.AddDynamic(this, &UCategoryButtonUI::OnUnhovered_SlotButton);
+}
 
-    TArray<UUserWidget*> FoundWidgets;
-    UWidgetBlueprintLibrary::GetAllWidgetsOfClass(GetWorld(), FoundWidgets, UInventoryUI::StaticClass());
+void UCategoryButtonUI::NativeDestruct()
+{
+    SlotButton->OnClicked.RemoveDynamic(this, &UCategoryButtonUI::OnClicked_SlotButton);
+    SlotButton->OnHovered.RemoveDynamic(this, &UCategoryButtonUI::OnHovered_SlotButton);
+    SlotButton->OnUnhovered.RemoveDynamic(this, &UCategoryButtonUI::OnUnhovered_SlotButton);
 
-    InventoryUI = Cast<UInventoryUI>(FoundWidgets[0]);
-    if (InventoryUI->IsValidLowLevel())
-    {
-        if (ItemType == InventoryUI->GetDisplayedType())
-        {
-            InventoryUI->SetCategoryButton(this);
-        }
-    }
+    Super::NativeDestruct();
 }
 
 void UCategoryButtonUI::OnClicked_SlotButton()
@@ -67,6 +64,19 @@ void UCategoryButtonUI::OnHovered_SlotButton()
 void UCategoryButtonUI::OnUnhovered_SlotButton()
 {
     CategoryImage->SetColorAndOpacity(FLinearColor::Gray);
+}
+
+// called after NativeConstruct
+void UCategoryButtonUI::Init(UInventoryUI* InInventoryUI)
+{
+    InventoryUI = InInventoryUI;
+    if (InventoryUI->IsValidLowLevel())
+    {
+        if (ItemType == InventoryUI->GetDisplayedType())
+        {
+            InventoryUI->SetCategoryButton(this);
+        }
+    }
 }
 
 void UCategoryButtonUI::SetActiveBorder(bool bVisible)

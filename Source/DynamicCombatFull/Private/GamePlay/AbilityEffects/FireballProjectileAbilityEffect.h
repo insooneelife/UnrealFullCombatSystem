@@ -66,36 +66,43 @@ private:
     UPROPERTY(EditAnywhere)
     float LifeTime;
 
-    UPROPERTY(EditAnywhere)
+    UPROPERTY()
     AActor* HomingTarget;
 
     UPROPERTY(EditAnywhere)
     bool bApplyStun;
 
+    UPROPERTY(EditAnywhere)
     float HeadShotDamageMultiplier;
+
+    UPROPERTY(EditAnywhere)
     float HomingInterpSpeed;
+
+    UPROPERTY(EditAnywhere)
     float StopHomingDistance;
+
+    UPROPERTY(EditAnywhere)
     float ImpulsePower;
 
-    UPROPERTY()
+    UPROPERTY(EditAnywhere)
     UParticleSystem* HitParticle;
 
     UPROPERTY()
     UParticleSystem* FireballHitParticle;
 
-    UPROPERTY()
+    UPROPERTY(EditAnywhere)
     USoundBase* HitSound;
 
-    UPROPERTY()
+    UPROPERTY(EditAnywhere)
     UStaticMeshComponent* CollisionSphere;
 
-    UPROPERTY()
+    UPROPERTY(EditAnywhere)
     UParticleSystemComponent* ParticleSystem;
 
-    UPROPERTY()
+    UPROPERTY(EditAnywhere)
     UCollisionHandlerComponent* CollisionHandler;
 
-    UPROPERTY()
+    UPROPERTY(EditAnywhere)
     UProjectileMovementComponent* ProjectileMovement;
 
     FTimerHandle UpdateHomingProjectileTimerHandle;

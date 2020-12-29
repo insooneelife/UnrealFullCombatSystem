@@ -55,6 +55,30 @@ void UInventoryUI::NativeConstruct()
 
     CloseButton->OnClicked.AddDynamic(this, &UInventoryUI::OnClicked_CloseButton);
     InventoryItemsGrid->OnInventoryItemClicked.AddDynamic(this, &UInventoryUI::OnInventoryItemClicked);
+
+    AllItemsCategoryButton->Init(this);
+    ArrowsCategoryButton->Init(this);
+    FeetCategoryButton->Init(this);
+    HandsCategoryButton->Init(this);
+    HeadCategoryButton->Init(this);
+    LegsCategoryButton->Init(this);
+    MaterialCategoryButton->Init(this);
+    MeleeWeaponCategoryButton->Init(this);
+    NecklaceCategoryButton->Init(this);
+    RangeWeaponCategoryButton->Init(this);
+    RingCategoryButton->Init(this);
+    ShieldCategoryButton->Init(this);
+    SpellCategoryButton->Init(this);
+    ToolCategoryButton->Init(this);
+    TopCategoryButton->Init(this);
+}
+
+void UInventoryUI::NativeDestruct()
+{
+    CloseButton->OnClicked.RemoveDynamic(this, &UInventoryUI::OnClicked_CloseButton);
+    InventoryItemsGrid->OnInventoryItemClicked.RemoveDynamic(this, &UInventoryUI::OnInventoryItemClicked);
+
+    Super::NativeDestruct();
 }
 
 FReply UInventoryUI::NativeOnKeyDown(const FGeometry& InGeometry, const FKeyEvent& InKeyEvent)
@@ -94,7 +118,7 @@ void UInventoryUI::OnInventoryItemClicked(UInventoryItemUI* InItem)
     UItemActionsUI* CreatedUI = Cast<UItemActionsUI>(CreateWidget(GetOwningPlayer(), ItemActionsUIClass));
     CreatedUI->Init(InventoryComponent, SpawnPosition, InItem->GetItem());
 
-    CreatedUI->OnWidgetRemoved.AddDynamic(this, &UInventoryUI::FocusSelf);
+    CreatedUI->OnWidgetRemoved.AddDynamic(this, &UInventoryUI::OnWidgetRemoved);
     CreatedUI->AddToViewport();
 }
 

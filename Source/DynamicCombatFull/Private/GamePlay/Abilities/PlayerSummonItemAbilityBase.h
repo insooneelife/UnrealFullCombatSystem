@@ -31,22 +31,23 @@ public:
 
 private:
 
-    UPROPERTY(EditAnywhere)
+    UPROPERTY()
     TSubclassOf<ASummonedItemAbilityEffect> SpawnSummonedItemAbilityEffectClass;
 
-    UPROPERTY(EditAnywhere)
+    UPROPERTY(EditAnywhere, Category = "Ability\|Custom")
     TArray<TSubclassOf<UItemBase>> SummonedItemClasses;
 
-    UPROPERTY(EditAnywhere)
+    UPROPERTY(EditAnywhere, Category = "Ability\|Custom")
     float Duration;
 
-    UPROPERTY(EditAnywhere)
+    UPROPERTY(EditAnywhere, Category = "Ability\|Custom")
     bool bAutoSwap;
 
-    UPROPERTY()
+    UPROPERTY(EditAnywhere, Category = "Ability\|Custom")
         UParticleSystem* SummonCastParticle;
 
-    UPROPERTY()
+
+    UPROPERTY(EditAnywhere, Category = "Ability\|Custom")
         USoundBase* Sound;
 
 

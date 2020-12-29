@@ -9,16 +9,20 @@
 
 ASpellDisplayedItem::ASpellDisplayedItem()
 {
+    ParticleSystemComponent = CreateDefaultSubobject<UParticleSystemComponent>("ParticleSystem");
+    
     static UParticleSystem* LoadedObject =
         GameUtils::LoadAssetObject<UParticleSystem>(TEXT("/Game/DynamicCombatSystem/VFX/P_ArcaneHand"));
 
-    HandParticle = LoadedObject;
+    ParticleSystemComponent->SetTemplate(LoadedObject);
+
+    HandAttachmentSocket = FName("magic_right_hand");
+    AttachmentSocket = FName("magic_right_hand");
 }
 
 void ASpellDisplayedItem::OnConstruction(const FTransform& Transform)
 {
     Super::OnConstruction(Transform);
-    ParticleSystemComponent->SetTemplate(HandParticle);
 }
 
 

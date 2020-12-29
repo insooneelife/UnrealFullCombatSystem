@@ -7,7 +7,7 @@
 #include "AIAbilityBase.generated.h"
 
 class AAICharacter;
-
+class UAbilityComponent;
 /**
  * 
  */
@@ -20,6 +20,7 @@ protected:
     virtual void BeginPlay() override;
 
 public:
+    virtual void Init(UAbilityComponent* InAbilityComponent) override;
 
     FVector GetTargetLoc() const;
     AActor* GetTarget() const;

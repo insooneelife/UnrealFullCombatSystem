@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GamePlay/Items/DisplayedItems/DisplayedItem.h"
+#include "HandDisplayedItem.h"
 #include "SpellDisplayedItem.generated.h"
 
 class UParticleSystem;
@@ -12,7 +13,7 @@ class UParticleSystemComponent;
  * 
  */
 UCLASS()
-class ASpellDisplayedItem : public ADisplayedItem
+class ASpellDisplayedItem : public AHandDisplayedItem
 {
 	GENERATED_BODY()
 	
@@ -29,7 +30,4 @@ private:
 
     UPROPERTY(EditAnywhere)
     UParticleSystemComponent* ParticleSystemComponent;
-
-    UPROPERTY()
-    UParticleSystem* HandParticle;
 };

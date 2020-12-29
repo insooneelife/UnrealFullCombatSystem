@@ -1,14 +1,16 @@
 // Fill out your copyright notice in the Description page of Project Settings.
-
-
 #include "NecklaceItem.h"
+#include "GameCore/GameUtils.h"
 
 UNecklaceItem::UNecklaceItem(const FObjectInitializer& ObjectInitializer)
 {
+    static UTexture2D* LoadTexture =
+        GameUtils::LoadAssetObject<UTexture2D>("/Game/DynamicCombatSystem/Widgets/Textures/T_Necklace");
+
     Item = FItem(
         FName(TEXT("None")),
         FText::FromString(TEXT("Item description")),
-        EItemType::Necklace, false, true, false, nullptr);
+        EItemType::Necklace, false, true, false, LoadTexture);
 
 
     Modifiers =

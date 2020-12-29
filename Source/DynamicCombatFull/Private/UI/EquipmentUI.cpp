@@ -26,8 +26,11 @@ void UEquipmentUI::NativeConstruct()
     Super::NativeConstruct();
 
     bIsFocusable = true;
-    GetOwningPlayerPawn()->GetComponentByClass(UInventoryComponent::StaticClass());
-    GetOwningPlayerPawn()->GetComponentByClass(UEquipmentComponent::StaticClass());
+    InventoryComponent = Cast<UInventoryComponent>(
+        GetOwningPlayerPawn()->GetComponentByClass(UInventoryComponent::StaticClass()));
+
+    EquipmentComponent = Cast<UEquipmentComponent>(
+        GetOwningPlayerPawn()->GetComponentByClass(UEquipmentComponent::StaticClass()));
 
     InventoryItemsGrid->OnInventoryItemClicked.AddDynamic(this, &UEquipmentUI::OnInventoryItemClicked);
     CloseButton->OnClicked.AddDynamic(this, &UEquipmentUI::OnClicked_CloseButton);
@@ -41,6 +44,14 @@ void UEquipmentUI::NativeConstruct()
 
     FText BackDisplayName = UKismetInputLibrary::Key_GetDisplayName(BackKey);
     InputHelpers->AddInputHelper(BackDisplayName, FText::FromString("Back"));
+}
+
+void UEquipmentUI::NativeDestruct()
+{
+    InventoryItemsGrid->OnInventoryItemClicked.RemoveDynamic(this, &UEquipmentUI::OnInventoryItemClicked);
+    CloseButton->OnClicked.RemoveDynamic(this, &UEquipmentUI::OnClicked_CloseButton);
+
+    Super::NativeDestruct();
 }
 
 FReply UEquipmentUI::NativeOnKeyDown(const FGeometry& InGeometry, const FKeyEvent& InKeyEvent)

@@ -78,16 +78,25 @@ public:
 
 protected:
     // effects events
+    UFUNCTION(BlueprintCallable)
     void OnEffectApplied(EEffectType InType);
+
+    UFUNCTION(BlueprintCallable)
     void OnEffectRemoved(EEffectType InType);
 
 
     // weapon collision events
+    UFUNCTION(BlueprintCallable)
     void OnHit(const FHitResult& Hit);
+
+    UFUNCTION(BlueprintCallable)
     void OnCollisionActivated(ECollisionPart CollisionPart);
 
     // input buffer events
+    UFUNCTION(BlueprintCallable)
     void OnInputBufferConsumed(EInputBufferKey InKey);
+
+    UFUNCTION(BlueprintCallable)
     void OnInputBufferClose();
 
     // zoom events
@@ -100,8 +109,12 @@ protected:
         TEnumAsByte<ETimelineDirection::Type>& OutDirection,
         float& OutAlpha);
 
+    UFUNCTION(BlueprintCallable)
     void OnActionPressed_Zoom();
+
+    UFUNCTION(BlueprintCallable)
     void OnActionReleased_Zoom();
+
 
     // block events
     void UpdateBlocking();
@@ -113,66 +126,138 @@ protected:
         TEnumAsByte<ETimelineDirection::Type>& OutDirection,
         float& OutAlpha);
 
-
+    UFUNCTION(BlueprintCallable)
     void OnActionPressed_Block();
+
+    UFUNCTION(BlueprintCallable)
     void OnActionReleased_Block();
 
     // melee attacks events
+    UFUNCTION(BlueprintCallable)
     void OnActionPressed_Parry();
+
+    UFUNCTION(BlueprintCallable)
     void OnActionPressed_SpecialAttack();
+
+    UFUNCTION(BlueprintCallable)
     void OnActionPressed_ThrustAttack();
+
+    UFUNCTION(BlueprintCallable)
     void OnActionPressed_HeavyAttack();
+
+    UFUNCTION(BlueprintCallable)
     void OnActionPressed_Attack();
 
+
     // targeting system events
+    UFUNCTION(BlueprintCallable)
     void OnActionPressed_ToggleTargeting();
+
+    UFUNCTION(BlueprintCallable)
     void OnActionPressed_TargetLeft();
+
+    UFUNCTION(BlueprintCallable)
     void OnActionPressed_TargetRight();
+
+    UFUNCTION(BlueprintCallable)
     void OnTargetingToggled(bool bInEnabled);
 
+
     // equipment events
+    UFUNCTION(BlueprintCallable)
     void OnActiveItemChanged(FStoredItem OldItem, FStoredItem NewItem, EItemType Type, int SlotIndex, int ActiveIndex);
+    
+    UFUNCTION(BlueprintCallable)
     void OnCombatTypeChanged(ECombatType CombatType);
+
+    UFUNCTION(BlueprintCallable)
     void OnMainHandTypeChanged(EItemType InType);
+
+    UFUNCTION(BlueprintCallable)
     void OnInCombatChanged(bool bIsInCombat);
 
+
+    UFUNCTION(BlueprintCallable)
     void OnActionPressed_SwitchMainHandTypeUp();
+
+    UFUNCTION(BlueprintCallable)
     void OnActionPressed_SwitchMainHandTypeDown();
+
+    UFUNCTION(BlueprintCallable)
     void OnActionPressed_SwitchMainHandItemUp();
+
+    UFUNCTION(BlueprintCallable)
     void OnActionPressed_SwitchMainHandItemDown();
+
+    UFUNCTION(BlueprintCallable)
     void OnActionPressed_SwitchArrowsItem();
+
+    UFUNCTION(BlueprintCallable)
     void OnActionPressed_SwitchToolItem();
+
+    UFUNCTION(BlueprintCallable)
     void OnActionPressed_UseToolItem();
+
 
     void PlayMainHandTypeChangedMontage(EItemType InType);
 
     // movement && camera
+    UFUNCTION(BlueprintCallable)
     void OnAxis_MoveForward(float AxisValue);
+
+    UFUNCTION(BlueprintCallable)
     void OnAxis_MoveRight(float AxisValue);
+
+    UFUNCTION(BlueprintCallable)
     void OnAxis_HorizontalLook(float AxisValue);
+
+    UFUNCTION(BlueprintCallable)
     void OnAxis_VerticalLook(float AxisValue);
 
+
+    UFUNCTION(BlueprintCallable)
     void OnActionPressed_ToggleMovement();
+
+    UFUNCTION(BlueprintCallable)
     void OnActionPressed_Sprint();
+
+    UFUNCTION(BlueprintCallable)
     void OnActionReleased_Sprint();
 
+
+    UFUNCTION(BlueprintCallable)
     void OnMovementStateStart(EMovementState InState);
+
+    UFUNCTION(BlueprintCallable)
     void OnMovementStateEnd(EMovementState InState);
 
+
+    UFUNCTION(BlueprintCallable)
     void OnActionPressed_Roll();
+
+    UFUNCTION(BlueprintCallable)
     void OnActionPressed_Jump();
+
+    UFUNCTION(BlueprintCallable)
     void OnActionReleased_Jump();
 
+
     // state machine events
+    UFUNCTION(BlueprintCallable)
     void OnStateChanged(EState PrevState, EState NewState);
 
     // interaction events
+    UFUNCTION(BlueprintCallable)
     void OnActionPressed_Interact();
+
+    UFUNCTION(BlueprintCallable)
     void CheckForInteractable();
 
 
     // activities events
+    UFUNCTION(BlueprintCallable)
     void OnActivityChanged(EActivity Activity, bool bValue);
+
     void StartLookingForward();
     void StopLookingForward();
 
@@ -184,25 +269,42 @@ protected:
     void StopZooming();
 
     // toggle ui events
+    UFUNCTION(BlueprintCallable)
     void OnActionPressed_Inventory();
+
+    UFUNCTION(BlueprintCallable)
     void OnActionPressed_Equipment();
 
+
     // stats events
+    UFUNCTION(BlueprintCallable)
     void OnValueChanged_ExtendedHealth(float NewValue, float MaxValue);
+
+    UFUNCTION(BlueprintCallable)
     void OnValueChanged_ExtendedStamina(float NewValue, float MaxValue);
 
+
     // rotating events
+    UFUNCTION(BlueprintCallable)
     void OnRotatingEnd();
 
     // toggle combat events
+    UFUNCTION(BlueprintCallable)
     void OnActionPressed_ToggleCombat();
 
     // slow motion events
+    UFUNCTION(BlueprintCallable)
     void OnActionPressed_SlowMotion();
+
+    UFUNCTION(BlueprintCallable)
     void OnActionReleased_SlowMotion();
 
+
     // archery events
+    UFUNCTION(BlueprintCallable)
     void OnActionPressed_BowAttack();
+
+    UFUNCTION(BlueprintCallable)
     void OnActionReleased_BowAttack();
 
     void PlayBowDrawSound();
@@ -213,14 +315,27 @@ protected:
     void StopBowDrawSound();
 
     // ability events
+    UFUNCTION(BlueprintCallable)
     void OnKeyPressed_1();
+
+    UFUNCTION(BlueprintCallable)
     void OnKeyPressed_2();
+
+    UFUNCTION(BlueprintCallable)
     void OnKeyPressed_3();
+
+    UFUNCTION(BlueprintCallable)
     void OnKeyPressed_4();
+
+    UFUNCTION(BlueprintCallable)
     void OnKeyPressed_5();
 
+    UFUNCTION(BlueprintCallable)
     void OnManaConsumed(float Amount);
+
+    UFUNCTION(BlueprintCallable)
     void OnValueChanged_ExtendedMana(float NewValue, float MaxValue);
+
 
     void AbilityPressed();
     void AbilityReleased();
@@ -228,29 +343,51 @@ protected:
     void UpdateAbilityCrosshair();
     void UpdateAbilityPressed();
 
+    UFUNCTION(BlueprintCallable)
     void OnAbilityStarted();
+
+    UFUNCTION(BlueprintCallable)
     void OnAbilityEnded(EAbilityEndResult Result);
 
     void UpdateAbilityAttackKey();
     void EnableAbilityMode();
     void DisableAbilityMode();
 
+    UFUNCTION(BlueprintCallable)
     void OnMousePressed_Thumb();
+
+    UFUNCTION(BlueprintCallable)
     void OnMouseReleased_Thumb();
 
+    UFUNCTION(BlueprintCallable)
     void OnAbilityChanged(AAbilityBase* NewAbility);
 
     void AbilityOnStateChanged(EState NewState);
     void AbilityOnMovementModeChanged(EMovementMode PrevMovementMode, EMovementMode NewMovementMode);
     void SetSpellActiveIndex();
+
+    UFUNCTION(BlueprintCallable)
     void OnActionPressed_AbilityAttack();
+
+    UFUNCTION(BlueprintCallable)
     void OnActionReleased_AbilityAttack();
 
+    UFUNCTION(BlueprintCallable)
     void OnKeyPressed_P();
+
+    UFUNCTION(BlueprintCallable)
     void OnKeyPressed_K();
+
+    UFUNCTION(BlueprintCallable)
     void OnKeyReleased_K();
+
+    UFUNCTION(BlueprintCallable)
     void OnKeyPressed_L();
+
+    UFUNCTION(BlueprintCallable)
     void OnKeyPressed_O();
+
+    UFUNCTION(BlueprintCallable)
     void CreateKeybindings();
 
 public:
@@ -383,14 +520,23 @@ private:
     EMeleeAttackType MeleeAttackType;
     float BlockAlpha;
 
+    //
     UPROPERTY()
     AActor* BackstabbedActor;
 
+    UPROPERTY(EditAnywhere, Category = "Combat")
     EDirection ReceivedHitDirection;
 
+    UPROPERTY(EditAnywhere, Category = "Combat")
     TArray<FName> LeftHandCollisionSockets;
+
+    UPROPERTY(EditAnywhere, Category = "Combat")
     TArray<FName> RightHandCollisionSockets;
+
+    UPROPERTY(EditAnywhere, Category = "Combat")
     TArray<FName> RightFootCollisionSockets;
+
+    UPROPERTY(EditAnywhere, Category = "Combat")
     TArray<FName> LeftFootCollisionSockets;
 
     UPROPERTY()
@@ -399,43 +545,43 @@ private:
     UPROPERTY()
     URotatingComponent* Rotating;
 
-    UPROPERTY()
+    UPROPERTY(EditAnywhere)
     UEquipmentComponent* Equipment;
 
-    UPROPERTY()
+    UPROPERTY(EditAnywhere)
     UInventoryComponent* Inventory;
 
-    UPROPERTY()
+    UPROPERTY(EditAnywhere)
     UDissolveComponent* Dissolve;
 
-    UPROPERTY()
+    UPROPERTY(EditAnywhere)
     UStatsManagerComponent* StatsManager;
 
-    UPROPERTY()
+    UPROPERTY(EditAnywhere)
     UMovementSpeedComponent* MovementSpeed;
 
-    UPROPERTY()
+    UPROPERTY(EditAnywhere)
     UEffectsComponent* Effects;
     
     UPROPERTY()
     USceneComponent* ArrowSpawnLocation;
     
-    UPROPERTY()
+    UPROPERTY(EditAnywhere)
     UDynamicTargetingComponent* DynamicTargeting;
     
     UPROPERTY()
     UMontageManagerComponent* MontageManager;
     
-    UPROPERTY()
+    UPROPERTY(EditAnywhere)
     UExtendedStatComponent* ExtendedStamina;
     
-    UPROPERTY()
+    UPROPERTY(EditAnywhere)
     UExtendedStatComponent* ExtendedHealth;
     
-    UPROPERTY()
+    UPROPERTY(EditAnywhere)
     UExtendedStatComponent* ExtendedMana;
     
-    UPROPERTY()
+    UPROPERTY(EditAnywhere)
     UCollisionHandlerComponent* MeleeCollisionHandler;
     
     UPROPERTY()
@@ -447,13 +593,22 @@ private:
     UPROPERTY()
     UStateManagerComponent* StateManager;
     
-    UPROPERTY()
+    UPROPERTY(EditAnywhere)
     UAbilityComponent* AbilityComponent;
 
+    UPROPERTY(EditAnywhere, Category = "Crosshair")
     bool IsCrosshairVisible;
+
+    UPROPERTY(EditAnywhere, Category = "AimAlpha")
     float AimAlpha;
+
+    UPROPERTY(EditAnywhere, Category = "SlowMotion")
     bool bIsInSlowMotion;
+
+    UPROPERTY(EditAnywhere, Category = "SlowMotion")
     float SlowMotionTimeDilation;
+
+    UPROPERTY(EditAnywhere, Category = "SlowMotion")
     float SlowMotionStaminaCost;
 
     UPROPERTY()
@@ -465,16 +620,31 @@ private:
     UPROPERTY()
     UKeybindingsUI* KeybindingsWidget;
 
+    UPROPERTY(EditAnywhere, Category = "Camera")
     bool bAutoZoom;
+
+    UPROPERTY(EditAnywhere, Category = "Camera")
     float TargetLagSpeed;
+
+    UPROPERTY(EditAnywhere, Category = "Camera")
     float ZoomAlpha;
+
+    UPROPERTY(EditAnywhere, Category = "Camera")
     float ZoomCameraArmLength;
+
+    UPROPERTY(EditAnywhere, Category = "Camera")
     float InitialCameraArmLength;
+
+    UPROPERTY(EditAnywhere, Category = "Camera")
     float InitialCameraLagSpeed;
 
+    UPROPERTY(EditAnywhere, Category = "Abilities")
     bool bIsAbilityInputPressed;
+
+    UPROPERTY(EditAnywhere, Category = "Abilities")
     bool bIsAbilityMainInputPressed;
 
+    UPROPERTY(EditAnywhere, Category = "Abilities")
     int SelectedSpellIndex;
 
     float HorizontalLookRate;
@@ -484,19 +654,15 @@ private:
     float RollStaminaCost;
     float SprintStaminaCost;
 
-    // WidgetBlueprint'/Game/DynamicCombatSystem/Widgets/InGameWB.InGameWB'
     UPROPERTY(EditAnywhere)
     TSubclassOf<UUserWidget> InGameUIClass;
 
-    // WidgetBlueprint'/Game/DynamicCombatSystem/Widgets/KeybindingsWB.KeybindingsWB'
     UPROPERTY(EditAnywhere)
         TSubclassOf<UKeybindingsUI> KeybindingsUIClass;
 
-    // Texture2D'/Game/DynamicCombatSystem/Widgets/Textures/T_AbilityCrosshair.T_AbilityCrosshair'
     UPROPERTY(EditAnywhere)
     UTexture2D* CrosshairTexture;
 
-    // Texture2D'/Game/DynamicCombatSystem/Widgets/Textures/T_Crosshair.T_Crosshair'
     UPROPERTY(EditAnywhere)
         UTexture2D* DefaultCrosshairTextureObject;
 

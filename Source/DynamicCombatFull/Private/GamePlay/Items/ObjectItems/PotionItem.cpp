@@ -3,16 +3,27 @@
 
 #include "PotionItem.h"
 #include "Components/ExtendedStatComponent.h"
+#include "GameCore/GameUtils.h"
+#include "GamePlay/Items/DisplayedItems/DisplayedItem.h"
 
 UPotionItem::UPotionItem(const FObjectInitializer& ObjectInitializer)
 {
     Type = EStat::Health;
     Value = 25.0f;
 
+    static UTexture2D* LoadTexture =
+        GameUtils::LoadAssetObject<UTexture2D>("/Game/DynamicCombatSystem/Widgets/Textures/T_Tool");
+
     Item = FItem(
         FName(TEXT("Base Potion")),
         FText::FromString(TEXT("Item description")),
-        EItemType::Tool, true, true, true, nullptr);
+        EItemType::Tool, true, true, true, LoadTexture);
+
+    UseMontage = GameUtils::LoadAssetObject<UAnimMontage>(
+        "/Game/DynamicCombatSystem/Montages/Player/Common/M_DrinkPotion");
+
+    DisplayedItemClass = GameUtils::LoadAssetClass<ADisplayedItem>(
+        "/Game/DynamicCombatSystem/Blueprints/Items/DisplayedItems/Instances/PotionDisplayedItemBP");
 }
 
 void UPotionItem::UseItem(AActor* Caller)

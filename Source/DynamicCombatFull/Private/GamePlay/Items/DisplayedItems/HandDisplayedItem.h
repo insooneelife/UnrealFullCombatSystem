@@ -14,14 +14,16 @@ UCLASS()
 class AHandDisplayedItem : public ADisplayedItem
 {
 	GENERATED_BODY()
-
+        
 protected:
     // Called when the game starts or when spawned
     virtual void BeginPlay() override;
+    virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 public:
-
     virtual void OnConstruction(const FTransform& Transform) override;
+
+    virtual void Init(UEquipmentComponent* InEquipmentComponent, EItemType InType, int InSlotIndex) override;
 
     virtual FName GetAttachmentSocket() const override;
 
@@ -29,6 +31,7 @@ public:
     void OnSlotHiddenChanged(EItemType InSlotType, int InSlotIndex, FStoredItem InActiveItem, bool bInIsHidden);
 
 
-private:
+protected:
+    UPROPERTY(EditAnywhere, Category = "Sockets")
     FName HandAttachmentSocket;
 };

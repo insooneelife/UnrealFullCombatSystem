@@ -13,7 +13,7 @@
 /**
  *
  */
-UCLASS()
+UCLASS(Blueprintable)
 class URingItem : public UItemBase, public IItemHasModifiers
 {
     GENERATED_BODY()
@@ -25,7 +25,7 @@ public:
 
 private:
 
-    UPROPERTY(EditAnywhere)
+    UPROPERTY(EditAnywhere, Category = "Modifiers")
     TArray<FModifier> Modifiers;
 };
 

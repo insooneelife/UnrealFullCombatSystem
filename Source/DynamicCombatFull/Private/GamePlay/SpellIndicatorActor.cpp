@@ -2,6 +2,7 @@
 
 
 #include "SpellIndicatorActor.h"
+#include "Components/SceneComponent.h"
 #include "Components/DecalComponent.h"
 #include "Materials/MaterialInterface.h"
 #include "GameCore/GameUtils.h"
@@ -13,11 +14,15 @@ ASpellIndicatorActor::ASpellIndicatorActor()
 	PrimaryActorTick.bCanEverTick = false;
     PrimaryActorTick.bStartWithTickEnabled = false;
 
+    Scene = CreateDefaultSubobject<USceneComponent>("Scene");
+    Decal = CreateDefaultSubobject<UDecalComponent>("Decal");
+    Decal->SetupAttachment(Scene);
+
     static UMaterialInterface* LoadedObject = 
         GameUtils::LoadAssetObject<UMaterialInterface>(
             TEXT("/Game/DynamicCombatSystem/VFX/Materials/MI_SpellIndicatror_01"));
 
-    DecalMaterial = LoadedObject;
+    SetMaterial(LoadedObject);
     Radius = 256.0f;
 }
 
@@ -31,7 +36,6 @@ void ASpellIndicatorActor::OnConstruction(const FTransform& Transform)
 {
     Super::OnConstruction(Transform);
     SetRadius(Radius);
-    SetMaterial(DecalMaterial);
 }
 
 void ASpellIndicatorActor::SetRadius(float NewRadius)

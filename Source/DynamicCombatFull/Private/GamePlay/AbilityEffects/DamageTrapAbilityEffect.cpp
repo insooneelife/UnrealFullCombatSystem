@@ -3,6 +3,7 @@
 
 #include "DamageTrapAbilityEffect.h"
 #include "Sound/SoundBase.h"
+#include "Components/SceneComponent.h"
 #include "Components/SphereComponent.h"
 #include "Components/DecalComponent.h"
 #include "Particles/ParticleSystem.h"
@@ -30,7 +31,10 @@ ADamageTrapAbilityEffect::ADamageTrapAbilityEffect()
     static USoundBase* LoadedSoundObject = 
         GameUtils::LoadAssetObject<USoundBase>(TEXT("/Game/DynamicCombatSystem/SFX/CUE/CUE_GroundExplosion"));
     ExplosionSound = LoadedSoundObject;
-    
+
+    RootComponent = CreateDefaultSubobject<USceneComponent>("Scene");
+    SphereComponent = CreateDefaultSubobject<USphereComponent>("Sphere");
+    DecalComponent = CreateDefaultSubobject<UDecalComponent>("Decal");
 }
 
 // Called when the game starts or when spawned

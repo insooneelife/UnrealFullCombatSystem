@@ -28,49 +28,67 @@ public:
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+    virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
-    UFUNCTION()
     void BeginPlayDelayed();
 
     UFUNCTION()
-    void OnHit(const FHitResult& Hit);
+    void OnHit(const FHitResult& InHit);
 
 public:	
     void Init(float InDamage, float InInitialSpeed);
+
+    UFUNCTION(BlueprintCallable)
     void ApplyHitImpulse(UPrimitiveComponent* InComponent, FVector InHitNormal, FName InBoneName);
     void UpdateArrowMesh();
-    void OnArrowHit(const FHitResult& InHit);
+
+    UFUNCTION(BlueprintCallable)
     bool IsEnemy(AActor* InTarget) const;
 
     UFUNCTION(BlueprintImplementableEvent, Category = "Blueprint")
     void SpawnImpaledArrow(USceneComponent* InComponent, FName InSocketName, AActor* InActor, FVector InLocation);
 
+    UFUNCTION(BlueprintCallable)
+    float GetDamage() const { return Damage; }
+
+    UFUNCTION(BlueprintCallable)
+        float GetHeadShotDamageMultiplier() const { return HeadShotDamageMultiplier; }
+
+    UFUNCTION(BlueprintCallable)
+        float GetInitialSpeed() const { return InitialSpeed; }
+
+    UFUNCTION(BlueprintCallable)
+        float GetLifeTime() const { return LifeTime; }
+
+    UFUNCTION(BlueprintCallable)
+        float GetImpulsePower() const { return ImpulsePower; }
+
 private:
-    UPROPERTY(EditAnywhere)
+    UPROPERTY(EditAnywhere, Category = "Projectile")
     float Damage;
 
+    UPROPERTY(EditAnywhere, Category = "Projectile")
     float HeadShotDamageMultiplier;
 
-    UPROPERTY(EditAnywhere)
+    UPROPERTY(EditAnywhere, Category = "Projectile")
     float InitialSpeed;
 
+    UPROPERTY(EditAnywhere, Category = "Projectile")
     float LifeTime;
+
+    UPROPERTY(EditAnywhere, Category = "Projectile")
     float ImpulsePower;
 
-    UPROPERTY()
+    UPROPERTY(EditAnywhere)
     UCollisionHandlerComponent* CollisionHandler;
 
-    UPROPERTY()
+    UPROPERTY(EditAnywhere)
     UParticleSystemComponent* ParticleSystem;
 
 public:
-    UPROPERTY(BlueprintReadOnly)
+    UPROPERTY(EditAnywhere, BlueprintReadOnly)
     UStaticMeshComponent* StaticMesh;
 
-    UPROPERTY(BlueprintReadOnly)
-    UProjectileMovementComponent* ProjectileMovement;
-
-    // Blueprint'/Game/DynamicCombatSystem/Blueprints/Projectiles/BP_ImpaledArrow.BP_ImpaledArrow'
     UPROPERTY(EditAnywhere, BlueprintReadOnly)
-    TSubclassOf<UArrowItem> SpawnImpaledArrowClass;
+    UProjectileMovementComponent* ProjectileMovement;
 };

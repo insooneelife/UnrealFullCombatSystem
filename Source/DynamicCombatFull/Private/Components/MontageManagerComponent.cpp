@@ -30,7 +30,7 @@ void UMontageManagerComponent::BeginPlay()
     if (MontageManagerInterface == nullptr)
     {
         FString Name = UGameplayStatics::GetObjectClass(GetOwner())->GetDisplayNameText().ToString();
-        UE_LOG(LogTemp, Warning, TEXT("Does not implement interface IMontageManager!  %s"), *Name);
+        UE_LOG(LogTemp, Error, TEXT("Does not implement interface IMontageManager!  %s"), *Name);
     }
 }
 

@@ -22,6 +22,7 @@ public:
 protected:
     virtual void NativePreConstruct() override;
     virtual void NativeConstruct() override;
+    virtual void NativeDestruct() override;
 
     UFUNCTION()
     void OnValueChanged(float InNewValue, float InMaxValue);

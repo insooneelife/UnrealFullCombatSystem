@@ -11,7 +11,7 @@
 /**
  * 
  */
-UCLASS()
+UCLASS(Blueprintable)
 class USpellWeaponItem 
     :
     public UWeaponItem,
@@ -28,10 +28,9 @@ public:
 
 private:
 
-    UPROPERTY(EditAnywhere)
+    UPROPERTY(EditAnywhere, Category = "Ability")
     TSubclassOf<AAbilityBase> AbilityClass;
 
-    // Blueprint'/Game/DynamicCombatSystem/Blueprints/Items/DisplayedItems/DI_SpellBP.DI_SpellBP'
-    UPROPERTY(EditAnywhere)
+    UPROPERTY(EditAnywhere, Category = "Display")
     TSubclassOf<ADisplayedItem> DisplayedItemClass;
 };

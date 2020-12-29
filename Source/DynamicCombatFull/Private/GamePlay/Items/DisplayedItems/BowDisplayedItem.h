@@ -5,23 +5,32 @@
 #include "CoreMinimal.h"
 #include "GamePlay/Items/DisplayedItems/DisplayedItem.h"
 #include "GameCore/CustomStructs.h"
+#include "HandDisplayedItem.h"
 #include "BowDisplayedItem.generated.h"
 
+class USceneComponent;
 class UStaticMeshComponent;
+class USkeletalMeshComponent;
 /**
  * 
  */
 UCLASS()
-class ABowDisplayedItem : public ADisplayedItem
+class ABowDisplayedItem : public AHandDisplayedItem
 {
 	GENERATED_BODY()
+
+public:
+    ABowDisplayedItem();
 
 protected:
     // Called when the game starts or when spawned
     virtual void BeginPlay() override;
+    virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 public:
     virtual void OnConstruction(const FTransform& Transform) override;
+
+    virtual void Init(UEquipmentComponent* InEquipmentComponent, EItemType InType, int InSlotIndex) override;
 
     virtual void SimulatePhysics() override;
 
@@ -38,14 +47,14 @@ public:
     void UpdateArrowMesh();
 
 private:
-    UPROPERTY()
+    UPROPERTY(EditAnywhere)
         UStaticMeshComponent* ArrowMesh;
 
-    UPROPERTY()
-        UStaticMeshComponent* BowMesh;
-
-
     UPROPERTY(EditAnywhere)
+        USkeletalMeshComponent* BowMesh;
+
+
+    UPROPERTY(EditAnywhere, Category = "Sockets")
     FName ArrowSocketName;
 
     UPROPERTY(EditAnywhere)

@@ -10,7 +10,7 @@
 /**
  * 
  */
-UCLASS()
+UCLASS(Blueprintable)
 class UWeaponItem : public UItemBase
 {
 	GENERATED_BODY()
@@ -19,6 +19,6 @@ public:
     EWeaponType GetWeaponType() const { return WeaponType; }
 
 protected:
-    UPROPERTY(EditAnywhere)
+    UPROPERTY(EditAnywhere, Category = "Weapon")
     EWeaponType WeaponType;
 };

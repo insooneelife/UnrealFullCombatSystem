@@ -23,8 +23,7 @@ class UAnimMontage;
 AAbilityBase::AAbilityBase()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = false;
-    PrimaryActorTick.bStartWithTickEnabled = false;
+	PrimaryActorTick.bCanEverTick = true;
 
     static UTexture2D* LoadedTextureObject = GameUtils::LoadAssetObject<UTexture2D>(
         TEXT("/Game/DynamicCombatSystem/Widgets/Textures/T_AbilityCrosshair"));
@@ -52,7 +51,11 @@ AAbilityBase::AAbilityBase()
 void AAbilityBase::BeginPlay()
 {
 	Super::BeginPlay();
+}
 
+void AAbilityBase::Init(UAbilityComponent* InAbilityComponent)
+{
+    AbilityComponent = InAbilityComponent;
     Character = AbilityComponent->GetCharacter();
 }
 
@@ -95,11 +98,6 @@ float AAbilityBase::PlayAbilityMontage(
     {
         return 0.0f;
     }    
-}
-
-FVector AAbilityBase::GetEffectLocation() const
-{
-    return EffectTransform.GetLocation();
 }
 
 float AAbilityBase::GetDamage() const

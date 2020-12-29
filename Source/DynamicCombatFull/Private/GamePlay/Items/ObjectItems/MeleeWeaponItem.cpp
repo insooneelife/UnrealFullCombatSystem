@@ -1,14 +1,16 @@
 // Fill out your copyright notice in the Description page of Project Settings.
-
-
 #include "MeleeWeaponItem.h"
+#include "GameCore/GameUtils.h"
 
 UMeleeWeaponItem::UMeleeWeaponItem(const FObjectInitializer& ObjectInitializer)
 {
+    static UTexture2D* LoadTexture =
+        GameUtils::LoadAssetObject<UTexture2D>("/Game/DynamicCombatSystem/Widgets/Textures/T_MeleeWeapon");
+
     Item = FItem(
         FName(TEXT("Base Melee Weapon")),
         FText::FromString(TEXT("Item description")),
-        EItemType::MeleeWeapon, false, true, false, nullptr);
+        EItemType::MeleeWeapon, false, true, false, LoadTexture);
 
     WeaponType = EWeaponType::Sword;
 

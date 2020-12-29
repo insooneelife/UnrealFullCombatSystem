@@ -28,7 +28,7 @@ void URotatingComponent::BeginPlay()
     if (RotatingInterface == nullptr)
     {
         FString Name = UGameplayStatics::GetObjectClass(GetOwner())->GetDisplayNameText().ToString();
-        UE_LOG(LogTemp, Warning, TEXT("Does not implement interface IRotatingInterface!  %s"), *Name);
+        UE_LOG(LogTemp, Error, TEXT("Does not implement interface IRotatingInterface!  %s"), *Name);
     }
 }
 
@@ -47,7 +47,7 @@ void URotatingComponent::TickComponent(
         if (TimeElapsed <= RotateTime)
         {
             IRotatingInterface* RotatingInterface = Cast<IRotatingInterface>(GetOwner());
-            if (RotatingInterface == nullptr)
+            if (RotatingInterface != nullptr)
             {
                 FRotator CurrentRot = GetOwner()->GetActorRotation();
                 FRotator TargetRot = RotatingInterface->GetDesiredRotation();

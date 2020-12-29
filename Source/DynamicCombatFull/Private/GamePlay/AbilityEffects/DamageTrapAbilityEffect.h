@@ -7,6 +7,7 @@
 #include "GamePlay/AbilityEffects/DamageAbilityEffectBase.h"
 #include "DamageTrapAbilityEffect.generated.h"
 
+class USceneComponent;
 class USoundBase;
 class USphereComponent;
 class UParticleSystem;
@@ -47,16 +48,19 @@ public:
 
 private:
 
-    UPROPERTY()
+    UPROPERTY(EditAnywhere)
+    USceneComponent* SceneComponent;
+
+    UPROPERTY(EditAnywhere)
     USphereComponent* SphereComponent;
     
-    UPROPERTY()
+    UPROPERTY(EditAnywhere)
     UDecalComponent* DecalComponent;
     
-    UPROPERTY()
+    UPROPERTY(EditAnywhere)
     UParticleSystem* HitParticle;
 
-    UPROPERTY()
+    UPROPERTY(EditAnywhere)
         USoundBase* ExplosionSound;
 
     UPROPERTY(EditAnywhere)
@@ -68,6 +72,7 @@ private:
     UPROPERTY(EditAnywhere)
     float ActivationDelay;
 
+    UPROPERTY(EditAnywhere)
     FLinearColor Color;
 
 };
