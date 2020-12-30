@@ -46,12 +46,15 @@ public:
 
     void UpdateDisplayedItem(EItemType Type, int SlotIndex);
 
+    UFUNCTION(BlueprintCallable)
     ADisplayedItem* GetDisplayedItem(EItemType Type, int SlotIndex) const;
 
     bool IsItemEquipped(FGuid ItemId) const;
 
+    UFUNCTION(BlueprintCallable)
     FStoredItem GetActiveItem(EItemType Type, int SlotIndex) const;
 
+    UFUNCTION(BlueprintCallable)
     bool IsSlotHidden(EItemType Type, int SlotIndex) const;
 
     void SetSlotHidden(EItemType Type, int SlotIndex, bool bIsHidden);
@@ -94,8 +97,10 @@ public:
 
     bool IsShieldEquipped() const;
 
+    UFUNCTION(BlueprintCallable)
     bool IsInCombat() const;
 
+    UFUNCTION(BlueprintCallable)
     void ToggleCombat();
 
     void SetCombat(bool bValue);

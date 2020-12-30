@@ -41,6 +41,7 @@ public:
 
     void UpdateEffect(EEffectType Type, float Duration, EApplyEffectMethod Method, AActor* Applier);
 
+    UFUNCTION(BlueprintCallable)
     bool IsEffectApplied(EEffectType Type) const;
 
     bool IsAnyEffectApplied(TArray<EEffectType> Types) const;
@@ -51,10 +52,13 @@ public:
 
     int GetEffectIndex(EEffectType Type) const;
 
+    UFUNCTION(BlueprintCallable)
     AActor* GetEffectApplier(EEffectType Type) const;
 
     static FString GetEEffectTypeAsString(EEffectType EnumValue);
 
+    UFUNCTION(BlueprintCallable)
+    float GetBackstabDamage() const { return BackstabDamage; }
 
 public:
     UPROPERTY(BlueprintAssignable)

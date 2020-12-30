@@ -282,11 +282,11 @@ void ABaseCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
     PlayerInputComponent->BindAction("BowAttack", IE_Pressed, this, &ABaseCharacter::OnActionPressed_BowAttack);
     PlayerInputComponent->BindAction("BowAttack", IE_Released, this, &ABaseCharacter::OnActionReleased_BowAttack);
 
-    PlayerInputComponent->BindKey(EKeys::NumPadOne, IE_Pressed, this, &ABaseCharacter::OnKeyPressed_1);
-    PlayerInputComponent->BindKey(EKeys::NumPadTwo, IE_Pressed, this, &ABaseCharacter::OnKeyPressed_2);
-    PlayerInputComponent->BindKey(EKeys::NumPadThree, IE_Pressed, this, &ABaseCharacter::OnKeyPressed_3);
-    PlayerInputComponent->BindKey(EKeys::NumPadFour, IE_Pressed, this, &ABaseCharacter::OnKeyPressed_4);
-    PlayerInputComponent->BindKey(EKeys::NumPadFive, IE_Pressed, this, &ABaseCharacter::OnKeyPressed_5);
+    PlayerInputComponent->BindKey(EKeys::One, IE_Pressed, this, &ABaseCharacter::OnKeyPressed_1);
+    PlayerInputComponent->BindKey(EKeys::Two, IE_Pressed, this, &ABaseCharacter::OnKeyPressed_2);
+    PlayerInputComponent->BindKey(EKeys::Three, IE_Pressed, this, &ABaseCharacter::OnKeyPressed_3);
+    PlayerInputComponent->BindKey(EKeys::Four, IE_Pressed, this, &ABaseCharacter::OnKeyPressed_4);
+    PlayerInputComponent->BindKey(EKeys::Five, IE_Pressed, this, &ABaseCharacter::OnKeyPressed_5);
 
     PlayerInputComponent->BindKey(EKeys::ThumbMouseButton, IE_Pressed, this, &ABaseCharacter::OnMousePressed_Thumb);
     PlayerInputComponent->BindKey(EKeys::ThumbMouseButton, IE_Released, this, &ABaseCharacter::OnMouseReleased_Thumb);
@@ -433,6 +433,7 @@ void ABaseCharacter::OnCollisionActivated(ECollisionPart CollisionPart)
 
 void ABaseCharacter::OnInputBufferConsumed(EInputBufferKey InKey)
 {
+    UE_LOG(LogTemp, Warning, TEXT("OnInputBufferConsumed !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"));
     if (IsCharacterAlive())
     {
         if (InKey == EInputBufferKey::LightAttack)
@@ -1656,10 +1657,12 @@ void ABaseCharacter::ToggleCombat()
 
         if (AnimMontage->IsValidLowLevel())
         {
-            PlayAnimMontage(AnimMontage);
+            UE_LOG(LogTemp, Error, TEXT("PlayAnimMontage  %s"), *AnimMontage->GetName());
+            PlayAnimMontage(AnimMontage, 1.0f, TEXT("UpperBody"));
         }
         else
         {
+            UE_LOG(LogTemp, Error, TEXT("AnimMontage is not valid!!"));
             Equipment->ToggleCombat();
             StateManager->ResetState(0.0f);
         }

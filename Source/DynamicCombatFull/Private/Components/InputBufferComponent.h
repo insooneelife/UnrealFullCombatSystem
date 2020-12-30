@@ -27,7 +27,11 @@ protected:
 public:	
     void ConsumeInputBuffer();
     void UpdateKey(EInputBufferKey Key);
+
+    UFUNCTION(BlueprintCallable)
     void OpenInputBuffer();
+
+    UFUNCTION(BlueprintCallable)
     void CloseInputBuffer();
     EInputBufferKey GetStoredKey() const { return StoredKey; }
 

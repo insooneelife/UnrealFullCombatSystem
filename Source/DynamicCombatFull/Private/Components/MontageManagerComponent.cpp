@@ -37,7 +37,7 @@ void UMontageManagerComponent::BeginPlay()
 
 UAnimMontage* UMontageManagerComponent::GetMontageForAction(EMontageAction Action, int Index)
 {
-    FMontageAction OutMontageAction;
+    FMontageActionRow OutMontageAction;
     LastRequestedAction = Action;
 
     if (GetMontage(Action, OutMontageAction))
@@ -52,7 +52,7 @@ UAnimMontage* UMontageManagerComponent::GetMontageForAction(EMontageAction Actio
 
 int UMontageManagerComponent::GetMontageActionLastIndex(EMontageAction Action) const
 {
-    FMontageAction OutMontageAction;
+    FMontageActionRow OutMontageAction;
     if (GetMontage(Action, OutMontageAction))
     {
         if (OutMontageAction.Montages.Num() > 0)
@@ -74,21 +74,22 @@ EMontageAction UMontageManagerComponent::GetLastRequestedAction() const
     return LastRequestedAction;
 }
 
-bool UMontageManagerComponent::GetMontage(EMontageAction Action, FMontageAction& OutMontageData) const
+bool UMontageManagerComponent::GetMontage(EMontageAction Action, FMontageActionRow& OutMontageData) const
 {
     IMontageManagerInterface* MontageManagerInterface = Cast<IMontageManagerInterface>(GetOwner());
-
     FString EnumStr = GameUtils::GetEnumDisplayNameAsString("EMontageAction", Action);
-
-    FMontageAction* Item = MontageManagerInterface->GetMontages(Action)->FindRow<FMontageAction>(FName(EnumStr), "");
+    UDataTable* DataTable = MontageManagerInterface->GetMontages(Action);
+    FMontageActionRow* Item = DataTable->FindRow<FMontageActionRow>(FName(*EnumStr), FString(""));
 
     if (Item != nullptr)
     {
         OutMontageData = *Item;
+        UE_LOG(LogTemp, Error, TEXT("Found!!!!!!!!!!"));
         return true;
     }
     else
     {
+        UE_LOG(LogTemp, Error, TEXT("Not Found!!!!!!!!!!"));
         return false;
     }
 }

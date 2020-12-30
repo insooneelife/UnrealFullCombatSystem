@@ -39,6 +39,8 @@ public:
     void RemoveItemAtIndex(int Index, int InAmount);
 
     void DropItem(FStoredItem InItem);
+
+    UFUNCTION(BlueprintCallable)
     void UseItem(FGuid ItemId);
 
     FStoredItem GetItemAtIndex(int Index) const;

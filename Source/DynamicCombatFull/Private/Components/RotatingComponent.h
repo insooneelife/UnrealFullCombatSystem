@@ -28,8 +28,13 @@ public:
     // Called every frame
     virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
+    UFUNCTION(BlueprintCallable)
     void StartRotatingWithLimit(float InMaxPossibleRotation, float InMaxDegreesPerSecond);
+
+    UFUNCTION(BlueprintCallable)
     void StartRotatingWithTime(float InTime, float InMaxDegreesPerSecond);
+    
+    UFUNCTION(BlueprintCallable)
     void StopRotating();
     void Debug();
 

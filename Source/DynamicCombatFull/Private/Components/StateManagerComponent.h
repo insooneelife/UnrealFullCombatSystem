@@ -29,6 +29,7 @@ public:
 
     EState GetState() const;
 
+    UFUNCTION(BlueprintCallable)
     void SetActivity(EActivity Activity, bool Value);
 
     bool GetActivityValue(EActivity Activity);

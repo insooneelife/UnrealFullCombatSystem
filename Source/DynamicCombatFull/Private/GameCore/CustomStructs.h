@@ -10,6 +10,7 @@
 #include "Misc/Guid.h"
 #include "Animation/AnimMontage.h"
 #include "Engine/Texture2D.h"
+#include "Engine/DataTable.h"
 #include "CustomStructs.generated.h"
 
 class ADisplayedItem;
@@ -131,13 +132,13 @@ public:
         return *this;
     }
 
-    UPROPERTY(EditAnywhere)
+    UPROPERTY(EditAnywhere, BlueprintReadWrite)
         FGuid Id;
 
-    UPROPERTY(EditAnywhere)
+    UPROPERTY(EditAnywhere, BlueprintReadWrite)
         TSubclassOf<UItemBase> ItemClass;
 
-    UPROPERTY(EditAnywhere)
+    UPROPERTY(EditAnywhere, BlueprintReadWrite)
         int Amount;
 };
 
@@ -298,7 +299,7 @@ public:
 };
 
 USTRUCT(BlueprintType)
-struct FMontageAction
+struct FMontageActionRow : public FTableRowBase
 {
     GENERATED_BODY()
 

@@ -42,7 +42,10 @@ public:
     void OnActiveItemChanged(
         FStoredItem InOldItem, FStoredItem InNewItem, EItemType InType, int InSlotIndex, int InActiveIndex);
     
+    UFUNCTION(BlueprintCallable)
     void UpdateArrowAttachment(bool bAttachToOwner);
+
+    UFUNCTION(BlueprintCallable)
     void UpdateArrowVisibility(bool bVisible);
     void UpdateArrowMesh();
 

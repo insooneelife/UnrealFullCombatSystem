@@ -71,7 +71,7 @@ UEquipmentComponent::UEquipmentComponent()
     
     DisplayedItems = { {EItemType::Ring, FDisplayedItems(TArray<ADisplayedItem*>{nullptr, nullptr, nullptr})} };
 
-    MainHandTypes = { EItemType::MeleeWeapon };
+    MainHandTypes = { EItemType::MeleeWeapon, EItemType::Spell, EItemType::RangeWeapon };
 
     SelectedMainHandType = EItemType::MeleeWeapon;
 }
@@ -136,7 +136,7 @@ void UEquipmentComponent::Init()
     if (GetOwner() == UGameplayStatics::GetPlayerCharacter(GetWorld(), 0))
     {
         ADCSGameMode* GameMode = Cast<ADCSGameMode>(UGameplayStatics::GetGameMode(GetWorld()));
-        if (GameMode->IsValidLowLevel())
+        if (GameMode != nullptr)
         {
             GameMode->OnGameLoaded.AddDynamic(this, &UEquipmentComponent::OnGameLoaded);
         }        
@@ -444,6 +444,7 @@ void UEquipmentComponent::SwitchMainHandType(bool bForward)
     if (SelectedIndex >= 0)
     {
         int NextIndex = GetNextArrayIndex(MainHandTypes, SelectedIndex, bForward);
+
         SetMainHandType(MainHandTypes[NextIndex]);
     }
 }

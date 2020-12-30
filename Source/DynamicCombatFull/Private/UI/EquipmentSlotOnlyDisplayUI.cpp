@@ -48,9 +48,6 @@ void UEquipmentSlotOnlyDisplayUI::NativeConstruct()
         EquipmentComponent->OnActiveItemChanged.AddDynamic(this, &UEquipmentSlotOnlyDisplayUI::OnActiveItemChanged);
     }
 
-    UE_LOG(LogTemp, Error, TEXT("UEquipmentSlotOnlyDisplayUI  EquipmentComponent  %s"),
-        *EquipmentComponent->GetName());
-
     UpdateWidget(EquipmentComponent->GetItemInSlot(ItemType, SlotIndex, ItemIndex));
     SetActiveWidget(EquipmentComponent->IsActiveItemIndex(ItemType, SlotIndex, ItemIndex));
 }

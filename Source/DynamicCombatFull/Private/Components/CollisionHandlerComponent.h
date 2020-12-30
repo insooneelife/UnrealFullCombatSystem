@@ -36,8 +36,10 @@ public:
 
     void SetCollisionMesh(UPrimitiveComponent* WeaponMesh, const TArray<FName>& Sockets);
 
+    UFUNCTION(BlueprintCallable)
     void DeactivateCollision();
 
+    UFUNCTION(BlueprintCallable)
     void ActivateCollision(ECollisionPart CollisionPart);
 
     void UpdateLastSocketPositions();

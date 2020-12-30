@@ -50,6 +50,7 @@ public:
 
     void AbilityReleased();
 
+    UFUNCTION(BlueprintCallable)
     void AbilityEffect();
 
     void ConsumeMana(float Amount);
@@ -90,6 +91,8 @@ public:
     UFUNCTION(BlueprintCallable)
     bool IsUsingAbility() const;
     float GetManaCost() const;
+
+    UFUNCTION(BlueprintCallable)
     bool CanAbilityBeCancelled() const;
     bool IsAbilityValid() const;
     UTexture2D* GetAbilityCrosshair() const;

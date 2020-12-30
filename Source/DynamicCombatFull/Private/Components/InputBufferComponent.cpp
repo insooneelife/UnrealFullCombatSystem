@@ -28,7 +28,7 @@ void UInputBufferComponent::ConsumeInputBuffer()
 void UInputBufferComponent::UpdateKey(EInputBufferKey Key)
 {
     StoredKey = Key;
-    if (bIsOpen)
+    if (!bIsOpen)
     {
         ConsumeInputBuffer();
     }

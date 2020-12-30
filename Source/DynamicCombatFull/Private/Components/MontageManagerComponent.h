@@ -30,7 +30,7 @@ public:
     int GetRandomMontageIndex(EMontageAction Action) const;
     EMontageAction GetLastRequestedAction() const;
     
-    bool GetMontage(EMontageAction Action, FMontageAction& OutMontageData) const;
+    bool GetMontage(EMontageAction Action, FMontageActionRow& OutMontageData) const;
 
 private:
     EMontageAction LastRequestedAction;
