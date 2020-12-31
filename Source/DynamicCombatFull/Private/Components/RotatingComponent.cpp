@@ -108,7 +108,7 @@ void URotatingComponent::SetRotationMode(ERotationMode InMode)
 {
     ACharacter* Character = Cast<ACharacter>(GetOwner());
 
-    if (Character != nullptr)
+    if (Character->IsValidLowLevel())
     {
         if (InMode == ERotationMode::FaceCamera)
         {

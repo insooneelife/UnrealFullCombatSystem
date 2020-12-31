@@ -623,25 +623,19 @@ void ABaseCharacter::OnActionPressed_HeavyAttack()
 
 void ABaseCharacter::OnActionPressed_Attack()
 {
-    UE_LOG(LogTemp, Error, TEXT("OnActionPressed_Attack !!!!!!!!!!!!!!!!!!!!"));
     if (Equipment->IsInCombat())
     {
-        UE_LOG(LogTemp, Error, TEXT("OnActionPressed_Attack 1111111111111111 !!!!!!!!!!!!!!!!!!!!"));
         if (IsCombatTypePure(ECombatType::Melee))
         {
-            UE_LOG(LogTemp, Error, TEXT("OnActionPressed_Attack 22222222222222 !!!!!!!!!!!!!!!!!!!!"));
             if (!AttemptBackstab())
             {
-                UE_LOG(LogTemp, Error, TEXT("OnActionPressed_Attack 33333333333333 !!!!!!!!!!!!!!!!!!!!"));
                 InputBuffer->UpdateKey(EInputBufferKey::LightAttack);
             }
         }
         else
         {
-            UE_LOG(LogTemp, Error, TEXT("OnActionPressed_Attack 444444444444444444 !!!!!!!!!!!!!!!!!!!!"));
             if (IsCombatTypePure(ECombatType::Unarmed))
             {
-                UE_LOG(LogTemp, Error, TEXT("OnActionPressed_Attack 555555555555555 !!!!!!!!!!!!!!!!!!!!"));
                 InputBuffer->UpdateKey(EInputBufferKey::LightAttack);
             }
         }
@@ -766,25 +760,25 @@ void ABaseCharacter::PlayMainHandTypeChangedMontage(EItemType InType)
 
 void ABaseCharacter::OnAxis_MoveForward(float AxisValue)
 {
-    FVector ForwardVector;
-    FVector RightVector;
-    GetMovementVectors(ForwardVector, RightVector);
+    FVector OutForwardVector;
+    FVector OutRightVector;
+    GetMovementVectors(OutForwardVector, OutRightVector);
 
     if (IsCharacterAlive())
     {
-        AddMovementInput(ForwardVector, AxisValue, false);
+        AddMovementInput(OutForwardVector, AxisValue, false);
     }
 }
 
 void ABaseCharacter::OnAxis_MoveRight(float AxisValue)
 {
-    FVector ForwardVector;
-    FVector RightVector;
-    GetMovementVectors(ForwardVector, RightVector);
+    FVector OutForwardVector;
+    FVector OutRightVector;
+    GetMovementVectors(OutForwardVector, OutRightVector);
 
     if (IsCharacterAlive())
     {
-        AddMovementInput(RightVector, AxisValue, false);
+        AddMovementInput(OutRightVector, AxisValue, false);
     }
 }
 
@@ -1587,24 +1581,17 @@ void ABaseCharacter::ApplyHitImpulseToCharacter(AActor* HitActor, FVector HitNor
 
 void ABaseCharacter::MeleeAttack(EMeleeAttackType InType)
 {
-    UE_LOG(LogTemp, Error, TEXT("MeleeAttack !!!!!!!!!!!!!!!!!!!"));
     if (CanMeleeAttack())
     {
         MeleeAttackType = GetCharacterMovement()->IsFalling() ? EMeleeAttackType::Falling : InType;
-
         StateManager->SetState(EState::Attacking);
         GetWorld()->GetTimerManager().ClearTimer(ResetMeleeAttackCounterTimerHandle);
 
         UAnimMontage* AnimMontage = GetMeleeAttackMontage(MeleeAttackType);
-
         FString EnumStr = GameUtils::GetEnumValueAsString("EMeleeAttackType", MeleeAttackType);
-
-        UE_LOG(LogTemp, Error, TEXT("Get AnimMontage   %s"), *EnumStr);
 
         if (AnimMontage->IsValidLowLevel())
         {
-            UE_LOG(LogTemp, Error, TEXT("PlayAnimMontage !!!!!!!!!!!!!!!!!!!"));
-
             float Value = StatsManager->GetStatValue(EStat::AttackSpeed, true);
             float Duration = PlayAnimMontage(AnimMontage, Value);
             float Time = Duration * 0.8f;
@@ -1671,7 +1658,6 @@ void ABaseCharacter::ToggleCombat()
 
         if (AnimMontage->IsValidLowLevel())
         {
-            UE_LOG(LogTemp, Error, TEXT("ToggleCombat  %s"), *AnimMontage->GetFName().ToString());
             PlayAnimMontage(AnimMontage);
         }
         else
@@ -2020,6 +2006,52 @@ void ABaseCharacter::UpdateRotationSettings()
 
         DynamicTargeting->SetFreeCamera(true);
         Rotating->SetRotationMode(ERotationMode::FaceCamera);
+    }
+    else
+    {
+        VerticalLookRate = 45.0f;
+        HorizontalLookRate = 45.0f;
+
+        SetCameraLagSmoothly(InitialCameraLagSpeed);
+
+        if (DynamicTargeting->IsTargetingEnabled())
+        {
+            if (Equipment->IsInCombat())
+            {
+                // set free camera and rotation mode (only if not in roll) based on combat type
+                bool bFreeCamera;
+                if (Equipment->GetCombatType() == ECombatType::Range ||
+                    Equipment->GetCombatType() == ECombatType::Magic)
+                {
+                    bFreeCamera = true;
+                }
+                else
+                {
+                    bFreeCamera = false;
+                }
+
+                DynamicTargeting->SetFreeCamera(bFreeCamera);
+
+                ERotationMode Mode = ERotationMode::FaceCamera;
+                if (Equipment->GetCombatType() == ECombatType::Range || 
+                    Equipment->GetCombatType() == ECombatType::Magic)
+                {
+                    Mode = ERotationMode::OrientToMovement;
+                }
+                Rotating->SetRotationMode(Mode);
+            }
+            else
+            {
+                // free camera and update rotation mode only if state is not equal roll 
+                // (because roll should use OrientToMovement)
+                DynamicTargeting->SetFreeCamera(false);
+                Rotating->SetRotationMode(ERotationMode::FaceCamera);
+            }
+        }
+        else
+        {
+            Rotating->SetRotationMode(ERotationMode::OrientToMovement);
+        }
     }
 }
 
@@ -2641,7 +2673,7 @@ void ABaseCharacter::SetData()
 {
     GetCharacterMovement()->JumpZVelocity = 600.0f;
     GetCharacterMovement()->AirControl = 0.2f;
-    GetCharacterMovement()->RotationRate = UKismetMathLibrary::Conv_VectorToRotator(FVector(0.0f, 0.0f, 540.0f));
+    GetCharacterMovement()->RotationRate = FRotator(0.0f, 0.0f, 540.0f);
     GetCharacterMovement()->bOrientRotationToMovement = true;
     GetCharacterMovement()->NavAgentProps.AgentRadius = 42.0f;
     GetCharacterMovement()->NavAgentProps.AgentHeight = 192.0f;
