@@ -120,6 +120,7 @@ struct FStoredItem
 
 public:
     FStoredItem() : Amount(0) { }
+    FStoredItem(TSubclassOf<UItemBase> ItemClass) : ItemClass(ItemClass), Amount(0) {}
     FStoredItem(const FGuid& Id, TSubclassOf<UItemBase> ItemClass, int Amount)
         :Id(Id), ItemClass(ItemClass), Amount(Amount) {}
 

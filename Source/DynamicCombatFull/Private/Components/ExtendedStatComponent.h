@@ -48,6 +48,8 @@ public:
     void RegenTick();
 
     void ClearRegenTimer();
+
+    UFUNCTION(BlueprintCallable)
     void ChangeRegenPercent(int Percent);
 
     void ModifyStat(float Value, bool bInterruptRegeneration);
@@ -59,9 +61,13 @@ public:
 
 public:
     EStat GetStatType() const { return StatType; }
+    void SetStatType(EStat InStatType) { StatType = InStatType; }
+
+    void SetDoesRegenerates(bool bInDoesRegenerates) { bDoesRegenerates = bInDoesRegenerates; }
+    void SetRegenValue(float InRegenValue) { RegenValue = InRegenValue; }
+    void SetReenableRegenTime(float InReenableRegenTime) { ReenableRegenTime = InReenableRegenTime; }
 
     float GetCurrentValue() const { return CurrentValue; }
-
     float GetMaxValue() const { return TopValue + ModifierValue; }
 
 public:

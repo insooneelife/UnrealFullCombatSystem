@@ -94,7 +94,7 @@ public:
     void SetMainHandType(EItemType Type);
 
 public:
-
+    UFUNCTION(BlueprintCallable)
     bool IsShieldEquipped() const;
 
     UFUNCTION(BlueprintCallable)
@@ -115,6 +115,7 @@ public:
 
     bool AreArrowsEquipped() const;
 
+    UFUNCTION(BlueprintCallable)
     bool IsTwoHandedWeaponEquipped() const;
 
     EWeaponType GetWeaponType() const;
@@ -122,6 +123,7 @@ public:
     bool IsWeaponEquipped() const;
 
     const TArray<FEquipmentSlots>& GetEquipmentSlots() const;
+    void SetEquipmentSlots(const TArray<FEquipmentSlots>& InEquipmentSlots) { EquipmentSlots = InEquipmentSlots ;}
 
 private:
     EItemType GetItemType(FStoredItem Item) const;

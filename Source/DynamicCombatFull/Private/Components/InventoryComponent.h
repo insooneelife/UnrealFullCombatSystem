@@ -62,6 +62,7 @@ public:
 
 public:
     const TArray<FStoredItem>& GetInventory() const { return Inventory; }
+    void SetInventory(const TArray<FStoredItem>& InInventory) { Inventory = InInventory; }
 
 private:
 

@@ -787,7 +787,6 @@ void UEquipmentComponent::SetCombat(bool bValue)
     {
         bIsInCombat = bValue;
         AttachDisplayedItem(SelectedMainHandType, 0);
-
         AttachDisplayedItem(EItemType::Shield, 0);
 
         OnInCombatChanged.Broadcast(bIsInCombat);
@@ -839,6 +838,16 @@ void UEquipmentComponent::UpdateCombatType()
     {
         CombatType = ECombatType::Unarmed;
         WeaponType = EWeaponType::None;
+    }
+
+    if (CombatType != PreviousCombatType)
+    {
+        OnCombatTypeChanged.Broadcast(CombatType);
+    }
+
+    if (WeaponType != PreviousWeaponType)
+    {
+        OnWeaponTypeChanged.Broadcast(WeaponType);
     }
 }
 

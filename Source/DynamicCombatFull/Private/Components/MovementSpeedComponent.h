@@ -40,6 +40,15 @@ public:
     void ToggleState();
     float GetMaxPossibleSpeed() const;
 
+    UFUNCTION(BlueprintCallable)
+    float GetWalkSpeed() const { return WalkSpeed; }
+
+    UFUNCTION(BlueprintCallable)
+    float GetJogSpeed() const { return JogSpeed; }
+
+    UFUNCTION(BlueprintCallable)
+    float GetSprintSpeed() const { return SprintSpeed; }
+
 public:
 
     UPROPERTY(BlueprintAssignable)

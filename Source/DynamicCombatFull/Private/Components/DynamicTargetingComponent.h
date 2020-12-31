@@ -69,6 +69,11 @@ public:
 public:
     AActor* GetSelectedActor() const { return SelectedActor; }
 
+    void SetBlockingCollisionTypes(const TArray<TEnumAsByte<EObjectTypeQuery>>& InBlockingCollisionTypes) 
+    {
+        BlockingCollisionTypes = InBlockingCollisionTypes;
+    }
+
 private:
     UPROPERTY()
     UArrowComponent* ArrowComponent;

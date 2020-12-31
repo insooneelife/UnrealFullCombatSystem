@@ -119,10 +119,7 @@ protected:
 
     // return true if completed
     UFUNCTION(BlueprintImplementableEvent, Category = "Blueprint")
-    bool UpdateBlockingTimeline(
-        bool bInCondition,
-        TEnumAsByte<ETimelineDirection::Type>& OutDirection,
-        float& OutAlpha);
+    void UpdateBlockingTimeline(bool bInCondition);
 
     UFUNCTION(BlueprintCallable)
     void OnActionPressed_Block();
@@ -451,6 +448,7 @@ public:
     void UpdateCameraLag();
     void SetSprint(bool bActivate);
 
+    UFUNCTION(BlueprintCallable)
     void CalculateLeanAmount(float& OutLeanAmount, float& OutInterpSpeed);
     void SprintLoop();
 
@@ -470,6 +468,7 @@ public:
     virtual UDataTable* GetMontages(EMontageAction InAction) const override;
 
     // IIsArcher
+    UFUNCTION(BlueprintCallable)
     virtual float GetAimAlpha() const override;
     virtual bool DoesHoldBowString() const override;
     virtual FName GetBowStringSocketName() const override;
@@ -517,9 +516,31 @@ public:
     UFUNCTION(BlueprintCallable)
     float GetZoomCameraArmLength() const { return ZoomCameraArmLength; }
 
+    UFUNCTION(BlueprintCallable)
+    UMovementSpeedComponent* GetMovementSpeedComp() const { return MovementSpeed; }
+
+    UFUNCTION(BlueprintCallable)
+    UExtendedStatComponent* GetExtendedStaminaComp() const { return ExtendedStamina; }
+
+    UFUNCTION(BlueprintCallable)
+    bool IsInSlowMotion() const { return bIsInSlowMotion; }
+
+    UFUNCTION(BlueprintCallable)
+    float GetBlockAlpha() const { return BlockAlpha; }
+
+    UFUNCTION(BlueprintCallable)
+    void SetBlockAlpha(float InBlockAlpha) { BlockAlpha = InBlockAlpha; }
+
+    UFUNCTION(BlueprintCallable)
+    EItemType GetSelectedMainHandType() const;
+
+    UFUNCTION(BlueprintCallable)
+    EState GetState() const;
+
 private:
     void SetTimerRetriggerable(FTimerHandle& TimerHandle, TBaseDelegate<void> ObjectDelegate, float Time, bool bLoop);
 
+    void SetData();
 
 private:
 
@@ -533,7 +554,6 @@ private:
     EMeleeAttackType MeleeAttackType;
     float BlockAlpha;
 
-    //
     UPROPERTY()
     AActor* BackstabbedActor;
 
@@ -699,7 +719,7 @@ private:
 
 
     UPROPERTY(EditAnywhere)
-        UDataTable* PlayerMeleeMontages;
+        UDataTable* PlayerOneHandMeleeMontages;
 
     UPROPERTY(EditAnywhere)
         UDataTable* PlayerArcherMontages;

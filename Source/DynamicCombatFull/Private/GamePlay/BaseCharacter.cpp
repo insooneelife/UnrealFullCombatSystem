@@ -48,8 +48,6 @@
 // Sets default values
 ABaseCharacter::ABaseCharacter()
 {
-    UE_LOG(LogTemp, Error, TEXT("ABaseCharacter Ctor!!!!!!!!!!!!!!!!!!!!!!!"));
-
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
@@ -95,17 +93,30 @@ ABaseCharacter::ABaseCharacter()
 
     InGameUIClass = GameUtils::LoadAssetClass<UUserWidget>("/Game/DynamicCombatSystem/Widgets/InGameWB");
 
-    KeybindingsUIClass = GameUtils::LoadAssetClass<UKeybindingsUI>(
-        "/Game/DynamicCombatSystem/Widgets/KeybindingsWB");
+    KeybindingsUIClass = GameUtils::LoadAssetClass<UKeybindingsUI>("/Game/DynamicCombatSystem/Widgets/KeybindingsWB");
 
-    CrosshairTexture = GameUtils::LoadAssetObject<UTexture2D>(
-        "/Game/DynamicCombatSystem/Widgets/Textures/T_AbilityCrosshair");
+    CrosshairTexture = 
+        GameUtils::LoadAssetObject<UTexture2D>("/Game/DynamicCombatSystem/Widgets/Textures/T_AbilityCrosshair");
 
-    DefaultCrosshairTextureObject = GameUtils::LoadAssetObject<UTexture2D>(
-        "/Game/DynamicCombatSystem/Widgets/Textures/T_Crosshair");
+    DefaultCrosshairTextureObject = 
+        GameUtils::LoadAssetObject<UTexture2D>("/Game/DynamicCombatSystem/Widgets/Textures/T_Crosshair");
 
-    UE_LOG(LogTemp, Error, TEXT("ABaseCharacter 2222222222222222 Ctor!!!!!!!!!!!!!!!!!!!!!!!"));
+    PlayerOneHandMeleeMontages =
+        GameUtils::LoadAssetObject<UDataTable>("/Game/DynamicCombatSystem/DataTables/PlayerOneHandMeleeMontages");
 
+    PlayerArcherMontages =
+        GameUtils::LoadAssetObject<UDataTable>("/Game/DynamicCombatSystem/DataTables/PlayerArcherMontages");
+
+    PlayerCommonMontages =
+        GameUtils::LoadAssetObject<UDataTable>("/Game/DynamicCombatSystem/DataTables/PlayerCommonMontages");
+
+    PlayerMagicMontages =
+        GameUtils::LoadAssetObject<UDataTable>("/Game/DynamicCombatSystem/DataTables/PlayerMagicMontages");
+
+    PlayerUnarmedMontages =
+        GameUtils::LoadAssetObject<UDataTable>("/Game/DynamicCombatSystem/DataTables/PlayerUnarmedMontages");
+
+    
     StateManager = CreateDefaultSubobject<UStateManagerComponent>("StateManager");
     InputBuffer = CreateDefaultSubobject<UInputBufferComponent>("InputBuffer");
     MeleeCollisionHandler = CreateDefaultSubobject<UCollisionHandlerComponent>("MeleeCollisionHandler");
@@ -116,21 +127,21 @@ ABaseCharacter::ABaseCharacter()
     Effects = CreateDefaultSubobject<UEffectsComponent>("Effects");
     MovementSpeed = CreateDefaultSubobject<UMovementSpeedComponent>("MovementSpeed");
     StatsManager = CreateDefaultSubobject<UStatsManagerComponent>("StatsManager");
+    
     Dissolve = CreateDefaultSubobject<UDissolveComponent>("Dissolve");
     Inventory = CreateDefaultSubobject<UInventoryComponent>("Inventory");
+    
     Equipment = CreateDefaultSubobject<UEquipmentComponent>("Equipment");
     Rotating = CreateDefaultSubobject<URotatingComponent>("Rotating");
     AbilityComponent = CreateDefaultSubobject<UAbilityComponent>("AbilityComponent");
     ExtendedMana = CreateDefaultSubobject<UExtendedStatComponent>("ExtendedMana");
-
-    UE_LOG(LogTemp, Error, TEXT("ABaseCharacter 33333333333333333333 Ctor!!!!!!!!!!!!!!!!!!!!!!!"));
+    
+    SetData();
 }
 
 // Called when the game starts or when spawned
 void ABaseCharacter::BeginPlay()
 {
-    UE_LOG(LogTemp, Error, TEXT("BeginPlay OnConstruction!!!!!!!!!!!!!!!!!!!!!!!"));
-
 	Super::BeginPlay();
 
     
@@ -181,7 +192,6 @@ void ABaseCharacter::BeginPlay()
     AbilityComponent->OnAbilityEnded.AddDynamic(this, &ABaseCharacter::OnAbilityEnded);
     AbilityComponent->OnAbilityChanged.AddDynamic(this, &ABaseCharacter::OnAbilityChanged);
     ExtendedMana->OnValueChanged.AddDynamic(this, &ABaseCharacter::OnValueChanged_ExtendedMana);
-
 }
 
 void ABaseCharacter::EndPlay(const EEndPlayReason::Type EndPlayResult)
@@ -191,8 +201,6 @@ void ABaseCharacter::EndPlay(const EEndPlayReason::Type EndPlayResult)
 
 void ABaseCharacter::OnConstruction(const FTransform& Transform)
 {
-    UE_LOG(LogTemp, Error, TEXT("ABaseCharacter OnConstruction!!!!!!!!!!!!!!!!!!!!!!!"));
-
     UArrowComponent* ArrowComp = Cast<UArrowComponent>(GetComponentByClass(UArrowComponent::StaticClass()));
     TargetingArrow = ArrowComp;
 
@@ -531,7 +539,7 @@ void ABaseCharacter::OnInputBufferConsumed(EInputBufferKey InKey)
 
 void ABaseCharacter::OnInputBufferClose()
 {
-    if (IsStateEqualPure(EState::Disabled))
+    if (!IsStateEqualPure(EState::Disabled))
     {
         StateManager->ResetState(0.0f);
     }
@@ -568,25 +576,7 @@ void ABaseCharacter::UpdateBlocking()
         Equipment->CanBlock() &&
         IsEnoughStamina(5.0f);
 
-    TEnumAsByte<ETimelineDirection::Type> OutDirection;
-    float OutAlpha;
-    bool bCompleted = UpdateBlockingTimeline(bCondition, OutDirection, OutAlpha);
-
-    if (!bCompleted)
-    {
-        BlockAlpha = OutAlpha;
-    }
-    else
-    {
-        if (OutDirection == ETimelineDirection::Type::Forward)
-        {
-            ExtendedStamina->ChangeRegenPercent(25.0f);
-        }
-        else
-        {
-            ExtendedStamina->ChangeRegenPercent(100.0f);
-        }
-    }
+    UpdateBlockingTimeline(bCondition);
 }
 
 void ABaseCharacter::OnActionPressed_Block()
@@ -633,19 +623,25 @@ void ABaseCharacter::OnActionPressed_HeavyAttack()
 
 void ABaseCharacter::OnActionPressed_Attack()
 {
+    UE_LOG(LogTemp, Error, TEXT("OnActionPressed_Attack !!!!!!!!!!!!!!!!!!!!"));
     if (Equipment->IsInCombat())
     {
+        UE_LOG(LogTemp, Error, TEXT("OnActionPressed_Attack 1111111111111111 !!!!!!!!!!!!!!!!!!!!"));
         if (IsCombatTypePure(ECombatType::Melee))
         {
+            UE_LOG(LogTemp, Error, TEXT("OnActionPressed_Attack 22222222222222 !!!!!!!!!!!!!!!!!!!!"));
             if (!AttemptBackstab())
             {
+                UE_LOG(LogTemp, Error, TEXT("OnActionPressed_Attack 33333333333333 !!!!!!!!!!!!!!!!!!!!"));
                 InputBuffer->UpdateKey(EInputBufferKey::LightAttack);
             }
         }
         else
         {
+            UE_LOG(LogTemp, Error, TEXT("OnActionPressed_Attack 444444444444444444 !!!!!!!!!!!!!!!!!!!!"));
             if (IsCombatTypePure(ECombatType::Unarmed))
             {
+                UE_LOG(LogTemp, Error, TEXT("OnActionPressed_Attack 555555555555555 !!!!!!!!!!!!!!!!!!!!"));
                 InputBuffer->UpdateKey(EInputBufferKey::LightAttack);
             }
         }
@@ -1591,6 +1587,7 @@ void ABaseCharacter::ApplyHitImpulseToCharacter(AActor* HitActor, FVector HitNor
 
 void ABaseCharacter::MeleeAttack(EMeleeAttackType InType)
 {
+    UE_LOG(LogTemp, Error, TEXT("MeleeAttack !!!!!!!!!!!!!!!!!!!"));
     if (CanMeleeAttack())
     {
         MeleeAttackType = GetCharacterMovement()->IsFalling() ? EMeleeAttackType::Falling : InType;
@@ -1600,10 +1597,16 @@ void ABaseCharacter::MeleeAttack(EMeleeAttackType InType)
 
         UAnimMontage* AnimMontage = GetMeleeAttackMontage(MeleeAttackType);
 
+        FString EnumStr = GameUtils::GetEnumValueAsString("EMeleeAttackType", MeleeAttackType);
+
+        UE_LOG(LogTemp, Error, TEXT("Get AnimMontage   %s"), *EnumStr);
+
         if (AnimMontage->IsValidLowLevel())
         {
+            UE_LOG(LogTemp, Error, TEXT("PlayAnimMontage !!!!!!!!!!!!!!!!!!!"));
+
             float Value = StatsManager->GetStatValue(EStat::AttackSpeed, true);
-            float Duration =PlayAnimMontage(AnimMontage, Value);
+            float Duration = PlayAnimMontage(AnimMontage, Value);
             float Time = Duration * 0.8f;
 
             GetWorld()->GetTimerManager().SetTimer(
@@ -1668,6 +1671,7 @@ void ABaseCharacter::ToggleCombat()
 
         if (AnimMontage->IsValidLowLevel())
         {
+            UE_LOG(LogTemp, Error, TEXT("ToggleCombat  %s"), *AnimMontage->GetFName().ToString());
             PlayAnimMontage(AnimMontage);
         }
         else
@@ -2450,7 +2454,7 @@ UDataTable* ABaseCharacter::GetMontages(EMontageAction InAction) const
 
         if (Equipment->GetCombatType() == ECombatType::Melee)
         {
-            return PlayerMeleeMontages;
+            return PlayerOneHandMeleeMontages;
         }
         else if (Equipment->GetCombatType() == ECombatType::Range)
         {
@@ -2621,4 +2625,165 @@ void ABaseCharacter::SetTimerRetriggerable(
 {
     GetWorld()->GetTimerManager().ClearTimer(TimerHandle);
     GetWorld()->GetTimerManager().SetTimer(TimerHandle, ObjectDelegate, Time, bLoop);
+}
+
+EItemType ABaseCharacter::GetSelectedMainHandType() const 
+{ 
+    return Equipment->GetSelectedMainHandType(); 
+}
+
+EState ABaseCharacter::GetState() const
+{
+    return StateManager->GetState();
+}
+
+void ABaseCharacter::SetData()
+{
+    GetCharacterMovement()->JumpZVelocity = 600.0f;
+    GetCharacterMovement()->AirControl = 0.2f;
+    GetCharacterMovement()->RotationRate = UKismetMathLibrary::Conv_VectorToRotator(FVector(0.0f, 0.0f, 540.0f));
+    GetCharacterMovement()->bOrientRotationToMovement = true;
+    GetCharacterMovement()->NavAgentProps.AgentRadius = 42.0f;
+    GetCharacterMovement()->NavAgentProps.AgentHeight = 192.0f;
+
+    ExtendedHealth->SetStatType(EStat::Health);
+    ExtendedStamina->SetStatType(EStat::Stamina);
+    ExtendedStamina->SetDoesRegenerates(true);
+    ExtendedStamina->SetRegenValue(1.75f);
+    ExtendedStamina->SetReenableRegenTime(1.0f);
+
+    DynamicTargeting->SetBlockingCollisionTypes(
+        { UEngineTypes::ConvertToObjectType(ECollisionChannel::ECC_WorldStatic) }
+    );
+
+    FString ObjectItemDir("/Game/DynamicCombatSystem/Blueprints/Items/ObjectItems/Instances/");
+    auto SteelSwordBPClass = GameUtils::LoadAssetClass<UItemBase>(ObjectItemDir + FString("SteelSwordBP"));
+    auto SteelShieldBPClass = GameUtils::LoadAssetClass<UItemBase>(ObjectItemDir + FString("SteelShieldBP"));
+    auto HealthPotionBPClass = GameUtils::LoadAssetClass<UItemBase>(ObjectItemDir + FString("HealthPotionBP"));
+    auto GreatSwordBPClass = GameUtils::LoadAssetClass<UItemBase>(ObjectItemDir + FString("GreatSwordBP"));
+    auto ElvenBowBPClass = GameUtils::LoadAssetClass<UItemBase>(ObjectItemDir + FString("ElvenBowBP"));
+    auto ExplosiveArrowBPClass = GameUtils::LoadAssetClass<UItemBase>(ObjectItemDir + FString("ExplosiveArrowBP"));
+    auto ElvenArrowBPClass = GameUtils::LoadAssetClass<UItemBase>(ObjectItemDir + FString("ElvenArrowBP"));
+    auto SummonBowBPClass = GameUtils::LoadAssetClass<UItemBase>(ObjectItemDir + FString("SummonBowBP"));
+    auto SummonSwordBPClass = GameUtils::LoadAssetClass<UItemBase>(ObjectItemDir + FString("SummonSwordBP"));
+    auto DamageBuffBPClass = GameUtils::LoadAssetClass<UItemBase>(ObjectItemDir + FString("DamageBuffBP"));
+    auto HealthBuffBPClass = GameUtils::LoadAssetClass<UItemBase>(ObjectItemDir + FString("HealthBuffBP"));
+    auto DrainHealthBPClass = GameUtils::LoadAssetClass<UItemBase>(ObjectItemDir + FString("DrainHealthBP"));
+    auto FireballBPClass = GameUtils::LoadAssetClass<UItemBase>(ObjectItemDir + FString("FireballBP"));
+    auto HealingBPClass = GameUtils::LoadAssetClass<UItemBase>(ObjectItemDir + FString("HealingBP"));
+    auto InfernoBPClass = GameUtils::LoadAssetClass<UItemBase>(ObjectItemDir + FString("InfernoBP"));
+    auto InstantHealBPClass = GameUtils::LoadAssetClass<UItemBase>(ObjectItemDir + FString("InstantHealBP"));
+    auto LightingBeamBPClass = GameUtils::LoadAssetClass<UItemBase>(ObjectItemDir + FString("LightingBeamBP"));
+    auto VortexBPClass = GameUtils::LoadAssetClass<UItemBase>(ObjectItemDir + FString("VortexBP"));
+    auto TrapBPClass = GameUtils::LoadAssetClass<UItemBase>(ObjectItemDir + FString("TrapBP"));
+    auto TeleportBPClass = GameUtils::LoadAssetClass<UItemBase>(ObjectItemDir + FString("TeleportBP"));
+    auto MagicWandBPClass = GameUtils::LoadAssetClass<UItemBase>(ObjectItemDir + FString("MagicWandBP"));
+
+    Inventory->SetInventory(TArray<FStoredItem>{
+        FStoredItem(FGuid::NewGuid(), SteelSwordBPClass, 1),
+        FStoredItem(FGuid::NewGuid(), SteelShieldBPClass, 1),
+        FStoredItem(FGuid::NewGuid(), HealthPotionBPClass, 5),
+        FStoredItem(FGuid::NewGuid(), GreatSwordBPClass, 1),
+        FStoredItem(FGuid::NewGuid(), ElvenBowBPClass, 1),
+        FStoredItem(FGuid::NewGuid(), ExplosiveArrowBPClass, 10),
+        FStoredItem(FGuid::NewGuid(), ElvenArrowBPClass, 50),
+        FStoredItem(FGuid::NewGuid(), SummonBowBPClass, 1),
+        FStoredItem(FGuid::NewGuid(), SummonSwordBPClass, 1),
+        FStoredItem(FGuid::NewGuid(), DamageBuffBPClass, 1),
+        FStoredItem(FGuid::NewGuid(), HealthBuffBPClass, 1),
+        FStoredItem(FGuid::NewGuid(), DrainHealthBPClass, 1),
+        FStoredItem(FGuid::NewGuid(), FireballBPClass, 1),
+        FStoredItem(FGuid::NewGuid(), HealingBPClass, 1),
+        FStoredItem(FGuid::NewGuid(), InfernoBPClass, 1),
+        FStoredItem(FGuid::NewGuid(), InstantHealBPClass, 1),
+        FStoredItem(FGuid::NewGuid(), LightingBeamBPClass, 1),
+        FStoredItem(FGuid::NewGuid(), VortexBPClass, 1),
+        FStoredItem(FGuid::NewGuid(), TrapBPClass, 1),
+        FStoredItem(FGuid::NewGuid(), TeleportBPClass, 1),
+        FStoredItem(FGuid::NewGuid(), MagicWandBPClass, 1)
+    });
+
+    Equipment->SetEquipmentSlots({
+        FEquipmentSlots(EItemType::Spell, TArray<FEquipmentSlot> {
+            FEquipmentSlot(TArray<FStoredItem>{
+                FStoredItem(FireballBPClass), 
+                FStoredItem(InfernoBPClass), 
+                FStoredItem(VortexBPClass), 
+                FStoredItem(TeleportBPClass), 
+                FStoredItem(InstantHealBPClass)
+            }, 
+            0, false)
+        }),
+        FEquipmentSlots(EItemType::Shield, TArray<FEquipmentSlot> {
+            FEquipmentSlot(TArray<FStoredItem>{FStoredItem(SteelShieldBPClass)}, 0, false)
+        }),
+        FEquipmentSlots(EItemType::Head, TArray<FEquipmentSlot> {
+            FEquipmentSlot(TArray<FStoredItem>{FStoredItem()}, 0, false)
+        }),
+        FEquipmentSlots(EItemType::Top, TArray<FEquipmentSlot> {
+            FEquipmentSlot(TArray<FStoredItem>{FStoredItem()}, 0, false)
+        }),
+        FEquipmentSlots(EItemType::Legs, TArray<FEquipmentSlot> {
+            FEquipmentSlot(TArray<FStoredItem>{FStoredItem()}, 0, false)
+        }),
+        FEquipmentSlots(EItemType::Hands, TArray<FEquipmentSlot> {
+            FEquipmentSlot(TArray<FStoredItem>{FStoredItem()}, 0, false)
+        }),
+        FEquipmentSlots(EItemType::Feet, TArray<FEquipmentSlot> {
+            FEquipmentSlot(TArray<FStoredItem>{FStoredItem()}, 0, false)
+        }),
+        FEquipmentSlots(EItemType::Arrows, TArray<FEquipmentSlot> {
+            FEquipmentSlot(TArray<FStoredItem>{
+                FStoredItem(ElvenArrowBPClass), FStoredItem(ExplosiveArrowBPClass)
+            }, 
+            0, false)
+        }),
+        FEquipmentSlots(EItemType::Tool, TArray<FEquipmentSlot> {
+            FEquipmentSlot(TArray<FStoredItem>{
+                FStoredItem(HealthPotionBPClass), 
+                FStoredItem(), 
+                FStoredItem(), 
+                FStoredItem(), 
+                FStoredItem(), 
+                FStoredItem(), 
+                FStoredItem(), 
+                FStoredItem(), 
+                FStoredItem(), 
+                FStoredItem()
+            }, 
+            0, false)
+        }),
+        FEquipmentSlots(EItemType::Ring, TArray<FEquipmentSlot> {
+            FEquipmentSlot(TArray<FStoredItem>{FStoredItem()}, 0, false),
+            FEquipmentSlot(TArray<FStoredItem>{FStoredItem()}, 0, false),
+            FEquipmentSlot(TArray<FStoredItem>{FStoredItem()}, 0, false),
+            FEquipmentSlot(TArray<FStoredItem>{FStoredItem()}, 0, false)
+        }),
+        FEquipmentSlots(EItemType::MeleeWeapon, TArray<FEquipmentSlot> {
+            FEquipmentSlot(TArray<FStoredItem>{
+                FStoredItem(SteelSwordBPClass), 
+                FStoredItem(GreatSwordBPClass), 
+                FStoredItem()
+            }, 
+            0, false)
+        }),
+        FEquipmentSlots(EItemType::RangeWeapon, TArray<FEquipmentSlot> {
+            FEquipmentSlot(TArray<FStoredItem>{
+                FStoredItem(ElvenBowBPClass), 
+                FStoredItem(), 
+                FStoredItem()
+            }, 
+            0, false)
+        }),
+        FEquipmentSlots(EItemType::Necklace, TArray<FEquipmentSlot> {
+            FEquipmentSlot(TArray<FStoredItem>{FStoredItem()}, 0, false)
+        }),
+    });
+    
+
+    ExtendedMana->SetStatType(EStat::Mana);
+    ExtendedMana->SetDoesRegenerates(true);
+    ExtendedMana->SetRegenValue(1.75f);
+    ExtendedMana->SetReenableRegenTime(1.5f);
+
 }
