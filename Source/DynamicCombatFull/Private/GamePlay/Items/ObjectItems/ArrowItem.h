@@ -29,6 +29,7 @@ public:
     virtual const TArray<FModifier>& GetModifiers() const override { return Modifiers; }
     virtual TSubclassOf<ADisplayedItem> GetDisplayedItem() const override { return DisplayedItemClass; }
 
+    UFUNCTION(BlueprintCallable)
     UStaticMesh* GetArrowMesh() const { return ArrowMesh; }
     TSubclassOf<AArrowProjectileBase> GetProjectile() const { return Projectile; }
 private:

@@ -24,11 +24,16 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
+    virtual void Init_Impl(UEquipmentComponent* InEquipmentComponent, EItemType InType, int InSlotIndex);
+
 public:
     virtual void NotifyActorBeginOverlap(AActor* OtherActor) override { Super::NotifyActorBeginOverlap(OtherActor); }
     virtual void OnConstruction(const FTransform& Transform) override;
 
-    virtual void Init(UEquipmentComponent* InEquipmentComponent, EItemType InType, int InSlotIndex);
+    void Init(UEquipmentComponent* InEquipmentComponent, EItemType InType, int InSlotIndex);
+
+    UFUNCTION(BlueprintImplementableEvent, Category = "Blueprint", meta = (DisplayName = "Init", ScriptName = "Init"))
+    void K2_Init();
 
     virtual UPrimitiveComponent* GetPrimaryComponent() const;
 
@@ -39,6 +44,7 @@ public:
     virtual void SimulatePhysics();
 
 public:
+    UFUNCTION(BlueprintCallable)
     UEquipmentComponent* GetEquipmentComponent() const { return EquipmentComponent; }
     EItemType GetType() const { return Type; }
     int GetSlotIndex() const { return SlotIndex; }

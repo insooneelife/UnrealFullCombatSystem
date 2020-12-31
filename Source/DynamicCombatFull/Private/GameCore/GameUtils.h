@@ -55,17 +55,17 @@ public:
     }
 
     template<typename TEnum>
-    static FORCEINLINE FString GetEnumValueAsString(const FString& Name, TEnum Value)
+    static FORCEINLINE FString GetEnumValueAsString(const FString& EnumName, TEnum Value)
     {
-        const UEnum* enumPtr = FindObject<UEnum>(ANY_PACKAGE, *Name, true);
+        const UEnum* enumPtr = FindObject<UEnum>(ANY_PACKAGE, *EnumName, true);
         if (!enumPtr) return FString("Invalid");
         return enumPtr->GetNameByValue((int64)Value).ToString();
     }
 
     template<typename TEnum>
-    static FORCEINLINE FString GetEnumDisplayNameAsString(const FString& Name, TEnum Value)
+    static FORCEINLINE FString GetEnumDisplayNameAsString(const FString& EnumName, TEnum Value)
     {
-        const UEnum* enumPtr = FindObject<UEnum>(ANY_PACKAGE, *Name, true);
+        const UEnum* enumPtr = FindObject<UEnum>(ANY_PACKAGE, *EnumName, true);
         if (!enumPtr) return FString("Invalid");
         return enumPtr->GetDisplayNameTextByValue((int64)Value).ToString();
     }

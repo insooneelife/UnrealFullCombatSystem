@@ -48,6 +48,8 @@
 // Sets default values
 ABaseCharacter::ABaseCharacter()
 {
+    UE_LOG(LogTemp, Error, TEXT("ABaseCharacter Ctor!!!!!!!!!!!!!!!!!!!!!!!"));
+
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
@@ -102,6 +104,8 @@ ABaseCharacter::ABaseCharacter()
     DefaultCrosshairTextureObject = GameUtils::LoadAssetObject<UTexture2D>(
         "/Game/DynamicCombatSystem/Widgets/Textures/T_Crosshair");
 
+    UE_LOG(LogTemp, Error, TEXT("ABaseCharacter 2222222222222222 Ctor!!!!!!!!!!!!!!!!!!!!!!!"));
+
     StateManager = CreateDefaultSubobject<UStateManagerComponent>("StateManager");
     InputBuffer = CreateDefaultSubobject<UInputBufferComponent>("InputBuffer");
     MeleeCollisionHandler = CreateDefaultSubobject<UCollisionHandlerComponent>("MeleeCollisionHandler");
@@ -118,11 +122,15 @@ ABaseCharacter::ABaseCharacter()
     Rotating = CreateDefaultSubobject<URotatingComponent>("Rotating");
     AbilityComponent = CreateDefaultSubobject<UAbilityComponent>("AbilityComponent");
     ExtendedMana = CreateDefaultSubobject<UExtendedStatComponent>("ExtendedMana");
+
+    UE_LOG(LogTemp, Error, TEXT("ABaseCharacter 33333333333333333333 Ctor!!!!!!!!!!!!!!!!!!!!!!!"));
 }
 
 // Called when the game starts or when spawned
 void ABaseCharacter::BeginPlay()
 {
+    UE_LOG(LogTemp, Error, TEXT("BeginPlay OnConstruction!!!!!!!!!!!!!!!!!!!!!!!"));
+
 	Super::BeginPlay();
 
     
@@ -176,8 +184,15 @@ void ABaseCharacter::BeginPlay()
 
 }
 
+void ABaseCharacter::EndPlay(const EEndPlayReason::Type EndPlayResult)
+{
+    Super::EndPlay(EndPlayResult);
+}
+
 void ABaseCharacter::OnConstruction(const FTransform& Transform)
 {
+    UE_LOG(LogTemp, Error, TEXT("ABaseCharacter OnConstruction!!!!!!!!!!!!!!!!!!!!!!!"));
+
     UArrowComponent* ArrowComp = Cast<UArrowComponent>(GetComponentByClass(UArrowComponent::StaticClass()));
     TargetingArrow = ArrowComp;
 
@@ -433,7 +448,6 @@ void ABaseCharacter::OnCollisionActivated(ECollisionPart CollisionPart)
 
 void ABaseCharacter::OnInputBufferConsumed(EInputBufferKey InKey)
 {
-    UE_LOG(LogTemp, Warning, TEXT("OnInputBufferConsumed !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"));
     if (IsCharacterAlive())
     {
         if (InKey == EInputBufferKey::LightAttack)
@@ -532,16 +546,7 @@ void ABaseCharacter::UpdateZoom()
     bool Or3 = IsActivityPure(EActivity::IsZooming) && bAutoZoom;
     bool bCondition = Or1 && Or2 && Or3;
 
-    TEnumAsByte<ETimelineDirection::Type> OutDirection;
-    float OutAlpha;
-    bool bCompleted = UpdateZoomTimeline(bCondition, OutDirection, OutAlpha);
-
-    if (!bCompleted)
-    {
-        ZoomAlpha = OutAlpha;
-        CameraBoom->TargetArmLength = FMath::Lerp(InitialCameraArmLength, ZoomCameraArmLength, ZoomAlpha);
-    }
-
+    UpdateZoomTimeline(bCondition);
 }
 
 
@@ -851,8 +856,11 @@ void ABaseCharacter::OnActionReleased_Jump()
 void ABaseCharacter::OnStateChanged(EState PrevState, EState NewState)
 {
     UpdateBlocking();
+
     UpdateZoom();
+
     UpdateRotationSettings();
+
     AbilityOnStateChanged(NewState);
 
     if (PrevState == EState::Attacking)
@@ -1649,6 +1657,9 @@ void ABaseCharacter::CustomJump()
 
 void ABaseCharacter::ToggleCombat()
 {
+    EState CurrentState = StateManager->GetState();
+    FString EnumStr = GameUtils::GetEnumValueAsString(TEXT("EState"), CurrentState);
+
     if (IsStateEqualPure(EState::Idle))
     {
         StateManager->SetState(EState::Interacting);
@@ -1657,12 +1668,10 @@ void ABaseCharacter::ToggleCombat()
 
         if (AnimMontage->IsValidLowLevel())
         {
-            UE_LOG(LogTemp, Error, TEXT("PlayAnimMontage  %s"), *AnimMontage->GetName());
-            PlayAnimMontage(AnimMontage, 1.0f, TEXT("UpperBody"));
+            PlayAnimMontage(AnimMontage);
         }
         else
         {
-            UE_LOG(LogTemp, Error, TEXT("AnimMontage is not valid!!"));
             Equipment->ToggleCombat();
             StateManager->ResetState(0.0f);
         }

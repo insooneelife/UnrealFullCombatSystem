@@ -25,6 +25,13 @@ void ADisplayedItem::BeginPlay()
 	Super::BeginPlay();
 }
 
+void ADisplayedItem::Init_Impl(UEquipmentComponent* InEquipmentComponent, EItemType InType, int InSlotIndex)
+{
+    EquipmentComponent = InEquipmentComponent;
+    Type = InType;
+    SlotIndex = InSlotIndex;
+}
+
 void ADisplayedItem::OnConstruction(const FTransform& Transform)
 {
     if (GetPrimaryComponent()->IsValidLowLevel())
@@ -32,6 +39,13 @@ void ADisplayedItem::OnConstruction(const FTransform& Transform)
         GetPrimaryComponent()->SetCollisionEnabled(ECollisionEnabled::Type::NoCollision);
     }
 }
+
+void ADisplayedItem::Init(UEquipmentComponent* InEquipmentComponent, EItemType InType, int InSlotIndex)
+{
+    Init_Impl(InEquipmentComponent, InType, InSlotIndex);
+    K2_Init();
+}
+
 
 UPrimitiveComponent* ADisplayedItem::GetPrimaryComponent() const
 {
@@ -92,9 +106,5 @@ void ADisplayedItem::SimulatePhysics()
     GetPrimaryComponent()->SetSimulatePhysics(true);
 }
 
-void ADisplayedItem::Init(UEquipmentComponent* InEquipmentComponent, EItemType InType, int InSlotIndex)
-{
-    EquipmentComponent = InEquipmentComponent;
-    Type = InType;
-    SlotIndex = InSlotIndex;
-}
+
+

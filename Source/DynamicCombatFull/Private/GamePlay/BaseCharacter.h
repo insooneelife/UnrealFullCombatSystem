@@ -64,6 +64,7 @@ public:
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+    virtual void EndPlay(const EEndPlayReason::Type EndPlayResult) override;
 
 public:	
     virtual void OnConstruction(const FTransform& Transform) override;
@@ -104,10 +105,7 @@ protected:
 
     // return true if completed
     UFUNCTION(BlueprintImplementableEvent, Category = "Blueprint")
-    bool UpdateZoomTimeline(
-        bool bInCondition,
-        TEnumAsByte<ETimelineDirection::Type>& OutDirection,
-        float& OutAlpha);
+    void UpdateZoomTimeline(bool bInCondition);
 
     UFUNCTION(BlueprintCallable)
     void OnActionPressed_Zoom();
@@ -501,8 +499,23 @@ public:
 
 
 public:
+    UFUNCTION(BlueprintCallable)
     UCameraComponent* GetFollowCamera() const { return FollowCamera; }
+
+    UFUNCTION(BlueprintCallable)
     USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
+
+    UFUNCTION(BlueprintCallable)
+    float GetZoomAlpha() const { return ZoomAlpha; }
+
+    UFUNCTION(BlueprintCallable)
+    void SetZoomAlpha(float InZoomAlpha) { ZoomAlpha = InZoomAlpha; }
+
+    UFUNCTION(BlueprintCallable)
+    float GetInitialCameraArmLength() const { return InitialCameraArmLength; }
+
+    UFUNCTION(BlueprintCallable)
+    float GetZoomCameraArmLength() const { return ZoomCameraArmLength; }
 
 private:
     void SetTimerRetriggerable(FTimerHandle& TimerHandle, TBaseDelegate<void> ObjectDelegate, float Time, bool bLoop);

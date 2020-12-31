@@ -20,10 +20,10 @@ protected:
     virtual void BeginPlay() override;
     virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
+    virtual void Init_Impl(UEquipmentComponent* InEquipmentComponent, EItemType InType, int InSlotIndex) override;
+
 public:
     virtual void OnConstruction(const FTransform& Transform) override;
-
-    virtual void Init(UEquipmentComponent* InEquipmentComponent, EItemType InType, int InSlotIndex) override;
 
     virtual FName GetAttachmentSocket() const override;
 

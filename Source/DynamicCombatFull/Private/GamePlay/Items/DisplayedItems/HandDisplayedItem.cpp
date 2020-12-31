@@ -16,15 +16,15 @@ void AHandDisplayedItem::EndPlay(const EEndPlayReason::Type EndPlayReason)
     Super::EndPlay(EndPlayReason);
 }
 
+void AHandDisplayedItem::Init_Impl(UEquipmentComponent* InEquipmentComponent, EItemType InType, int InSlotIndex)
+{
+    Super::Init_Impl(InEquipmentComponent, InType, InSlotIndex);
+    EquipmentComponent->OnSlotHiddenChanged.AddDynamic(this, &AHandDisplayedItem::OnSlotHiddenChanged);
+}
+
 void AHandDisplayedItem::OnConstruction(const FTransform& Transform)
 {
     Super::OnConstruction(Transform);
-}
-
-void AHandDisplayedItem::Init(UEquipmentComponent* InEquipmentComponent, EItemType InType, int InSlotIndex)
-{ 
-    Super::Init(InEquipmentComponent, InType, InSlotIndex);
-    EquipmentComponent->OnSlotHiddenChanged.AddDynamic(this, &AHandDisplayedItem::OnSlotHiddenChanged);
 }
 
 FName AHandDisplayedItem::GetAttachmentSocket() const
