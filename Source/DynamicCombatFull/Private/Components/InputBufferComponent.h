@@ -48,5 +48,6 @@ public:
 
 private:
     EInputBufferKey StoredKey;
+
     bool bIsOpen;
 };

@@ -111,12 +111,16 @@ void UCollisionHandlerComponent::PerformTrace()
 
                 for (const FHitResult& Hit : OutHits)
                 {
-                    if (!GetHitActors(CollComp.Component).Contains(Hit.GetActor()) &&
-                        !IsIgnoredClass(Hit.GetActor()->GetClass()) &&
-                        !IgnoredCollisionProfileNames.Contains(Hit.Component->GetCollisionProfileName()))
+                    bool bActorNotContained = !GetHitActors(CollComp.Component).Contains(Hit.GetActor());
+                    bool bNotIgnoredClass = !IsIgnoredClass(Hit.GetActor()->GetClass());
+                    bool bCollisionProfileNotContained = 
+                        !IgnoredCollisionProfileNames.Contains(Hit.Component->GetCollisionProfileName());
+
+                    if (bActorNotContained &&
+                        bNotIgnoredClass &&
+                        bCollisionProfileNotContained)
                     {
                         AddHitActor(CollComp.Component, Hit.GetActor());
-
                         OnHit.Broadcast(Hit);
                     }
                 }

@@ -84,8 +84,5 @@ void APlayerSummonItemAbilityBase::SpawnItem(TSubclassOf<UItemBase> Class)
         GetOwner()->GetActorTransform(),
         Params);
 
-    Ability->SetItemClass(Class);
-    Ability->SetDuration(Duration);
-    Ability->SetAmount(bAutoSwap);
-    Ability->SetAutoSwap(bAutoSwap);
+    Ability->Init(Class, Duration, 1, bAutoSwap);
 }

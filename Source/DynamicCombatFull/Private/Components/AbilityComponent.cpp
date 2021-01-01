@@ -104,12 +104,14 @@ void UAbilityComponent::UpdateAbilityFromEquipment()
 
 void UAbilityComponent::AbilityPressed()
 {
+    UE_LOG(LogTemp, Error, TEXT("AbilityPressed !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"));
     if (IsAbilityValid())
     {
         SetIsPressed(true);
 
         if (CurrentAbility->IsValidLowLevel())
         {
+            UE_LOG(LogTemp, Error, TEXT("AbilityPressed Pressed !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"));
             CurrentAbility->Pressed();
         }
     }
@@ -117,12 +119,14 @@ void UAbilityComponent::AbilityPressed()
 
 void UAbilityComponent::AbilityReleased()
 {
+    UE_LOG(LogTemp, Error, TEXT("AbilityReleased !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"));
     if (GetIsPressed())
     {
         SetIsPressed(false);
 
         if (CurrentAbility->IsValidLowLevel())
         {
+            UE_LOG(LogTemp, Error, TEXT("AbilityReleased Released !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"));
             CurrentAbility->Released();
         }
     }
@@ -263,7 +267,7 @@ bool UAbilityComponent::StartAbility()
 
 float UAbilityComponent::PlayAbilityMontage(UAnimMontage* Montage, float PlayRate, FName Section)
 {
-    float Duration = Character->PlayAnimMontage(nullptr, PlayRate, Section);
+    float Duration = Character->PlayAnimMontage(Montage, PlayRate, Section);
     return Duration;
 }
 

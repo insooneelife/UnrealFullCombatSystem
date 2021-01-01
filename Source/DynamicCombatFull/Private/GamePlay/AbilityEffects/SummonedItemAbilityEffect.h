@@ -29,6 +29,13 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
+    UFUNCTION(BlueprintCallable)
+    void Init(
+        TSubclassOf<UItemBase> InClass,
+        float InDuration,
+        int InAmount,
+        bool bInAutoSwap);
+
     void UnsummonWeapon();
     void SummonWeapon();
     void AttemptToUnsummon();
@@ -52,11 +59,6 @@ public:
     float GetElapsedTime()const { return ElapsedTime; }
     bool IsAutoSwap() const { return bAutoSwap; }
     const FStoredItem& GetItemBeforeSummon() const { return ItemBeforeSummon; }
-
-    void SetItemClass(TSubclassOf<UItemBase> InClass) { ItemClass = InClass; }
-    void SetDuration(float InDuration) { Duration = InDuration; }
-    void SetAmount(int InAmount) { Amount = InAmount; }
-    void SetAutoSwap(bool bInAutoSwap) { bAutoSwap = bInAutoSwap; }
 
 private:
     UPROPERTY()

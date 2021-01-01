@@ -99,9 +99,6 @@ void APlayerBuffAbilityBase::ApplyBuff()
             GetOwner()->GetActorTransform(), 
             Params);
 
-        BuffAbility->SetDuration(BuffDuration);
-        BuffAbility->SetStatType(StatType);
-        BuffAbility->SetValue(BuffValue);
-        BuffAbility->SetColor(BuffColor);
+        BuffAbility->Init(BuffDuration, StatType, BuffValue, BuffColor);
     }
 }

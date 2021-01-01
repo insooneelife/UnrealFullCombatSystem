@@ -35,21 +35,24 @@ ADamageTrapAbilityEffect::ADamageTrapAbilityEffect()
     RootComponent = CreateDefaultSubobject<USceneComponent>("Scene");
     SphereComponent = CreateDefaultSubobject<USphereComponent>("Sphere");
     DecalComponent = CreateDefaultSubobject<UDecalComponent>("Decal");
+
+    SphereComponent->AttachTo(RootComponent);
+    DecalComponent->AttachTo(RootComponent);
 }
 
 // Called when the game starts or when spawned
 void ADamageTrapAbilityEffect::BeginPlay()
 {
 	Super::BeginPlay();
-	
-    this->SphereComponent->OnComponentBeginOverlap.AddDynamic(
-        this, &ADamageTrapAbilityEffect::OnComponentBeginOverlap);
-
-    SetLifeSpan(Duration);
-    SphereComponent->SetSphereRadius(TrapRadius);
-
 }
 
+void ADamageTrapAbilityEffect::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+    this->SphereComponent->OnComponentBeginOverlap.RemoveDynamic(
+        this, &ADamageTrapAbilityEffect::OnComponentBeginOverlap);
+
+    Super::EndPlay(EndPlayReason);
+}
 
 void ADamageTrapAbilityEffect::GetTraceObjects(TArray<FHitResult>& OutHits) const
 {
@@ -67,6 +70,25 @@ void ADamageTrapAbilityEffect::GetTraceObjects(TArray<FHitResult>& OutHits) cons
         Start, End, DamageRadius, ObjectTypes, false, ActorsToIgnore, DebugType, OutHits, true);
 }
 
+void ADamageTrapAbilityEffect::Init(
+    float InDamageRadius,
+    float InDamage,
+    float InImpulse,
+    float InTrapRadius,
+    float InDuration,
+    float InActivationDelay)
+{
+    Super::Init(InDamageRadius, InDamage, InImpulse);
+    TrapRadius = InTrapRadius;
+    Duration = InDuration;
+    ActivationDelay = InActivationDelay;
+
+    this->SphereComponent->OnComponentBeginOverlap.AddDynamic(
+        this, &ADamageTrapAbilityEffect::OnComponentBeginOverlap);
+
+    SetLifeSpan(Duration);
+    SphereComponent->SetSphereRadius(TrapRadius);
+}
 
 void ADamageTrapAbilityEffect::OnComponentBeginOverlap(
     UPrimitiveComponent* OverlappedComponent,

@@ -35,4 +35,3 @@ void ADamageSphereAbilityEffect::GetTraceObjects(TArray<FHitResult>& OutHits) co
         GetWorld(),
         Start, End, DamageRadius, ObjectTypes, false, ActorsToIgnore, DebugType, OutHits, true);
 }
-

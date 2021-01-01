@@ -24,6 +24,7 @@ protected:
 	virtual void BeginPlay() override;
 
 public:
+    void Init(float InDuration, EStat InStatType, float InValue, FLinearColor InColor);
 
     void ApplyBuff();
     void AttachToOwner();
@@ -42,11 +43,6 @@ public:
     float GetElapsedTime() const { return ElapsedTime; }
     FName GetAttachmentSocket() const { return AttachmentSocket; }
     float GetTimerInterval() const { return TimerInterval; }
-
-    void SetDuration(float InDuration) { Duration = InDuration; }
-    void SetStatType(EStat InStatType) { StatType = InStatType; }
-    void SetValue(float InValue) { Value = InValue; }
-    void SetColor(FLinearColor InColor) { Color = InColor; }
 
 public:	
 

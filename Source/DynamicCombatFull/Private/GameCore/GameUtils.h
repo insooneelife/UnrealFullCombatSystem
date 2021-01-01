@@ -21,7 +21,10 @@ public:
 
     static const FItem& GetDefaultItemFromStoredItem(const FStoredItem& StoredItem);
     static const FItem& GetDefaultItemFromItemClass(TSubclassOf<UItemBase> ItemClass);
+
     static void PrintStoredItem(const FStoredItem& StoredItem);
+
+    static void PrintHitResult(const FHitResult& InHit);
 
     template<typename ClassType>
     static TSubclassOf<ClassType> LoadAssetClass(FString AssetPath)

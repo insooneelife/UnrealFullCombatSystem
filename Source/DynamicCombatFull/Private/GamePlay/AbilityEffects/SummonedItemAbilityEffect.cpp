@@ -20,7 +20,27 @@ ASummonedItemAbilityEffect::ASummonedItemAbilityEffect()
 void ASummonedItemAbilityEffect::BeginPlay()
 {
 	Super::BeginPlay();
-	
+}
+
+// Called every frame
+void ASummonedItemAbilityEffect::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+
+    ElapsedTime += DeltaTime;
+}
+
+void ASummonedItemAbilityEffect::Init(
+    TSubclassOf<UItemBase> InClass,
+    float InDuration,
+    int InAmount,
+    bool bInAutoSwap)
+{
+    ItemClass = InClass;
+    Duration = InDuration;
+    Amount = InAmount;
+    bAutoSwap = bInAutoSwap;
+
     StateManager =
         Cast<UStateManagerComponent>(GetOwner()->GetComponentByClass(UStateManagerComponent::StaticClass()));
 
@@ -35,14 +55,6 @@ void ASummonedItemAbilityEffect::BeginPlay()
     {
         Destroy();
     }
-}
-
-// Called every frame
-void ASummonedItemAbilityEffect::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-
-    ElapsedTime += DeltaTime;
 }
 
 void ASummonedItemAbilityEffect::UnsummonWeapon()

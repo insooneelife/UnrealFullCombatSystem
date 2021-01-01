@@ -31,6 +31,7 @@ AArrowProjectileBase::AArrowProjectileBase()
     StaticMesh = CreateDefaultSubobject<UStaticMeshComponent>("StaticMesh");
     RootComponent = StaticMesh;
     ParticleSystem = CreateDefaultSubobject<UParticleSystemComponent>("Particle");
+    ParticleSystem->AttachTo(StaticMesh);
 
     ProjectileMovement = CreateDefaultSubobject<UProjectileMovementComponent>("ProjectileMovement");
     CollisionHandler = CreateDefaultSubobject<UCollisionHandlerComponent>("CollisionHandler");
@@ -40,17 +41,6 @@ AArrowProjectileBase::AArrowProjectileBase()
 void AArrowProjectileBase::BeginPlay()
 {
 	Super::BeginPlay();	
-
-    ProjectileMovement->Velocity = GetActorForwardVector() * InitialSpeed;
-
-    UpdateArrowMesh();
-    SetLifeSpan(LifeTime);
-    CollisionHandler->SetCollisionMesh(StaticMesh, StaticMesh->GetAllSocketNames());
-    CollisionHandler->ActivateCollision(ECollisionPart::None);
-    CollisionHandler->OnHit.AddDynamic(this, &AArrowProjectileBase::OnHit);
-
-    FTimerHandle Unused;
-    GetWorld()->GetTimerManager().SetTimer(Unused, this, &AArrowProjectileBase::BeginPlayDelayed, 0.3f, false);
 }
 
 void AArrowProjectileBase::EndPlay(const EEndPlayReason::Type EndPlayReason)
@@ -73,10 +63,11 @@ void AArrowProjectileBase::OnHit(const FHitResult& InHit)
     UPrimitiveComponent* HitComponent = InHit.GetComponent();
     FName HitBoneName = InHit.BoneName;
 
+    GameUtils::PrintHitResult(InHit);
+
     if (GetOwner() != HitActor)
     {
         ICanBeAttacked* CanBeAttacked = Cast<ICanBeAttacked>(HitActor);
-
         if (CanBeAttacked != nullptr)
         {
             if (IsEnemy(HitActor))
@@ -99,7 +90,6 @@ void AArrowProjectileBase::OnHit(const FHitResult& InHit)
                     if (bAttackResult)
                     {
                         UDefaultGameInstance* DefaultGameInstance = Cast<UDefaultGameInstance>(GetGameInstance());
-
                         DefaultGameInstance->PlayHitSound(GetOwner(), HitActor, HitLocation);
 
                         UEffectsComponent* EffectsComponent =
@@ -132,6 +122,16 @@ void AArrowProjectileBase::Init(float InDamage, float InInitialSpeed)
 {
     Damage = InDamage;
     InitialSpeed = InInitialSpeed;
+    ProjectileMovement->Velocity = GetActorForwardVector() * InitialSpeed;
+
+    UpdateArrowMesh();
+    SetLifeSpan(LifeTime);
+    CollisionHandler->SetCollisionMesh(StaticMesh, StaticMesh->GetAllSocketNames());
+    CollisionHandler->ActivateCollision(ECollisionPart::None);
+    CollisionHandler->OnHit.AddDynamic(this, &AArrowProjectileBase::OnHit);
+
+    FTimerHandle Unused;
+    GetWorld()->GetTimerManager().SetTimer(Unused, this, &AArrowProjectileBase::BeginPlayDelayed, 0.3f, false);
 }
 
 void AArrowProjectileBase::ApplyHitImpulse(UPrimitiveComponent* InComponent, FVector InHitNormal, FName InBoneName)

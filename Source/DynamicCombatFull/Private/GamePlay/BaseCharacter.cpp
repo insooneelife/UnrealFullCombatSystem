@@ -237,10 +237,13 @@ void ABaseCharacter::OnConstruction(const FTransform& Transform)
         UE_LOG(LogTemp, Error, TEXT("EffectsAudio is not valid!"));
     }
 
-    USceneComponent* Scene = Cast<USceneComponent>(GetComponentByClass(USceneComponent::StaticClass()));
-    ArrowSpawnLocation = Scene;
+    TArray<UActorComponent*> FoundCompArray = GetComponentsByTag(USceneComponent::StaticClass(), "ArrowSpawnLocation");
 
-    if (!ArrowSpawnLocation->IsValidLowLevel())
+    if (FoundCompArray.Num() > 0)
+    {
+        ArrowSpawnLocation = Cast<USceneComponent>(FoundCompArray[0]);;
+    }
+    else
     {
         UE_LOG(LogTemp, Error, TEXT("ArrowSpawnLocation is not valid!"));
     }
@@ -456,6 +459,8 @@ void ABaseCharacter::OnCollisionActivated(ECollisionPart CollisionPart)
 
 void ABaseCharacter::OnInputBufferConsumed(EInputBufferKey InKey)
 {
+    FString EnumStr = GameUtils::GetEnumValueAsString("EInputBufferKey", InKey);
+
     if (IsCharacterAlive())
     {
         if (InKey == EInputBufferKey::LightAttack)
@@ -525,7 +530,7 @@ void ABaseCharacter::OnInputBufferConsumed(EInputBufferKey InKey)
         else if (InKey == EInputBufferKey::AbilityAttack)
         {
             AbilityPressed();
-            if (bIsAbilityInputPressed)
+            if (!bIsAbilityInputPressed)
             {
                 AbilityReleased();
             }
@@ -1135,11 +1140,28 @@ void ABaseCharacter::ShootArrow()
     if (CanBowAttack())
     {
         FStoredItem Item = Equipment->GetActiveItem(EItemType::Arrows, 0);
+        GameUtils::PrintStoredItem(Item);
 
         UArrowItem* ArrowItem = Item.ItemClass->GetDefaultObject<UArrowItem>();
+
+        if (!ArrowItem->IsValidLowLevel())
+        {
+            UE_LOG(LogTemp, Error, TEXT("ArrowItem is not valid!  Item Id : %s"), *Item.Id.ToString());
+            GameUtils::PrintStoredItem(Item);
+            return;
+        }
+
         TSubclassOf<AActor> ProjectileClass = ArrowItem->GetProjectile();
+
+        if (!ProjectileClass->IsValidLowLevel())
+        {
+            UE_LOG(LogTemp, Error, TEXT("ProjectileClass is not valid!  Item Id : %s"), *Item.Id.ToString());
+            GameUtils::PrintStoredItem(Item);
+            return;
+        }
+
         FTransform SpawnTransform = GetSpawnArrowTransform();
-        
+
         FActorSpawnParameters SpawnInfo;
         SpawnInfo.Owner = this;
         SpawnInfo.Instigator = this;
@@ -1148,6 +1170,11 @@ void ABaseCharacter::ShootArrow()
         AArrowProjectileBase* ProjectileBase =
             GetWorld()->SpawnActor<AArrowProjectileBase>(ProjectileClass, SpawnTransform, SpawnInfo);
 
+        if (!ProjectileBase->IsValidLowLevel())
+        {
+            UE_LOG(LogTemp, Error, TEXT("Projectile spawn failed!"));
+            return;
+        }
 
         float Damage = StatsManager->GetDamage() * AimAlpha;
         ProjectileBase->Init(Damage, 7000.0f * AimAlpha);
@@ -1229,10 +1256,12 @@ void ABaseCharacter::OnValueChanged_ExtendedMana(float NewValue, float MaxValue)
 
 void ABaseCharacter::AbilityPressed()
 {
+    UE_LOG(LogTemp, Error, TEXT("ABaseCharacter AbilityPressed !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"));
     if (AbilityComponent->IsAbilityValid() &&
         Equipment->IsInCombat() &&
         (ExtendedMana->GetCurrentValue() > AbilityComponent->GetManaCost()))
     {
+        UE_LOG(LogTemp, Error, TEXT("ABaseCharacter Valid !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"));
         AbilityComponent->AbilityPressed();
         EnableAbilityMode();
     }
@@ -1240,8 +1269,12 @@ void ABaseCharacter::AbilityPressed()
 
 void ABaseCharacter::AbilityReleased()
 {
+    UE_LOG(LogTemp, Error, TEXT("ABaseCharacter AbilityReleased !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"));
     if (AbilityComponent->GetIsPressed())
     {
+        UE_LOG(LogTemp, Error, TEXT("ABaseCharacter Valid !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"));
+        AbilityComponent->AbilityReleased();
+
         if (!AbilityComponent->GetIsCasting())
         {
             DisableAbilityMode();
@@ -1978,12 +2011,12 @@ void ABaseCharacter::HideCrosshair()
 
 void ABaseCharacter::UpdateAimAlpha()
 {
-    float Value = StatsManager->GetStatValue(EStat::AttackSpeed, true);
     float DeltaTime = GetWorld()->GetDeltaSeconds();
 
     if (IsActivityPure(EActivity::IsAimingPressed) && IsIdleAndNotFalling())
     {
-        AimAlpha = UKismetMathLibrary::FInterpTo_Constant(AimAlpha, 0.0f, DeltaTime, Value);
+        float Value = StatsManager->GetStatValue(EStat::AttackSpeed, true);
+        AimAlpha = UKismetMathLibrary::FInterpTo_Constant(AimAlpha, 1.0f, DeltaTime, Value);
     }
     else
     {
@@ -2501,11 +2534,6 @@ UDataTable* ABaseCharacter::GetMontages(EMontageAction InAction) const
             return PlayerUnarmedMontages;
         }
     }
-}
-
-float ABaseCharacter::GetAimAlpha() const
-{
-    return AimAlpha;
 }
 
 bool ABaseCharacter::DoesHoldBowString() const

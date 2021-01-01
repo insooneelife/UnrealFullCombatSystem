@@ -26,6 +26,7 @@ APickupActor::APickupActor()
 
     Scene = CreateDefaultSubobject<USceneComponent>("Scene");
     Box = CreateDefaultSubobject<UBoxComponent>("Box");
+    Box->AttachTo(Scene);
     ParticleSystem = CreateDefaultSubobject<UParticleSystemComponent>("ParticleSystem");
     ParticleSystem->SetupAttachment(Box);
 }

@@ -14,7 +14,7 @@ ASpellIndicatorActor::ASpellIndicatorActor()
 	PrimaryActorTick.bCanEverTick = false;
     PrimaryActorTick.bStartWithTickEnabled = false;
 
-    Scene = CreateDefaultSubobject<USceneComponent>("Scene");
+    RootComponent = Scene = CreateDefaultSubobject<USceneComponent>("Scene");
     Decal = CreateDefaultSubobject<UDecalComponent>("Decal");
     Decal->SetupAttachment(Scene);
 

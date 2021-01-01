@@ -21,7 +21,10 @@ protected:
 	virtual void BeginPlay() override;
 
 public:	
+
     virtual void GetTraceObjects(TArray<FHitResult>& OutHits) const {}
+
+    void Init(float InDamageRadius, float InDamage, float InImpulse);
 
     void DamageToShapeArea();
 

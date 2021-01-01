@@ -23,6 +23,9 @@ protected:
 public:	
     virtual void GetTraceObjects(TArray<FHitResult>& OutHits) const override;
 
+    UFUNCTION(BlueprintCallable)
+    void Init(float InDamageRadius, float InDamage, float InImpulse, float InHalfHeight);
+
     float GetHalfHeight() const { return HalfHeight; }
 
 private:

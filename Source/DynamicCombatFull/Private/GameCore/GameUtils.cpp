@@ -28,18 +28,33 @@ void GameUtils::PrintStoredItem(const FStoredItem& StoredItem)
 {
     if (StoredItem.ItemClass->IsValidLowLevel())
     {
-        UE_LOG(LogTemp, Warning, TEXT("Print StoredItem  Id : %s  ItemClass : %s  Amount : %d"),
+        UE_LOG(LogTemp, Error, TEXT("Print StoredItem  Id : %s  ItemClass : %s  Amount : %d"),
             *StoredItem.Id.ToString(),
             *StoredItem.ItemClass->GetName(),
             StoredItem.Amount);
     }
     else
     {
-        UE_LOG(LogTemp, Warning, TEXT("StoredItem is not valid!!  Id : %s"), *StoredItem.Id.ToString());
+        UE_LOG(LogTemp, Error, TEXT("StoredItem is not valid!!  Id : %s"), *StoredItem.Id.ToString());
     }
 }
 
+void GameUtils::PrintHitResult(const FHitResult& InHit)
+{
+    FVector HitLocation = InHit.Location;
+    FVector HitNormal = InHit.Normal;
+    FVector ImpactPoint = InHit.ImpactPoint;
+    AActor* HitActor = InHit.GetActor();
+    UPrimitiveComponent* HitComponent = InHit.GetComponent();
 
+    UE_LOG(LogTemp, Error, TEXT("Print HitLocation : %s   HitNormal : %s   ImpactPoint : %s   HitActor : %s   HitComponent : %s"),
+        *HitLocation.ToString(),
+        *HitNormal.ToString(),
+        *ImpactPoint.ToString(),
+        HitActor == nullptr ? TEXT("") : *HitActor->GetName(),
+        HitComponent == nullptr ? TEXT("") : *HitComponent->GetName()
+    );
+}
 
 
 

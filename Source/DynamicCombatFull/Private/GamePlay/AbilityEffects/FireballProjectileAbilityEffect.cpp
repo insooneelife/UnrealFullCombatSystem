@@ -36,6 +36,7 @@ AFireballProjectileAbilityEffect::AFireballProjectileAbilityEffect()
     ProjectileMovement = CreateDefaultSubobject<UProjectileMovementComponent>("Projectile");
     RootComponent = CollisionSphere = CreateDefaultSubobject<UStaticMeshComponent>("CollisionSphere");
     ParticleSystem = CreateDefaultSubobject<UParticleSystemComponent>("ParticleSystem");
+    ParticleSystem->AttachTo(CollisionSphere);
 
     static UParticleSystem* LoadedParticleObject = 
         GameUtils::LoadAssetObject<UParticleSystem>(TEXT("/Game/DynamicCombatSystem/VFX/P_FireballHit"));
@@ -54,6 +55,23 @@ AFireballProjectileAbilityEffect::AFireballProjectileAbilityEffect()
 void AFireballProjectileAbilityEffect::BeginPlay()
 {
 	Super::BeginPlay();
+}
+
+void AFireballProjectileAbilityEffect::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+    CollisionHandler->OnHit.RemoveDynamic(this, &AFireballProjectileAbilityEffect::OnHit);
+    Super::EndPlay(EndPlayReason);
+}
+
+void AFireballProjectileAbilityEffect::Init(
+    float InDamage, float InInitialSpeed, float InLifeTime, AActor* InHomingTarget, bool bInApplyStun)
+{
+    Damage = InDamage;
+    InitialSpeed = InInitialSpeed;
+    LifeTime = InLifeTime;
+    HomingTarget = InHomingTarget;
+    bApplyStun = bInApplyStun;
+
     CollisionHandler->OnHit.AddDynamic(this, &AFireballProjectileAbilityEffect::OnHit);
     ProjectileMovement->Velocity = GetActorForwardVector() * InitialSpeed;
 

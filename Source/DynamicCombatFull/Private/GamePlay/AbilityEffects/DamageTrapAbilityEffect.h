@@ -24,9 +24,19 @@ public:
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+    virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 public:	
     virtual void GetTraceObjects(TArray<FHitResult>& OutHits) const override;
+
+    UFUNCTION(BlueprintCallable)
+    void Init(
+        float InDamageRadius,
+        float InDamage,
+        float InImpulse,
+        float InTrapRadius,
+        float InDuration,
+        float InActivationDelay);
 
     UFUNCTION()
     void OnComponentBeginOverlap(
@@ -61,7 +71,7 @@ private:
     UParticleSystem* HitParticle;
 
     UPROPERTY(EditAnywhere)
-        USoundBase* ExplosionSound;
+    USoundBase* ExplosionSound;
 
     UPROPERTY(EditAnywhere)
     float TrapRadius;

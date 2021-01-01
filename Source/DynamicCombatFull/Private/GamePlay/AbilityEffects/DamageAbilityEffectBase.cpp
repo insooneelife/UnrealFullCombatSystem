@@ -25,6 +25,13 @@ ADamageAbilityEffectBase::ADamageAbilityEffectBase()
 void ADamageAbilityEffectBase::BeginPlay()
 {
     Super::BeginPlay();
+}
+
+void ADamageAbilityEffectBase::Init(float InDamageRadius, float InDamage, float InImpulse)
+{
+    DamageRadius = InDamageRadius;
+    Damage = InDamage;
+    Impulse = InImpulse;
 
     DamageToShapeArea();
     Destroy();
@@ -89,8 +96,9 @@ bool ADamageAbilityEffectBase::IsEnemy(AActor* InTarget) const
     {
         if (CanBeAttacked->IsAlive())
         {
+            AActor* LOwner = GetOwner();
             UBehaviorComponent* BehaviorComponent =
-                Cast<UBehaviorComponent>(GetOwner()->GetComponentByClass(UBehaviorComponent::StaticClass()));
+                Cast<UBehaviorComponent>(LOwner->GetComponentByClass(UBehaviorComponent::StaticClass()));
 
             if (BehaviorComponent->IsValidLowLevel())
             {

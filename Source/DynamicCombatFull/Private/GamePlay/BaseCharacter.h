@@ -469,7 +469,7 @@ public:
 
     // IIsArcher
     UFUNCTION(BlueprintCallable)
-    virtual float GetAimAlpha() const override;
+    virtual float GetAimAlpha() const override { return AimAlpha; }
     virtual bool DoesHoldBowString() const override;
     virtual FName GetBowStringSocketName() const override;
 

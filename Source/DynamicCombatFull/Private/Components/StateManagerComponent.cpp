@@ -53,7 +53,7 @@ bool UStateManagerComponent::GetActivityValue(EActivity Activity)
 {
     if (Activities.Contains(Activity))
     {
-        return true;
+        return Activities[Activity];
     }
     return false;
 }

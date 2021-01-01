@@ -26,7 +26,15 @@ ABuffAbilityEffect::ABuffAbilityEffect()
 void ABuffAbilityEffect::BeginPlay()
 {
 	Super::BeginPlay();
-	
+}
+
+void ABuffAbilityEffect::Init(float InDuration, EStat InStatType, float InValue, FLinearColor InColor)
+{
+    Duration = InDuration;
+    StatType = InStatType;
+    Value = InValue;
+    Color = InColor;
+
     StatsManagerComponent = Cast<UStatsManagerComponent>(
         GetOwner()->GetComponentByClass(UStatsManagerComponent::StaticClass()));
 
