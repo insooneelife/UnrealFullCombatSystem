@@ -13,14 +13,9 @@
 
 #include "GamePlay/BaseCharacter.h"
 
-void APlayerAbilityBase::BeginPlay()
+void APlayerAbilityBase::NativeInit(UAbilityComponent* InAbilityComponent)
 {
-    Super::BeginPlay();
-}
-
-void APlayerAbilityBase::Init(UAbilityComponent* InAbilityComponent)
-{
-    Super::Init(InAbilityComponent);
+    Super::NativeInit(InAbilityComponent);
     PlayerCharacter = Cast<ABaseCharacter>(Character);
 }
 

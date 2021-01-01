@@ -1256,12 +1256,10 @@ void ABaseCharacter::OnValueChanged_ExtendedMana(float NewValue, float MaxValue)
 
 void ABaseCharacter::AbilityPressed()
 {
-    UE_LOG(LogTemp, Error, TEXT("ABaseCharacter AbilityPressed !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"));
     if (AbilityComponent->IsAbilityValid() &&
         Equipment->IsInCombat() &&
         (ExtendedMana->GetCurrentValue() > AbilityComponent->GetManaCost()))
     {
-        UE_LOG(LogTemp, Error, TEXT("ABaseCharacter Valid !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"));
         AbilityComponent->AbilityPressed();
         EnableAbilityMode();
     }
@@ -1269,10 +1267,8 @@ void ABaseCharacter::AbilityPressed()
 
 void ABaseCharacter::AbilityReleased()
 {
-    UE_LOG(LogTemp, Error, TEXT("ABaseCharacter AbilityReleased !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"));
     if (AbilityComponent->GetIsPressed())
     {
-        UE_LOG(LogTemp, Error, TEXT("ABaseCharacter Valid !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"));
         AbilityComponent->AbilityReleased();
 
         if (!AbilityComponent->GetIsCasting())

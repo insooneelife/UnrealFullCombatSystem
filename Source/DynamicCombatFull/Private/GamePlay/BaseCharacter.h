@@ -454,7 +454,15 @@ public:
 
 public:
     // ICanBeAttacked
-    virtual bool TakeDamage(const FHitData& HitData, EAttackResult& OutResult) override;
+    UFUNCTION(BlueprintNativeEvent, BlueprintCallable, meta = (DisplayName = "TakeDamage", ScriptName = "TakeDamage"))
+    bool K2_TakeDamage(const FHitData& InHitData, EAttackResult& OutResult);
+
+    virtual bool K2_TakeDamage_Implementation(const FHitData& InHitData, EAttackResult& OutResult) override
+    {
+        return TakeDamage(InHitData, OutResult);
+    }
+
+    virtual bool TakeDamage(const FHitData& InHitData, EAttackResult& OutResult) override;
     virtual bool IsAlive() const override;
     virtual FName GetHeadSocket() const override;
 
@@ -478,6 +486,11 @@ public:
     virtual void ClosedUI() override;
 
     // IAbilityInterface
+    UFUNCTION(BlueprintNativeEvent, BlueprintCallable, meta = (DisplayName = "CanCastAbility", ScriptName = "CanCastAbility"))
+    bool K2_CanCastAbility() const;
+
+    virtual bool K2_CanCastAbility_Implementation() const override { return CanCastAbility(); }
+
     virtual bool CanCastAbility() const override;
     virtual float GetMagicDamage() const override;
     virtual float GetCastingSpeed() const override;

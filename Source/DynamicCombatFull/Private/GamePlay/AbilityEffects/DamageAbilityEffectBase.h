@@ -17,11 +17,8 @@ public:
 	ADamageAbilityEffectBase();
 
 protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
 
 public:	
-
     virtual void GetTraceObjects(TArray<FHitResult>& OutHits) const {}
 
     void Init(float InDamageRadius, float InDamage, float InImpulse);

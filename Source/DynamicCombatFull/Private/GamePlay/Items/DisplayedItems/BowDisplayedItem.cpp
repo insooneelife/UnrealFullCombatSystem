@@ -17,12 +17,7 @@ ABowDisplayedItem::ABowDisplayedItem()
 
     BowMesh = CreateDefaultSubobject<USkeletalMeshComponent>("BowMesh");
     ArrowMesh = CreateDefaultSubobject<UStaticMeshComponent>("ArrowMesh");
-    ArrowMesh->SetupAttachment(BowMesh, ArrowSocketName);
-}
-
-void ABowDisplayedItem::BeginPlay()
-{
-    Super::BeginPlay();
+    ArrowMesh->AttachToComponent(BowMesh, FAttachmentTransformRules::KeepRelativeTransform, ArrowSocketName);
 }
 
 void ABowDisplayedItem::EndPlay(const EEndPlayReason::Type EndPlayReason)
@@ -32,16 +27,11 @@ void ABowDisplayedItem::EndPlay(const EEndPlayReason::Type EndPlayReason)
     Super::EndPlay(EndPlayReason);
 }
 
-void ABowDisplayedItem::Init_Impl(UEquipmentComponent* InEquipmentComponent, EItemType InType, int InSlotIndex)
+void ABowDisplayedItem::NativeInit(UEquipmentComponent* InEquipmentComponent, EItemType InType, int InSlotIndex)
 {
-    Super::Init_Impl(InEquipmentComponent, InType, InSlotIndex);
+    Super::NativeInit(InEquipmentComponent, InType, InSlotIndex);
     UpdateArrowMesh();
     EquipmentComponent->OnActiveItemChanged.AddDynamic(this, &ABowDisplayedItem::OnActiveItemChanged);
-}
-
-void ABowDisplayedItem::OnConstruction(const FTransform& Transform)
-{
-    Super::OnConstruction(Transform);
 }
 
 void ABowDisplayedItem::SimulatePhysics()

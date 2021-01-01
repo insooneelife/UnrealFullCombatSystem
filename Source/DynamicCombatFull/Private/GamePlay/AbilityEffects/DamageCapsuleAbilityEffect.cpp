@@ -14,12 +14,6 @@ ADamageCapsuleAbilityEffect::ADamageCapsuleAbilityEffect()
     Impulse = 20000.0f;
 }
 
-// Called when the game starts or when spawned
-void ADamageCapsuleAbilityEffect::BeginPlay()
-{
-	Super::BeginPlay();
-}
-
 void ADamageCapsuleAbilityEffect::GetTraceObjects(TArray<FHitResult>& OutHits) const
 {
     FVector Start = GetActorLocation();

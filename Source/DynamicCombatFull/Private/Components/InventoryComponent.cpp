@@ -191,11 +191,8 @@ void UInventoryComponent::DropItem(FStoredItem InItem)
         FVector End = Loc + Forward + Up;
 
         ETraceTypeQuery Channel = UEngineTypes::ConvertToTraceType(ECollisionChannel::ECC_Visibility);
-
         TArray<AActor*> IgnoreActors { GetOwner() };
-
         FHitResult HitResult;
-        
         FVector SpawnLoc = Start;
         
         if (UKismetSystemLibrary::LineTraceSingle(
@@ -211,8 +208,12 @@ void UInventoryComponent::DropItem(FStoredItem InItem)
             GetWorld()->SpawnActor<APickupActor>(
                 SpawnPickupActorClass, SpawnLoc, FRotator::ZeroRotator, SpawnParameters);
 
-        if (SpawnedActor != nullptr)
+        if (SpawnedActor->IsValidLowLevel())
         {
+            SpawnedActor->Init(
+                FName(TEXT("Items")), 
+                TMap<TSubclassOf<UItemBase>, int> { { InItem.ItemClass, InItem.Amount } }
+            );
             SpawnedActor->AddItem(InItem.ItemClass, InItem.Amount);
         }
     }

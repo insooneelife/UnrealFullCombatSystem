@@ -4,16 +4,6 @@
 #include "MasterPoseDisplayedItem.h"
 #include "GameFramework/Character.h"
 
-void AMasterPoseDisplayedItem::BeginPlay()
-{
-    Super::BeginPlay();
-}
-
-void AMasterPoseDisplayedItem::OnConstruction(const FTransform& Transform)
-{
-    Super::OnConstruction(Transform);
-}
-
 bool AMasterPoseDisplayedItem::Attach()
 {
     bool bResult = Super::Attach();

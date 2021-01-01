@@ -19,11 +19,9 @@ public:
 	ASpellIndicatorActor();
 
 protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
-
+	
 public:	
-    virtual void OnConstruction(const FTransform& Transform) override;
+    void Init(float InRadius, UMaterialInterface* InMaterial);
 
     void SetRadius(float NewRadius);
     void SetMaterial(UMaterialInterface* NewMaterial);

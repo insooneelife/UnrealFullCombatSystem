@@ -24,16 +24,13 @@ public:
 
 protected:
 	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
+    virtual void NativeInit(UAbilityComponent* InAbilityComponent);
 
 public:
-    virtual void OnConstruction(const FTransform& Transform) override {}
     virtual void Released() { K2_Released(); }
     virtual void Pressed() { K2_Pressed(); }
     virtual void Effect() { K2_Effect(); }
     virtual void Ended(EAbilityEndResult Result) { K2_Ended(Result); }
-
-    virtual void Init(UAbilityComponent* InAbilityComponent);
 
     UFUNCTION(BlueprintImplementableEvent, Category = "Blueprint", meta = (DisplayName = "Released", ScriptName = "Released"))
     void K2_Released();
@@ -47,6 +44,10 @@ public:
     UFUNCTION(BlueprintImplementableEvent, Category = "Blueprint", meta = (DisplayName = "Ended", ScriptName = "Ended"))
     void K2_Ended(EAbilityEndResult Result);
 
+    UFUNCTION(BlueprintImplementableEvent, Category = "Blueprint", meta = (DisplayName = "Init", ScriptName = "Init"))
+    void K2_Init();
+
+    void Init(UAbilityComponent* InAbilityComponent) { NativeInit(InAbilityComponent); K2_Init(); }
 
     UFUNCTION(BlueprintCallable)
     void ConsumeManaAmount(float Amount);

@@ -6,15 +6,9 @@
 #include "GamePlay/AI/AICharacter.h"
 #include "GamePlay/AI/BaseAIController.h"
 
-
-void AAIAbilityBase::BeginPlay()
+void AAIAbilityBase::NativeInit(UAbilityComponent* InAbilityComponent)
 {
-    Super::BeginPlay();
-}
-
-void AAIAbilityBase::Init(UAbilityComponent* InAbilityComponent)
-{
-    Super::Init(InAbilityComponent);
+    Super::NativeInit(InAbilityComponent);
     AICharacter = Cast<AAICharacter>(Character);
 }
 

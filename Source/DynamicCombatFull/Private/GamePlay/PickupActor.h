@@ -25,10 +25,9 @@ public:
     APickupActor();
 
 protected:
-    // Called when the game starts or when spawned
-    virtual void BeginPlay() override;
 
 public:
+    void Init(FName InName, const TMap<TSubclassOf<UItemBase>, int>& InItems);
     void RemoveInvalidItems();
     void TakeItem(TSubclassOf<UItemBase> ItemClass);
     void TakeAllItems();
@@ -45,9 +44,7 @@ public:
     virtual FName GetInteractionMessage() const override { return FName(TEXT("Pillage")); }
 
 public:
-
     FName GetName() const { return Name; }
-
     const TMap<TSubclassOf<UItemBase>, int>& GetItems() const { return Items; }
 
 private:
@@ -58,23 +55,20 @@ private:
     TSubclassOf<UUserWidget> CreateUserWidgetClass;
 
     UPROPERTY()
-        UInventoryComponent* InventoryComponent;
+    UInventoryComponent* InventoryComponent;
 
     UPROPERTY(EditAnywhere, Category = "Default")
-        FName Name;
+    FName Name;
 
     UPROPERTY(EditAnywhere, Category = "Default")
-        TMap<TSubclassOf<UItemBase>, int> Items;
+    TMap<TSubclassOf<UItemBase>, int> Items;
 
     UPROPERTY()
-        AActor* Caller;
-
-    UPROPERTY(EditAnywhere)
-    USceneComponent* Scene;
+    AActor* Caller;
 
     UPROPERTY(EditAnywhere)
     UBoxComponent* Box;
 
     UPROPERTY(EditAnywhere)
-        UParticleSystemComponent* ParticleSystem;
+    UParticleSystemComponent* ParticleSystem;
 };

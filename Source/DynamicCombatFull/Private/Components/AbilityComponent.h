@@ -58,7 +58,7 @@ public:
     void AbilityChanged();
 
 public:
-    void ShowSpellIndicator(FVector Location, float Radius, UMaterialInterface* Material);
+    void ShowSpellIndicator(FVector InLocation, float InRadius, UMaterialInterface* InMaterial);
 
     void HideSpellIndicator();
 

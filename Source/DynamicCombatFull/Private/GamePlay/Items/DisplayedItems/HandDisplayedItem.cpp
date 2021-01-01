@@ -4,11 +4,6 @@
 #include "HandDisplayedItem.h"
 #include "Components/EquipmentComponent.h"
 
-void AHandDisplayedItem::BeginPlay()
-{
-    Super::BeginPlay();
-}
-
 void AHandDisplayedItem::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
     EquipmentComponent->OnSlotHiddenChanged.RemoveDynamic(this, &AHandDisplayedItem::OnSlotHiddenChanged);
@@ -16,15 +11,10 @@ void AHandDisplayedItem::EndPlay(const EEndPlayReason::Type EndPlayReason)
     Super::EndPlay(EndPlayReason);
 }
 
-void AHandDisplayedItem::Init_Impl(UEquipmentComponent* InEquipmentComponent, EItemType InType, int InSlotIndex)
+void AHandDisplayedItem::NativeInit(UEquipmentComponent* InEquipmentComponent, EItemType InType, int InSlotIndex)
 {
-    Super::Init_Impl(InEquipmentComponent, InType, InSlotIndex);
+    Super::NativeInit(InEquipmentComponent, InType, InSlotIndex);
     EquipmentComponent->OnSlotHiddenChanged.AddDynamic(this, &AHandDisplayedItem::OnSlotHiddenChanged);
-}
-
-void AHandDisplayedItem::OnConstruction(const FTransform& Transform)
-{
-    Super::OnConstruction(Transform);
 }
 
 FName AHandDisplayedItem::GetAttachmentSocket() const

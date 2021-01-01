@@ -11,29 +11,19 @@
 // Sets default values
 ADisplayedItem::ADisplayedItem()
 {
-    Scene = CreateDefaultSubobject<USceneComponent>("Scene");
-    RootComponent = Scene;
+    RootComponent = CreateDefaultSubobject<USceneComponent>("Scene");
 
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = false;
     PrimaryActorTick.bStartWithTickEnabled = false;
 }
 
-// Called when the game starts or when spawned
-void ADisplayedItem::BeginPlay()
-{
-	Super::BeginPlay();
-}
-
-void ADisplayedItem::Init_Impl(UEquipmentComponent* InEquipmentComponent, EItemType InType, int InSlotIndex)
+void ADisplayedItem::NativeInit(UEquipmentComponent* InEquipmentComponent, EItemType InType, int InSlotIndex)
 {
     EquipmentComponent = InEquipmentComponent;
     Type = InType;
     SlotIndex = InSlotIndex;
-}
 
-void ADisplayedItem::OnConstruction(const FTransform& Transform)
-{
     if (GetPrimaryComponent()->IsValidLowLevel())
     {
         GetPrimaryComponent()->SetCollisionEnabled(ECollisionEnabled::Type::NoCollision);
@@ -42,7 +32,7 @@ void ADisplayedItem::OnConstruction(const FTransform& Transform)
 
 void ADisplayedItem::Init(UEquipmentComponent* InEquipmentComponent, EItemType InType, int InSlotIndex)
 {
-    Init_Impl(InEquipmentComponent, InType, InSlotIndex);
+    NativeInit(InEquipmentComponent, InType, InSlotIndex);
     K2_Init();
 }
 

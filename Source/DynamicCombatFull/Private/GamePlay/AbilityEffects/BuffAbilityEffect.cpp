@@ -22,12 +22,6 @@ ABuffAbilityEffect::ABuffAbilityEffect()
     TimerInterval = 0.1f;
 }
 
-// Called when the game starts or when spawned
-void ABuffAbilityEffect::BeginPlay()
-{
-	Super::BeginPlay();
-}
-
 void ABuffAbilityEffect::Init(float InDuration, EStat InStatType, float InValue, FLinearColor InColor)
 {
     Duration = InDuration;

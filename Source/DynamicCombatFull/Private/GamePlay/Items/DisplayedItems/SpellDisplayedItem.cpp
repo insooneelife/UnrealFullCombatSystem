@@ -20,12 +20,6 @@ ASpellDisplayedItem::ASpellDisplayedItem()
     AttachmentSocket = FName("magic_right_hand");
 }
 
-void ASpellDisplayedItem::OnConstruction(const FTransform& Transform)
-{
-    Super::OnConstruction(Transform);
-}
-
-
 bool ASpellDisplayedItem::Attach()
 {
     if (EquipmentComponent->IsSlotHidden(Type, SlotIndex))

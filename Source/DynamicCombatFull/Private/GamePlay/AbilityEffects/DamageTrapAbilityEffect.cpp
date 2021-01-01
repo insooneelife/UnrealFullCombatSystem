@@ -36,14 +36,8 @@ ADamageTrapAbilityEffect::ADamageTrapAbilityEffect()
     SphereComponent = CreateDefaultSubobject<USphereComponent>("Sphere");
     DecalComponent = CreateDefaultSubobject<UDecalComponent>("Decal");
 
-    SphereComponent->AttachTo(RootComponent);
-    DecalComponent->AttachTo(RootComponent);
-}
-
-// Called when the game starts or when spawned
-void ADamageTrapAbilityEffect::BeginPlay()
-{
-	Super::BeginPlay();
+    SphereComponent->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
+    DecalComponent->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
 }
 
 void ADamageTrapAbilityEffect::EndPlay(const EEndPlayReason::Type EndPlayReason)

@@ -31,7 +31,7 @@ AArrowProjectileBase::AArrowProjectileBase()
     StaticMesh = CreateDefaultSubobject<UStaticMeshComponent>("StaticMesh");
     RootComponent = StaticMesh;
     ParticleSystem = CreateDefaultSubobject<UParticleSystemComponent>("Particle");
-    ParticleSystem->AttachTo(StaticMesh);
+    ParticleSystem->AttachToComponent(StaticMesh, FAttachmentTransformRules::KeepRelativeTransform);
 
     ProjectileMovement = CreateDefaultSubobject<UProjectileMovementComponent>("ProjectileMovement");
     CollisionHandler = CreateDefaultSubobject<UCollisionHandlerComponent>("CollisionHandler");

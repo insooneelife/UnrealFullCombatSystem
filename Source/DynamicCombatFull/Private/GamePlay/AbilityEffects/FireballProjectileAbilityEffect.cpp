@@ -34,9 +34,10 @@ AFireballProjectileAbilityEffect::AFireballProjectileAbilityEffect()
 
     CollisionHandler = CreateDefaultSubobject<UCollisionHandlerComponent>("CollisionHandler");
     ProjectileMovement = CreateDefaultSubobject<UProjectileMovementComponent>("Projectile");
+
     RootComponent = CollisionSphere = CreateDefaultSubobject<UStaticMeshComponent>("CollisionSphere");
     ParticleSystem = CreateDefaultSubobject<UParticleSystemComponent>("ParticleSystem");
-    ParticleSystem->AttachTo(CollisionSphere);
+    ParticleSystem->AttachToComponent(CollisionSphere, FAttachmentTransformRules::KeepRelativeTransform);
 
     static UParticleSystem* LoadedParticleObject = 
         GameUtils::LoadAssetObject<UParticleSystem>(TEXT("/Game/DynamicCombatSystem/VFX/P_FireballHit"));
@@ -49,12 +50,6 @@ AFireballProjectileAbilityEffect::AFireballProjectileAbilityEffect()
     static UParticleSystem* LoadedFireballParticleObject =
         GameUtils::LoadAssetObject<UParticleSystem>(TEXT("/Game/DynamicCombatSystem/VFX/P_FireballHit"));
     FireballHitParticle = LoadedFireballParticleObject;
-}
-
-// Called when the game starts or when spawned
-void AFireballProjectileAbilityEffect::BeginPlay()
-{
-	Super::BeginPlay();
 }
 
 void AFireballProjectileAbilityEffect::EndPlay(const EEndPlayReason::Type EndPlayReason)

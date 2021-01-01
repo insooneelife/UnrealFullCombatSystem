@@ -21,9 +21,6 @@ public:
     ASpellDisplayedItem();
 
 public:
-
-    virtual void OnConstruction(const FTransform& Transform) override;
-
     virtual bool Attach() override;
 
 private:

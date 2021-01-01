@@ -16,7 +16,7 @@ ASpellIndicatorActor::ASpellIndicatorActor()
 
     RootComponent = Scene = CreateDefaultSubobject<USceneComponent>("Scene");
     Decal = CreateDefaultSubobject<UDecalComponent>("Decal");
-    Decal->SetupAttachment(Scene);
+    Decal->AttachToComponent(Scene, FAttachmentTransformRules::KeepRelativeTransform);
 
     static UMaterialInterface* LoadedObject = 
         GameUtils::LoadAssetObject<UMaterialInterface>(
@@ -26,16 +26,11 @@ ASpellIndicatorActor::ASpellIndicatorActor()
     Radius = 256.0f;
 }
 
-// Called when the game starts or when spawned
-void ASpellIndicatorActor::BeginPlay()
+void ASpellIndicatorActor::Init(float InRadius, UMaterialInterface* InMaterial)
 {
-	Super::BeginPlay();
-}
-
-void ASpellIndicatorActor::OnConstruction(const FTransform& Transform)
-{
-    Super::OnConstruction(Transform);
+    Radius = InRadius;
     SetRadius(Radius);
+    SetMaterial(InMaterial);
 }
 
 void ASpellIndicatorActor::SetRadius(float NewRadius)

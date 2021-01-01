@@ -47,13 +47,7 @@ AAbilityBase::AAbilityBase()
     bRotateOnPressed = true;
 }
 
-// Called when the game starts or when spawned
-void AAbilityBase::BeginPlay()
-{
-	Super::BeginPlay();
-}
-
-void AAbilityBase::Init(UAbilityComponent* InAbilityComponent)
+void AAbilityBase::NativeInit(UAbilityComponent* InAbilityComponent)
 {
     AbilityComponent = InAbilityComponent;
     Character = AbilityComponent->GetCharacter();

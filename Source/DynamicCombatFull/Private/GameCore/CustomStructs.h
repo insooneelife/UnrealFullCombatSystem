@@ -34,10 +34,10 @@ struct FCollCompHitActors
 
 public:
 
-    UPROPERTY(EditAnywhere)
+    UPROPERTY(EditAnywhere, BlueprintReadWrite)
         UPrimitiveComponent* Component;
 
-    UPROPERTY(EditAnywhere)
+    UPROPERTY(EditAnywhere, BlueprintReadWrite)
         TArray<AActor*> HitActors;
 };
 
@@ -49,10 +49,10 @@ struct FCollisionComponent
 
 public:
 
-    UPROPERTY(EditAnywhere)
+    UPROPERTY(EditAnywhere, BlueprintReadWrite)
         UPrimitiveComponent* Component;
 
-    UPROPERTY(EditAnywhere)
+    UPROPERTY(EditAnywhere, BlueprintReadWrite)
         TArray<FName> Sockets;
 };
 
@@ -67,7 +67,7 @@ public:
 
     FDisplayedItems(const TArray<ADisplayedItem*>& DisplayedItems) : DisplayedItems(DisplayedItems) {}
 
-    UPROPERTY(EditAnywhere)
+    UPROPERTY(EditAnywhere, BlueprintReadWrite)
         TArray<ADisplayedItem*> DisplayedItems;
 };
 
@@ -78,22 +78,22 @@ struct FDissolvedComponent
     GENERATED_BODY()
 
 public:
-    UPROPERTY(EditAnywhere)
+    UPROPERTY(EditAnywhere, BlueprintReadWrite)
         UPrimitiveComponent* Component;
 
-    UPROPERTY(EditAnywhere)
+    UPROPERTY(EditAnywhere, BlueprintReadWrite)
         float Value;
 
-    UPROPERTY(EditAnywhere)
+    UPROPERTY(EditAnywhere, BlueprintReadWrite)
         TArray<UMaterialInterface*> Materials;
 
-    UPROPERTY(EditAnywhere)
+    UPROPERTY(EditAnywhere, BlueprintReadWrite)
         TArray<UMaterialInstanceDynamic*> DissolveMaterials;
 
-    UPROPERTY(EditAnywhere)
+    UPROPERTY(EditAnywhere, BlueprintReadWrite)
         bool bReverse;
 
-    UPROPERTY(EditAnywhere)
+    UPROPERTY(EditAnywhere, BlueprintReadWrite)
         bool bIsRunning;
 };
 
@@ -103,13 +103,13 @@ struct FEffect
     GENERATED_BODY()
 
 public:
-    UPROPERTY(EditAnywhere)
+    UPROPERTY(EditAnywhere, BlueprintReadWrite)
         EEffectType Type;
 
-    UPROPERTY(EditAnywhere)
+    UPROPERTY(EditAnywhere, BlueprintReadWrite)
         float Duration;
 
-    UPROPERTY(EditAnywhere)
+    UPROPERTY(EditAnywhere, BlueprintReadWrite)
         AActor* Applier;
 };
 
@@ -165,13 +165,13 @@ public:
         return *this;
     }
 
-    UPROPERTY(EditAnywhere)
+    UPROPERTY(EditAnywhere, BlueprintReadWrite)
         TArray<FStoredItem> Items;
 
-    UPROPERTY(EditAnywhere)
+    UPROPERTY(EditAnywhere, BlueprintReadWrite)
         int ActiveItemIndex;
 
-    UPROPERTY(EditAnywhere)
+    UPROPERTY(EditAnywhere, BlueprintReadWrite)
         bool bIsHidden;
 };
 
@@ -186,10 +186,10 @@ public:
 
     FEquipmentSlots(EItemType Type, const TArray<FEquipmentSlot>& Slots) : Type(Type), Slots(Slots) {}
 
-    UPROPERTY(EditAnywhere)
+    UPROPERTY(EditAnywhere, BlueprintReadWrite)
         EItemType Type;
 
-    UPROPERTY(EditAnywhere)
+    UPROPERTY(EditAnywhere, BlueprintReadWrite)
         TArray<FEquipmentSlot> Slots;
 };
 
@@ -224,22 +224,22 @@ public:
         bCanReceiveImpact(bCanReceiveImpact) 
     {}
 
-    UPROPERTY(EditAnywhere)
+    UPROPERTY(EditAnywhere, BlueprintReadWrite)
         float Damage;
 
-    UPROPERTY(EditAnywhere)
+    UPROPERTY(EditAnywhere, BlueprintReadWrite)
         AActor* DamageCauser;
 
-    UPROPERTY(EditAnywhere)
+    UPROPERTY(EditAnywhere, BlueprintReadWrite)
         FVector HitFromDirection;
 
-    UPROPERTY(EditAnywhere)
+    UPROPERTY(EditAnywhere, BlueprintReadWrite)
         bool bCanBeParried;
 
-    UPROPERTY(EditAnywhere)
+    UPROPERTY(EditAnywhere, BlueprintReadWrite)
         bool bCanBeBlocked;
 
-    UPROPERTY(EditAnywhere)
+    UPROPERTY(EditAnywhere, BlueprintReadWrite)
         bool bCanReceiveImpact;
 };
 
@@ -259,25 +259,25 @@ public:
         Name(Name), Description(Description), Type(Type), bIsStackable(bIsStackable), bIsDroppable(bIsDroppable), bIsConsumable(bIsConsumable), Image(Image)
     {}
 
-    UPROPERTY(EditAnywhere)
+    UPROPERTY(EditAnywhere, BlueprintReadWrite)
         FName Name;
 
-    UPROPERTY(EditAnywhere)
+    UPROPERTY(EditAnywhere, BlueprintReadWrite)
         FText Description;
 
-    UPROPERTY(EditAnywhere)
+    UPROPERTY(EditAnywhere, BlueprintReadWrite)
         EItemType Type;
 
-    UPROPERTY(EditAnywhere)
+    UPROPERTY(EditAnywhere, BlueprintReadWrite)
         bool bIsStackable;
 
-    UPROPERTY(EditAnywhere)
+    UPROPERTY(EditAnywhere, BlueprintReadWrite)
         bool bIsDroppable;
 
-    UPROPERTY(EditAnywhere)
+    UPROPERTY(EditAnywhere, BlueprintReadWrite)
         bool bIsConsumable;
 
-    UPROPERTY(EditAnywhere)
+    UPROPERTY(EditAnywhere, BlueprintReadWrite)
         UTexture2D* Image;
 };
 
@@ -292,10 +292,10 @@ public:
     FModifier(EStat Type, float Value) : Type(Type), Value(Value){}
 
 
-    UPROPERTY(EditAnywhere)
+    UPROPERTY(EditAnywhere, BlueprintReadWrite)
         EStat Type;
 
-    UPROPERTY(EditAnywhere)
+    UPROPERTY(EditAnywhere, BlueprintReadWrite)
         float Value;
 };
 
@@ -305,10 +305,10 @@ struct FMontageActionRow : public FTableRowBase
     GENERATED_BODY()
 
 public:
-    UPROPERTY(EditAnywhere)
+    UPROPERTY(EditAnywhere, BlueprintReadWrite)
         EMontageAction Type;
 
-    UPROPERTY(EditAnywhere)
+    UPROPERTY(EditAnywhere, BlueprintReadWrite)
         TArray<UAnimMontage*> Montages;
 };
 
@@ -325,12 +325,12 @@ public:
         :Type(Type), BaseValue(BaseValue), ModifiersValue(ModifiersValue)
     {}
 
-    UPROPERTY(EditAnywhere)
+    UPROPERTY(EditAnywhere, BlueprintReadWrite)
         EStat Type;
 
-    UPROPERTY(EditAnywhere)
+    UPROPERTY(EditAnywhere, BlueprintReadWrite)
         float BaseValue;
 
-    UPROPERTY(EditAnywhere)
+    UPROPERTY(EditAnywhere, BlueprintReadWrite)
         float ModifiersValue;
 };

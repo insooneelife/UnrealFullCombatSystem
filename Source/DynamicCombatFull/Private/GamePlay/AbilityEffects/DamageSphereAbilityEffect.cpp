@@ -13,12 +13,6 @@ ADamageSphereAbilityEffect::ADamageSphereAbilityEffect()
     Impulse = 20000.0f;
 }
 
-// Called when the game starts or when spawned
-void ADamageSphereAbilityEffect::BeginPlay()
-{
-	Super::BeginPlay();
-	
-}
 
 void ADamageSphereAbilityEffect::GetTraceObjects(TArray<FHitResult>& OutHits) const
 {

@@ -15,18 +15,9 @@ class AMasterPoseDisplayedItem : public ADisplayedItem
 	GENERATED_BODY()
 
 protected:
-    // Called when the game starts or when spawned
-    virtual void BeginPlay() override;
 
 public:
-
     virtual void NotifyActorBeginOverlap(AActor* OtherActor) override { Super::NotifyActorBeginOverlap(OtherActor); }
-
-    virtual void OnConstruction(const FTransform& Transform) override;
-
-    // Called every frame
-    virtual void Tick(float DeltaTime) override { Super::Tick(DeltaTime); }
-
 
     virtual bool Attach() override;
 };

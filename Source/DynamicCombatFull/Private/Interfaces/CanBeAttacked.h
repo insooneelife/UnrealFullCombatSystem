@@ -8,7 +8,7 @@
 #include "CanBeAttacked.generated.h"
 
 // This class does not need to be modified.
-UINTERFACE(MinimalAPI)
+UINTERFACE(BlueprintType, MinimalAPI)
 class UCanBeAttacked : public UInterface
 {
 	GENERATED_BODY()
@@ -23,8 +23,12 @@ class ICanBeAttacked
 
 	// Add interface functions to this class. This is the class that will be inherited to implement this interface.
 public:
+    UFUNCTION(BlueprintNativeEvent, BlueprintCallable, meta = (DisplayName = "TakeDamage", ScriptName = "TakeDamage"))
+    bool K2_TakeDamage(const FHitData& InHitData, EAttackResult& OutResult);
 
-    virtual bool TakeDamage(const FHitData& HitData, EAttackResult& OutResult) = 0;
+    virtual bool K2_TakeDamage_Implementation(const FHitData& InHitData, EAttackResult& OutResult) = 0;
+
+    virtual bool TakeDamage(const FHitData& InHitData, EAttackResult& OutResult) = 0;
 
     virtual bool IsAlive() const = 0;
 

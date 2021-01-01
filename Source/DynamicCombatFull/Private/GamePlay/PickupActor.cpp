@@ -24,17 +24,19 @@ APickupActor::APickupActor()
 
     CreateUserWidgetClass = LoadedClass;
 
-    Scene = CreateDefaultSubobject<USceneComponent>("Scene");
+    RootComponent = CreateDefaultSubobject<USceneComponent>("Scene");
     Box = CreateDefaultSubobject<UBoxComponent>("Box");
-    Box->AttachTo(Scene);
+    Box->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
+
     ParticleSystem = CreateDefaultSubobject<UParticleSystemComponent>("ParticleSystem");
-    ParticleSystem->SetupAttachment(Box);
+    ParticleSystem->AttachToComponent(Box, FAttachmentTransformRules::KeepRelativeTransform);
 }
 
-// Called when the game starts or when spawned
-void APickupActor::BeginPlay()
+void APickupActor::Init(FName InName, const TMap<TSubclassOf<UItemBase>, int>& InItems)
 {
-    Super::BeginPlay();
+    Name = InName;
+    Items = InItems;
+
     RemoveInvalidItems();
     DestroyActorIfEmpty();
 }

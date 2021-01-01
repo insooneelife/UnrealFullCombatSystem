@@ -21,12 +21,6 @@ ADamageAbilityEffectBase::ADamageAbilityEffectBase()
     Impulse = 20000.0f;
 }
 
-// Called when the game starts or when spawned
-void ADamageAbilityEffectBase::BeginPlay()
-{
-    Super::BeginPlay();
-}
-
 void ADamageAbilityEffectBase::Init(float InDamageRadius, float InDamage, float InImpulse)
 {
     DamageRadius = InDamageRadius;

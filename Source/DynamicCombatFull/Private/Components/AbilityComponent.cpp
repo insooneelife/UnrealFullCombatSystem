@@ -104,14 +104,12 @@ void UAbilityComponent::UpdateAbilityFromEquipment()
 
 void UAbilityComponent::AbilityPressed()
 {
-    UE_LOG(LogTemp, Error, TEXT("AbilityPressed !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"));
     if (IsAbilityValid())
     {
         SetIsPressed(true);
 
         if (CurrentAbility->IsValidLowLevel())
         {
-            UE_LOG(LogTemp, Error, TEXT("AbilityPressed Pressed !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"));
             CurrentAbility->Pressed();
         }
     }
@@ -119,14 +117,11 @@ void UAbilityComponent::AbilityPressed()
 
 void UAbilityComponent::AbilityReleased()
 {
-    UE_LOG(LogTemp, Error, TEXT("AbilityReleased !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"));
     if (GetIsPressed())
     {
         SetIsPressed(false);
-
         if (CurrentAbility->IsValidLowLevel())
         {
-            UE_LOG(LogTemp, Error, TEXT("AbilityReleased Released !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"));
             CurrentAbility->Released();
         }
     }
@@ -160,29 +155,27 @@ void UAbilityComponent::AbilityChanged()
 }
 
 
-void UAbilityComponent::ShowSpellIndicator(FVector Location, float Radius, UMaterialInterface* Material)
+void UAbilityComponent::ShowSpellIndicator(FVector InLocation, float InRadius, UMaterialInterface* InMaterial)
 {
     if (SpellIndicator->IsValidLowLevel())
     {
-        UpdateSpellIndicatorLocation(Location);
+        UpdateSpellIndicatorLocation(InLocation);
 
-        SpellIndicator->SetRadius(Radius);
-        SpellIndicator->SetMaterial(Material);
+        SpellIndicator->SetRadius(InRadius);
+        SpellIndicator->SetMaterial(InMaterial);
 
     }
     else
     {
         FActorSpawnParameters SpawnParameters = FActorSpawnParameters();
-
         SpawnParameters.Owner = GetOwner();
         SpawnParameters.Instigator = GetOwner()->GetInstigator();
 
         ASpellIndicatorActor* SpawnedActor =
             GetWorld()->SpawnActor<ASpellIndicatorActor>(
-                SpawnIndicatorClass, FTransform(FQuat::Identity, Location), SpawnParameters);
+                SpawnIndicatorClass, FTransform(FQuat::Identity, InLocation), SpawnParameters);
 
-        SpawnedActor->SetRadius(Radius);
-        SpawnedActor->SetMaterial(Material);
+        SpawnedActor->Init(InRadius, InMaterial);
 
         SpellIndicator = SpawnedActor;
     }

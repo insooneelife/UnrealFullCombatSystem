@@ -20,8 +20,6 @@ public:
 	ABuffAbilityEffect();
 
 protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
 
 public:
     void Init(float InDuration, EStat InStatType, float InValue, FLinearColor InColor);

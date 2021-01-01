@@ -18,11 +18,9 @@ public:
     APlayerAbilityBase() {}
 
 protected:
-    // Called when the game starts or when spawned
-    virtual void BeginPlay() override;
+    virtual void NativeInit(UAbilityComponent* InAbilityComponent) override;
 
 public:
-    virtual void Init(UAbilityComponent* InAbilityComponent) override;
 
     UFUNCTION(BlueprintCallable)
     FTransform GetSurfaceTransform(float Range, float MaxSurfaceAngle, float MaxHeightDeviation) const;

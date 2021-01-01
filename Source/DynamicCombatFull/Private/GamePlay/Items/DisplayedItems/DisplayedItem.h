@@ -21,14 +21,10 @@ public:
 	ADisplayedItem();
 
 protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
-
-    virtual void Init_Impl(UEquipmentComponent* InEquipmentComponent, EItemType InType, int InSlotIndex);
+    virtual void NativeInit(UEquipmentComponent* InEquipmentComponent, EItemType InType, int InSlotIndex);
 
 public:
     virtual void NotifyActorBeginOverlap(AActor* OtherActor) override { Super::NotifyActorBeginOverlap(OtherActor); }
-    virtual void OnConstruction(const FTransform& Transform) override;
 
     void Init(UEquipmentComponent* InEquipmentComponent, EItemType InType, int InSlotIndex);
 
@@ -50,8 +46,6 @@ public:
     int GetSlotIndex() const { return SlotIndex; }
 
 protected:
-    UPROPERTY(EditAnywhere)
-        USceneComponent* Scene;
 
     UPROPERTY(EditAnywhere, Category = "Sockets")
         FName AttachmentSocket;

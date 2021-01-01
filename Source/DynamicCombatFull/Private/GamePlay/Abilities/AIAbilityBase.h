@@ -16,11 +16,9 @@ class AAIAbilityBase : public AAbilityBase
 {
 	GENERATED_BODY()
 protected:
-    // Called when the game starts or when spawned
-    virtual void BeginPlay() override;
+    virtual void NativeInit(UAbilityComponent* InAbilityComponent) override;
 
 public:
-    virtual void Init(UAbilityComponent* InAbilityComponent) override;
 
     FVector GetTargetLoc() const;
     AActor* GetTarget() const;

@@ -16,12 +16,6 @@ ASummonedItemAbilityEffect::ASummonedItemAbilityEffect()
     Amount = 1;
 }
 
-// Called when the game starts or when spawned
-void ASummonedItemAbilityEffect::BeginPlay()
-{
-	Super::BeginPlay();
-}
-
 // Called every frame
 void ASummonedItemAbilityEffect::Tick(float DeltaTime)
 {

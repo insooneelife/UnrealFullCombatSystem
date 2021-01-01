@@ -17,14 +17,12 @@ public:
 	ADamageSphereAbilityEffect();
 
 protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
 
 public:
     virtual void GetTraceObjects(TArray<FHitResult>& OutHits) const override;
 
     UFUNCTION(BlueprintCallable, meta = (DisplayName = "Init", ScriptName = "Init"))
-        void K2_Init(float InDamageRadius, float InDamage, float InImpulse) 
+    void K2_Init(float InDamageRadius, float InDamage, float InImpulse) 
     {
         Super::Init(InDamageRadius, InDamage, InImpulse); 
     }
