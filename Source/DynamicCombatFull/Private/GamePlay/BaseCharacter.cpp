@@ -116,7 +116,6 @@ ABaseCharacter::ABaseCharacter()
     PlayerUnarmedMontages =
         GameUtils::LoadAssetObject<UDataTable>("/Game/DynamicCombatSystem/DataTables/PlayerUnarmedMontages");
 
-    
     StateManager = CreateDefaultSubobject<UStateManagerComponent>("StateManager");
     InputBuffer = CreateDefaultSubobject<UInputBufferComponent>("InputBuffer");
     MeleeCollisionHandler = CreateDefaultSubobject<UCollisionHandlerComponent>("MeleeCollisionHandler");
@@ -157,8 +156,8 @@ void ABaseCharacter::BeginPlay()
     InGameWidget->AddToViewport();
     CreateKeybindings();
 
-    FTimerHandle TimerHandle;
-    GetWorld()->GetTimerManager().SetTimer(TimerHandle, this, &ABaseCharacter::CheckForInteractable, 0.1f, true);
+    GetWorld()->GetTimerManager().SetTimer(
+        CheckForInteractableTimerHandle, this, &ABaseCharacter::CheckForInteractable, 0.1f, true);
 
     Effects->OnEffectApplied.AddDynamic(this, &ABaseCharacter::OnEffectApplied);
     Effects->OnEffectRemoved.AddDynamic(this, &ABaseCharacter::OnEffectRemoved);
@@ -204,7 +203,7 @@ void ABaseCharacter::OnConstruction(const FTransform& Transform)
     UArrowComponent* ArrowComp = Cast<UArrowComponent>(GetComponentByClass(UArrowComponent::StaticClass()));
     TargetingArrow = ArrowComp;
 
-    if (!TargetingArrow->IsValidLowLevel())
+    if (!GameUtils::IsValid(TargetingArrow))
     {
         UE_LOG(LogTemp, Error, TEXT("TargetingArrow is not valid!"));
     }
@@ -212,7 +211,7 @@ void ABaseCharacter::OnConstruction(const FTransform& Transform)
     UCameraComponent* Camera = Cast<UCameraComponent>(GetComponentByClass(UCameraComponent::StaticClass()));
     FollowCamera = Camera;
 
-    if (!FollowCamera->IsValidLowLevel())
+    if (!GameUtils::IsValid(FollowCamera))
     {
         UE_LOG(LogTemp, Error, TEXT("FollowCamera is not valid!"));
     }
@@ -220,7 +219,7 @@ void ABaseCharacter::OnConstruction(const FTransform& Transform)
     USpringArmComponent* Boom = Cast<USpringArmComponent>(GetComponentByClass(USpringArmComponent::StaticClass()));
     CameraBoom = Boom;
 
-    if (!CameraBoom->IsValidLowLevel())
+    if (!GameUtils::IsValid(CameraBoom))
     {
         UE_LOG(LogTemp, Error, TEXT("CameraBoom is not valid!"));
     }
@@ -232,7 +231,8 @@ void ABaseCharacter::OnConstruction(const FTransform& Transform)
 
     UAudioComponent* Audio = Cast<UAudioComponent>(GetComponentByClass(UAudioComponent::StaticClass()));
     EffectsAudio = Audio;
-    if (!EffectsAudio->IsValidLowLevel())
+
+    if (!GameUtils::IsValid(EffectsAudio))
     {
         UE_LOG(LogTemp, Error, TEXT("EffectsAudio is not valid!"));
     }
@@ -390,17 +390,16 @@ void ABaseCharacter::OnEffectRemoved(EEffectType InType)
 
         InputBuffer->CloseInputBuffer();
     }
-
 }
 
-void ABaseCharacter::OnHit(const FHitResult& Hit)
+// on hit melee attack
+void ABaseCharacter::OnHit(const FHitResult& InHit)
 {
-    FVector HitLocation = Hit.Location;
-    FVector HitNormal = Hit.Normal;
-    AActor* HitActor = Hit.GetActor();
+    FVector HitLocation = InHit.Location;
+    FVector HitNormal = InHit.Normal;
+    AActor* HitActor = InHit.GetActor();
     ICanBeAttacked* CanBeAttacked = Cast<ICanBeAttacked>(HitActor);
-
-    FHitData HitData = MakeMeleeHitData(Hit.GetActor());
+    FHitData HitData = MakeMeleeHitData(InHit.GetActor());
 
     if (CanBeAttacked != nullptr)
     {
@@ -417,7 +416,7 @@ void ABaseCharacter::OnHit(const FHitResult& Hit)
             UEffectsComponent* EffectsComponent =
                 Cast<UEffectsComponent>(HitActor->GetComponentByClass(UEffectsComponent::StaticClass()));
 
-            if (EffectsComponent->IsValidLowLevel())
+            if (GameUtils::IsValid(EffectsComponent))
             {
                 EffectsComponent->ApplyEffect(EEffectType::Stun, 2.0f, EApplyEffectMethod::Replace, this);
             }
@@ -432,7 +431,7 @@ void ABaseCharacter::OnCollisionActivated(ECollisionPart CollisionPart)
         EItemType ItemType = Equipment->GetSelectedMainHandType();
         ADisplayedItem* DisplayedItem = Equipment->GetDisplayedItem(ItemType, 0);
 
-        if (DisplayedItem->IsValidLowLevel())
+        if (GameUtils::IsValid(DisplayedItem))
         {
             MeleeCollisionHandler->SetCollisionMesh(
                 DisplayedItem->GetPrimaryComponent(), DisplayedItem->GetPrimaryComponent()->GetAllSocketNames());
@@ -874,7 +873,7 @@ void ABaseCharacter::OnActionPressed_Interact()
 {
     if (CanOpenUI())
     {
-        if (InteractionActor->IsValidLowLevel())
+        if (GameUtils::IsValid(InteractionActor))
         {
             IIsInteractable* IsInteractable = Cast<IIsInteractable>(InteractionActor);
 
@@ -922,7 +921,7 @@ void ABaseCharacter::CheckForInteractable()
     }
     else
     {
-        if (InteractionActor->IsValidLowLevel())
+        if (InteractionActor != nullptr)
         {
             InteractionActor = nullptr;
             InGameWidget->GetInteractionMessage()->UpdateWidget(TEXT(""));
@@ -1140,11 +1139,9 @@ void ABaseCharacter::ShootArrow()
     if (CanBowAttack())
     {
         FStoredItem Item = Equipment->GetActiveItem(EItemType::Arrows, 0);
-        GameUtils::PrintStoredItem(Item);
-
         UArrowItem* ArrowItem = Item.ItemClass->GetDefaultObject<UArrowItem>();
 
-        if (!ArrowItem->IsValidLowLevel())
+        if (!GameUtils::IsValid(ArrowItem))
         {
             UE_LOG(LogTemp, Error, TEXT("ArrowItem is not valid!  Item Id : %s"), *Item.Id.ToString());
             GameUtils::PrintStoredItem(Item);
@@ -1153,7 +1150,7 @@ void ABaseCharacter::ShootArrow()
 
         TSubclassOf<AActor> ProjectileClass = ArrowItem->GetProjectile();
 
-        if (!ProjectileClass->IsValidLowLevel())
+        if (!UKismetSystemLibrary::IsValidClass(ProjectileClass))
         {
             UE_LOG(LogTemp, Error, TEXT("ProjectileClass is not valid!  Item Id : %s"), *Item.Id.ToString());
             GameUtils::PrintStoredItem(Item);
@@ -1170,7 +1167,7 @@ void ABaseCharacter::ShootArrow()
         AArrowProjectileBase* ProjectileBase =
             GetWorld()->SpawnActor<AArrowProjectileBase>(ProjectileClass, SpawnTransform, SpawnInfo);
 
-        if (!ProjectileBase->IsValidLowLevel())
+        if (!GameUtils::IsValid(ProjectileBase))
         {
             UE_LOG(LogTemp, Error, TEXT("Projectile spawn failed!"));
             return;
@@ -1189,7 +1186,7 @@ void ABaseCharacter::ShootArrow()
         int MontageIndex = Equipment->AreArrowsEquipped() ? 0 : 1;
         UAnimMontage* AnimMontage = MontageManager->GetMontageForAction(EMontageAction::ShootArrow, MontageIndex);
 
-        if (AnimMontage->IsValidLowLevel())
+        if (GameUtils::IsValid(AnimMontage))
         {
             PlayAnimMontage(AnimMontage);
         }
@@ -1256,7 +1253,7 @@ void ABaseCharacter::OnValueChanged_ExtendedMana(float NewValue, float MaxValue)
 
 void ABaseCharacter::AbilityPressed()
 {
-    if (AbilityComponent->IsAbilityValid() &&
+    if (AbilityComponent->IsCurrentAbilityValid() &&
         Equipment->IsInCombat() &&
         (ExtendedMana->GetCurrentValue() > AbilityComponent->GetManaCost()))
     {
@@ -1393,7 +1390,8 @@ void ABaseCharacter::OnMouseReleased_Thumb()
 void ABaseCharacter::OnAbilityChanged(AAbilityBase* NewAbility)
 {
     UpdateAbilityCrosshair();
-    if (NewAbility->IsValidLowLevel())
+
+    if (GameUtils::IsValid(NewAbility))
     {
         ResetAimingMode();
     }
@@ -1598,7 +1596,7 @@ void ABaseCharacter::ApplyHitImpulseToCharacter(AActor* HitActor, FVector HitNor
 {
     ACharacter* Character = Cast<ACharacter>(HitActor);
 
-    if (Character->IsValidLowLevel())
+    if (GameUtils::IsValid(Character))
     {
         if (Character->GetMesh()->IsAnySimulatingPhysics())
         {
@@ -1619,7 +1617,7 @@ void ABaseCharacter::MeleeAttack(EMeleeAttackType InType)
         UAnimMontage* AnimMontage = GetMeleeAttackMontage(MeleeAttackType);
         FString EnumStr = GameUtils::GetEnumValueAsString("EMeleeAttackType", MeleeAttackType);
 
-        if (AnimMontage->IsValidLowLevel())
+        if (GameUtils::IsValid(AnimMontage))
         {
             float Value = StatsManager->GetStatValue(EStat::AttackSpeed, true);
             float Duration = PlayAnimMontage(AnimMontage, Value);
@@ -1648,7 +1646,7 @@ void ABaseCharacter::Roll()
 
         UAnimMontage* AnimMontage = GetRollMontage();
 
-        if (AnimMontage->IsValidLowLevel())
+        if (GameUtils::IsValid(AnimMontage))
         {
             PlayAnimMontage(AnimMontage);
             ExtendedStamina->ModifyStat(RollStaminaCost * -1.0f, true);
@@ -1685,7 +1683,7 @@ void ABaseCharacter::ToggleCombat()
         EMontageAction Action = Equipment->IsInCombat() ? EMontageAction::DisarmWeapon : EMontageAction::DrawWeapon;
         UAnimMontage* AnimMontage = MontageManager->GetMontageForAction(Action, 0);
 
-        if (AnimMontage->IsValidLowLevel())
+        if (GameUtils::IsValid(AnimMontage))
         {
             PlayAnimMontage(AnimMontage);
         }
@@ -1704,7 +1702,7 @@ void ABaseCharacter::Parry()
         StateManager->SetState(EState::Parrying);
         UAnimMontage* AnimMontage = GetParryMontage();
 
-        if (AnimMontage->IsValidLowLevel())
+        if (GameUtils::IsValid(AnimMontage))
         {
             float Value = StatsManager->GetStatValue(EStat::AttackSpeed, true);
             PlayAnimMontage(AnimMontage, Value);
@@ -1739,7 +1737,7 @@ bool ABaseCharacter::AttemptBackstab()
                 UEffectsComponent* EffectsComponent = 
                     Cast<UEffectsComponent>(HitActor->GetComponentByClass(UEffectsComponent::StaticClass()));
 
-                if (EffectsComponent->IsValidLowLevel())
+                if (GameUtils::IsValid(EffectsComponent))
                 {
                     bool bApplied = EffectsComponent->ApplyBackstabEffect(
                         1.0f, EApplyEffectMethod::Replace, this, StatsManager->GetDamage() * 3.0f);
@@ -1750,7 +1748,7 @@ bool ABaseCharacter::AttemptBackstab()
                         StateManager->SetState(EState::Backstabbing);
                         UAnimMontage* AnimMontage = MontageManager->GetMontageForAction(EMontageAction::Backstab, 0);
 
-                        if (AnimMontage->IsValidLowLevel())
+                        if (GameUtils::IsValid(AnimMontage))
                         {
                             PlayAnimMontage(AnimMontage);
                             ExtendedStamina->ModifyStat(-40.0f, true);
@@ -1776,7 +1774,7 @@ void ABaseCharacter::UseItem(EItemType InType)
     {
         FStoredItem ActiveItem = Equipment->GetActiveItem(InType, 0);
 
-        if (ActiveItem.ItemClass->IsValidLowLevel())
+        if(UKismetSystemLibrary::IsValidClass(ActiveItem.ItemClass))
         {
             UItemBase* ItemBase = NewObject<UItemBase>(this, ActiveItem.ItemClass);
 
@@ -1785,7 +1783,7 @@ void ABaseCharacter::UseItem(EItemType InType)
             {
                 UAnimMontage* AnimMontage = ItemHasUseMontage->GetUseMontage();
 
-                if (AnimMontage->IsValidLowLevel())
+                if (GameUtils::IsValid(AnimMontage))
                 {
                     StateManager->SetState(EState::Interacting);
                     float Duration = PlayAnimMontage(AnimMontage);
@@ -1896,7 +1894,7 @@ UAnimMontage* ABaseCharacter::GetRollMontage() const
         RollDirection = EMontageAction::RollBackward;
 
         UAnimMontage* AnimMontage = MontageManager->GetMontageForAction(RollDirection, 0);
-        if (AnimMontage->IsValidLowLevel())
+        if (GameUtils::IsValid(AnimMontage))
         {
             return AnimMontage;
         }
@@ -1929,7 +1927,7 @@ UAnimMontage* ABaseCharacter::GetStunMontage(EDirection Direction) const
     int Index = MontageManager->GetRandomMontageIndex(StunDirection);
     UAnimMontage* AnimMontage = MontageManager->GetMontageForAction(StunDirection, Index);
 
-    if (AnimMontage->IsValidLowLevel())
+    if (GameUtils::IsValid(AnimMontage))
     {
         return AnimMontage;
     }
@@ -1989,7 +1987,8 @@ void ABaseCharacter::ResetAimingMode()
 void ABaseCharacter::ShowCrosshair(UTexture2D* InTexture)
 {
     GetWorld()->GetTimerManager().ClearTimer(HideCrosshairTimerHandle);
-    if (InGameWidget->IsValidLowLevel())
+
+    if (GameUtils::IsValid(InGameWidget))
     {
         InGameWidget->GetCrosshair()->SetVisibility(ESlateVisibility::Visible);
         UTexture2D* FinalTexture = UKismetSystemLibrary::IsValid(InTexture) ? InTexture : DefaultCrosshairTextureObject;
@@ -1999,7 +1998,7 @@ void ABaseCharacter::ShowCrosshair(UTexture2D* InTexture)
 
 void ABaseCharacter::HideCrosshair()
 {
-    if (InGameWidget->IsValidLowLevel())
+    if (GameUtils::IsValid(InGameWidget))
     {
         InGameWidget->GetCrosshair()->SetVisibility(ESlateVisibility::Hidden);
     }
@@ -2123,7 +2122,7 @@ void ABaseCharacter::Block()
 {
     UAnimMontage* AnimMontage = GetBlockMontage();
 
-    if (AnimMontage->IsValidLowLevel())
+    if (GameUtils::IsValid(AnimMontage))
     {
         PlayAnimMontage(AnimMontage);
         ResetMeleeAttackCounter();
@@ -2133,7 +2132,7 @@ void ABaseCharacter::Block()
 void ABaseCharacter::Stunned()
 {
     UAnimMontage* AnimMontage = GetStunMontage(ReceivedHitDirection);
-    if (AnimMontage->IsValidLowLevel())
+    if (GameUtils::IsValid(AnimMontage))
     {
         float Duration = PlayAnimMontage(AnimMontage);
         Effects->AdjustEffectTime(EEffectType::Stun, Duration * 0.8f);
@@ -2160,7 +2159,8 @@ void ABaseCharacter::Death()
     {
         EItemType MainHandType = Equipment->GetSelectedMainHandType();
         ADisplayedItem* MainHandItem = Equipment->GetDisplayedItem(MainHandType, 0);
-        if (MainHandItem->IsValidLowLevel())
+
+        if (GameUtils::IsValid(MainHandItem))
         {
             MainHandItem->SimulatePhysics();
         }
@@ -2168,7 +2168,8 @@ void ABaseCharacter::Death()
         if (!Equipment->IsSlotHidden(EItemType::Shield, 0))
         {
             ADisplayedItem* ShieldItem = Equipment->GetDisplayedItem(EItemType::Shield, 0);
-            if (ShieldItem->IsValidLowLevel())
+
+            if (GameUtils::IsValid(ShieldItem))
             {
                 ShieldItem->SimulatePhysics();
             }
@@ -2180,7 +2181,7 @@ void ABaseCharacter::Parried()
 {
     UAnimMontage* AnimMontage = GetParriedMontage();
 
-    if (AnimMontage->IsValidLowLevel())
+    if (GameUtils::IsValid(AnimMontage))
     {
         float Duration = PlayAnimMontage(AnimMontage);
         Effects->AdjustEffectTime(EEffectType::Parried, Duration * 0.8f);
@@ -2195,7 +2196,7 @@ void ABaseCharacter::Impact()
 {
     UAnimMontage* AnimMontage = MontageManager->GetMontageForAction(EMontageAction::Impact, 0);
 
-    if (AnimMontage->IsValidLowLevel())
+    if (GameUtils::IsValid(AnimMontage))
     {
         float Duration = PlayAnimMontage(AnimMontage);
         Effects->AdjustEffectTime(EEffectType::Impact, Duration * 0.8f);
@@ -2210,7 +2211,7 @@ void ABaseCharacter::Backstabbed()
 {
     UAnimMontage* AnimMontage = MontageManager->GetMontageForAction(EMontageAction::Backstabbed, 0);
 
-    if (AnimMontage->IsValidLowLevel())
+    if (GameUtils::IsValid(AnimMontage))
     {
         float Duration = PlayAnimMontage(AnimMontage);
         Effects->AdjustEffectTime(EEffectType::Backstab, Duration * 0.8f);
@@ -2313,7 +2314,7 @@ bool ABaseCharacter::TakeDamage(const FHitData& HitData, EAttackResult& OutResul
                 UEffectsComponent* EffectsComponent =
                     Cast<UEffectsComponent>(HitData.DamageCauser->GetComponentByClass(UEffectsComponent::StaticClass()));
 
-                if (EffectsComponent->IsValidLowLevel())
+                if (GameUtils::IsValid(EffectsComponent))
                 {
                     bool bApplied = 
                         EffectsComponent->ApplyEffect(EEffectType::Parried, 1.0f, EApplyEffectMethod::Replace, this);
@@ -2347,7 +2348,7 @@ bool ABaseCharacter::TakeDamage(const FHitData& HitData, EAttackResult& OutResul
                         UEffectsComponent* EffectsComponent = Cast<UEffectsComponent>(
                             HitData.DamageCauser->GetComponentByClass(UEffectsComponent::StaticClass()));
 
-                        if (EffectsComponent->IsValidLowLevel())
+                        if (GameUtils::IsValid(EffectsComponent))
                         {
                             EffectsComponent->ApplyEffect(EEffectType::Impact, 1.0f, EApplyEffectMethod::Replace, this);
                         }
@@ -2412,7 +2413,7 @@ FRotator ABaseCharacter::GetDesiredRotation() const
 {
     if (IsStateEqualPure(EState::Backstabbing))
     {
-        if (BackstabbedActor->IsValidLowLevel())
+        if (GameUtils::IsValid(BackstabbedActor))
         {
             float Yaw = 
                 UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), BackstabbedActor->GetActorLocation()).Yaw;

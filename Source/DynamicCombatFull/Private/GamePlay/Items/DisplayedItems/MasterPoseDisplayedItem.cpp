@@ -3,6 +3,7 @@
 
 #include "MasterPoseDisplayedItem.h"
 #include "GameFramework/Character.h"
+#include "GameCore/GameUtils.h"
 
 bool AMasterPoseDisplayedItem::Attach()
 {
@@ -11,7 +12,8 @@ bool AMasterPoseDisplayedItem::Attach()
     if (bResult)
     {
         USkeletalMeshComponent* Comp = Cast<USkeletalMeshComponent>(GetPrimaryComponent());
-        if (Comp != nullptr)
+
+        if (GameUtils::IsValid(Comp))
         {
             ACharacter* Character = Cast<ACharacter>(GetOwner());
 

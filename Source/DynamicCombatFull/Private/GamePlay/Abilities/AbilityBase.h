@@ -23,7 +23,6 @@ public:
 	AAbilityBase();
 
 protected:
-	// Called when the game starts or when spawned
     virtual void NativeInit(UAbilityComponent* InAbilityComponent);
 
 public:

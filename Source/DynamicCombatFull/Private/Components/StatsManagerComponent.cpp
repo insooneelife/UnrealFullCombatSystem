@@ -8,6 +8,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "Interfaces/ItemHasModifiers.h"
 #include "GameCore/DefaultGameInstance.h"
+#include "GameCore/GameUtils.h"
 #include "Components/ExtendedStatComponent.h"
 #include "GamePlay/Items/ObjectItems/ItemBase.h"
 
@@ -45,7 +46,7 @@ void UStatsManagerComponent::BeginPlay()
 
 void UStatsManagerComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
-    if (EquipmentComponent->IsValidLowLevel())
+    if (GameUtils::IsValid(EquipmentComponent))
     {
         EquipmentComponent->OnActiveItemChanged.RemoveDynamic(this, &UStatsManagerComponent::OnActiveItemChanged);
         EquipmentComponent->OnSlotHiddenChanged.RemoveDynamic(this, &UStatsManagerComponent::OnSlotHiddenChanged);
@@ -89,7 +90,7 @@ void UStatsManagerComponent::Init()
     InitialBlockValue = GetStatValue(EStat::Block, false);
     EquipmentComponent = Cast<UEquipmentComponent>(GetOwner()->GetComponentByClass(UEquipmentComponent::StaticClass()));
 
-    if (EquipmentComponent->IsValidLowLevel())
+    if (GameUtils::IsValid(EquipmentComponent))
     {
         EquipmentComponent->OnActiveItemChanged.AddDynamic(this, &UStatsManagerComponent::OnActiveItemChanged);
         EquipmentComponent->OnSlotHiddenChanged.AddDynamic(this, &UStatsManagerComponent::OnSlotHiddenChanged);
@@ -205,7 +206,8 @@ float UStatsManagerComponent::GetDamage() const
 
     if (UKismetMathLibrary::RandomFloatInRange(1.0f, 100.0f) <= GetStatValue(EStat::CritChance, true))
     {
-        Damage *= GetStatValue(EStat::CritMultiplier, true);
+        float CritMultiplier = GetStatValue(EStat::CritMultiplier, true);
+        Damage *= CritMultiplier;
     }
 
     return UKismetMathLibrary::FTrunc(Damage);
@@ -235,9 +237,9 @@ void UStatsManagerComponent::TakeDamage(float Damage, bool bIgnoreStamina)
     float ArmorVal = Damage * (GetStatValue(EStat::Armor, true) / 100.0f);
     float ReducedDamage = FMath::Clamp(Damage - ArmorVal, 0.0f, Damage - ArmorVal);
         
-    if (HealthStatComp->IsValidLowLevel())
+    if (GameUtils::IsValid(HealthStatComp))
     {
-        if (bIgnoreStamina || !StaminaStatComp->IsValidLowLevel())
+        if (bIgnoreStamina || !GameUtils::IsValid(StaminaStatComp))
         {
             HealthStatComp->ModifyStat(ReducedDamage * -1.0f, true);
 

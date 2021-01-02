@@ -24,38 +24,68 @@ const FItem& GameUtils::GetDefaultItemFromItemClass(TSubclassOf<UItemBase> ItemC
     return DefaultItem->GetItem();
 }
 
-void GameUtils::PrintStoredItem(const FStoredItem& StoredItem)
+void GameUtils::PrintStoredItem(const FStoredItem& InStoredItem)
 {
-    if (StoredItem.ItemClass->IsValidLowLevel())
+    if (UKismetSystemLibrary::IsValidClass(InStoredItem.ItemClass))
     {
         UE_LOG(LogTemp, Error, TEXT("Print StoredItem  Id : %s  ItemClass : %s  Amount : %d"),
-            *StoredItem.Id.ToString(),
-            *StoredItem.ItemClass->GetName(),
-            StoredItem.Amount);
+            *InStoredItem.Id.ToString(),
+            *InStoredItem.ItemClass->GetName(),
+            InStoredItem.Amount);
     }
     else
     {
-        UE_LOG(LogTemp, Error, TEXT("StoredItem is not valid!!  Id : %s"), *StoredItem.Id.ToString());
+        UE_LOG(LogTemp, Error, TEXT("StoredItem is not valid!!  Id : %s"), *InStoredItem.Id.ToString());
     }
 }
 
-void GameUtils::PrintHitResult(const FHitResult& InHit)
+void GameUtils::PrintHitResult(const FHitResult& InHitResult)
 {
-    FVector HitLocation = InHit.Location;
-    FVector HitNormal = InHit.Normal;
-    FVector ImpactPoint = InHit.ImpactPoint;
-    AActor* HitActor = InHit.GetActor();
-    UPrimitiveComponent* HitComponent = InHit.GetComponent();
+    FVector HitLocation = InHitResult.Location;
+    FVector HitNormal = InHitResult.Normal;
+    FVector ImpactPoint = InHitResult.ImpactPoint;
+    AActor* HitActor = InHitResult.GetActor();
+    UPrimitiveComponent* HitComponent = InHitResult.GetComponent();
 
-    UE_LOG(LogTemp, Error, TEXT("Print HitLocation : %s   HitNormal : %s   ImpactPoint : %s   HitActor : %s   HitComponent : %s"),
+    UE_LOG(LogTemp, Error, TEXT("Print HitResult  HitLocation : %s   HitNormal : %s   ImpactPoint : %s   HitActor : %s   HitComponent : %s"),
         *HitLocation.ToString(),
         *HitNormal.ToString(),
         *ImpactPoint.ToString(),
-        HitActor == nullptr ? TEXT("") : *HitActor->GetName(),
-        HitComponent == nullptr ? TEXT("") : *HitComponent->GetName()
+        HitActor == nullptr ? TEXT("null") : *HitActor->GetName(),
+        HitComponent == nullptr ? TEXT("null") : *HitComponent->GetName()
     );
 }
 
 
+void GameUtils::PrintHitData(const FHitData& InHitData)
+{
+    float Damage = InHitData.Damage;
+    FVector HitFromDirection = InHitData.HitFromDirection;
+    bool bCanBeParried = InHitData.bCanBeParried;
+    bool bCanBeBlocked = InHitData.bCanBeBlocked;
+    bool bCanReceiveImpact = InHitData.bCanReceiveImpact;
+    AActor* DamageCauser = InHitData.DamageCauser;
 
+    UE_LOG(LogTemp, Error, TEXT("Print HitData  Damage : %f  HitFromDirection : %s   bCanBeParried : %d   bCanBeBlocked : %d   bCanReceiveImpact : %d   DamageCauser : %s"),
+        Damage,
+        *HitFromDirection.ToString(),
+        bCanBeParried,
+        bCanBeBlocked,
+        bCanReceiveImpact,
+        DamageCauser == nullptr ? TEXT("null") : *DamageCauser->GetName()
+    );
+}
 
+bool GameUtils::IsValid(const UObjectBase* const InObject)
+{
+    if (InObject->IsValidLowLevel())
+    {
+        return true;
+    }
+    else
+    {
+        FDebug::DumpStackTraceToLog();
+        //UE_LOG(LogTemp, Error, TEXT("Is not valid!!"));
+        return false;
+    }
+}

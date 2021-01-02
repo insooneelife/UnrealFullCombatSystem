@@ -7,6 +7,7 @@
 #include "Components/SkeletalMeshComponent.h"
 #include "Particles/ParticleSystemComponent.h"
 #include "GameFramework/Character.h"
+#include "GameCore/GameUtils.h"
 
 // Sets default values
 ADisplayedItem::ADisplayedItem()
@@ -24,7 +25,7 @@ void ADisplayedItem::NativeInit(UEquipmentComponent* InEquipmentComponent, EItem
     Type = InType;
     SlotIndex = InSlotIndex;
 
-    if (GetPrimaryComponent()->IsValidLowLevel())
+    if (GameUtils::IsValid(GetPrimaryComponent()))
     {
         GetPrimaryComponent()->SetCollisionEnabled(ECollisionEnabled::Type::NoCollision);
     }
@@ -43,7 +44,7 @@ UPrimitiveComponent* ADisplayedItem::GetPrimaryComponent() const
         UPrimitiveComponent* Comp = Cast<UPrimitiveComponent>(
             GetComponentByClass(UStaticMeshComponent::StaticClass()));
 
-        if (Comp->IsValidLowLevel())
+        if (Comp != nullptr)
         {
             return Comp;
         }
@@ -53,7 +54,7 @@ UPrimitiveComponent* ADisplayedItem::GetPrimaryComponent() const
         USkeletalMeshComponent* Comp = Cast<USkeletalMeshComponent>(
             GetComponentByClass(USkeletalMeshComponent::StaticClass()));
 
-        if (Comp->IsValidLowLevel())
+        if (Comp != nullptr)
         {
             return Comp;
         }
@@ -63,7 +64,7 @@ UPrimitiveComponent* ADisplayedItem::GetPrimaryComponent() const
         UParticleSystemComponent* Comp = Cast<UParticleSystemComponent>(
             GetComponentByClass(UParticleSystemComponent::StaticClass()));
 
-        if (Comp->IsValidLowLevel())
+        if (Comp != nullptr)
         {
             return Comp;
         }
@@ -74,11 +75,11 @@ UPrimitiveComponent* ADisplayedItem::GetPrimaryComponent() const
 
 bool ADisplayedItem::Attach()
 {
-    if (GetPrimaryComponent()->IsValidLowLevel())
+    if (GameUtils::IsValid(GetPrimaryComponent()))
     {
         ACharacter* Character = Cast<ACharacter>(GetOwner());
 
-        if (Character->IsValidLowLevel())
+        if (GameUtils::IsValid(Character))
         {
             FAttachmentTransformRules AttachmentRules(
                 EAttachmentRule::KeepRelative, EAttachmentRule::KeepRelative, EAttachmentRule::KeepRelative, false);

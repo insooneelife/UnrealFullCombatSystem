@@ -42,9 +42,10 @@ UAnimMontage* UMontageManagerComponent::GetMontageForAction(EMontageAction Actio
 
     if (GetMontage(Action, OutMontageAction))
     {
-        if (OutMontageAction.Montages[Index]->IsValidLowLevel())
+        UAnimMontage* AnimMontage = OutMontageAction.Montages[Index];
+        if (GameUtils::IsValid(AnimMontage))
         {
-            return OutMontageAction.Montages[Index];
+            return AnimMontage;
         }
     }
     return nullptr;

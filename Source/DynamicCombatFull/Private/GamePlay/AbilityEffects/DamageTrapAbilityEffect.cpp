@@ -141,7 +141,7 @@ bool ADamageTrapAbilityEffect::IsImmortal(AActor* InActor) const
     UStateManagerComponent* StatsManagerComp =
         Cast<UStateManagerComponent>(InActor->GetComponentByClass(UStateManagerComponent::StaticClass()));
 
-    if (StatsManagerComp->IsValidLowLevel())
+    if (GameUtils::IsValid(StatsManagerComp))
     {
         if (StatsManagerComp->GetActivityValue(EActivity::IsImmortal))
         {

@@ -39,7 +39,7 @@ void UDissolveComponent::BeginPlay()
 
 void UDissolveComponent::StartDessolve(UPrimitiveComponent* Component, bool bReversed)
 {
-    if (Component->IsValidLowLevel())
+    if (GameUtils::IsValid(Component))
     {
         int LComponentIndex = FindComponent(Component);
         if (LComponentIndex >= 0)
@@ -95,7 +95,8 @@ void UDissolveComponent::DissolveComponents()
     {
         int LIndex = i;
         FDissolvedComponent DissComp = DissolvedComponents[i];
-        if (DissComp.Component->IsValidLowLevel())
+
+        if (GameUtils::IsValid(DissComp.Component))
         {
             if (DissComp.bIsRunning)
             {

@@ -51,7 +51,7 @@ void UItemActionsUI::Close()
 
 void UItemActionsUI::OnClicked_UseButton()
 {
-    if (InventoryComponent->IsValidLowLevel())
+    if (GameUtils::IsValid(InventoryComponent))
     {
         InventoryComponent->UseItem(Item.Id);
         Close();
@@ -60,7 +60,7 @@ void UItemActionsUI::OnClicked_UseButton()
 
 void UItemActionsUI::OnClicked_DropButton()
 {
-    if (InventoryComponent->IsValidLowLevel())
+    if (GameUtils::IsValid(InventoryComponent))
     {
         InventoryComponent->DropItem(Item);
         Close();

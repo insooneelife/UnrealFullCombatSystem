@@ -7,6 +7,7 @@
 #include "Components/ProgressBar.h"
 #include "Components/CanvasPanelSlot.h"
 #include "GameCore/DefaultGameInstance.h"
+#include "GameCore/GameUtils.h"
 #include "Components/ExtendedStatComponent.h"
 
 UStatBarUI::UStatBarUI(const FObjectInitializer& ObjectInitializer)
@@ -51,7 +52,7 @@ void UStatBarUI::OnValueChanged(float InNewValue, float InMaxValue)
 
 void UStatBarUI::Init(UExtendedStatComponent* InStatComp)
 {
-    if (InStatComp->IsValidLowLevel())
+    if (GameUtils::IsValid(InStatComp))
     {
         OnValueChanged(InStatComp->GetCurrentValue(), InStatComp->GetMaxValue());
         InStatComp->OnValueChanged.AddDynamic(this, &UStatBarUI::OnValueChanged);
@@ -70,12 +71,12 @@ void UStatBarUI::SetFillColor(FLinearColor InColor)
 
 void UStatBarUI::UpdateWidth(float InMaxValue)
 {
-    if (GetOwningPlayer()->IsValidLowLevel())
+    if (GameUtils::IsValid(GetOwningPlayer()))
     {
         UCanvasPanelSlot* CanvasSlot = UWidgetLayoutLibrary::SlotAsCanvasSlot(StatSizeBox);
         float MaxClampedValue;
 
-        if (CanvasSlot->IsValidLowLevel())
+        if (CanvasSlot != nullptr)
         {
             MaxClampedValue = 
                 UWidgetLayoutLibrary::GetViewportSize(GetWorld()).X - CanvasSlot->GetPosition().X * 2.0f;

@@ -45,7 +45,7 @@ void UActiveEquipmentSlotUI::NativeConstruct()
     EquipmentComponent =
         Cast<UEquipmentComponent>(GetOwningPlayerPawn()->GetComponentByClass(UEquipmentComponent::StaticClass()));
 
-    if (EquipmentComponent->IsValidLowLevel())
+    if (GameUtils::IsValid(EquipmentComponent))
     {
         FStoredItem ActiveItem = EquipmentComponent->GetActiveItem(SlotType, 0);
         UpdateWidget(ActiveItem);
@@ -59,7 +59,7 @@ void UActiveEquipmentSlotUI::NativeConstruct()
 
 void UActiveEquipmentSlotUI::NativeDestruct()
 {
-    if (EquipmentComponent->IsValidLowLevel())
+    if (GameUtils::IsValid(EquipmentComponent))
     {
         EquipmentComponent->OnActiveItemChanged.RemoveDynamic(this, &UActiveEquipmentSlotUI::OnActiveItemChanged);
         EquipmentComponent->OnSlotHiddenChanged.RemoveDynamic(this, &UActiveEquipmentSlotUI::OnSlotHiddenChanged);
@@ -96,7 +96,7 @@ void UActiveEquipmentSlotUI::UpdateWidget(FStoredItem InItem)
 
 void UActiveEquipmentSlotUI::UpdateAmountText()
 {
-    if (Item.ItemClass->IsValidLowLevel())
+    if(UKismetSystemLibrary::IsValidClass(Item.ItemClass))
     {
         UItemBase* DefaultObject = Cast<UItemBase>(Item.ItemClass->GetDefaultObject());
 

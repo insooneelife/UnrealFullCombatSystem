@@ -5,6 +5,7 @@
 #include "Kismet/KismetMathLibrary.h"
 #include "GamePlay/AI/AICharacter.h"
 #include "GamePlay/AI/BaseAIController.h"
+#include "GameCore/GameUtils.h"
 
 void AAIAbilityBase::NativeInit(UAbilityComponent* InAbilityComponent)
 {
@@ -16,7 +17,7 @@ FVector AAIAbilityBase::GetTargetLoc() const
 {
     AActor* Target = GetTarget();
 
-    if (Target->IsValidLowLevel())
+    if (GameUtils::IsValid(Target))
     {
         return Target->GetActorLocation();
     }
@@ -26,13 +27,13 @@ FVector AAIAbilityBase::GetTargetLoc() const
 
 AActor* AAIAbilityBase::GetTarget() const
 {
-    if (AICharacter->IsValidLowLevel())
+    if (GameUtils::IsValid(AICharacter))
     {
-        if (AICharacter->GetAIController()->IsValidLowLevel())
+        if (GameUtils::IsValid(AICharacter->GetAIController()))
         {
             ABaseAIController* AICon = AICharacter->GetAIController();
 
-            if (AICon->GetTarget()->IsValidLowLevel())
+            if (GameUtils::IsValid(AICon->GetTarget()))
             {
                 return AICon->GetTarget();
             }
@@ -66,7 +67,7 @@ FTransform AAIAbilityBase::GetSurfacePredictedTargetTransform(float Range) const
 {
     AActor* Target = GetTarget();
 
-    if (Target->IsValidLowLevel())
+    if (GameUtils::IsValid(Target))
     {
         return GetSurfaceTargetTransform(Range);
     }

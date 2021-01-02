@@ -34,7 +34,7 @@ void UInventoryItemUI::NativeConstruct()
     Super::NativeConstruct();
 
     SetFocusedImage(false);
-    if (EquipmentComponent->IsValidLowLevel())
+    if (GameUtils::IsValid(EquipmentComponent))
     {
         EquipmentComponent->OnItemInSlotChanged.AddDynamic(this, &UInventoryItemUI::OnItemInSlotChanged);
         EquipmentComponent->OnActiveItemChanged.AddDynamic(this, &UInventoryItemUI::OnActiveItemChanged);

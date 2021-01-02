@@ -44,7 +44,7 @@ void UItemsGridUI::NativeConstruct()
     EquipmentComponent =
         Cast<UEquipmentComponent>(GetOwningPlayerPawn()->GetComponentByClass(UEquipmentComponent::StaticClass()));
 
-    if (InventoryComponent->IsValidLowLevel())
+    if (GameUtils::IsValid(InventoryComponent))
     {
         InventoryComponent->OnItemAdded.AddDynamic(this, &UItemsGridUI::OnItemAdded);
         InventoryComponent->OnItemRemoved.AddDynamic(this, &UItemsGridUI::OnItemRemoved);
@@ -53,7 +53,7 @@ void UItemsGridUI::NativeConstruct()
 
 void UItemsGridUI::NativeDestruct()
 {
-    if (InventoryComponent->IsValidLowLevel())
+    if (GameUtils::IsValid(InventoryComponent))
     {
         InventoryComponent->OnItemAdded.RemoveDynamic(this, &UItemsGridUI::OnItemAdded);
         InventoryComponent->OnItemRemoved.RemoveDynamic(this, &UItemsGridUI::OnItemRemoved);
@@ -135,7 +135,7 @@ void UItemsGridUI::OnItemAdded(FStoredItem InItem)
     FItem DefaultItem = GameUtils::GetDefaultItemFromStoredItem(InItem);
     if (DefaultItem.Type == DisplayedType)
     {
-        if (TargetItemUI->IsValidLowLevel())
+        if (GameUtils::IsValid(TargetItemUI))
         {
             TargetItemUI->UpdateWidget(InItem);
         }
@@ -171,7 +171,7 @@ void UItemsGridUI::OnItemRemoved(FStoredItem InItem)
         }
     }
 
-    if (TargetItemUI->IsValidLowLevel())
+    if (GameUtils::IsValid(TargetItemUI))
     {
         TargetItemUI->UpdateWidget(InItem);
 

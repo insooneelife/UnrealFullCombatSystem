@@ -7,6 +7,7 @@
 #include "Components/EquipmentComponent.h"
 #include "Components/StateManagerComponent.h"
 #include "GamePlay/Items/ObjectItems/ItemBase.h"
+#include "GameCore/GameUtils.h"
 
 // Sets default values
 ASummonedItemAbilityEffect::ASummonedItemAbilityEffect()
@@ -41,7 +42,7 @@ void ASummonedItemAbilityEffect::Init(
     EquipmentComponent =
         Cast<UEquipmentComponent>(GetOwner()->GetComponentByClass(UEquipmentComponent::StaticClass()));
 
-    if (EquipmentComponent->IsValidLowLevel())
+    if (GameUtils::IsValid(EquipmentComponent))
     {
         SummonWeapon();
     }
@@ -90,7 +91,7 @@ void ASummonedItemAbilityEffect::SummonWeapon()
 
 void ASummonedItemAbilityEffect::AttemptToUnsummon()
 {
-    if (StateManager->IsValidLowLevel())
+    if (GameUtils::IsValid(StateManager))
     {
         if (StateManager->GetState() == EState::Idle || StateManager->GetState() == EState::Dead)
         {
@@ -151,7 +152,7 @@ bool ASummonedItemAbilityEffect::IsItemInInventory(const FStoredItem& Item) cons
     UInventoryComponent* Inventory = 
         Cast<UInventoryComponent>(GetOwner()->GetComponentByClass(UInventoryComponent::StaticClass()));
 
-    if (Inventory->IsValidLowLevel())
+    if (GameUtils::IsValid(Inventory))
     {
         int Index = Inventory->FindIndexById(Item.Id);
 

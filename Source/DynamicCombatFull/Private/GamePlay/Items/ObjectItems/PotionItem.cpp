@@ -34,7 +34,8 @@ void UPotionItem::UseItem(AActor* Caller)
     for (UActorComponent* Comp : Comps)
     {
         UExtendedStatComponent* StatComp = Cast<UExtendedStatComponent>(Comp);
-        if (StatComp->IsValidLowLevel())
+
+        if (GameUtils::IsValid(StatComp))
         {
             if (StatComp->GetStatType() == Type)
             {

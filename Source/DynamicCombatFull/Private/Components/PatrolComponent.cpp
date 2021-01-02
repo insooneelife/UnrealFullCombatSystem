@@ -3,6 +3,7 @@
 
 #include "PatrolComponent.h"
 #include "GamePlay/PatrolPathActor.h"
+#include "GameCore/GameUtils.h"
 
 // Sets default values for this component's properties
 UPatrolComponent::UPatrolComponent()
@@ -22,7 +23,7 @@ void UPatrolComponent::BeginPlay()
 
 void UPatrolComponent::UpdatePatrolIndex()
 {
-    if (PatrolPath->IsValidLowLevel())
+    if (GameUtils::IsValid(PatrolPath))
     {
         if (bReverseDirection)
         {
@@ -67,7 +68,7 @@ void UPatrolComponent::UpdatePatrolIndex()
 
 FVector UPatrolComponent::GetSplinePointLocation(int InPointIndex) const
 {
-    if (PatrolPath->IsValidLowLevel())
+    if (GameUtils::IsValid(PatrolPath))
     {
         return PatrolPath->GetPatrolSpline()->GetLocationAtSplinePoint(InPointIndex, ESplineCoordinateSpace::World);
     }
@@ -79,7 +80,7 @@ FVector UPatrolComponent::GetSplinePointLocation(int InPointIndex) const
 
 bool UPatrolComponent::IsPatrolPathValid() const
 {
-    return PatrolPath->IsValidLowLevel();
+    return GameUtils::IsValid(PatrolPath);
 }
 
 

@@ -57,7 +57,7 @@ void APickupActor::RemoveInvalidItems()
         TSubclassOf<UItemBase> Key = Keys[i];
         int Value = Values[i];
 
-        if (!Key->IsValidLowLevel() || Value <= 0)
+        if (!UKismetSystemLibrary::IsValidClass(Key) || Value <= 0)
         {
             Items.Remove(Key);
         }
@@ -72,7 +72,7 @@ void APickupActor::TakeItem(TSubclassOf<UItemBase> ItemClass)
 
         UItemBase* ItemBase = Cast<UItemBase>(ItemClass->GetDefaultObject());
 
-        if (ItemBase->IsValidLowLevel())
+        if (GameUtils::IsValid(ItemBase))
         {
             if (ItemBase->GetItem().bIsStackable)
             {
@@ -105,7 +105,7 @@ void APickupActor::TakeAllItems()
 
         UItemBase* ItemBase = Cast<UItemBase>(ItemClass->GetDefaultObject());
 
-        if (ItemBase->IsValidLowLevel())
+        if (GameUtils::IsValid(ItemBase))
         {
             if (ItemBase->GetItem().bIsStackable)
             {
@@ -142,13 +142,13 @@ void APickupActor::Interact(AActor* InCaller)
     UInventoryComponent* InventoryComp =
         Cast<UInventoryComponent>(InCaller->GetComponentByClass(UInventoryComponent::StaticClass()));
 
-    if (InventoryComp->IsValidLowLevel())
+    if (GameUtils::IsValid(InventoryComp))
     {
         InventoryComponent = InventoryComp;
 
         APlayerController* PlayerCon = UGameplayStatics::GetPlayerController(GetWorld(), 0);
 
-        if (PlayerCon != nullptr)
+        if (GameUtils::IsValid(PlayerCon))
         {
             // call blueprint function
             UUserWidget* Widget = CreatePickupWidget(PlayerCon, CreateUserWidgetClass, this);

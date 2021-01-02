@@ -89,18 +89,18 @@ void UEquipmentComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
     {
         const FDisplayedItems& Item = E.Value;
 
-        for (ADisplayedItem* DisplayItem : Item.DisplayedItems)
+        for (ADisplayedItem* DisplayedItem : Item.DisplayedItems)
         {
-            if (DisplayItem->IsValidLowLevel())
+            if (DisplayedItem != nullptr)
             {
-                DisplayItem->Destroy();
+                DisplayedItem->Destroy();
             }
         }
     }
 
     DisplayedItems.Empty();
 
-    if (Inventory->IsValidLowLevel())
+    if (GameUtils::IsValid(Inventory))
     {
         Inventory->OnItemRemoved.RemoveDynamic(this, &UEquipmentComponent::OnItemModified);
         Inventory->OnItemAdded.RemoveDynamic(this, &UEquipmentComponent::OnItemModified);
@@ -109,7 +109,8 @@ void UEquipmentComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
     if (GetOwner() == UGameplayStatics::GetPlayerCharacter(GetWorld(), 0))
     {
         ADCSGameMode* GameMode = Cast<ADCSGameMode>(UGameplayStatics::GetGameMode(GetWorld()));
-        if (GameMode->IsValidLowLevel())
+
+        if (GameUtils::IsValid(GameMode))
         {
             GameMode->OnGameLoaded.RemoveDynamic(this, &UEquipmentComponent::OnGameLoaded);
         }
@@ -123,7 +124,7 @@ void UEquipmentComponent::Init()
     // inventory events
     Inventory = Cast <UInventoryComponent> (GetOwner()->GetComponentByClass(UInventoryComponent::StaticClass()));
 
-    if (Inventory->IsValidLowLevel())
+    if (GameUtils::IsValid(Inventory))
     {
         Inventory->OnItemRemoved.AddDynamic(this, &UEquipmentComponent::OnItemModified);
         Inventory->OnItemAdded.AddDynamic(this, &UEquipmentComponent::OnItemModified);
@@ -136,7 +137,8 @@ void UEquipmentComponent::Init()
     if (GetOwner() == UGameplayStatics::GetPlayerCharacter(GetWorld(), 0))
     {
         ADCSGameMode* GameMode = Cast<ADCSGameMode>(UGameplayStatics::GetGameMode(GetWorld()));
-        if (GameMode != nullptr)
+
+        if (GameUtils::IsValid(GameMode))
         {
             GameMode->OnGameLoaded.AddDynamic(this, &UEquipmentComponent::OnGameLoaded);
         }        
@@ -159,7 +161,8 @@ void UEquipmentComponent::OnItemModified(FStoredItem InItem)
 void UEquipmentComponent::OnGameLoaded()
 {
     ADCSGameMode* GameMode = Cast<ADCSGameMode>(UGameplayStatics::GetGameMode(GetWorld()));
-    if (GameMode != nullptr)
+
+    if (GameUtils::IsValid(GameMode))
     {
         SelectedMainHandType = GameMode->GetSelectedMainHandSlotType();
         BuildEquipment(GameMode->GetEquipmentSlots());
@@ -174,7 +177,7 @@ void UEquipmentComponent::UpdateDisplayedItem(EItemType Type, int SlotIndex)
     if (ItemsValue != nullptr)
     {
         ADisplayedItem* DisplayedItem = ItemsValue->DisplayedItems[SlotIndex];
-        if(DisplayedItem->IsValidLowLevel())
+        if (DisplayedItem != nullptr)
         {
             DisplayedItem->Destroy();
         }
@@ -483,7 +486,7 @@ void UEquipmentComponent::UseActiveItemAtSlot(EItemType Type, int SlotIndex)
 
             if (IsItemValid(SlotItem))
             {
-                if (Inventory->IsValidLowLevel())
+                if (GameUtils::IsValid(Inventory))
                 {
                     Inventory->UseItem(SlotItem.Id);
                 }
@@ -550,7 +553,7 @@ void UEquipmentComponent::BuildEquipment(const TArray<FEquipmentSlots>& InEquipm
 
         for (ADisplayedItem* DisplayedItem : DisplayedItemActors)
         {
-            if(DisplayedItem->IsValidLowLevel())
+            if (DisplayedItem != nullptr)
             {
                 DisplayedItem->Destroy();
             }
@@ -642,7 +645,7 @@ void UEquipmentComponent::BuildEquipment(const TArray<FEquipmentSlots>& InEquipm
                 int ItemIndex = k;
                 FStoredItem Item = Equipment[i].Slots[j].Items[k];
 
-                if (Inventory->IsValidLowLevel())
+                if (GameUtils::IsValid(Inventory))
                 {
                     // If owner has inventory component, check only class, amount doesn't matter
                     if (UKismetSystemLibrary::IsValidClass(Item.ItemClass))
@@ -1036,7 +1039,7 @@ void UEquipmentComponent::AttachDisplayedItem(EItemType Type, int SlotIndex)
 {
     ADisplayedItem* DisplayedItem = GetDisplayedItem(Type, SlotIndex);
 
-    if (DisplayedItem->IsValidLowLevel())
+    if (GameUtils::IsValid(DisplayedItem))
     {
         DisplayedItem->Attach();
     }

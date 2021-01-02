@@ -7,6 +7,7 @@
 #include "GameFramework/Character.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Interfaces/RotatingInterface.h"
+#include "GameCore/GameUtils.h"
 
 
 URotatingComponent::URotatingComponent()
@@ -18,20 +19,6 @@ URotatingComponent::URotatingComponent()
     MaxDegreesPerSecond = 720.0f;
     MaxAllowedDegrees = 180.0f;
 }
-
-// Called when the game starts
-void URotatingComponent::BeginPlay()
-{
-    Super::BeginPlay();
-
-    IRotatingInterface* RotatingInterface = Cast<IRotatingInterface>(GetOwner());
-    if (RotatingInterface == nullptr)
-    {
-        FString Name = UGameplayStatics::GetObjectClass(GetOwner())->GetDisplayNameText().ToString();
-        UE_LOG(LogTemp, Error, TEXT("Does not implement interface IRotatingInterface!  %s"), *Name);
-    }
-}
-
 
 // Called every frame
 void URotatingComponent::TickComponent(
@@ -108,7 +95,7 @@ void URotatingComponent::SetRotationMode(ERotationMode InMode)
 {
     ACharacter* Character = Cast<ACharacter>(GetOwner());
 
-    if (Character->IsValidLowLevel())
+    if (GameUtils::IsValid(Character))
     {
         if (InMode == ERotationMode::FaceCamera)
         {

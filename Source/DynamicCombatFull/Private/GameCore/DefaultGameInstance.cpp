@@ -49,7 +49,7 @@ void UDefaultGameInstance::PlayHitSound(AActor* Applier, AActor* Receiver, FVect
     UEquipmentComponent* ReceiverActorEquip =
         Cast<UEquipmentComponent>(Receiver->GetComponentByClass(UEquipmentComponent::StaticClass()));
 
-    if (ApplierActorEquip->IsValidLowLevel() && ReceiverActorEquip->IsValidLowLevel())
+    if (GameUtils::IsValid(ApplierActorEquip) && GameUtils::IsValid(ReceiverActorEquip))
     {
         USoundBase* Sound = DefaultHitSound;
 
@@ -74,7 +74,8 @@ void UDefaultGameInstance::PlayParrySound(AActor* Applier, AActor* Receiver, FVe
     UEquipmentComponent* ReceiverActorEquip =
         Cast<UEquipmentComponent>(Receiver->GetComponentByClass(UEquipmentComponent::StaticClass()));
 
-    if (ApplierActorEquip->IsValidLowLevel() && ReceiverActorEquip->IsValidLowLevel())
+    
+    if (GameUtils::IsValid(ApplierActorEquip) && GameUtils::IsValid(ReceiverActorEquip))
     {
         USoundBase* Sound = DefaultHitSound;
 
@@ -113,7 +114,7 @@ void UDefaultGameInstance::PlayBlockSound(AActor* Applier, AActor* Receiver, FVe
     UEquipmentComponent* ReceiverActorEquip =
         Cast<UEquipmentComponent>(Receiver->GetComponentByClass(UEquipmentComponent::StaticClass()));
 
-    if (ApplierActorEquip->IsValidLowLevel() && ReceiverActorEquip->IsValidLowLevel())
+    if (GameUtils::IsValid(ApplierActorEquip) && GameUtils::IsValid(ReceiverActorEquip))
     {
         USoundBase* Sound = DefaultHitSound;
 
@@ -197,7 +198,8 @@ UExtendedStatComponent* UDefaultGameInstance::GetExtendedStatComponent(AActor* A
     for (UActorComponent* Comp : Comps)
     {
         UExtendedStatComponent* StatComp = Cast<UExtendedStatComponent>(Comp);
-        if (StatComp != nullptr)
+
+        if (GameUtils::IsValid(StatComp))
         {
             if (StatComp->GetStatType() == Type)
             {
@@ -213,11 +215,11 @@ TArray<AActor*> UDefaultGameInstance::SelectEnemyActors(AActor* Target, const TA
 {
     TArray<AActor*> EnemyActors;
 
-    if (Target->IsValidLowLevel())
+    if (GameUtils::IsValid(Target))
     {
         UBehaviorComponent* Comp = Cast<UBehaviorComponent>(Target->GetComponentByClass(UBehaviorComponent::StaticClass()));
 
-        if (Comp->IsValidLowLevel())
+        if (GameUtils::IsValid(Comp))
         {
             for (AActor* Actor : Actors)
             {
@@ -237,7 +239,7 @@ AActor* UDefaultGameInstance::GetClosestActor(AActor* Target, const TArray<AActo
     AActor* ClosestActor = nullptr;
     float MinDistance = TNumericLimits<float>::Max();
 
-    if (Target->IsValidLowLevel())
+    if (GameUtils::IsValid(Target))
     {
         for (AActor* Actor : Actors)
         {
@@ -257,7 +259,8 @@ AActor* UDefaultGameInstance::GetClosestActor(AActor* Target, const TArray<AActo
 FKey UDefaultGameInstance::GetFirstActionMappingKey(FName ActionName)
 {
     UInputSettings* InputSettings = UInputSettings::GetInputSettings();
-    if (InputSettings->IsValidLowLevel())
+
+    if (GameUtils::IsValid(InputSettings))
     {
         TArray<FInputActionKeyMapping> OutMappings;
         InputSettings->GetActionMappingByName(ActionName, OutMappings);
@@ -272,7 +275,7 @@ FKey UDefaultGameInstance::GetFirstActionMappingKey(FName ActionName)
 
 EDirection UDefaultGameInstance::GetHitDirection(FVector HitFromDirection, AActor* AttackedActor)
 {
-    if (AttackedActor->IsValidLowLevel())
+    if (GameUtils::IsValid(AttackedActor))
     {
         FVector Forward = AttackedActor->GetActorForwardVector();
         Forward.Z = 0.0f;
@@ -347,30 +350,30 @@ float UDefaultGameInstance::ScaleMeleeAttackStaminaCostByType(float Cost, EMelee
 
 float UDefaultGameInstance::ScaleMeleeDamageByType(float Damage, EMeleeAttackType MeleeAttackType)
 {
-    float Ret = 1.0f;
+    float Ret = Damage;
     if (MeleeAttackType == EMeleeAttackType::None)
     {
-        Ret = 1.0f;
+        Ret *= 1.0f;
     }
     else if (MeleeAttackType == EMeleeAttackType::Light)
     {
-        Ret = 1.0f;
+        Ret *= 1.0f;
     }
     else if (MeleeAttackType == EMeleeAttackType::Heavy)
     {
-        Ret = 1.5f;
+        Ret *= 1.5f;
     }
     else if (MeleeAttackType == EMeleeAttackType::Special)
     {
-        Ret = 1.5f;
+        Ret *= 1.5f;
     }
     else if (MeleeAttackType == EMeleeAttackType::Thrust)
     {
-        Ret = 1.5f;
+        Ret *= 1.5f;
     }
     else if (MeleeAttackType == EMeleeAttackType::Falling)
     {
-        Ret = 1.0f;
+        Ret *= 1.0f;
     }
     return Ret;
 }

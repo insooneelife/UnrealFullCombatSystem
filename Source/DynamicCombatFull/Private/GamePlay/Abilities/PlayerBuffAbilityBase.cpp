@@ -78,7 +78,7 @@ void APlayerBuffAbilityBase::ApplyBuff()
         {
             ABuffAbilityEffect* Buff = Cast<ABuffAbilityEffect>(Actor);
 
-            if (Buff == nullptr)
+            if (GameUtils::IsValid(Buff))
                 continue;
 
             if (Actor->GetOwner() == GetOwner())

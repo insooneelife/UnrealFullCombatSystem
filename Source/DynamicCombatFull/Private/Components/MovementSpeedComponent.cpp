@@ -5,6 +5,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "GameCore/GameUtils.h"
 
 // Sets default values for this component's properties
 UMovementSpeedComponent::UMovementSpeedComponent()
@@ -29,12 +30,11 @@ void UMovementSpeedComponent::BeginPlay()
 	Super::BeginPlay();
 
     MovementState = StartMovementState;
-    SetMovementState(MovementState);
-
     Movement = Cast<UCharacterMovementComponent>(
         GetOwner()->GetComponentByClass(UCharacterMovementComponent::StaticClass()));
 
-    if (!Movement->IsValidLowLevel())
+    SetMovementState(MovementState);
+    if (!GameUtils::IsValid(Movement))
     {
         UE_LOG(LogTemp, Error, TEXT("Movement is not valid!!"));
     }
@@ -58,7 +58,7 @@ EMovementState UMovementSpeedComponent::GetMovementState() const
 
 void UMovementSpeedComponent::SetMovementState(EMovementState State)
 {
-    if (Movement->IsValidLowLevel())
+    if (GameUtils::IsValid(Movement))
     {
         OnMovementStateEnd.Broadcast(MovementState);
         MovementState = StartMovementState;
@@ -91,7 +91,7 @@ void UMovementSpeedComponent::UpdateMaxSpeed()
 {
     if (bIsUpdatingSpeed)
     {
-        if (Movement->IsValidLowLevel())
+        if (GameUtils::IsValid(Movement))
         {
             Movement->MaxWalkSpeed = UKismetMathLibrary::FInterpTo(
                 Movement->MaxWalkSpeed, 
@@ -101,6 +101,7 @@ void UMovementSpeedComponent::UpdateMaxSpeed()
 
             if (UKismetMathLibrary::NearlyEqual_FloatFloat(Movement->MaxWalkSpeed, TargetSpeed))
             {
+                UE_LOG(LogTemp, Error, TEXT("UpdateMaxSpeed  %f"), TargetSpeed);
                 Movement->MaxWalkSpeed = TargetSpeed;
 
                 bIsUpdatingSpeed = false;
@@ -133,7 +134,7 @@ void UMovementSpeedComponent::ToggleState()
 
 float UMovementSpeedComponent::GetMaxPossibleSpeed() const
 {
-    if (Movement->IsValidLowLevel())
+    if (GameUtils::IsValid(Movement))
     {
         return Movement->MaxWalkSpeed;
     }

@@ -36,10 +36,9 @@ void UAbilityComponent::BeginPlay()
 	Super::BeginPlay();
 
     Character = Cast<ACharacter>(GetOwner());
+    EquipmentComponent = Cast<UEquipmentComponent>(Character->GetComponentByClass(UEquipmentComponent::StaticClass()));
 
-    EquipmentComponent = Cast<UEquipmentComponent>(GetOwner()->GetComponentByClass(UEquipmentComponent::StaticClass()));
-
-    if (EquipmentComponent->IsValidLowLevel())
+    if (GameUtils::IsValid(EquipmentComponent))
     {
         EquipmentComponent->OnActiveItemChanged.AddDynamic(this, &UAbilityComponent::OnActiveItemChanged);
         EquipmentComponent->OnMainHandTypeChanged.AddDynamic(this, &UAbilityComponent::OnMainHandTypeChanged);
@@ -51,10 +50,13 @@ void UAbilityComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
     if (EndPlayReason == EEndPlayReason::Destroyed)
     {
-        CurrentAbility->Destroy();
+        if (IsCurrentAbilityValid())
+        {
+            CurrentAbility->Destroy();
+        }
     }
 
-    if (EquipmentComponent->IsValidLowLevel())
+    if (GameUtils::IsValid(EquipmentComponent))
     {
         EquipmentComponent->OnActiveItemChanged.RemoveDynamic(this, &UAbilityComponent::OnActiveItemChanged);
         EquipmentComponent->OnMainHandTypeChanged.RemoveDynamic(this, &UAbilityComponent::OnMainHandTypeChanged);
@@ -64,7 +66,8 @@ void UAbilityComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 }
 
 
-void UAbilityComponent::OnActiveItemChanged(FStoredItem OldItem, FStoredItem NewItem, EItemType Type, int SlotIndex, int ActiveIndex)
+void UAbilityComponent::OnActiveItemChanged(
+    FStoredItem OldItem, FStoredItem NewItem, EItemType Type, int SlotIndex, int ActiveIndex)
 {
     if (Type == EItemType::None || EquipmentComponent->GetSelectedMainHandType() == Type)
     {
@@ -85,7 +88,6 @@ void UAbilityComponent::UpdateAbilityFromEquipment()
     if (UKismetSystemLibrary::IsValidClass(ItemClass.Get()))
     {
         UItemBase* ItemBase = NewObject<UItemBase>(GetOwner(), ItemClass);
-
         IItemHasAbility* ItemHasAbility = Cast<IItemHasAbility>(ItemBase);
         if (ItemHasAbility != nullptr)
         {
@@ -104,11 +106,11 @@ void UAbilityComponent::UpdateAbilityFromEquipment()
 
 void UAbilityComponent::AbilityPressed()
 {
-    if (IsAbilityValid())
+    if (IsCurrentAbilityValid())
     {
         SetIsPressed(true);
 
-        if (CurrentAbility->IsValidLowLevel())
+        if (IsCurrentAbilityValid())
         {
             CurrentAbility->Pressed();
         }
@@ -120,7 +122,7 @@ void UAbilityComponent::AbilityReleased()
     if (GetIsPressed())
     {
         SetIsPressed(false);
-        if (CurrentAbility->IsValidLowLevel())
+        if (IsCurrentAbilityValid())
         {
             CurrentAbility->Released();
         }
@@ -132,7 +134,10 @@ void UAbilityComponent::AbilityEffect()
 {
     if(IsUsingAbility())
     {
-        CurrentAbility->Effect();
+        if (IsCurrentAbilityValid())
+        {
+            CurrentAbility->Effect();
+        }
     }
 }
 
@@ -143,7 +148,7 @@ void UAbilityComponent::ConsumeMana(float Amount)
 
 void UAbilityComponent::AbilityChanged()
 {
-    if (CurrentAbility->IsValidLowLevel())
+    if (IsCurrentAbilityValid())
     {
     }
     else
@@ -157,13 +162,13 @@ void UAbilityComponent::AbilityChanged()
 
 void UAbilityComponent::ShowSpellIndicator(FVector InLocation, float InRadius, UMaterialInterface* InMaterial)
 {
-    if (SpellIndicator->IsValidLowLevel())
+    if (SpellIndicator != nullptr)
     {
         UpdateSpellIndicatorLocation(InLocation);
 
         SpellIndicator->SetRadius(InRadius);
         SpellIndicator->SetMaterial(InMaterial);
-
+        SpellIndicator->Show();
     }
     else
     {
@@ -175,17 +180,18 @@ void UAbilityComponent::ShowSpellIndicator(FVector InLocation, float InRadius, U
             GetWorld()->SpawnActor<ASpellIndicatorActor>(
                 SpawnIndicatorClass, FTransform(FQuat::Identity, InLocation), SpawnParameters);
 
-        SpawnedActor->Init(InRadius, InMaterial);
-
-        SpellIndicator = SpawnedActor;
+        if (GameUtils::IsValid(SpawnedActor))
+        {
+            SpawnedActor->Init(InRadius, InMaterial);
+            SpellIndicator = SpawnedActor;
+            SpellIndicator->Show();
+        }
     }
-
-    SpellIndicator->Show();
 }
 
 void UAbilityComponent::HideSpellIndicator()
 {
-    if (SpellIndicator->IsValidLowLevel())
+    if (GameUtils::IsValid(SpellIndicator))
     {
         SpellIndicator->Hide();
     }
@@ -193,7 +199,7 @@ void UAbilityComponent::HideSpellIndicator()
 
 void UAbilityComponent::UpdateSpellIndicatorLocation(FVector NewLocation)
 {
-    if (SpellIndicator->IsValidLowLevel())
+    if (GameUtils::IsValid(SpellIndicator))
     {
         SpellIndicator->SetActorLocation(NewLocation);
     }
@@ -201,7 +207,7 @@ void UAbilityComponent::UpdateSpellIndicatorLocation(FVector NewLocation)
 
 void UAbilityComponent::UpdateAbility(TSubclassOf<AAbilityBase> AbilityClass)
 {
-    if (CurrentAbility->IsValidLowLevel())
+    if (IsCurrentAbilityValid())
     {
         if (CurrentAbility->GetClass() != AbilityClass)
         {
@@ -210,7 +216,7 @@ void UAbilityComponent::UpdateAbility(TSubclassOf<AAbilityBase> AbilityClass)
         }
     }
 
-    if (AbilityClass->IsValidLowLevel())
+    if(UKismetSystemLibrary::IsValidClass(AbilityClass))
     {
         FActorSpawnParameters Params;
         Params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
@@ -232,7 +238,7 @@ void UAbilityComponent::UpdateAbility(TSubclassOf<AAbilityBase> AbilityClass)
 
 bool UAbilityComponent::StartAbility()
 {
-    if (CurrentAbility->IsValidLowLevel())
+    if (IsCurrentAbilityValid())
     {
         IAbilityInterface* AbilityInterface = Cast<IAbilityInterface>(GetOwner());
 
@@ -326,7 +332,7 @@ AAbilityBase* UAbilityComponent::GetCurrentAbility() const
 
 bool UAbilityComponent::IsAbilityUsingCrosshair() const
 {
-    if (CurrentAbility->IsValidLowLevel())
+    if (IsCurrentAbilityValid())
     {
         return CurrentAbility->IsUsingCrosshair();
     }
@@ -338,7 +344,7 @@ bool UAbilityComponent::IsAbilityUsingCrosshair() const
 
 FTransform UAbilityComponent::GetEffectTransform() const
 {
-    if (CurrentAbility->IsValidLowLevel())
+    if (IsCurrentAbilityValid())
     {
         return CurrentAbility->GetEffectTransform();
     }
@@ -365,7 +371,7 @@ bool UAbilityComponent::IsUsingAbility() const
 
 float UAbilityComponent::GetManaCost() const
 {
-    if (CurrentAbility->IsValidLowLevel())
+    if (IsCurrentAbilityValid())
     {
         return CurrentAbility->GetManaCost();
     }
@@ -377,7 +383,7 @@ float UAbilityComponent::GetManaCost() const
 
 bool UAbilityComponent::CanAbilityBeCancelled() const
 {
-    if (CurrentAbility->IsValidLowLevel())
+    if (IsCurrentAbilityValid())
     {
         return CurrentAbility->CanBeCancelled();
     }
@@ -387,14 +393,14 @@ bool UAbilityComponent::CanAbilityBeCancelled() const
     }
 }
 
-bool UAbilityComponent::IsAbilityValid() const
+bool UAbilityComponent::IsCurrentAbilityValid() const
 {
-    return UKismetSystemLibrary::IsValid(CurrentAbility);
+    return CurrentAbility != nullptr;
 }
 
 UTexture2D* UAbilityComponent::GetAbilityCrosshair() const
 {
-    if (CurrentAbility->IsValidLowLevel())
+    if (IsCurrentAbilityValid())
     {
         return CurrentAbility->GetCrosshairTexture();
     }
@@ -406,7 +412,7 @@ UTexture2D* UAbilityComponent::GetAbilityCrosshair() const
 
 bool UAbilityComponent::ShouldRotateOnPressed() const
 {
-    if (CurrentAbility->IsValidLowLevel())
+    if (IsCurrentAbilityValid())
     {
         return CurrentAbility->IsRotateOnPressed();
     }
@@ -436,8 +442,7 @@ void UAbilityComponent::SetIsCasting(bool bValue)
 bool UAbilityComponent::IsPlayingAbilityMontage() const
 {
     UAnimMontage* Montage = Character->GetCurrentMontage();
-
-    return Montage == RecentlyPlayedMontage && RecentlyPlayedMontage->IsValidLowLevel();
+    return Montage == RecentlyPlayedMontage && GameUtils::IsValid(RecentlyPlayedMontage);
 }
 
 void UAbilityComponent::HideIndicatorIfNotPressed()
@@ -453,7 +458,7 @@ void UAbilityComponent::HideIndicatorIfNotPressed()
 
 void UAbilityComponent::CallAbilityEnded(EAbilityEndResult Result)
 {
-    if (CurrentAbility->IsValidLowLevel())
+    if (IsCurrentAbilityValid())
     {
         CurrentAbility->Ended(Result);
     }

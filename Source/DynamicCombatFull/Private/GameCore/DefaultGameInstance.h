@@ -39,6 +39,7 @@ public:
 
     static EMontageAction ConvertMeleeAttackTypeToAction(EMeleeAttackType Type);
 
+    UFUNCTION(BlueprintCallable, BlueprintPure, Category = DefaultGameInstance)
     static UExtendedStatComponent* GetExtendedStatComponent(AActor* Actor, EStat Type);
 
     static TArray<AActor*> SelectEnemyActors(AActor* Target, const TArray<AActor*>& Actors);

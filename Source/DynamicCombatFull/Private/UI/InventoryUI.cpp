@@ -170,19 +170,21 @@ void UInventoryUI::SetCategoryButton(UCategoryButtonUI* Button)
 {
     if (Button != SelectedCategoryButton)
     {
-        if (SelectedCategoryButton->IsValidLowLevel())
+        if (SelectedCategoryButton != nullptr)
         {
-            SelectedCategoryButton->SetActiveBorder(false);
-            if (Button->IsValidLowLevel())
-            {
-                SelectedCategoryButton = Button;
-                SelectedCategoryButton->SetActiveBorder(true);
-            }
+            SelectedCategoryButton->SetActiveBorder(false);   
+        }
+
+        if (GameUtils::IsValid(Button))
+        {
+            SelectedCategoryButton = Button;
+            SelectedCategoryButton->SetActiveBorder(true);
         }
     }
 }
 
 EItemType UInventoryUI::GetDisplayedType() const
 {
-    return UKismetSystemLibrary::IsValid(SelectedCategoryButton) ? SelectedCategoryButton->GetItemType() : EItemType::None;
+    return UKismetSystemLibrary::IsValid(SelectedCategoryButton) ? 
+        SelectedCategoryButton->GetItemType() : EItemType::None;
 }

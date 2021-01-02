@@ -79,7 +79,7 @@ void AFireballProjectileAbilityEffect::Init(
 
 void AFireballProjectileAbilityEffect::EnableHomingProjectile()
 {
-    if (HomingTarget->IsValidLowLevel())
+    if (GameUtils::IsValid(HomingTarget))
     {
         GetWorld()->GetTimerManager().SetTimer(
             UpdateHomingProjectileTimerHandle,
@@ -133,7 +133,7 @@ void AFireballProjectileAbilityEffect::OnHit(const FHitResult& Hit)
                     {
                         UDefaultGameInstance* GameInst = Cast<UDefaultGameInstance>(GetGameInstance());
 
-                        if (GameInst->IsValidLowLevel())
+                        if (GameUtils::IsValid(GameInst))
                         {
                             GameInst->PlayHitSound(GetOwner(), HitActor, HitLoc);
                             if (bApplyStun)
@@ -142,7 +142,7 @@ void AFireballProjectileAbilityEffect::OnHit(const FHitResult& Hit)
                                     Cast<UEffectsComponent>(
                                         HitActor->GetComponentByClass(UEffectsComponent::StaticClass()));
 
-                                if (EffectsComponent->IsValidLowLevel())
+                                if (GameUtils::IsValid(EffectsComponent))
                                 {
                                     EffectsComponent->ApplyEffect(
                                         EEffectType::Stun, 1.0f, EApplyEffectMethod::Replace, GetOwner());
@@ -172,7 +172,8 @@ bool AFireballProjectileAbilityEffect::IsEnemy(AActor* Target) const
 {
     UBehaviorComponent* BehaviorComp = 
         Cast<UBehaviorComponent>(GetOwner()->GetComponentByClass(UBehaviorComponent::StaticClass()));
-    if (BehaviorComp->IsValidLowLevel())
+
+    if (GameUtils::IsValid(BehaviorComp))
     {
         return BehaviorComp->IsEnemy(Target);
     }
@@ -184,7 +185,7 @@ bool AFireballProjectileAbilityEffect::IsEnemy(AActor* Target) const
 
 void AFireballProjectileAbilityEffect::UpdateHomingProjectile()
 {
-    if (HomingTarget->IsValidLowLevel())
+    if (GameUtils::IsValid(HomingTarget))
     {
         float Distance = (HomingTarget->GetActorLocation() - GetActorLocation()).Size();
 

@@ -8,6 +8,7 @@
 #include "GameFramework/Character.h"
 
 #include "GameCore/DCSGameMode.h"
+#include "GameCore/GameUtils.h"
 #include "Components/StatsManagerComponent.h"
 
 
@@ -42,7 +43,8 @@ void UExtendedStatComponent::BeginPlay()
     if (GetOwner() == UGameplayStatics::GetPlayerCharacter(GetWorld(), 0))
     {
         ADCSGameMode* GameMode = Cast<ADCSGameMode>(UGameplayStatics::GetGameMode(GetWorld()));
-        if (GameMode->IsValidLowLevel())
+
+        if (GameUtils::IsValid(GameMode))
         {
             GameMode->OnGameLoaded.AddDynamic(this, &UExtendedStatComponent::OnGameLoaded);
         }
@@ -54,7 +56,8 @@ void UExtendedStatComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
     if (GetOwner() == UGameplayStatics::GetPlayerCharacter(GetWorld(), 0))
     {
         ADCSGameMode* GameMode = Cast<ADCSGameMode>(UGameplayStatics::GetGameMode(GetWorld()));
-        if (GameMode->IsValidLowLevel())
+
+        if (GameUtils::IsValid(GameMode))
         {
             GameMode->OnGameLoaded.RemoveDynamic(this, &UExtendedStatComponent::OnGameLoaded);
         }
@@ -63,7 +66,7 @@ void UExtendedStatComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
     UStatsManagerComponent* StatsManagerComp =
         Cast<UStatsManagerComponent>(GetOwner()->GetComponentByClass(UStatsManagerComponent::StaticClass()));
 
-    if (StatsManagerComp->IsValidLowLevel())
+    if (GameUtils::IsValid(StatsManagerComp))
     {
         StatsManagerComp->OnModifierAdded.RemoveDynamic(this, &UExtendedStatComponent::OnModifierAdded);
         StatsManagerComp->OnModifierRemoved.RemoveDynamic(this, &UExtendedStatComponent::OnModifierRemoved);
@@ -115,7 +118,7 @@ void UExtendedStatComponent::InitStatManager()
     UStatsManagerComponent* StatsManagerComp = 
         Cast<UStatsManagerComponent>(GetOwner()->GetComponentByClass(UStatsManagerComponent::StaticClass()));
 
-    if (StatsManagerComp->IsValidLowLevel())
+    if (GameUtils::IsValid(StatsManagerComp))
     {
         float StatValue = StatsManagerComp->GetStatValue(StatType, false);
         TopValue = StatValue;
@@ -137,7 +140,7 @@ void UExtendedStatComponent::OnGameLoadedDelayed()
 {
     ADCSGameMode* GameMode = Cast<ADCSGameMode>(UGameplayStatics::GetGameMode(GetWorld()));
 
-    if (GameMode != nullptr)
+    if (GameUtils::IsValid(GameMode))
     {
         const TMap<EStat, float>& StatValues = GameMode->GetCurrentStatValues();
 

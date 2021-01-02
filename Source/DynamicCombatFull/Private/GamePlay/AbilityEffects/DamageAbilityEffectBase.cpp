@@ -9,6 +9,7 @@
 #include "Interfaces/CanBeAttacked.h"
 #include "Components/EffectsComponent.h"
 #include "Components/BehaviorComponent.h"
+#include "GameCore/GameUtils.h"
 
 // Sets default values
 ADamageAbilityEffectBase::ADamageAbilityEffectBase()
@@ -69,7 +70,7 @@ void ADamageAbilityEffectBase::DamageToShapeArea()
                         UEffectsComponent* EffectsComponent =
                             Cast<UEffectsComponent>(HitActor->GetComponentByClass(UEffectsComponent::StaticClass()));
 
-                        if (EffectsComponent->IsValidLowLevel())
+                        if (GameUtils::IsValid(EffectsComponent))
                         {
                             EffectsComponent->ApplyEffect(EEffectType::Stun, 1.0f, EApplyEffectMethod::Replace, GetOwner());
                         }
@@ -94,7 +95,7 @@ bool ADamageAbilityEffectBase::IsEnemy(AActor* InTarget) const
             UBehaviorComponent* BehaviorComponent =
                 Cast<UBehaviorComponent>(LOwner->GetComponentByClass(UBehaviorComponent::StaticClass()));
 
-            if (BehaviorComponent->IsValidLowLevel())
+            if (GameUtils::IsValid(BehaviorComponent))
             {
                 return BehaviorComponent->IsEnemy(InTarget);
             }
@@ -111,7 +112,7 @@ void ADamageAbilityEffectBase::ApplyImpulseToCharacter(AActor* InActor, FVector 
 {
     ACharacter* Character = Cast<ACharacter>(InActor);
 
-    if (Character->IsValidLowLevel())
+    if (GameUtils::IsValid(Character))
     {
         if (Character->GetMesh()->IsAnySimulatingPhysics())
         {

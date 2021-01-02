@@ -63,8 +63,6 @@ void AArrowProjectileBase::OnHit(const FHitResult& InHit)
     UPrimitiveComponent* HitComponent = InHit.GetComponent();
     FName HitBoneName = InHit.BoneName;
 
-    GameUtils::PrintHitResult(InHit);
-
     if (GetOwner() != HitActor)
     {
         ICanBeAttacked* CanBeAttacked = Cast<ICanBeAttacked>(HitActor);
@@ -95,7 +93,7 @@ void AArrowProjectileBase::OnHit(const FHitResult& InHit)
                         UEffectsComponent* EffectsComponent =
                             Cast<UEffectsComponent>(HitActor->GetComponentByClass(UEffectsComponent::StaticClass()));
 
-                        if (EffectsComponent->IsValidLowLevel())
+                        if (GameUtils::IsValid(EffectsComponent))
                         {
                             EffectsComponent->ApplyEffect(
                                 EEffectType::Stun, 1.0f, EApplyEffectMethod::Replace, GetOwner());
@@ -148,7 +146,7 @@ void AArrowProjectileBase::UpdateArrowMesh()
     UEquipmentComponent* EquipmentComponent = 
         Cast<UEquipmentComponent>(GetOwner()->GetComponentByClass(UEquipmentComponent::StaticClass()));
 
-    if (EquipmentComponent->IsValidLowLevel())
+    if (GameUtils::IsValid(EquipmentComponent))
     {
         TSubclassOf<UItemBase> ItemClass = EquipmentComponent->GetActiveItem(EItemType::Arrows, 0).ItemClass;
         UArrowItem* ArrowItem = NewObject<UArrowItem>(GetOwner(), ItemClass);
@@ -162,7 +160,7 @@ bool AArrowProjectileBase::IsEnemy(AActor* InTarget) const
     UBehaviorComponent* BehaviorComponent = 
         Cast<UBehaviorComponent>(GetOwner()->GetComponentByClass(UBehaviorComponent::StaticClass()));
 
-    if (BehaviorComponent->IsValidLowLevel())
+    if (GameUtils::IsValid(BehaviorComponent))
     {
         return BehaviorComponent->IsEnemy(InTarget);
     }

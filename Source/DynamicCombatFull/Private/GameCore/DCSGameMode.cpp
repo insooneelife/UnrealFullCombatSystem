@@ -4,9 +4,11 @@
 #include "DCSGameMode.h"
 
 #include "Kismet/GameplayStatics.h"
+#include "GameFramework/Character.h"
 #include "Components/InventoryComponent.h"
 #include "Components/ExtendedStatComponent.h"
 #include "Components/EquipmentComponent.h"
+#include "GameCore/GameUtils.h"
 
 // Called when the game starts
 void ADCSGameMode::BeginPlay()
@@ -21,13 +23,14 @@ void ADCSGameMode::BeginPlay()
 
 void ADCSGameMode::UpdateInventoryValues()
 {
-    APlayerController* PlayerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
-    if (PlayerController->IsValidLowLevel())
+    ACharacter* PlayerCharacter = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
+
+    if (GameUtils::IsValid(PlayerCharacter))
     {
         UInventoryComponent* InventoryComp = 
-            Cast<UInventoryComponent>(PlayerController->GetComponentByClass(UInventoryComponent::StaticClass()));
+            Cast<UInventoryComponent>(PlayerCharacter->GetComponentByClass(UInventoryComponent::StaticClass()));
 
-        if (InventoryComp->IsValidLowLevel())
+        if (GameUtils::IsValid(InventoryComp))
         {
             Inventory = InventoryComp->GetInventory();
         }
@@ -36,13 +39,14 @@ void ADCSGameMode::UpdateInventoryValues()
 
 void ADCSGameMode::UpdateEquipmentValues()
 {
-    APlayerController* PlayerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
-    if (PlayerController->IsValidLowLevel())
+    ACharacter* PlayerCharacter = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
+
+    if (GameUtils::IsValid(PlayerCharacter))
     {
         UEquipmentComponent* EquipComp =
-            Cast<UEquipmentComponent>(PlayerController->GetComponentByClass(UEquipmentComponent::StaticClass()));
+            Cast<UEquipmentComponent>(PlayerCharacter->GetComponentByClass(UEquipmentComponent::StaticClass()));
 
-        if (EquipComp->IsValidLowLevel())
+        if (GameUtils::IsValid(EquipComp))
         {
             EquipmentSlots = EquipComp->GetEquipmentSlots();
             bIsInCombat = EquipComp->IsInCombat();
@@ -54,7 +58,8 @@ void ADCSGameMode::UpdateEquipmentValues()
 void ADCSGameMode::UpdateStatValues()
 {
     APlayerController* PlayerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
-    if (PlayerController->IsValidLowLevel())
+
+    if (GameUtils::IsValid(PlayerController))
     {
         TArray<UActorComponent*> StatComps;
         PlayerController->GetComponents(UExtendedStatComponent::StaticClass(), StatComps);
@@ -63,7 +68,7 @@ void ADCSGameMode::UpdateStatValues()
         {
             UExtendedStatComponent* StatComp = Cast<UExtendedStatComponent>(Comp);
 
-            if (StatComp->IsValidLowLevel())
+            if (GameUtils::IsValid(StatComp))
             {
                 CurrentStatValues.Add(StatComp->GetStatType(), StatComp->GetCurrentValue());
             }
@@ -80,7 +85,7 @@ void ADCSGameMode::LoadGame()
 
     SavedGame = Cast<UDCSSaveGame>(LoadedGame);
 
-    if (SavedGame == nullptr)
+    if (GameUtils::IsValid(SavedGame))
     {
         UE_LOG(LogTemp, Error, TEXT("Load Failed!"));
     }
@@ -100,7 +105,7 @@ void ADCSGameMode::LoadGame()
 
 void ADCSGameMode::SaveGame()
 {
-    if (SavedGame->IsValidLowLevel())
+    if (GameUtils::IsValid(SavedGame))
     {
         UpdateInventoryValues();
         UpdateEquipmentValues();

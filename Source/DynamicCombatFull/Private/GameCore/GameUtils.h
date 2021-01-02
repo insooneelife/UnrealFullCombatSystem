@@ -22,9 +22,12 @@ public:
     static const FItem& GetDefaultItemFromStoredItem(const FStoredItem& StoredItem);
     static const FItem& GetDefaultItemFromItemClass(TSubclassOf<UItemBase> ItemClass);
 
-    static void PrintStoredItem(const FStoredItem& StoredItem);
+    static void PrintStoredItem(const FStoredItem& InStoredItem);
+    static void PrintHitResult(const FHitResult& InHitResult);
+    static void PrintHitData(const FHitData& InHitData);
 
-    static void PrintHitResult(const FHitResult& InHit);
+    // for easy debug
+    static bool IsValid(const UObjectBase* const InObject);
 
     template<typename ClassType>
     static TSubclassOf<ClassType> LoadAssetClass(FString AssetPath)

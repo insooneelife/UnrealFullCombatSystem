@@ -16,6 +16,7 @@
 
 #include "Interfaces/CanOpenUI.h"
 #include "GameCore/DefaultGameInstance.h"
+#include "GameCore/GameUtils.h"
 #include "InputHelpersUI.h"
 #include "ItemsGridUI.h"
 #include "InventoryItemUI.h"
@@ -96,7 +97,7 @@ FReply UEquipmentUI::NativeOnKeyDown(const FGeometry& InGeometry, const FKeyEven
 
 void UEquipmentUI::OnInventoryItemClicked(UInventoryItemUI* InItem)
 {
-    if (ClickedSlot->IsValidLowLevel())
+    if (GameUtils::IsValid(ClickedSlot))
     {
         EquipmentComponent->UpdateItemInSlot(
             ClickedSlot->GetItemType(),

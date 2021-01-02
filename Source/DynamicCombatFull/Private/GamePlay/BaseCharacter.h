@@ -88,7 +88,7 @@ protected:
 
     // weapon collision events
     UFUNCTION(BlueprintCallable)
-    void OnHit(const FHitResult& Hit);
+    void OnHit(const FHitResult& InHit);
 
     UFUNCTION(BlueprintCallable)
     void OnCollisionActivated(ECollisionPart CollisionPart);

@@ -81,7 +81,7 @@ void AAbilityBase::HideIndicator()
 float AAbilityBase::PlayAbilityMontage(
     UAnimMontage* Montage, FName StartSectionName, bool bUseCastingSpeed, float PlayRate)
 {
-    if (AbilityComponent->IsValidLowLevel())
+    if (GameUtils::IsValid(AbilityComponent))
     {
         return AbilityComponent->PlayAbilityMontage(
             Montage,
@@ -96,7 +96,7 @@ float AAbilityBase::PlayAbilityMontage(
 
 float AAbilityBase::GetDamage() const
 {
-    if (AbilityComponent->IsValidLowLevel())
+    if (GameUtils::IsValid(AbilityComponent))
     {
         if (bIncludeOwnerDamage) 
         {
@@ -119,7 +119,7 @@ void AAbilityBase::ApplyImpulseToCharacter(AActor* Actor, FVector HitNormal, flo
 {
     ACharacter* TargetCharacter = Cast<ACharacter>(Actor);
 
-    if (TargetCharacter != nullptr)
+    if (GameUtils::IsValid(TargetCharacter))
     {
         if (TargetCharacter->GetMesh()->IsAnySimulatingPhysics())
         {

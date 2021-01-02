@@ -2,12 +2,14 @@
 
 
 #include "BowDisplayedItem.h"
+#include "Kismet/KismetSystemLibrary.h"
 #include "Components/StaticMeshComponent.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "GameFramework/Character.h"
 #include "Components/EquipmentComponent.h"
 #include "GamePlay/Items/ObjectItems/ArrowItem.h"
 #include "Interfaces/IsArcher.h"
+#include "GameCore/GameUtils.h"
 
 ABowDisplayedItem::ABowDisplayedItem()
 {
@@ -82,7 +84,7 @@ void ABowDisplayedItem::UpdateArrowAttachment(bool bAttachToOwner)
         IIsArcher* IsArcher = Cast<IIsArcher>(GetOwner());
         ACharacter* Character = Cast<ACharacter>(GetOwner());
 
-        if (IsArcher != nullptr && Character != nullptr)
+        if (IsArcher != nullptr && GameUtils::IsValid(Character))
         {
             FName SocketName = IsArcher->GetBowStringSocketName();
 
@@ -114,12 +116,9 @@ void ABowDisplayedItem::UpdateArrowMesh()
 {
     FStoredItem Item = GetEquipmentComponent()->GetActiveItem(EItemType::Arrows, 0);
 
-    UClass* Class = Item.ItemClass;
-    UArrowItem* ArrowItem = Cast<UArrowItem>(Class);
-
-    if (ArrowItem != nullptr)
+    if(UKismetSystemLibrary::IsValidClass(Item.ItemClass))
     {
-        UArrowItem* ArrowItemObject = NewObject<UArrowItem>(GetOwner(), Class);
+        UArrowItem* ArrowItemObject = NewObject<UArrowItem>(GetOwner(), Item.ItemClass);
         ArrowMesh->SetStaticMesh(ArrowItemObject->GetArrowMesh());
     }
     else

@@ -52,6 +52,7 @@ public:
     UFUNCTION(BlueprintCallable)
     void ChangeRegenPercent(int Percent);
 
+    UFUNCTION(BlueprintCallable)
     void ModifyStat(float Value, bool bInterruptRegeneration);
 
     void AddModifier(float Value);

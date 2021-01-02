@@ -37,7 +37,8 @@ void UInventoryComponent::BeginPlay()
     if (GetOwner() == UGameplayStatics::GetPlayerCharacter(GetWorld(), 0))
     {
         ADCSGameMode* GameMode = Cast<ADCSGameMode>(UGameplayStatics::GetGameMode(GetWorld()));
-        if (GameMode->IsValidLowLevel())
+
+        if (GameUtils::IsValid(GameMode))
         {
             GameMode->OnGameLoaded.AddDynamic(this, &UInventoryComponent::OnGameLoaded);
         }
@@ -49,7 +50,8 @@ void UInventoryComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
     if (GetOwner() == UGameplayStatics::GetPlayerCharacter(GetWorld(), 0))
     {
         ADCSGameMode* GameMode = Cast<ADCSGameMode>(UGameplayStatics::GetGameMode(GetWorld()));
-        if (GameMode->IsValidLowLevel())
+
+        if (GameUtils::IsValid(GameMode))
         {
             GameMode->OnGameLoaded.RemoveDynamic(this, &UInventoryComponent::OnGameLoaded);
         }
@@ -62,7 +64,7 @@ void UInventoryComponent::OnGameLoaded()
 {
     ADCSGameMode* GameMode = Cast<ADCSGameMode>(UGameplayStatics::GetGameMode(GetWorld()));
 
-    if (GameMode != nullptr)
+    if (GameUtils::IsValid(GameMode))
     {
         Inventory = GameMode->GetInventory();
         ClearInventory();
@@ -174,9 +176,9 @@ void UInventoryComponent::DropItem(FStoredItem InItem)
     }
 
     AActor* ClosestActor = UDefaultGameInstance::GetClosestActor(GetOwner(), PickupActors);
-
     APickupActor* ClosestPickupActor = Cast<APickupActor>(ClosestActor);
-    if (ClosestPickupActor->IsValidLowLevel())
+
+    if (GameUtils::IsValid(ClosestPickupActor))
     {
         ClosestPickupActor->AddItem(InItem.ItemClass, InItem.Amount);
     }
@@ -208,7 +210,7 @@ void UInventoryComponent::DropItem(FStoredItem InItem)
             GetWorld()->SpawnActor<APickupActor>(
                 SpawnPickupActorClass, SpawnLoc, FRotator::ZeroRotator, SpawnParameters);
 
-        if (SpawnedActor->IsValidLowLevel())
+        if (GameUtils::IsValid(SpawnedActor))
         {
             SpawnedActor->Init(
                 FName(TEXT("Items")), 
@@ -228,7 +230,7 @@ void UInventoryComponent::UseItem(FGuid ItemId)
     {
         UItemBase* ItemBase = NewObject<UItemBase>(GetOwner(), Inventory[Index].ItemClass);
 
-        if (ItemBase != nullptr)
+        if (GameUtils::IsValid(ItemBase))
         {
             const FItem& UseItemData = ItemBase->GetItem();
             ItemBase->UseItem(GetOwner());

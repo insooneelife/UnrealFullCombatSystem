@@ -5,6 +5,7 @@
 #include "Kismet/KismetMathLibrary.h"
 #include "Kismet/KismetArrayLibrary.h"
 #include "Components/PrimitiveComponent.h"
+#include "GameCore/GameUtils.h"
 
 // Sets default values for this component's properties
 UCollisionHandlerComponent::UCollisionHandlerComponent()
@@ -76,7 +77,7 @@ void UCollisionHandlerComponent::UpdateLastSocketPositions()
 {
     for (const FCollisionComponent& CollComp : CollisionComponents)
     {
-        if (CollComp.Component->IsValidLowLevel())
+        if (GameUtils::IsValid(CollComp.Component))
         {
             for (FName Name : CollComp.Sockets)
             {
@@ -93,7 +94,7 @@ void UCollisionHandlerComponent::PerformTrace()
 {
     for (const FCollisionComponent& CollComp : CollisionComponents)
     {
-        if (CollComp.Component->IsValidLowLevel())
+        if (GameUtils::IsValid(CollComp.Component))
         {
             for (FName Name : CollComp.Sockets)
             {

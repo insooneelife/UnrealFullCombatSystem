@@ -25,6 +25,7 @@ protected:
     virtual void BeginPlay() override;
 
 public:
+    UFUNCTION(BlueprintCallable)
     bool ApplyEffect(EEffectType Type, float Duration, EApplyEffectMethod Method, AActor* Applier);
 
     void RemoveEffect(EEffectType Type);

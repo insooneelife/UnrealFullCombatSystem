@@ -7,8 +7,8 @@
 #include "Particles/ParticleSystemComponent.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Kismet/KismetSystemLibrary.h"
-
 #include "Components/StatsManagerComponent.h"
+#include "GameCore/GameUtils.h"
 
 // Sets default values
 ABuffAbilityEffect::ABuffAbilityEffect()
@@ -40,7 +40,7 @@ void ABuffAbilityEffect::Init(float InDuration, EStat InStatType, float InValue,
 
 void ABuffAbilityEffect::ApplyBuff()
 {
-    if (StatsManagerComponent->IsValidLowLevel())
+    if (GameUtils::IsValid(StatsManagerComponent))
     {
         StatsManagerComponent->AddModifier(StatType, Value);
     }
@@ -50,7 +50,7 @@ void ABuffAbilityEffect::AttachToOwner()
 {
     ACharacter* Character = Cast<ACharacter>(GetOwner());
 
-    if (Character != nullptr)
+    if (GameUtils::IsValid(Character))
     {
         FAttachmentTransformRules Rules(
             EAttachmentRule::SnapToTarget, EAttachmentRule::SnapToTarget, EAttachmentRule::KeepRelative, true);
@@ -96,7 +96,7 @@ void ABuffAbilityEffect::Deactivate()
 
 void ABuffAbilityEffect::RemoveBuff()
 {
-    if (StatsManagerComponent->IsValidLowLevel())
+    if (GameUtils::IsValid(StatsManagerComponent))
     {
         StatsManagerComponent->RemoveModifier(StatType, Value);
         Value = 0.0f;
@@ -115,14 +115,14 @@ void ABuffAbilityEffect::AdjustBuff(float NewValue, float NewDuration)
 
     if (ValueDifference > 0.0f)
     {
-        if (StatsManagerComponent->IsValidLowLevel())
+        if (GameUtils::IsValid(StatsManagerComponent))
         {
             StatsManagerComponent->AddModifier(StatType, ValueDifference);
         }
     }
     else if (ValueDifference < 0.0f)
     {
-        if (StatsManagerComponent->IsValidLowLevel())
+        if (GameUtils::IsValid(StatsManagerComponent))
         {
             StatsManagerComponent->RemoveModifier(StatType, ValueDifference);
         }

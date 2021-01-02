@@ -94,7 +94,7 @@ public:
 
     UFUNCTION(BlueprintCallable)
     bool CanAbilityBeCancelled() const;
-    bool IsAbilityValid() const;
+    bool IsCurrentAbilityValid() const;
     UTexture2D* GetAbilityCrosshair() const;
     bool ShouldRotateOnPressed() const;
     void SetIsPressed(bool bValue);

@@ -9,6 +9,7 @@
 #include "Components/ArrowComponent.h"
 #include "Blueprint/WidgetLayoutLibrary.h"
 #include "Interfaces/IsTargetable.h"
+#include "GameCore/GameUtils.h"
 
 // Sets default values for this component's properties
 UDynamicTargetingComponent::UDynamicTargetingComponent()
@@ -34,7 +35,8 @@ void UDynamicTargetingComponent::BeginPlay()
     SetDebugMode();
     CheckCollisionTypeArrays();
     CharacterReference = Cast<ACharacter>(GetOwner());
-    if (CharacterReference == nullptr)
+
+    if (!GameUtils::IsValid(CharacterReference))
     {
         UE_LOG(LogTemp, Error, TEXT("Casting to owner as character has failed!!"));
     }
@@ -52,7 +54,7 @@ void UDynamicTargetingComponent::TickComponent(
 
 void UDynamicTargetingComponent::Init(UArrowComponent* InArrowComp)
 {
-    if (InArrowComp->IsValidLowLevel())
+    if (GameUtils::IsValid(InArrowComp))
     {
         ArrowComponent = InArrowComp;
         ArrowComponent->SetUsingAbsoluteRotation(true);
@@ -82,8 +84,9 @@ void UDynamicTargetingComponent::DisableCameraLock()
 void UDynamicTargetingComponent::FindTargetWithAxisInput(float AxisValue)
 {
     const float StartRotatingThreshold = 1.5f;
-    if (ArrowComponent->IsValidLowLevel() &&
-        SelectedActor->IsValidLowLevel() &&
+    if (GameUtils::IsValid(ArrowComponent) &&
+        //GameUtils::IsValid(SelectedActor) &&
+        SelectedActor != nullptr &&
         FMath::Abs(AxisValue) > StartRotatingThreshold &&
         !bIsFreeCamera)
     {
@@ -230,7 +233,7 @@ void UDynamicTargetingComponent::FindTarget()
         }
     }
 
-    if (SelectedActor->IsValidLowLevel())
+    if (GameUtils::IsValid(SelectedActor))
     {
         EnableCameraLock();
         OnTargetChanged.Broadcast(SelectedActor);
@@ -283,7 +286,8 @@ void UDynamicTargetingComponent::UpdateCameraLock()
         if (Distance >= 50.0f && Distance <= TargetingMaxDistance)
         {
             float DeltaTime = GetWorld()->GetDeltaSeconds();
-            if (ArrowComponent->IsValidLowLevel())
+
+            if (GameUtils::IsValid(ArrowComponent))
             {
                 FRotator Current = ArrowComponent->GetComponentRotation();
                 FRotator Target = GetOwner()->GetInstigator()->GetControlRotation();
@@ -429,7 +433,7 @@ void UDynamicTargetingComponent::FindDirectionalTarget(bool bOnLeft)
             }
         }
 
-        if (LocalPotentialTarget->IsValidLowLevel())
+        if (GameUtils::IsValid(LocalPotentialTarget))
         {
             IIsTargetable* IsTargetable = Cast<IIsTargetable>(SelectedActor);
             if (IsTargetable != nullptr)
@@ -484,7 +488,8 @@ AActor* UDynamicTargetingComponent::GetTargetByDotProduct(const TArray<AActor*> 
 void UDynamicTargetingComponent::UpdateIgnoreLookInput()
 {
     AController* Controller = GetOwner()->GetInstigator()->GetController();
-    if (Controller->IsValidLowLevel())
+
+    if (GameUtils::IsValid(Controller))
     {
         if (IsTargetingEnabled() && !bIsFreeCamera)
         {

@@ -50,7 +50,7 @@ void UCategoryButtonUI::NativeDestruct()
 
 void UCategoryButtonUI::OnClicked_SlotButton()
 {
-    if (InventoryUI->IsValidLowLevel())
+    if (GameUtils::IsValid(InventoryUI))
     {
         InventoryUI->CategoryButtonClicked(this);
     }
@@ -70,7 +70,7 @@ void UCategoryButtonUI::OnUnhovered_SlotButton()
 void UCategoryButtonUI::Init(UInventoryUI* InInventoryUI)
 {
     InventoryUI = InInventoryUI;
-    if (InventoryUI->IsValidLowLevel())
+    if (GameUtils::IsValid(InventoryUI))
     {
         if (ItemType == InventoryUI->GetDisplayedType())
         {
