@@ -160,7 +160,8 @@ bool AArrowProjectileBase::IsEnemy(AActor* InTarget) const
     UBehaviorComponent* BehaviorComponent = 
         Cast<UBehaviorComponent>(GetOwner()->GetComponentByClass(UBehaviorComponent::StaticClass()));
 
-    if (GameUtils::IsValid(BehaviorComponent))
+    // #fix BaseCharacter doesn't have BehaviorComponent 
+    if (BehaviorComponent != nullptr)
     {
         return BehaviorComponent->IsEnemy(InTarget);
     }

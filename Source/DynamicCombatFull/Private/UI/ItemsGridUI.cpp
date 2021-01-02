@@ -156,7 +156,10 @@ void UItemsGridUI::OnItemAdded(FStoredItem InItem)
 
 void UItemsGridUI::OnItemRemoved(FStoredItem InItem)
 {
-    if (!IsOpen())
+    bool bIsOpen = IsOpen();
+
+    // #fix ui is not opened but bIsOpen is true
+    if (!bIsOpen)
     {
         return;
     }
@@ -171,7 +174,7 @@ void UItemsGridUI::OnItemRemoved(FStoredItem InItem)
         }
     }
 
-    if (GameUtils::IsValid(TargetItemUI))
+    if (TargetItemUI != nullptr)
     {
         TargetItemUI->UpdateWidget(InItem);
 

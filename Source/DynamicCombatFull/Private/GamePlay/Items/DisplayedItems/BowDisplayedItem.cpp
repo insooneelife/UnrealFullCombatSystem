@@ -18,6 +18,8 @@ ABowDisplayedItem::ABowDisplayedItem()
     AttachmentSocket = FName("bow");
 
     BowMesh = CreateDefaultSubobject<USkeletalMeshComponent>("BowMesh");
+    BowMesh->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
+
     ArrowMesh = CreateDefaultSubobject<UStaticMeshComponent>("ArrowMesh");
     ArrowMesh->AttachToComponent(BowMesh, FAttachmentTransformRules::KeepRelativeTransform, ArrowSocketName);
 }

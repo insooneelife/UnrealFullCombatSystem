@@ -191,7 +191,7 @@ void UAbilityComponent::ShowSpellIndicator(FVector InLocation, float InRadius, U
 
 void UAbilityComponent::HideSpellIndicator()
 {
-    if (GameUtils::IsValid(SpellIndicator))
+    if (SpellIndicator != nullptr)
     {
         SpellIndicator->Hide();
     }
@@ -199,7 +199,7 @@ void UAbilityComponent::HideSpellIndicator()
 
 void UAbilityComponent::UpdateSpellIndicatorLocation(FVector NewLocation)
 {
-    if (GameUtils::IsValid(SpellIndicator))
+    if (SpellIndicator != nullptr)
     {
         SpellIndicator->SetActorLocation(NewLocation);
     }

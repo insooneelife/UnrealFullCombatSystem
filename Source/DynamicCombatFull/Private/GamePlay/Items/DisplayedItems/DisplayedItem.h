@@ -50,16 +50,13 @@ protected:
     UPROPERTY(EditAnywhere, Category = "Sockets")
         FName AttachmentSocket;
 
-    UPROPERTY(EditAnywhere, Category = "Equipment")
+    UPROPERTY()
         UEquipmentComponent* EquipmentComponent;
 
-
-    UPROPERTY(EditAnywhere, Category = "Equipment")
+    UPROPERTY()
         EItemType Type;
 
-    UPROPERTY(EditAnywhere, Category = "Equipment")
+    UPROPERTY()
         int SlotIndex;
-
-
 
 };

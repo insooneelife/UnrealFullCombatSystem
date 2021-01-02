@@ -79,7 +79,7 @@ void AFireballProjectileAbilityEffect::Init(
 
 void AFireballProjectileAbilityEffect::EnableHomingProjectile()
 {
-    if (GameUtils::IsValid(HomingTarget))
+    if (HomingTarget != nullptr)
     {
         GetWorld()->GetTimerManager().SetTimer(
             UpdateHomingProjectileTimerHandle,
@@ -173,7 +173,8 @@ bool AFireballProjectileAbilityEffect::IsEnemy(AActor* Target) const
     UBehaviorComponent* BehaviorComp = 
         Cast<UBehaviorComponent>(GetOwner()->GetComponentByClass(UBehaviorComponent::StaticClass()));
 
-    if (GameUtils::IsValid(BehaviorComp))
+    // #fix BaseCharacter doesn't have UBehaviorComponent
+    if (BehaviorComp != nullptr)
     {
         return BehaviorComp->IsEnemy(Target);
     }

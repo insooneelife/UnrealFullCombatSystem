@@ -95,7 +95,8 @@ bool ADamageAbilityEffectBase::IsEnemy(AActor* InTarget) const
             UBehaviorComponent* BehaviorComponent =
                 Cast<UBehaviorComponent>(LOwner->GetComponentByClass(UBehaviorComponent::StaticClass()));
 
-            if (GameUtils::IsValid(BehaviorComponent))
+            // #fix BaseCharacter doesn't have BehaviorComponent 
+            if (BehaviorComponent != nullptr)
             {
                 return BehaviorComponent->IsEnemy(InTarget);
             }

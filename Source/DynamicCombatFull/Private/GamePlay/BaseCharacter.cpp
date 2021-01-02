@@ -1167,14 +1167,11 @@ void ABaseCharacter::ShootArrow()
         AArrowProjectileBase* ProjectileBase =
             GetWorld()->SpawnActor<AArrowProjectileBase>(ProjectileClass, SpawnTransform, SpawnInfo);
 
-        if (!GameUtils::IsValid(ProjectileBase))
+        if (GameUtils::IsValid(ProjectileBase))
         {
-            UE_LOG(LogTemp, Error, TEXT("Projectile spawn failed!"));
-            return;
+            float Damage = StatsManager->GetDamage() * AimAlpha;
+            ProjectileBase->Init(Damage, 7000.0f * AimAlpha);
         }
-
-        float Damage = StatsManager->GetDamage() * AimAlpha;
-        ProjectileBase->Init(Damage, 7000.0f * AimAlpha);
 
         FGuid ItemId = Equipment->GetActiveItem(EItemType::Arrows, 0).Id;
         int ItemIndex = Inventory->FindIndexById(ItemId);
@@ -1391,7 +1388,7 @@ void ABaseCharacter::OnAbilityChanged(AAbilityBase* NewAbility)
 {
     UpdateAbilityCrosshair();
 
-    if (GameUtils::IsValid(NewAbility))
+    if (NewAbility != nullptr)
     {
         ResetAimingMode();
     }
@@ -2760,6 +2757,7 @@ void ABaseCharacter::SetData()
         FStoredItem(FGuid::NewGuid(), MagicWandBPClass, 1)
     });
 
+    
     Equipment->SetEquipmentSlots({
         FEquipmentSlots(EItemType::Spell, TArray<FEquipmentSlot> {
             FEquipmentSlot(TArray<FStoredItem>{
@@ -2771,9 +2769,11 @@ void ABaseCharacter::SetData()
             }, 
             0, false)
         }),
+        
         FEquipmentSlots(EItemType::Shield, TArray<FEquipmentSlot> {
             FEquipmentSlot(TArray<FStoredItem>{FStoredItem(SteelShieldBPClass)}, 0, false)
         }),
+        
         FEquipmentSlots(EItemType::Head, TArray<FEquipmentSlot> {
             FEquipmentSlot(TArray<FStoredItem>{FStoredItem()}, 0, false)
         }),

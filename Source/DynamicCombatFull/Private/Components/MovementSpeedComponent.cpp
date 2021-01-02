@@ -101,7 +101,6 @@ void UMovementSpeedComponent::UpdateMaxSpeed()
 
             if (UKismetMathLibrary::NearlyEqual_FloatFloat(Movement->MaxWalkSpeed, TargetSpeed))
             {
-                UE_LOG(LogTemp, Error, TEXT("UpdateMaxSpeed  %f"), TargetSpeed);
                 Movement->MaxWalkSpeed = TargetSpeed;
 
                 bIsUpdatingSpeed = false;

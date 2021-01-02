@@ -46,10 +46,9 @@ void UEquipmentSlotOnlyDisplayUI::NativeConstruct()
     {
         EquipmentComponent->OnItemInSlotChanged.AddDynamic(this, &UEquipmentSlotOnlyDisplayUI::OnItemInSlotChanged);
         EquipmentComponent->OnActiveItemChanged.AddDynamic(this, &UEquipmentSlotOnlyDisplayUI::OnActiveItemChanged);
+        UpdateWidget(EquipmentComponent->GetItemInSlot(ItemType, SlotIndex, ItemIndex));
+        SetActiveWidget(EquipmentComponent->IsActiveItemIndex(ItemType, SlotIndex, ItemIndex));
     }
-
-    UpdateWidget(EquipmentComponent->GetItemInSlot(ItemType, SlotIndex, ItemIndex));
-    SetActiveWidget(EquipmentComponent->IsActiveItemIndex(ItemType, SlotIndex, ItemIndex));
 }
 
 void UEquipmentSlotOnlyDisplayUI::NativeDestruct()

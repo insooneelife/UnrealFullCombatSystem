@@ -25,9 +25,15 @@ void ADisplayedItem::NativeInit(UEquipmentComponent* InEquipmentComponent, EItem
     Type = InType;
     SlotIndex = InSlotIndex;
 
-    if (GameUtils::IsValid(GetPrimaryComponent()))
+    TArray<UActorComponent*> Components = GetComponentsByClass(UPrimitiveComponent::StaticClass());
+
+    for (UActorComponent* Component : Components)
     {
-        GetPrimaryComponent()->SetCollisionEnabled(ECollisionEnabled::Type::NoCollision);
+        UPrimitiveComponent* PrimitiveComp = Cast<UPrimitiveComponent>(Component);
+        if (PrimitiveComp->IsValidLowLevel())
+        {
+            PrimitiveComp->SetCollisionEnabled(ECollisionEnabled::Type::NoCollision);
+        }
     }
 }
 
