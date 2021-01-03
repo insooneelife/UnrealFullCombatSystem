@@ -725,9 +725,7 @@ void UEquipmentComponent::SetMainHandType(EItemType Type)
             UpdateCombatType();
 
             SetSlotHidden(PreviousType, 0, true);
-
             SetSlotHidden(SelectedMainHandType, 0, false);
-
 
             // Update shield if new weapon is Two Handed
             FStoredItem Item = GetItemInSlot(SelectedMainHandType, 0, GetActiveItemIndex(SelectedMainHandType, 0));

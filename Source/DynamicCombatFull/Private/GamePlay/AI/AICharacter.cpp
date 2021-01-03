@@ -19,17 +19,199 @@ void AAICharacter::BeginPlay()
 	
 }
 
-// Called every frame
-void AAICharacter::Tick(float DeltaTime)
+void AAICharacter::OnEffectApplied(EEffectType InType)
 {
-	Super::Tick(DeltaTime);
-
 }
 
-// Called to bind functionality to input
-void AAICharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
+void AAICharacter::OnEffectRemoved(EEffectType InType)
 {
-	Super::SetupPlayerInputComponent(PlayerInputComponent);
-
 }
 
+void AAICharacter::OnHit(const FHitResult& InHit)
+{
+}
+
+void AAICharacter::OnCollisionActivated(ECollisionPart InCollisionPart)
+{
+}
+
+void AAICharacter::HandleMeshOnDeath()
+{
+}
+
+void AAICharacter::OnValueChanged_ExtendedHealth(float InNewValue, float InMaxValue)
+{
+}
+
+void AAICharacter::InitializeStatsWidget()
+{
+}
+
+UAnimMontage* AAICharacter::GetStunMontage(EDirection InDirection) const
+{
+    return nullptr;
+}
+
+UAnimMontage* AAICharacter::GetBlockMontage() const
+{
+    return nullptr;
+}
+
+UAnimMontage* AAICharacter::GetImpactMontage() const
+{
+    return nullptr;
+}
+
+UAnimMontage* AAICharacter::GetParriedMontage() const
+{
+    return nullptr;
+}
+
+UAnimMontage* AAICharacter::GetRollMontage() const
+{
+    return nullptr;
+}
+
+bool AAICharacter::CanBeStunned() const
+{
+    return false;
+}
+
+bool AAICharacter::CanBeAttacked() const
+{
+    return false;
+}
+
+bool AAICharacter::CanBeBackstabbed() const
+{
+    return false;
+}
+
+void AAICharacter::ShowStatsWidget()
+{
+}
+
+void AAICharacter::HideStatsWidget()
+{
+}
+
+void AAICharacter::Death()
+{
+}
+
+void AAICharacter::Stunned()
+{
+}
+
+void AAICharacter::Block()
+{
+}
+
+void AAICharacter::Parried()
+{
+}
+
+void AAICharacter::Impact()
+{
+}
+
+void AAICharacter::Backstabbed()
+{
+}
+
+FHitData AAICharacter::MakeMeleeHitData(AActor* InHitActor)
+{
+    return FHitData();
+}
+
+void AAICharacter::ApplyHitImpulseToCharacter(AActor* InActor, FVector InHitNormal, float InImpulsePower)
+{
+}
+
+float AAICharacter::MeleeAttack(EMeleeAttackType InType)
+{
+    return 0.0f;
+}
+
+UAnimMontage* AAICharacter::GetMeleeAttackMontage() const
+{
+    return nullptr;
+}
+
+void AAICharacter::ResetMeleeAttackCounter()
+{
+}
+
+float AAICharacter::Roll(EDirection InDirection)
+{
+    return 0.0f;
+}
+
+bool AAICharacter::IsStateEqualPure(EState InState) const
+{
+    return false;
+}
+
+bool AAICharacter::IsActivityPure(EActivity InActivity) const
+{
+    return false;
+}
+
+bool AAICharacter::IsCombatTypePure(ECombatType InType) const
+{
+    return false;
+}
+
+void AAICharacter::UpdateReceivedHitDirection(float InHitFromDirection)
+{
+}
+
+bool AAICharacter::CanBeInterrupted() const
+{
+    return false;
+}
+
+bool AAICharacter::OnSelected()
+{
+    return false;
+}
+
+bool AAICharacter::OnDeselected()
+{
+    return false;
+}
+
+bool AAICharacter::IsTargetable() const
+{
+    return false;
+}
+
+bool AAICharacter::TakeDamage(const FHitData& InHitData, EAttackResult& OutResult)
+{
+    return false;
+}
+
+bool AAICharacter::IsAlive() const
+{
+    return false;
+}
+
+FName AAICharacter::GetHeadSocket() const
+{
+    return FName();
+}
+
+bool AAICharacter::CanEffectBeApplied(EEffectType Type, AActor* Applier)
+{
+    return false;
+}
+
+FRotator AAICharacter::GetDesiredRotation() const
+{
+    return FRotator();
+}
+
+UDataTable* AAICharacter::GetMontages(EMontageAction InAction) const
+{
+    return nullptr;
+}

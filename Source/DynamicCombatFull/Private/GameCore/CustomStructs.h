@@ -196,6 +196,7 @@ public:
 
 USTRUCT(BlueprintType)
 struct FHitData
+
 {
     GENERATED_BODY()
 

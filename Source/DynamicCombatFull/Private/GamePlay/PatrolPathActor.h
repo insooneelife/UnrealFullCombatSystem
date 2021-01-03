@@ -19,20 +19,20 @@ public:
 	// Sets default values for this actor's properties
 	APatrolPathActor();
 
-protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
-
 public:
+
+    virtual void OnConstruction(const FTransform& Transform) override;
+
     USplineComponent* GetPatrolSpline() const { return PatrolSpline; }
 
 private:
+    UPROPERTY(EditAnywhere)
     bool bCloseLoop;
 
-    UPROPERTY()
+    UPROPERTY(EditAnywhere)
     USplineComponent* PatrolSpline;
 
-    UPROPERTY()
+    UPROPERTY(EditAnywhere)
     UBillboardComponent* Billboard;
 
 

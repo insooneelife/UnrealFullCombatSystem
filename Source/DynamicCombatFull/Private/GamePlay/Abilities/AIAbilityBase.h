@@ -20,10 +20,20 @@ protected:
 
 public:
 
+    UFUNCTION(BlueprintCallable)
     FVector GetTargetLoc() const;
+
+    UFUNCTION(BlueprintCallable)
     AActor* GetTarget() const;
-    FTransform GetSurfaceTargetTransform(float Range) const;
-    FTransform GetSurfacePredictedTargetTransform(float Range) const;
+
+    UFUNCTION(BlueprintCallable)
+    FTransform GetSurfaceTargetTransform(float InRange) const;
+
+    UFUNCTION(BlueprintCallable)
+    FTransform GetSurfacePredictedTargetTransform(float InRange) const;
+
+    UFUNCTION(BlueprintCallable)
+    AAICharacter* GetAICharacter() const { return AICharacter; }
 
 private:
     UPROPERTY()

@@ -117,23 +117,24 @@ ABaseCharacter::ABaseCharacter()
         GameUtils::LoadAssetObject<UDataTable>("/Game/DynamicCombatSystem/DataTables/PlayerUnarmedMontages");
 
     StateManager = CreateDefaultSubobject<UStateManagerComponent>("StateManager");
+    StatsManager = CreateDefaultSubobject<UStatsManagerComponent>("StatsManager");
     InputBuffer = CreateDefaultSubobject<UInputBufferComponent>("InputBuffer");
     MeleeCollisionHandler = CreateDefaultSubobject<UCollisionHandlerComponent>("MeleeCollisionHandler");
-    ExtendedHealth = CreateDefaultSubobject<UExtendedStatComponent>("ExtendedHealth");
-    ExtendedStamina = CreateDefaultSubobject<UExtendedStatComponent>("ExtendedStamina");
     MontageManager = CreateDefaultSubobject<UMontageManagerComponent>("MontageManager");
+
     DynamicTargeting = CreateDefaultSubobject<UDynamicTargetingComponent>("DynamicTargeting");
     Effects = CreateDefaultSubobject<UEffectsComponent>("Effects");
     MovementSpeed = CreateDefaultSubobject<UMovementSpeedComponent>("MovementSpeed");
-    StatsManager = CreateDefaultSubobject<UStatsManagerComponent>("StatsManager");
-    
-    Dissolve = CreateDefaultSubobject<UDissolveComponent>("Dissolve");
-    Inventory = CreateDefaultSubobject<UInventoryComponent>("Inventory");
-    
-    Equipment = CreateDefaultSubobject<UEquipmentComponent>("Equipment");
     Rotating = CreateDefaultSubobject<URotatingComponent>("Rotating");
-    AbilityComponent = CreateDefaultSubobject<UAbilityComponent>("AbilityComponent");
+    Dissolve = CreateDefaultSubobject<UDissolveComponent>("Dissolve");
+
+    ExtendedHealth = CreateDefaultSubobject<UExtendedStatComponent>("ExtendedHealth");
+    ExtendedStamina = CreateDefaultSubobject<UExtendedStatComponent>("ExtendedStamina");
     ExtendedMana = CreateDefaultSubobject<UExtendedStatComponent>("ExtendedMana");
+
+    Inventory = CreateDefaultSubobject<UInventoryComponent>("Inventory");
+    Equipment = CreateDefaultSubobject<UEquipmentComponent>("Equipment");
+    AbilityComponent = CreateDefaultSubobject<UAbilityComponent>("AbilityComponent");
     
     SetData();
 }
@@ -341,8 +342,317 @@ void ABaseCharacter::OnMovementModeChanged(EMovementMode PrevMovementMode, uint8
     {
         AttemptPlayBowDrawSound();
     }
-
 }
+
+
+EItemType ABaseCharacter::GetSelectedMainHandType() const
+{
+    return Equipment->GetSelectedMainHandType();
+}
+
+EState ABaseCharacter::GetState() const
+{
+    return StateManager->GetState();
+}
+
+void ABaseCharacter::CalculateLeanAmount(float& OutLeanAmount, float& OutInterpSpeed) const
+{
+    EMovementState MovementState = MovementSpeed->GetMovementState();
+
+    bool bLean =
+        IsIdleAndNotFalling() &&
+        (MovementState == EMovementState::Jog || MovementState == EMovementState::Sprint) &&
+        GetCharacterMovement()->Velocity.Size() > 10.0f &&
+        !IsActivityEqual(EActivity::IsLookingForward);
+
+    float HorizontalLookAxisVal = GetInputAxisValue("HorizontalLook");
+    OutLeanAmount = bLean ? HorizontalLookAxisVal : 0.0f;
+    OutInterpSpeed = bLean ? 1.0f : 10.0f;
+}
+
+bool ABaseCharacter::TakeDamage(const FHitData& HitData, EAttackResult& OutResult)
+{
+    if (CanBeAttacked())
+    {
+        UpdateReceivedHitDirection(HitData.HitFromDirection);
+
+        UDefaultGameInstance* DefaultGameInstance = Cast<UDefaultGameInstance>(GetGameInstance());
+
+        if (HitData.Damage != 0.0f)
+        {
+            // If hit was successfully Parried, apply Parried effect on attacker and don't subtract health
+            bool bParried =
+                ReceivedHitDirection == EDirection::Front &&
+                IsActivityEqual(EActivity::CanParryHit) &&
+                HitData.bCanBeParried;
+
+            if (bParried)
+            {
+                UEffectsComponent* EffectsComponent =
+                    Cast<UEffectsComponent>(HitData.DamageCauser->GetComponentByClass(UEffectsComponent::StaticClass()));
+
+                if (GameUtils::IsValid(EffectsComponent))
+                {
+                    bool bApplied =
+                        EffectsComponent->ApplyEffect(EEffectType::Parried, 1.0f, EApplyEffectMethod::Replace, this);
+
+                    if (bApplied)
+                    {
+                        DefaultGameInstance->PlayParrySound(this, HitData.DamageCauser, GetActorLocation());
+                    }
+                }
+
+                OutResult = EAttackResult::Parried;
+                return false;
+            }
+
+            // Check if hit was successfully blocked
+
+            bool bBlocked = ReceivedHitDirection == EDirection::Front && BlockAlpha >= 1.0f && HitData.bCanBeBlocked;
+
+            StatsManager->TakeDamage(HitData.Damage, !bBlocked);
+
+            if (IsAlive() && bBlocked)
+            {
+                DefaultGameInstance->PlayBlockSound(this, HitData.DamageCauser, GetActorLocation());
+                Block();
+
+                if (ExtendedStamina->GetCurrentValue() > 0.0f)
+                {
+                    if (HitData.bCanReceiveImpact &&
+                        (Equipment->IsShieldEquipped() || !IsCombatTypeEqual(ECombatType::Unarmed)))
+                    {
+                        UEffectsComponent* EffectsComponent = Cast<UEffectsComponent>(
+                            HitData.DamageCauser->GetComponentByClass(UEffectsComponent::StaticClass()));
+
+                        if (GameUtils::IsValid(EffectsComponent))
+                        {
+                            EffectsComponent->ApplyEffect(EEffectType::Impact, 1.0f, EApplyEffectMethod::Replace, this);
+                        }
+                    }
+
+                }
+
+                OutResult = EAttackResult::Blocked;
+                return false;
+            }
+
+
+            OutResult = EAttackResult::Success;
+            return true;
+        }
+    }
+
+    OutResult = EAttackResult::Failed;
+    return false;
+}
+
+bool ABaseCharacter::IsAlive() const
+{
+    return !IsStateEqual(EState::Dead);
+}
+
+FName ABaseCharacter::GetHeadSocket() const
+{
+    return FName("head");
+}
+
+bool ABaseCharacter::CanEffectBeApplied(EEffectType Type, AActor* Applier)
+{
+    if (CanBeAttacked())
+    {
+        if (Type == EEffectType::Stun)
+        {
+            return CanBeStunned() && CanBeInterrupted();
+        }
+        else if (Type == EEffectType::Burning)
+        {
+            return true;
+        }
+        else if (Type == EEffectType::Backstab)
+        {
+            return CanBeStunned() && CanBeInterrupted();
+        }
+        else if (Type == EEffectType::Impact)
+        {
+            return CanBeInterrupted();
+        }
+        else if (Type == EEffectType::Parried)
+        {
+            return CanBeInterrupted();
+        }
+    }
+
+    return false;
+}
+
+FRotator ABaseCharacter::GetDesiredRotation() const
+{
+    if (IsStateEqual(EState::Backstabbing))
+    {
+        if (GameUtils::IsValid(BackstabbedActor))
+        {
+            float Yaw =
+                UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), BackstabbedActor->GetActorLocation()).Yaw;
+            return FRotator(GetActorRotation().Pitch, Yaw, GetActorRotation().Roll);
+        }
+    }
+
+    if (AbilityComponent->IsCasting())
+    {
+        float Yaw = AbilityComponent->GetEffectTransform().Rotator().Yaw;
+        return FRotator(GetActorRotation().Pitch, Yaw, GetActorRotation().Roll);
+    }
+
+    if (DynamicTargeting->IsTargetingEnabled())
+    {
+        float Yaw = UKismetMathLibrary::FindLookAtRotation(
+            GetActorLocation(), DynamicTargeting->GetSelectedActor()->GetActorLocation()).Yaw;
+
+        FRotator SampleRotation(GetActorRotation().Pitch, Yaw, GetActorRotation().Roll);
+
+        if (HasMovementInput())
+        {
+            if (IsStateEqual(EState::Rolling))
+            {
+                if (MontageManager->GetLastRequestedAction() == EMontageAction::RollForward)
+                {
+                    return UKismetMathLibrary::Conv_VectorToRotator(GetLastMovementInputVector());
+                }
+            }
+
+            return SampleRotation;
+        }
+        else
+        {
+            if (IsStateEqual(EState::Rolling))
+            {
+
+                if (MontageManager->GetLastRequestedAction() == EMontageAction::RollForward)
+                {
+                    return GetActorRotation();
+                }
+                else
+                {
+                    return SampleRotation;
+                }
+            }
+            else
+            {
+                return SampleRotation;
+            }
+        }
+    }
+    else
+    {
+        if (HasMovementInput())
+        {
+            return UKismetMathLibrary::Conv_VectorToRotator(GetLastMovementInputVector());
+        }
+        else
+        {
+            return GetActorRotation();
+        }
+    }
+}
+
+UDataTable* ABaseCharacter::GetMontages(EMontageAction InAction) const
+{
+    TArray<EMontageAction> CommonMontages
+    {
+        EMontageAction::Backstabbed,
+        EMontageAction::RollForward,
+        EMontageAction::RollLeft,
+        EMontageAction::RollRight,
+        EMontageAction::RollBackward,
+    };
+
+    if (CommonMontages.Contains(InAction))
+    {
+        return PlayerCommonMontages;
+    }
+    else
+    {
+        if (Equipment->IsInCombat())
+        {
+
+        }
+        else
+        {
+            TArray<EMontageAction> Array
+            {
+                EMontageAction::DisarmWeapon,
+                EMontageAction::DrawWeapon
+            };
+
+            if (!Array.Contains(InAction))
+            {
+                return PlayerUnarmedMontages;
+            }
+        }
+
+        if (Equipment->GetCombatType() == ECombatType::Melee)
+        {
+            return PlayerOneHandMeleeMontages;
+        }
+        else if (Equipment->GetCombatType() == ECombatType::Range)
+        {
+            return PlayerArcherMontages;
+        }
+        else if (Equipment->GetCombatType() == ECombatType::Magic)
+        {
+            return PlayerMagicMontages;
+        }
+        else
+        {
+            return PlayerUnarmedMontages;
+        }
+    }
+}
+
+bool ABaseCharacter::DoesHoldBowString() const
+{
+    return
+        IsIdleAndNotFalling() &&
+        Equipment->IsInCombat() &&
+        IsCombatTypeEqual(ECombatType::Range) &&
+        GetMesh()->GetAnimInstance()->IsAnyMontagePlaying();
+}
+
+FName ABaseCharacter::GetBowStringSocketName() const
+{
+    return FName("bow_string");
+}
+
+void ABaseCharacter::OpenedUI()
+{
+    GetWorld()->GetTimerManager().ClearTimer(CheckForInteractableTimerHandle);
+    InteractionActor = nullptr;
+    InGameWidget->GetInteractionMessage()->UpdateWidget(NAME_None);
+}
+
+void ABaseCharacter::ClosedUI()
+{
+    GetWorld()->GetTimerManager().SetTimer(
+        CheckForInteractableTimerHandle, this, &ABaseCharacter::CheckForInteractable, 0.1f, true);
+}
+
+bool ABaseCharacter::CanCastAbility() const
+{
+    return IsIdleAndNotFalling() && ExtendedMana->GetCurrentValue() > AbilityComponent->GetManaCost();
+}
+
+float ABaseCharacter::GetMagicDamage() const
+{
+    return StatsManager->GetStatValue(EStat::MagicDamage, true);
+}
+
+float ABaseCharacter::GetCastingSpeed() const
+{
+    return StatsManager->GetStatValue(EStat::CastingSpeed, true);
+}
+
+
 
 void ABaseCharacter::OnEffectApplied(EEffectType InType)
 {
@@ -543,24 +853,11 @@ void ABaseCharacter::OnInputBufferConsumed(EInputBufferKey InKey)
 
 void ABaseCharacter::OnInputBufferClose()
 {
-    if (!IsStateEqualPure(EState::Disabled))
+    if (!IsStateEqual(EState::Disabled))
     {
         StateManager->ResetState(0.0f);
     }
 }
-
-void ABaseCharacter::UpdateZoom()
-{
-    bool Or1 = (AbilityComponent->IsUsingAbility() && AbilityComponent->ShouldRotateOnPressed()) ||
-        IsActivityPure(EActivity::IsLookingForward);
-
-    bool Or2 = IsIdleAndNotFalling() && IsStateEqualPure(EState::Attacking);
-    bool Or3 = IsActivityPure(EActivity::IsZooming) && bAutoZoom;
-    bool bCondition = Or1 && Or2 && Or3;
-
-    UpdateZoomTimeline(bCondition);
-}
-
 
 void ABaseCharacter::OnActionPressed_Zoom()
 {
@@ -570,17 +867,6 @@ void ABaseCharacter::OnActionPressed_Zoom()
 void ABaseCharacter::OnActionReleased_Zoom()
 {
     StopZooming();
-}
-
-void ABaseCharacter::UpdateBlocking()
-{
-    bool bCondition = 
-        IsActivityPure(EActivity::IsBlockingPressed) &&
-        IsIdleAndNotFalling() &&
-        Equipment->CanBlock() &&
-        IsEnoughStamina(5.0f);
-
-    UpdateBlockingTimeline(bCondition);
 }
 
 void ABaseCharacter::OnActionPressed_Block()
@@ -595,7 +881,7 @@ void ABaseCharacter::OnActionReleased_Block()
 
 void ABaseCharacter::OnActionPressed_Parry()
 {
-    if (IsCombatTypePure(ECombatType::Unarmed) || IsCombatTypePure(ECombatType::Melee))
+    if (IsCombatTypeEqual(ECombatType::Unarmed) || IsCombatTypeEqual(ECombatType::Melee))
     {
         InputBuffer->UpdateKey(EInputBufferKey::Parry);
     }
@@ -603,7 +889,7 @@ void ABaseCharacter::OnActionPressed_Parry()
 
 void ABaseCharacter::OnActionPressed_SpecialAttack()
 {
-    if (IsCombatTypePure(ECombatType::Melee))
+    if (IsCombatTypeEqual(ECombatType::Melee))
     {
         InputBuffer->UpdateKey(EInputBufferKey::SpecialAttack);
     }
@@ -611,7 +897,7 @@ void ABaseCharacter::OnActionPressed_SpecialAttack()
 
 void ABaseCharacter::OnActionPressed_ThrustAttack()
 {
-    if (IsCombatTypePure(ECombatType::Melee))
+    if (IsCombatTypeEqual(ECombatType::Melee))
     {
         InputBuffer->UpdateKey(EInputBufferKey::ThrustAttack);
     }
@@ -619,7 +905,7 @@ void ABaseCharacter::OnActionPressed_ThrustAttack()
 
 void ABaseCharacter::OnActionPressed_HeavyAttack()
 {
-    if (IsCombatTypePure(ECombatType::Unarmed) || IsCombatTypePure(ECombatType::Melee))
+    if (IsCombatTypeEqual(ECombatType::Unarmed) || IsCombatTypeEqual(ECombatType::Melee))
     {
         InputBuffer->UpdateKey(EInputBufferKey::HeavyAttack);
     }
@@ -629,7 +915,7 @@ void ABaseCharacter::OnActionPressed_Attack()
 {
     if (Equipment->IsInCombat())
     {
-        if (IsCombatTypePure(ECombatType::Melee))
+        if (IsCombatTypeEqual(ECombatType::Melee))
         {
             if (!AttemptBackstab())
             {
@@ -638,7 +924,7 @@ void ABaseCharacter::OnActionPressed_Attack()
         }
         else
         {
-            if (IsCombatTypePure(ECombatType::Unarmed))
+            if (IsCombatTypeEqual(ECombatType::Unarmed))
             {
                 InputBuffer->UpdateKey(EInputBufferKey::LightAttack);
             }
@@ -680,7 +966,7 @@ void ABaseCharacter::OnActiveItemChanged(FStoredItem OldItem, FStoredItem NewIte
     {
         if (!Equipment->AreArrowsEquipped() &&
             Equipment->IsInCombat() &&
-            IsCombatTypePure(ECombatType::Range))
+            IsCombatTypeEqual(ECombatType::Range))
         {
             ResetAimingMode();
         }
@@ -689,7 +975,7 @@ void ABaseCharacter::OnActiveItemChanged(FStoredItem OldItem, FStoredItem NewIte
 
 void ABaseCharacter::OnCombatTypeChanged(ECombatType CombatType)
 {
-    if (!AbilityComponent->GetIsPressed())
+    if (!AbilityComponent->IsPressed())
     {
         ResetAimingMode();
     }
@@ -749,17 +1035,6 @@ void ABaseCharacter::OnActionPressed_SwitchToolItem()
 void ABaseCharacter::OnActionPressed_UseToolItem()
 {
     UseItem(EItemType::Tool);
-}
-
-void ABaseCharacter::PlayMainHandTypeChangedMontage(EItemType InType)
-{
-    if (Equipment->GetSelectedMainHandType() == InType && Equipment->IsInCombat())
-    {
-        StateManager->SetState(EState::Interacting);
-        UAnimMontage* Montage = MontageManager->GetMontageForAction(EMontageAction::DrawWeapon, 1);
-        PlayAnimMontage(Montage, 1.0f);
-        StateManager->ResetState(0.1f);
-    }
 }
 
 void ABaseCharacter::OnAxis_MoveForward(float AxisValue)
@@ -946,47 +1221,6 @@ void ABaseCharacter::OnActivityChanged(EActivity Activity, bool bValue)
     }
 }
 
-void ABaseCharacter::StartLookingForward()
-{
-    StateManager->SetActivity(EActivity::IsLookingForward, true);
-    GetWorld()->GetTimerManager().ClearTimer(StopLookingForwardTimerHandle);
-}
-
-void ABaseCharacter::StopLookingForward()
-{
-    StateManager->SetActivity(EActivity::IsLookingForward, false);
-}
-
-void ABaseCharacter::StartAiming()
-{
-    StateManager->SetActivity(EActivity::IsAimingPressed, true);
-}
-
-void ABaseCharacter::StopAiming()
-{
-    StateManager->SetActivity(EActivity::IsAimingPressed, false);
-}
-
-void ABaseCharacter::StartBlocking()
-{
-    StateManager->SetActivity(EActivity::IsBlockingPressed, true);
-}
-
-void ABaseCharacter::StopBlocking()
-{
-    StateManager->SetActivity(EActivity::IsBlockingPressed, false);
-}
-
-void ABaseCharacter::StartZooming()
-{
-    StateManager->SetActivity(EActivity::IsZooming, true);
-}
-
-void ABaseCharacter::StopZooming()
-{
-    StateManager->SetActivity(EActivity::IsZooming, false);
-}
-
 void ABaseCharacter::OnActionPressed_Inventory()
 {
     if (CanOpenUI())
@@ -1003,17 +1237,17 @@ void ABaseCharacter::OnActionPressed_Equipment()
     }
 }
 
-void ABaseCharacter::OnValueChanged_ExtendedHealth(float NewValue, float MaxValue)
+void ABaseCharacter::OnValueChanged_ExtendedHealth(float InNewValue, float InMaxValue)
 {
-    if (NewValue <= 0.0f)
+    if (InNewValue <= 0.0f)
     {
         Death();
     }
 }
 
-void ABaseCharacter::OnValueChanged_ExtendedStamina(float NewValue, float MaxValue)
+void ABaseCharacter::OnValueChanged_ExtendedStamina(float InNewValue, float InMaxValue)
 {
-    if (NewValue / MaxValue <= 0.1f)
+    if (InNewValue / InMaxValue <= 0.1f)
     {
         UpdateBlocking();
     }
@@ -1021,8 +1255,8 @@ void ABaseCharacter::OnValueChanged_ExtendedStamina(float NewValue, float MaxVal
 
 void ABaseCharacter::OnRotatingEnd()
 {
-    if (IsStateEqualPure(EState::Attacking) &&
-        (IsCombatTypePure(ECombatType::Unarmed) || IsCombatTypePure(ECombatType::Melee)) &&
+    if (IsStateEqual(EState::Attacking) &&
+        (IsCombatTypeEqual(ECombatType::Unarmed) || IsCombatTypeEqual(ECombatType::Melee)) &&
         DynamicTargeting->IsTargetingEnabled() &&
         Equipment->IsInCombat())
     {
@@ -1044,7 +1278,7 @@ void ABaseCharacter::OnActionPressed_ToggleCombat()
     }
     else
     {
-        if (IsActivityPure(EActivity::IsAimingPressed) && IsIdleAndNotFalling())
+        if (IsActivityEqual(EActivity::IsAimingPressed) && IsIdleAndNotFalling())
         {
             ResetAimingMode();
             StopBowDrawSound();
@@ -1107,9 +1341,294 @@ void ABaseCharacter::OnActionReleased_BowAttack()
     }
 }
 
+void ABaseCharacter::OnKeyPressed_1()
+{
+    UpdateSpellActiveIndexKey(0);
+}
+
+void ABaseCharacter::OnKeyPressed_2()
+{
+    UpdateSpellActiveIndexKey(1);
+}
+
+void ABaseCharacter::OnKeyPressed_3()
+{
+    UpdateSpellActiveIndexKey(2);
+}
+
+void ABaseCharacter::OnKeyPressed_4()
+{
+    UpdateSpellActiveIndexKey(3);
+}
+
+void ABaseCharacter::OnKeyPressed_5()
+{
+    UpdateSpellActiveIndexKey(4);
+}
+
+void ABaseCharacter::OnManaConsumed(float Amount)
+{
+    ExtendedMana->ModifyStat(Amount * -1.0f, true);
+}
+
+void ABaseCharacter::OnValueChanged_ExtendedMana(float NewValue, float MaxValue)
+{
+    if (NewValue < AbilityComponent->GetManaCost())
+    {
+        AbilityComponent->EndAbility(EAbilityEndResult::OutOfMana);
+    }
+    else
+    {
+        if (bIsAbilityInputPressed)
+        {
+            if (AbilityComponent->IsPressed())
+            {
+                UpdateAbilityPressed();
+            }
+        }
+    }
+}
+
+void ABaseCharacter::OnAbilityStarted()
+{
+    if (!AbilityComponent->CanAbilityBeCancelled())
+    {
+        StateManager->SetState(EState::Attacking);
+    }
+}
+
+void ABaseCharacter::OnAbilityEnded(EAbilityEndResult Result)
+{
+    if (IsStateEqual(EState::Attacking))
+    {
+        StateManager->ResetState(0.0f);
+    }
+
+    if (!AbilityComponent->IsPressed())
+    {
+        DisableAbilityMode();
+    }
+}
+
+void ABaseCharacter::OnMousePressed_Thumb()
+{
+    if (!bIsAbilityInputPressed)
+    {
+        bIsAbilityInputPressed = true;
+        UpdateAbilityAttackKey();
+    }
+}
+
+void ABaseCharacter::OnMouseReleased_Thumb()
+{
+    if (bIsAbilityInputPressed)
+    {
+        bIsAbilityInputPressed = false;
+        AbilityReleased();
+    }
+}
+
+void ABaseCharacter::OnAbilityChanged(AAbilityBase* NewAbility)
+{
+    UpdateAbilityCrosshair();
+
+    if (NewAbility != nullptr)
+    {
+        ResetAimingMode();
+    }
+}
+
+void ABaseCharacter::OnActionPressed_AbilityAttack()
+{
+    if (IsCombatTypeEqual(ECombatType::Magic) && !bIsAbilityInputPressed)
+    {
+        bIsAbilityInputPressed = true;
+        bIsAbilityMainInputPressed = true;
+        UpdateAbilityAttackKey();
+    }
+}
+
+void ABaseCharacter::OnActionReleased_AbilityAttack()
+{
+    if ((IsCombatTypeEqual(ECombatType::Magic) || bIsAbilityMainInputPressed) && bIsAbilityInputPressed)
+    {
+        bIsAbilityInputPressed = false;
+        bIsAbilityMainInputPressed = false;
+        AbilityReleased();
+    }
+}
+
+void ABaseCharacter::OnKeyPressed_P()
+{
+    // save game
+    ADCSGameMode* GameMode = Cast<ADCSGameMode>(UGameplayStatics::GetGameMode(GetWorld()));
+    GameMode->SaveGame();
+}
+
+void ABaseCharacter::OnKeyPressed_K()
+{
+    KeybindingsWidget->ShowKeybindings();
+}
+
+void ABaseCharacter::OnKeyReleased_K()
+{
+    KeybindingsWidget->HideKeybindings();
+}
+
+void ABaseCharacter::OnKeyPressed_L()
+{
+    APlayerController* PlayerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
+    UKismetSystemLibrary::ExecuteConsoleCommand(GetWorld(), FString(TEXT("RestartLevel")), PlayerController);
+}
+
+void ABaseCharacter::OnKeyPressed_O()
+{
+    ADCSGameMode* GameMode = Cast<ADCSGameMode>(UGameplayStatics::GetGameMode(GetWorld()));
+    GameMode->LoadGame();
+}
+
+void ABaseCharacter::CreateKeybindings()
+{
+    APlayerController* PlayerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
+    KeybindingsWidget = Cast<UKeybindingsUI>(CreateWidget(PlayerController, KeybindingsUIClass));
+    KeybindingsWidget->AddToViewport(1);
+}
+
+void ABaseCharacter::AbilityPressed()
+{
+    if (AbilityComponent->IsCurrentAbilityValid() &&
+        Equipment->IsInCombat() &&
+        (ExtendedMana->GetCurrentValue() > AbilityComponent->GetManaCost()))
+    {
+        AbilityComponent->AbilityPressed();
+        EnableAbilityMode();
+    }
+}
+
+void ABaseCharacter::AbilityReleased()
+{
+    if (AbilityComponent->IsPressed())
+    {
+        AbilityComponent->AbilityReleased();
+
+        if (!AbilityComponent->IsCasting())
+        {
+            DisableAbilityMode();
+        }
+    }
+}
+
+void ABaseCharacter::UpdateSpellActiveIndexKey(int NewActiveIndex)
+{
+    SelectedSpellIndex = NewActiveIndex;
+    InputBuffer->UpdateKey(EInputBufferKey::SetSpellActiveIndex);
+}
+
+void ABaseCharacter::UpdateAbilityCrosshair()
+{
+    if (AbilityComponent->IsAbilityUsingCrosshair())
+    {
+        if (AbilityComponent->IsPressed())
+        {
+            ShowCrosshair(AbilityComponent->GetAbilityCrosshair());
+        }
+        else
+        {
+            HideCrosshair();
+        }
+    }
+    else
+    {
+        HideCrosshair();
+    }
+}
+
+void ABaseCharacter::UpdateAbilityPressed()
+{
+    if (bIsAbilityInputPressed && InputBuffer->GetStoredKey() == EInputBufferKey::None)
+    {
+        UpdateAbilityAttackKey();
+    }
+}
+
+void ABaseCharacter::UpdateZoom()
+{
+    bool Or1 = (AbilityComponent->IsUsingAbility() && AbilityComponent->ShouldRotateOnPressed()) ||
+        IsActivityEqual(EActivity::IsLookingForward);
+
+    bool Or2 = IsIdleAndNotFalling() && IsStateEqual(EState::Attacking);
+    bool Or3 = IsActivityEqual(EActivity::IsZooming) && bAutoZoom;
+    bool bCondition = Or1 && Or2 && Or3;
+
+    UpdateZoomTimeline(bCondition);
+}
+
+void ABaseCharacter::UpdateBlocking()
+{
+    bool bCondition =
+        IsActivityEqual(EActivity::IsBlockingPressed) &&
+        IsIdleAndNotFalling() &&
+        Equipment->CanBlock() &&
+        IsEnoughStamina(5.0f);
+
+    UpdateBlockingTimeline(bCondition);
+}
+
+void ABaseCharacter::PlayMainHandTypeChangedMontage(EItemType InType)
+{
+    if (Equipment->GetSelectedMainHandType() == InType && Equipment->IsInCombat())
+    {
+        StateManager->SetState(EState::Interacting);
+        UAnimMontage* Montage = MontageManager->GetMontageForAction(EMontageAction::DrawWeapon, 1);
+        PlayAnimMontage(Montage, 1.0f);
+        StateManager->ResetState(0.1f);
+    }
+}
+
+void ABaseCharacter::StartLookingForward()
+{
+    StateManager->SetActivity(EActivity::IsLookingForward, true);
+    GetWorld()->GetTimerManager().ClearTimer(StopLookingForwardTimerHandle);
+}
+
+void ABaseCharacter::StopLookingForward()
+{
+    StateManager->SetActivity(EActivity::IsLookingForward, false);
+}
+
+void ABaseCharacter::StartAiming()
+{
+    StateManager->SetActivity(EActivity::IsAimingPressed, true);
+}
+
+void ABaseCharacter::StopAiming()
+{
+    StateManager->SetActivity(EActivity::IsAimingPressed, false);
+}
+
+void ABaseCharacter::StartBlocking()
+{
+    StateManager->SetActivity(EActivity::IsBlockingPressed, true);
+}
+
+void ABaseCharacter::StopBlocking()
+{
+    StateManager->SetActivity(EActivity::IsBlockingPressed, false);
+}
+
+void ABaseCharacter::StartZooming()
+{
+    StateManager->SetActivity(EActivity::IsZooming, true);
+}
+
+void ABaseCharacter::StopZooming()
+{
+    StateManager->SetActivity(EActivity::IsZooming, false);
+}
+
 void ABaseCharacter::PlayBowDrawSound()
 {
-    if (IsIdleAndNotFalling() && CanBowAttack() && IsActivityPure(EActivity::IsAimingPressed))
+    if (IsIdleAndNotFalling() && CanBowAttack() && IsActivityEqual(EActivity::IsAimingPressed))
     {
         EffectsAudio->SetSound(nullptr);
         EffectsAudio->Play();
@@ -1125,7 +1644,7 @@ void ABaseCharacter::AttemptPlayBowDrawSound()
     SetTimerRetriggerable(
         RetriggerableDelayTimerHandle,
         FTimerDelegate::CreateUObject(this, &ABaseCharacter::AttemptPlayBowDrawSoundDelayed),
-        1.0f, 
+        1.0f,
         true);
 }
 
@@ -1200,132 +1719,6 @@ void ABaseCharacter::StopBowDrawSound()
     EffectsAudio->Stop();
 }
 
-void ABaseCharacter::OnKeyPressed_1()
-{
-    UpdateSpellActiveIndexKey(0);
-}
-
-void ABaseCharacter::OnKeyPressed_2()
-{
-    UpdateSpellActiveIndexKey(1);
-}
-
-void ABaseCharacter::OnKeyPressed_3()
-{
-    UpdateSpellActiveIndexKey(2);
-}
-
-void ABaseCharacter::OnKeyPressed_4()
-{
-    UpdateSpellActiveIndexKey(3);
-}
-
-void ABaseCharacter::OnKeyPressed_5()
-{
-    UpdateSpellActiveIndexKey(4);
-}
-
-void ABaseCharacter::OnManaConsumed(float Amount)
-{
-    ExtendedMana->ModifyStat(Amount * -1.0f, true);
-}
-
-void ABaseCharacter::OnValueChanged_ExtendedMana(float NewValue, float MaxValue)
-{
-    if (NewValue < AbilityComponent->GetManaCost())
-    {
-        AbilityComponent->EndAbility(EAbilityEndResult::OutOfMana);
-    }
-    else
-    {
-        if (bIsAbilityInputPressed)
-        {
-            if (AbilityComponent->GetIsPressed())
-            {
-                UpdateAbilityPressed();
-            }
-        }
-    }
-}
-
-void ABaseCharacter::AbilityPressed()
-{
-    if (AbilityComponent->IsCurrentAbilityValid() &&
-        Equipment->IsInCombat() &&
-        (ExtendedMana->GetCurrentValue() > AbilityComponent->GetManaCost()))
-    {
-        AbilityComponent->AbilityPressed();
-        EnableAbilityMode();
-    }
-}
-
-void ABaseCharacter::AbilityReleased()
-{
-    if (AbilityComponent->GetIsPressed())
-    {
-        AbilityComponent->AbilityReleased();
-
-        if (!AbilityComponent->GetIsCasting())
-        {
-            DisableAbilityMode();
-        }
-    }
-}
-
-void ABaseCharacter::UpdateSpellActiveIndexKey(int NewActiveIndex)
-{
-    SelectedSpellIndex = NewActiveIndex;
-    InputBuffer->UpdateKey(EInputBufferKey::SetSpellActiveIndex);
-}
-
-void ABaseCharacter::UpdateAbilityCrosshair()
-{
-    if (AbilityComponent->IsAbilityUsingCrosshair())
-    {
-        if (AbilityComponent->GetIsPressed())
-        {
-            ShowCrosshair(AbilityComponent->GetAbilityCrosshair());
-        }
-        else
-        {
-            HideCrosshair();
-        }
-    }
-    else
-    {
-        HideCrosshair();
-    }
-}
-
-void ABaseCharacter::UpdateAbilityPressed()
-{
-    if (bIsAbilityInputPressed && InputBuffer->GetStoredKey() == EInputBufferKey::None)
-    {
-        UpdateAbilityAttackKey();
-    }
-}
-
-void ABaseCharacter::OnAbilityStarted()
-{
-    if (!AbilityComponent->CanAbilityBeCancelled())
-    {
-        StateManager->SetState(EState::Attacking);
-    }
-}
-
-void ABaseCharacter::OnAbilityEnded(EAbilityEndResult Result)
-{
-    if (IsStateEqualPure(EState::Attacking))
-    {
-        StateManager->ResetState(0.0f);
-    }
-
-    if (!AbilityComponent->GetIsPressed())
-    {
-        DisableAbilityMode();
-    }
-}
-
 void ABaseCharacter::UpdateAbilityAttackKey()
 {
     EInputBufferKey Key = Equipment->IsInCombat() ? EInputBufferKey::AbilityAttack : EInputBufferKey::ToggleCombat;
@@ -1352,7 +1745,7 @@ void ABaseCharacter::EnableAbilityMode()
 
 void ABaseCharacter::DisableAbilityMode()
 {
-    if (!AbilityComponent->GetIsCasting() && !AbilityComponent->GetIsPressed())
+    if (!AbilityComponent->IsCasting() && !AbilityComponent->IsPressed())
     {
         GetWorld()->GetTimerManager().SetTimer(
             StopLookingForwardTimerHandle, this, &ABaseCharacter::StopLookingForward, 1.0f, false);
@@ -1366,37 +1759,9 @@ void ABaseCharacter::DisableAbilityMode()
     }
 }
 
-void ABaseCharacter::OnMousePressed_Thumb()
-{
-    if (!bIsAbilityInputPressed)
-    {
-        bIsAbilityInputPressed = true;
-        UpdateAbilityAttackKey();
-    }
-}
-
-void ABaseCharacter::OnMouseReleased_Thumb()
-{
-    if (bIsAbilityInputPressed)
-    {
-        bIsAbilityInputPressed = false;
-        AbilityReleased();
-    }
-}
-
-void ABaseCharacter::OnAbilityChanged(AAbilityBase* NewAbility)
-{
-    UpdateAbilityCrosshair();
-
-    if (NewAbility != nullptr)
-    {
-        ResetAimingMode();
-    }
-}
-
 void ABaseCharacter::AbilityOnStateChanged(EState NewState)
 {
-    if (EState::Idle != NewState && 
+    if (EState::Idle != NewState &&
         EState::Attacking != NewState)
     {
         AbilityComponent->EndAbility(EAbilityEndResult::Interrupted);
@@ -1429,62 +1794,6 @@ void ABaseCharacter::SetSpellActiveIndex()
         Equipment->SetMainHandType(EItemType::Spell);
         Equipment->SetSlotActiveIndex(EItemType::Spell, 0, SelectedSpellIndex);
     }
-}
-
-void ABaseCharacter::OnActionPressed_AbilityAttack()
-{
-    if (IsCombatTypePure(ECombatType::Magic) && !bIsAbilityInputPressed)
-    {
-        bIsAbilityInputPressed = true;
-        bIsAbilityMainInputPressed = true;
-        UpdateAbilityAttackKey();
-    }
-}
-
-void ABaseCharacter::OnActionReleased_AbilityAttack()
-{
-    if ((IsCombatTypePure(ECombatType::Magic) || bIsAbilityMainInputPressed) && bIsAbilityInputPressed)
-    {
-        bIsAbilityInputPressed = false;
-        bIsAbilityMainInputPressed = false;
-        AbilityReleased();
-    }
-}
-
-void ABaseCharacter::OnKeyPressed_P()
-{
-    // save game
-    ADCSGameMode* GameMode = Cast<ADCSGameMode>(UGameplayStatics::GetGameMode(GetWorld()));
-    GameMode->SaveGame();
-}
-
-void ABaseCharacter::OnKeyPressed_K()
-{
-    KeybindingsWidget->ShowKeybindings();
-}
-
-void ABaseCharacter::OnKeyReleased_K()
-{
-    KeybindingsWidget->HideKeybindings();
-}
-
-void ABaseCharacter::OnKeyPressed_L()
-{
-    APlayerController* PlayerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
-    UKismetSystemLibrary::ExecuteConsoleCommand(GetWorld(), FString(TEXT("RestartLevel")), PlayerController);
-}
-
-void ABaseCharacter::OnKeyPressed_O()
-{
-    ADCSGameMode* GameMode = Cast<ADCSGameMode>(UGameplayStatics::GetGameMode(GetWorld()));
-    GameMode->LoadGame();
-}
-
-void ABaseCharacter::CreateKeybindings()
-{
-    APlayerController* PlayerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
-    KeybindingsWidget = Cast<UKeybindingsUI>(CreateWidget(PlayerController, KeybindingsUIClass));
-    KeybindingsWidget->AddToViewport(1);
 }
 
 FTransform ABaseCharacter::GetSpawnArrowTransform() const
@@ -1611,7 +1920,7 @@ void ABaseCharacter::MeleeAttack(EMeleeAttackType InType)
         StateManager->SetState(EState::Attacking);
         GetWorld()->GetTimerManager().ClearTimer(ResetMeleeAttackCounterTimerHandle);
 
-        UAnimMontage* AnimMontage = GetMeleeAttackMontage(MeleeAttackType);
+        UAnimMontage* AnimMontage = GetNextMeleeAttackMontage(MeleeAttackType);
         FString EnumStr = GameUtils::GetEnumValueAsString("EMeleeAttackType", MeleeAttackType);
 
         if (GameUtils::IsValid(AnimMontage))
@@ -1657,7 +1966,7 @@ void ABaseCharacter::Roll()
 
 void ABaseCharacter::CustomJump()
 {
-    if (IsStateEqualPure(EState::Idle) && CanJump())
+    if (IsStateEqual(EState::Idle) && CanJump())
     {
         UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
 
@@ -1674,7 +1983,7 @@ void ABaseCharacter::ToggleCombat()
     EState CurrentState = StateManager->GetState();
     FString EnumStr = GameUtils::GetEnumValueAsString(TEXT("EState"), CurrentState);
 
-    if (IsStateEqualPure(EState::Idle))
+    if (IsStateEqual(EState::Idle))
     {
         StateManager->SetState(EState::Interacting);
         EMontageAction Action = Equipment->IsInCombat() ? EMontageAction::DisarmWeapon : EMontageAction::DrawWeapon;
@@ -1802,9 +2111,9 @@ void ABaseCharacter::UseItem(EItemType InType)
 bool ABaseCharacter::CanMeleeAttack() const
 {
     return
-        IsStateEqualPure(EState::Idle) &&
+        IsStateEqual(EState::Idle) &&
         Equipment->IsInCombat() &&
-        (IsCombatTypePure(ECombatType::Unarmed) || IsCombatTypePure(ECombatType::Melee)) &&
+        (IsCombatTypeEqual(ECombatType::Unarmed) || IsCombatTypeEqual(ECombatType::Melee)) &&
         IsEnoughStamina(1.0f);
 }
 
@@ -1817,7 +2126,7 @@ bool ABaseCharacter::CanBeAttacked() const
 {
     if (IsCharacterAlive())
     {
-        return !IsActivityPure(EActivity::IsImmortal);
+        return !IsActivityEqual(EActivity::IsImmortal);
     }
     else
     {
@@ -1834,7 +2143,7 @@ bool ABaseCharacter::CanUseOrSwitchItem() const
 {
     if (IsCharacterAlive())
     {
-        return IsStateEqualPure(EState::Idle);
+        return IsStateEqual(EState::Idle);
     }
     else
     {
@@ -1846,7 +2155,7 @@ bool ABaseCharacter::CanOpenUI() const
 {
     if (IsCharacterAlive())
     {
-        return IsStateEqualPure(EState::Idle);
+        return IsStateEqual(EState::Idle);
     }
     else
     {
@@ -1859,15 +2168,15 @@ bool ABaseCharacter::CanBowAttack() const
     return 
         Equipment->IsInCombat() &&
         Equipment->AreArrowsEquipped() &&
-        IsCombatTypePure(ECombatType::Range);
+        IsCombatTypeEqual(ECombatType::Range);
 }
 
 bool ABaseCharacter::CanEnterSlowMotion() const
 {
-    return IsActivityPure(EActivity::IsLookingForward) && (IsStateEqualPure(EState::Attacking) || IsIdleAndNotFalling());
+    return IsActivityEqual(EActivity::IsLookingForward) && (IsStateEqual(EState::Attacking) || IsIdleAndNotFalling());
 }
 
-UAnimMontage* ABaseCharacter::GetMeleeAttackMontage(EMeleeAttackType AttackType)
+UAnimMontage* ABaseCharacter::GetNextMeleeAttackMontage(EMeleeAttackType AttackType)
 {
     EMontageAction Action = UDefaultGameInstance::ConvertMeleeAttackTypeToAction(AttackType);
     int LastIndex = MontageManager->GetMontageActionLastIndex(Action);
@@ -2005,7 +2314,7 @@ void ABaseCharacter::UpdateAimAlpha()
 {
     float DeltaTime = GetWorld()->GetDeltaSeconds();
 
-    if (IsActivityPure(EActivity::IsAimingPressed) && IsIdleAndNotFalling())
+    if (IsActivityEqual(EActivity::IsAimingPressed) && IsIdleAndNotFalling())
     {
         float Value = StatsManager->GetStatValue(EStat::AttackSpeed, true);
         AimAlpha = UKismetMathLibrary::FInterpTo_Constant(AimAlpha, 1.0f, DeltaTime, Value);
@@ -2018,12 +2327,12 @@ void ABaseCharacter::UpdateAimAlpha()
 
 void ABaseCharacter::UpdateRotationSettings()
 {
-    if (IsActivityPure(EActivity::IsLookingForward) &&
+    if (IsActivityEqual(EActivity::IsLookingForward) &&
            (IsIdleAndNotFalling() ||
-            IsStateEqualPure(EState::Attacking) ||
-            IsStateEqualPure(EState::Parrying) ||
-            IsStateEqualPure(EState::Backstabbing) ||
-            (AbilityComponent->GetIsPressed() && !GetCharacterMovement()->IsFalling())))
+            IsStateEqual(EState::Attacking) ||
+            IsStateEqual(EState::Parrying) ||
+            IsStateEqual(EState::Backstabbing) ||
+            (AbilityComponent->IsPressed() && !GetCharacterMovement()->IsFalling())))
     {
         VerticalLookRate = 25.0f;
         HorizontalLookRate = 25.0f;
@@ -2258,26 +2567,13 @@ void ABaseCharacter::SetSprint(bool bActivate)
     }
 }
 
-void ABaseCharacter::CalculateLeanAmount(float& OutLeanAmount, float& OutInterpSpeed)
-{
-    EMovementState MovementState = MovementSpeed->GetMovementState();
 
-    bool bLean =
-        IsIdleAndNotFalling() &&
-        (MovementState == EMovementState::Jog || MovementState == EMovementState::Sprint) &&
-        GetCharacterMovement()->Velocity.Size() > 10.0f &&
-        !IsActivityPure(EActivity::IsLookingForward);
-
-    float HorizontalLookAxisVal = GetInputAxisValue("HorizontalLook");
-    OutLeanAmount = bLean ? HorizontalLookAxisVal : 0.0f;
-    OutInterpSpeed = bLean ? 1.0f : 10.0f;
-}
 
 void ABaseCharacter::SprintLoop()
 {
     if (MovementSpeed->GetMovementState() == EMovementState::Sprint &&
         IsEnoughStamina(SprintStaminaCost) &&
-        !IsActivityPure(EActivity::IsLookingForward))
+        !IsActivityEqual(EActivity::IsLookingForward))
     {
         if (IsIdleAndNotFalling() && GetVelocity().Size() > 10.0f)
         {
@@ -2290,289 +2586,7 @@ void ABaseCharacter::SprintLoop()
     }
 }
 
-bool ABaseCharacter::TakeDamage(const FHitData& HitData, EAttackResult& OutResult)
-{
-    if (CanBeAttacked())
-    {
-        UpdateReceivedHitDirection(HitData.HitFromDirection);
-
-        UDefaultGameInstance* DefaultGameInstance = Cast<UDefaultGameInstance>(GetGameInstance());
-
-        if (HitData.Damage != 0.0f)
-        {
-            // If hit was successfully Parried, apply Parried effect on attacker and don't subtract health
-            bool bParried =
-                ReceivedHitDirection == EDirection::Front &&
-                IsActivityPure(EActivity::CanParryHit) &&
-                HitData.bCanBeParried;
-
-            if (bParried)
-            {
-                UEffectsComponent* EffectsComponent =
-                    Cast<UEffectsComponent>(HitData.DamageCauser->GetComponentByClass(UEffectsComponent::StaticClass()));
-
-                if (GameUtils::IsValid(EffectsComponent))
-                {
-                    bool bApplied = 
-                        EffectsComponent->ApplyEffect(EEffectType::Parried, 1.0f, EApplyEffectMethod::Replace, this);
-
-                    if (bApplied)
-                    {
-                        DefaultGameInstance->PlayParrySound(this, HitData.DamageCauser, GetActorLocation());
-                    }
-                }
-
-                OutResult = EAttackResult::Parried;
-                return false;
-            }
-
-            // Check if hit was successfully blocked
-
-            bool bBlocked = ReceivedHitDirection == EDirection::Front && BlockAlpha >= 1.0f && HitData.bCanBeBlocked;
-            
-            StatsManager->TakeDamage(HitData.Damage, !bBlocked);
-
-            if (IsAlive() && bBlocked)
-            {
-                DefaultGameInstance->PlayBlockSound(this, HitData.DamageCauser, GetActorLocation());
-                Block();
-
-                if (ExtendedStamina->GetCurrentValue() > 0.0f)
-                {
-                    if (HitData.bCanReceiveImpact &&
-                        (Equipment->IsShieldEquipped() || !IsCombatTypePure(ECombatType::Unarmed)))
-                    {
-                        UEffectsComponent* EffectsComponent = Cast<UEffectsComponent>(
-                            HitData.DamageCauser->GetComponentByClass(UEffectsComponent::StaticClass()));
-
-                        if (GameUtils::IsValid(EffectsComponent))
-                        {
-                            EffectsComponent->ApplyEffect(EEffectType::Impact, 1.0f, EApplyEffectMethod::Replace, this);
-                        }
-                    }
-                    
-                }
-
-                OutResult = EAttackResult::Blocked;
-                return false;
-            }
-
-
-            OutResult = EAttackResult::Success;
-            return true;
-        }
-    }
-
-    OutResult = EAttackResult::Failed;
-    return false;
-}
-
-bool ABaseCharacter::IsAlive() const
-{
-    return !IsStateEqualPure(EState::Dead);
-}
-
-FName ABaseCharacter::GetHeadSocket() const
-{
-    return FName("head");
-}
-
-bool ABaseCharacter::CanEffectBeApplied(EEffectType Type, AActor* Applier)
-{
-    if (CanBeAttacked())
-    {
-        if (Type == EEffectType::Stun)
-        {
-            return CanBeStunned() && CanBeInterrupted();
-        }
-        else if (Type == EEffectType::Burning)
-        {
-            return true;
-        }
-        else if (Type == EEffectType::Backstab)
-        {
-            return CanBeStunned() && CanBeInterrupted();
-        }
-        else if (Type == EEffectType::Impact)
-        {
-            return CanBeInterrupted();
-        }
-        else if (Type == EEffectType::Parried)
-        {
-            return CanBeInterrupted();
-        }
-    }
-
-    return false;
-}
-
-FRotator ABaseCharacter::GetDesiredRotation() const
-{
-    if (IsStateEqualPure(EState::Backstabbing))
-    {
-        if (GameUtils::IsValid(BackstabbedActor))
-        {
-            float Yaw = 
-                UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), BackstabbedActor->GetActorLocation()).Yaw;
-            return FRotator(GetActorRotation().Pitch, Yaw, GetActorRotation().Roll);
-        }
-    }
-    
-    if (AbilityComponent->GetIsCasting())
-    {
-        float Yaw = AbilityComponent->GetEffectTransform().Rotator().Yaw;
-        return FRotator(GetActorRotation().Pitch, Yaw, GetActorRotation().Roll);
-    }
-
-    if (DynamicTargeting->IsTargetingEnabled())
-    {
-        float Yaw = UKismetMathLibrary::FindLookAtRotation(
-            GetActorLocation(), DynamicTargeting->GetSelectedActor()->GetActorLocation()).Yaw;
-
-        FRotator SampleRotation(GetActorRotation().Pitch, Yaw, GetActorRotation().Roll);
-
-        if (HasMovementInput())
-        {
-            if (IsStateEqualPure(EState::Rolling))
-            {
-                if (MontageManager->GetLastRequestedAction() == EMontageAction::RollForward)
-                {
-                    return UKismetMathLibrary::Conv_VectorToRotator(GetLastMovementInputVector());
-                }
-            }
-
-            return SampleRotation;
-        }
-        else
-        {
-            if (IsStateEqualPure(EState::Rolling))
-            {
-
-                if (MontageManager->GetLastRequestedAction() == EMontageAction::RollForward)
-                {
-                    return GetActorRotation();
-                }
-                else
-                {
-                    return SampleRotation;
-                }
-            }
-            else
-            {
-                return SampleRotation;
-            }
-        }
-    }
-    else
-    {
-        if (HasMovementInput())
-        {
-            return UKismetMathLibrary::Conv_VectorToRotator(GetLastMovementInputVector());
-        }
-        else
-        {
-            return GetActorRotation();
-        }
-    }
-}
-
-UDataTable* ABaseCharacter::GetMontages(EMontageAction InAction) const
-{
-    TArray<EMontageAction> CommonMontages
-    {
-        EMontageAction::Backstabbed,
-        EMontageAction::RollForward,
-        EMontageAction::RollLeft,
-        EMontageAction::RollRight,
-        EMontageAction::RollBackward,
-    };
-
-    if (CommonMontages.Contains(InAction))
-    {
-        return PlayerCommonMontages;
-    }
-    else
-    {
-        if (Equipment->IsInCombat())
-        {
-
-        }
-        else
-        {
-            TArray<EMontageAction> Array
-            {
-                EMontageAction::DisarmWeapon,
-                EMontageAction::DrawWeapon
-            };
-
-            if (!Array.Contains(InAction))
-            {
-                return PlayerUnarmedMontages;
-            }
-        }
-
-        if (Equipment->GetCombatType() == ECombatType::Melee)
-        {
-            return PlayerOneHandMeleeMontages;
-        }
-        else if (Equipment->GetCombatType() == ECombatType::Range)
-        {
-            return PlayerArcherMontages;
-        }
-        else if (Equipment->GetCombatType() == ECombatType::Magic)
-        {
-            return PlayerMagicMontages;
-        }
-        else
-        {
-            return PlayerUnarmedMontages;
-        }
-    }
-}
-
-bool ABaseCharacter::DoesHoldBowString() const
-{
-    return
-        IsIdleAndNotFalling() &&
-        Equipment->IsInCombat() &&
-        IsCombatTypePure(ECombatType::Range) &&
-        GetMesh()->GetAnimInstance()->IsAnyMontagePlaying();
-}
-
-FName ABaseCharacter::GetBowStringSocketName() const
-{
-    return FName("bow_string");
-}
-
-void ABaseCharacter::OpenedUI()
-{
-    GetWorld()->GetTimerManager().ClearTimer(CheckForInteractableTimerHandle);
-    InteractionActor = nullptr;
-    InGameWidget->GetInteractionMessage()->UpdateWidget(NAME_None);
-}
-
-void ABaseCharacter::ClosedUI()
-{
-    GetWorld()->GetTimerManager().SetTimer(
-        CheckForInteractableTimerHandle, this, &ABaseCharacter::CheckForInteractable, 0.1f, true);
-}
-
-bool ABaseCharacter::CanCastAbility() const
-{
-    return IsIdleAndNotFalling() && ExtendedMana->GetCurrentValue() > AbilityComponent->GetManaCost();
-}
-
-float ABaseCharacter::GetMagicDamage() const
-{
-    return StatsManager->GetStatValue(EStat::MagicDamage, true);
-}
-
-float ABaseCharacter::GetCastingSpeed() const
-{
-    return StatsManager->GetStatValue(EStat::CastingSpeed, true);
-}
-
-bool ABaseCharacter::IsStateEqualPure(EState InState) const
+bool ABaseCharacter::IsStateEqual(EState InState) const
 {
     return StateManager->GetState() == InState;
 }
@@ -2580,6 +2594,55 @@ bool ABaseCharacter::IsStateEqualPure(EState InState) const
 bool ABaseCharacter::IsEnoughStamina(float InValue) const
 {
     return ExtendedStamina->GetCurrentValue() >= InValue;
+}
+
+void ABaseCharacter::GetMovementVectors(FVector& InOutForward, FVector& InOutRight) const
+{
+    FRotator Rotator(0.0f, GetControlRotation().Yaw, 0.0f);
+
+    InOutForward = UKismetMathLibrary::GetForwardVector(Rotator);
+    InOutRight = UKismetMathLibrary::GetRightVector(Rotator);
+}
+
+bool ABaseCharacter::IsCombatTypeEqual(ECombatType InType) const
+{
+    return Equipment->GetCombatType() == InType;
+}
+
+bool ABaseCharacter::IsActivityEqual(EActivity InActivity) const
+{
+    return StateManager->GetActivityValue(InActivity);
+}
+
+bool ABaseCharacter::IsIdleAndNotFalling() const
+{
+    return IsStateEqual(EState::Idle) && !GetCharacterMovement()->IsFalling();
+}
+
+bool ABaseCharacter::HasMovementInput() const
+{
+    return UKismetMathLibrary::NotEqual_VectorVector(
+        GetCharacterMovement()->GetLastInputVector(), FVector::ZeroVector, 0.0001f);
+}
+
+bool ABaseCharacter::IsCharacterAlive() const
+{
+    return IsAlive();
+}
+
+bool ABaseCharacter::CanUseOrSwitch() const
+{
+    return CanUseOrSwitchItem();
+}
+
+bool ABaseCharacter::CanBeInterrupted() const
+{
+    return !IsActivityEqual(EActivity::CantBeInterrupted);
+}
+
+void ABaseCharacter::UpdateReceivedHitDirection(FVector InHitFromDirection)
+{
+    ReceivedHitDirection = UDefaultGameInstance::GetHitDirection(InHitFromDirection, this);
 }
 
 void ABaseCharacter::LineTraceForInteractable()
@@ -2622,74 +2685,16 @@ void ABaseCharacter::LineTraceForInteractable()
             }
         }
     }
-
-}
-
-void ABaseCharacter::GetMovementVectors(FVector& InOutForward, FVector& InOutRight) const
-{
-    FRotator Rotator(0.0f, GetControlRotation().Yaw, 0.0f);
-
-    InOutForward = UKismetMathLibrary::GetForwardVector(Rotator);
-    InOutRight = UKismetMathLibrary::GetRightVector(Rotator);
-}
-
-bool ABaseCharacter::IsCombatTypePure(ECombatType InType) const
-{
-    return Equipment->GetCombatType() == InType;
-}
-
-bool ABaseCharacter::IsActivityPure(EActivity InActivity) const
-{
-    return StateManager->GetActivityValue(InActivity);
-}
-
-bool ABaseCharacter::IsIdleAndNotFalling() const
-{
-    return IsStateEqualPure(EState::Idle) && !GetCharacterMovement()->IsFalling();
-}
-
-bool ABaseCharacter::HasMovementInput() const
-{
-    return UKismetMathLibrary::NotEqual_VectorVector(
-        GetCharacterMovement()->GetLastInputVector(), FVector::ZeroVector, 0.0001f);
-}
-
-bool ABaseCharacter::IsCharacterAlive() const
-{
-    return IsAlive();
-}
-
-void ABaseCharacter::UpdateReceivedHitDirection(FVector InHitFromDirection)
-{
-    ReceivedHitDirection = UDefaultGameInstance::GetHitDirection(InHitFromDirection, this);
-}
-
-bool ABaseCharacter::CanUseOrSwitch() const
-{
-    return CanUseOrSwitchItem();
-}
-
-bool ABaseCharacter::CanBeInterrupted() const
-{
-    return !IsActivityPure(EActivity::CantBeInterrupted);
 }
 
 void ABaseCharacter::SetTimerRetriggerable(
-    FTimerHandle& TimerHandle, TBaseDelegate<void> ObjectDelegate, float Time, bool bLoop)
+    FTimerHandle& InTimerHandle, TBaseDelegate<void> InObjectDelegate, float InTime, bool bInLoop)
 {
-    GetWorld()->GetTimerManager().ClearTimer(TimerHandle);
-    GetWorld()->GetTimerManager().SetTimer(TimerHandle, ObjectDelegate, Time, bLoop);
+    GetWorld()->GetTimerManager().ClearTimer(InTimerHandle);
+    GetWorld()->GetTimerManager().SetTimer(InTimerHandle, InObjectDelegate, InTime, bInLoop);
 }
 
-EItemType ABaseCharacter::GetSelectedMainHandType() const 
-{ 
-    return Equipment->GetSelectedMainHandType(); 
-}
 
-EState ABaseCharacter::GetState() const
-{
-    return StateManager->GetState();
-}
 
 void ABaseCharacter::SetData()
 {

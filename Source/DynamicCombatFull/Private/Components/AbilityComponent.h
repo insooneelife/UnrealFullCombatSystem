@@ -34,114 +34,99 @@ public:
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
-
     virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 public:
+    UFUNCTION(BlueprintCallable)
+    void AbilityEffect();
+
+    UFUNCTION(BlueprintCallable)
+    void UpdateSpellIndicatorLocation(FVector NewLocation);
+
+    UFUNCTION(BlueprintCallable)
+    bool StartAbility();
+
+    UFUNCTION(BlueprintCallable)
+    void EndAbility(EAbilityEndResult Result);
+
+    UFUNCTION(BlueprintCallable)
+    bool IsCasting() const { return bIsCasting; }
+
+    UFUNCTION(BlueprintCallable)
+    bool IsPressed() const { return bIsPressed; }
+
+    UFUNCTION(BlueprintCallable)
+    bool IsUsingAbility() const;
+
+    UFUNCTION(BlueprintCallable)
+    bool CanAbilityBeCancelled() const;
+
+protected:
     UFUNCTION()
     void OnActiveItemChanged(FStoredItem OldItem, FStoredItem NewItem, EItemType Type, int SlotIndex, int ActiveIndex);
 
     UFUNCTION()
     void OnMainHandTypeChanged(EItemType Type);
 
-    void UpdateAbilityFromEquipment();
-
+public:
     void AbilityPressed();
-
     void AbilityReleased();
-
-    UFUNCTION(BlueprintCallable)
-    void AbilityEffect();
-
     void ConsumeMana(float Amount);
-
-    void AbilityChanged();
-
-public:
     void ShowSpellIndicator(FVector InLocation, float InRadius, UMaterialInterface* InMaterial);
-
     void HideSpellIndicator();
-
-    UFUNCTION(BlueprintCallable)
-    void UpdateSpellIndicatorLocation(FVector NewLocation);
-
-    void UpdateAbility(TSubclassOf<AAbilityBase> Ability);
-
-    UFUNCTION(BlueprintCallable)
-    bool StartAbility();
-
     float PlayAbilityMontage(UAnimMontage* Montage, float PlayRate, FName Section);
-
-    void StopAbilityMontage();
-
-    UFUNCTION(BlueprintCallable)
-    void EndAbility(EAbilityEndResult Result);
-
-public:
-    AAbilityBase* GetCurrentAbility() const;
     bool IsAbilityUsingCrosshair() const;
     FTransform GetEffectTransform() const;
-
-    UFUNCTION(BlueprintCallable)
-    bool GetIsCasting() const;
-
-    UFUNCTION(BlueprintCallable)
-    bool GetIsPressed() const;
-
-    UFUNCTION(BlueprintCallable)
-    bool IsUsingAbility() const;
     float GetManaCost() const;
-
-    UFUNCTION(BlueprintCallable)
-    bool CanAbilityBeCancelled() const;
     bool IsCurrentAbilityValid() const;
     UTexture2D* GetAbilityCrosshair() const;
     bool ShouldRotateOnPressed() const;
-    void SetIsPressed(bool bValue);
-    void SetIsCasting(bool bValue);
     bool IsPlayingAbilityMontage() const;
-
-    void HideIndicatorIfNotPressed();
-    void CallAbilityEnded(EAbilityEndResult Result);
-
     ACharacter* GetCharacter() const { return Character; }
-
-public:
-    UPROPERTY(BlueprintAssignable)
-        FAbilityStartedSignature OnAbilityStarted;
-
-    UPROPERTY(BlueprintAssignable)
-        FAbilityEndedSignature OnAbilityEnded;
-
-    UPROPERTY(BlueprintAssignable)
-        FManaConsumedSignature OnManaConsumed;
-
-    UPROPERTY(BlueprintAssignable)
-        FAbilityChangedSignature OnAbilityChanged;
-
-    UPROPERTY(BlueprintAssignable)
-        FCastingChangedSignature OnCastingChanged;
-
-    UPROPERTY(BlueprintAssignable)
-        FPressedChangedSignature OnPressedChanged;
 
 private:
 
-    UPROPERTY(EditAnywhere)
-        TSubclassOf<ASpellIndicatorActor> SpawnIndicatorClass;
+    void UpdateAbilityFromEquipment();
+    void AbilityChanged();
+    void UpdateAbility(TSubclassOf<AAbilityBase> Ability);
+    void StopAbilityMontage();
+    void SetIsPressed(bool bValue);
+    void SetIsCasting(bool bValue);
+    void HideIndicatorIfNotPressed();
+    void CallAbilityEnded(EAbilityEndResult Result);
+
+public:
+    UPROPERTY(BlueprintAssignable)
+    FAbilityStartedSignature OnAbilityStarted;
+
+    UPROPERTY(BlueprintAssignable)
+    FAbilityEndedSignature OnAbilityEnded;
+
+    UPROPERTY(BlueprintAssignable)
+    FManaConsumedSignature OnManaConsumed;
+
+    UPROPERTY(BlueprintAssignable)
+    FAbilityChangedSignature OnAbilityChanged;
+
+    UPROPERTY(BlueprintAssignable)
+    FCastingChangedSignature OnCastingChanged;
+
+    UPROPERTY(BlueprintAssignable)
+    FPressedChangedSignature OnPressedChanged;
+
+private:
+
+    UPROPERTY(EditAnywhere, Category = "LoadedClass")
+    TSubclassOf<ASpellIndicatorActor> SpawnIndicatorClass;
 
     UPROPERTY()
-        UEquipmentComponent* EquipmentComponent;
-
-    UPROPERTY()
-        AAbilityBase* CurrentAbility;
-
-    bool bIsPressed;
-
-    bool bIsCasting;
+    UEquipmentComponent* EquipmentComponent;
 
     UPROPERTY()
     ACharacter* Character;
+
+    UPROPERTY()
+    AAbilityBase* CurrentAbility;
 
     UPROPERTY()
     ASpellIndicatorActor* SpellIndicator;
@@ -151,4 +136,8 @@ private:
 
     UPROPERTY(EditAnywhere)
     bool bUpdateEquipmentAbility;
+
+    bool bIsPressed;
+
+    bool bIsCasting;
 };

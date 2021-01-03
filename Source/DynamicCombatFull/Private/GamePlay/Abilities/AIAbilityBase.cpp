@@ -43,14 +43,14 @@ AActor* AAIAbilityBase::GetTarget() const
     return nullptr;
 }
 
-FTransform AAIAbilityBase::GetSurfaceTargetTransform(float Range) const
+FTransform AAIAbilityBase::GetSurfaceTargetTransform(float InRange) const
 {
     FVector EffectLocation = GetTargetLoc();
     FVector ActorLoc = GetOwner()->GetActorLocation();
     FRotator EffectRotation = UKismetMathLibrary::FindLookAtRotation(ActorLoc, EffectLocation);
 
     float Val = (ActorLoc - EffectLocation).Size();
-    float ClampedVal = FMath::Clamp(Val, 0.0f, Range);
+    float ClampedVal = FMath::Clamp(Val, 0.0f, InRange);
 
     FVector StartLocation = ActorLoc + UKismetMathLibrary::Conv_RotatorToVector(EffectRotation)* ClampedVal;
     FVector OutGroundLocation;
@@ -63,13 +63,13 @@ FTransform AAIAbilityBase::GetSurfaceTargetTransform(float Range) const
 }
 
 
-FTransform AAIAbilityBase::GetSurfacePredictedTargetTransform(float Range) const
+FTransform AAIAbilityBase::GetSurfacePredictedTargetTransform(float InRange) const
 {
     AActor* Target = GetTarget();
 
     if (GameUtils::IsValid(Target))
     {
-        return GetSurfaceTargetTransform(Range);
+        return GetSurfaceTargetTransform(InRange);
     }
     else
     {
