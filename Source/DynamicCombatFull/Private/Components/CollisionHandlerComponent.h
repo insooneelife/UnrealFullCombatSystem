@@ -23,30 +23,25 @@ public:
     // Sets default values for this component's properties
     UCollisionHandlerComponent();
 
-protected:
-    // Called when the game starts
-    virtual void BeginPlay() override;
-
 public:
     // Called every frame
     virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 public:
-    void SetCollisionMeshes(const TArray<FCollisionComponent>& CollComps);
-
-    void SetCollisionMesh(UPrimitiveComponent* WeaponMesh, const TArray<FName>& Sockets);
-
     UFUNCTION(BlueprintCallable)
     void DeactivateCollision();
 
     UFUNCTION(BlueprintCallable)
     void ActivateCollision(ECollisionPart CollisionPart);
 
-    void UpdateLastSocketPositions();
-
-    void PerformTrace();
-
 public:
+    void SetCollisionMeshes(const TArray<FCollisionComponent>& CollComps);
+    void SetCollisionMesh(UPrimitiveComponent* WeaponMesh, const TArray<FName>& Sockets);
+
+private:
+
+    void UpdateLastSocketPositions();
+    void PerformTrace();
     bool IsIgnoredClass(TSubclassOf<AActor> TestClass) const;
 
     bool IsCollisionActive() const;
@@ -61,41 +56,38 @@ public:
 
 public:
     UPROPERTY(BlueprintAssignable)
-        FHitSignature OnHit;
+    FHitSignature OnHit;
 
     UPROPERTY(BlueprintAssignable)
-        FCollisionActivatedSignature OnCollisionActivated;
+    FCollisionActivatedSignature OnCollisionActivated;
 
     UPROPERTY(BlueprintAssignable)
-        FCollisionDeactivatedSignature OnCollisionDeactivated;
-
-public:
+    FCollisionDeactivatedSignature OnCollisionDeactivated;
 
 private:
 
     UPROPERTY(EditAnywhere)
-        TArray<TEnumAsByte<EObjectTypeQuery>> ObjectTypesToCollideWith;
+    TArray<TEnumAsByte<EObjectTypeQuery>> ObjectTypesToCollideWith;
 
     UPROPERTY(EditAnywhere)
-        TEnumAsByte<EDrawDebugTrace::Type> VisualizeTrace;
+    TEnumAsByte<EDrawDebugTrace::Type> VisualizeTrace;
 
     UPROPERTY(EditAnywhere)
-        TArray<TSubclassOf<AActor>> IgnoredClasses;
+    TArray<TSubclassOf<AActor>> IgnoredClasses;
 
+    UPROPERTY(EditAnywhere)
+    TArray<FName> IgnoredCollisionProfileNames;
+
+    UPROPERTY(EditAnywhere)
+    float TraceRadius;
+
+    UPROPERTY(EditAnywhere)
+    TArray<FCollisionComponent> CollisionComponents;
+
+    UPROPERTY(EditAnywhere)
+    TArray<FCollCompHitActors> HitActors;
 
     bool bCanPerformTrace;
     bool bCollisionActive;
     TMap<FName, FVector> LastSocketLocations;
-
-    UPROPERTY(EditAnywhere)
-        TArray<FName> IgnoredCollisionProfileNames;
-
-    UPROPERTY(EditAnywhere)
-        float TraceRadius;
-
-    UPROPERTY(EditAnywhere)
-        TArray<FCollisionComponent> CollisionComponents;
-
-    UPROPERTY(EditAnywhere)
-        TArray<FCollCompHitActors> HitActors;
 };

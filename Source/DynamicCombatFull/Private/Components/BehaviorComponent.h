@@ -16,11 +16,6 @@ public:
 	// Sets default values for this component's properties
 	UBehaviorComponent();
 
-protected:
-	// Called when the game starts
-	virtual void BeginPlay() override;
-
-
 public:
     UFUNCTION(BlueprintCallable)
     bool IsEnemy(AActor* InActor) const;

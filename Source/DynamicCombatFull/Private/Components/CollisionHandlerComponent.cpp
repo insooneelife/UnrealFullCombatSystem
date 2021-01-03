@@ -18,14 +18,6 @@ UCollisionHandlerComponent::UCollisionHandlerComponent()
     TraceRadius = 0.1f;
 }
 
-
-// Called when the game starts
-void UCollisionHandlerComponent::BeginPlay()
-{
-    Super::BeginPlay();
-}
-
-
 // Called every frame
 void UCollisionHandlerComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
@@ -43,6 +35,20 @@ void UCollisionHandlerComponent::TickComponent(float DeltaTime, ELevelTick TickT
     }
 }
 
+void UCollisionHandlerComponent::DeactivateCollision()
+{
+    bCollisionActive = false;
+    bCanPerformTrace = false;
+    OnCollisionDeactivated.Broadcast();
+}
+
+void UCollisionHandlerComponent::ActivateCollision(ECollisionPart CollisionPart)
+{
+    HitActors.Empty();
+    bCollisionActive = true;
+    OnCollisionActivated.Broadcast(CollisionPart);
+}
+
 void UCollisionHandlerComponent::SetCollisionMeshes(const TArray<FCollisionComponent>& CollComps)
 {
     CollisionComponents = CollComps;
@@ -57,20 +63,6 @@ void UCollisionHandlerComponent::SetCollisionMesh(UPrimitiveComponent* WeaponMes
 
     TArray<FCollisionComponent> CollComps = { CollComp };
     SetCollisionMeshes(CollComps);
-}
-
-void UCollisionHandlerComponent::DeactivateCollision()
-{
-    bCollisionActive = false;
-    bCanPerformTrace = false;
-    OnCollisionDeactivated.Broadcast();
-}
-
-void UCollisionHandlerComponent::ActivateCollision(ECollisionPart CollisionPart)
-{
-    HitActors.Empty();
-    bCollisionActive = true;
-    OnCollisionActivated.Broadcast(CollisionPart);
 }
 
 void UCollisionHandlerComponent::UpdateLastSocketPositions()
@@ -175,6 +167,7 @@ TArray<AActor*> UCollisionHandlerComponent::GetHitActors(UPrimitiveComponent* Co
     }
     else
     {
+        // ???
         TArray<AActor*> Actors{ GetOwner() };
 
         FCollCompHitActors CollCompHitActors;

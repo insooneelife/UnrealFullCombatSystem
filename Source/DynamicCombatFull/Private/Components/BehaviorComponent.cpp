@@ -13,14 +13,6 @@ UBehaviorComponent::UBehaviorComponent()
     PrimaryComponentTick.bStartWithTickEnabled = false;
 }
 
-
-// Called when the game starts
-void UBehaviorComponent::BeginPlay()
-{
-	Super::BeginPlay();
-}
-
-
 bool UBehaviorComponent::IsEnemy(AActor* InActor) const
 {
     return CheckClass(InActor, Enemies);
