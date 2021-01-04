@@ -13,6 +13,7 @@
 #include "Interfaces/IsArcher.h"
 #include "Interfaces/CanOpenUI.h"
 #include "Interfaces/AbilityInterface.h"
+#include "Interfaces/IsTargetable.h"
 #include "Components/TimelineComponent.h"
 
 #include "BaseCharacter.generated.h"
@@ -41,6 +42,7 @@ class UInGameUI;
 class UKeybindingsUI;
 class UTexture2D;
 class AAbilityBase;
+class UWidgetComponent;
 
 UCLASS()
 class ABaseCharacter 
@@ -52,7 +54,8 @@ class ABaseCharacter
     public IMontageManagerInterface,
     public IIsArcher,
     public ICanOpenUI,
-    public IAbilityInterface
+    public IAbilityInterface,
+    public IIsTargetable
 
 {
 	GENERATED_BODY()
@@ -163,6 +166,11 @@ public:
     virtual bool CanCastAbility() const override;
     virtual float GetMagicDamage() const override;
     virtual float GetCastingSpeed() const override;
+
+    // IIsTargetable
+    virtual void OnSelected() override;
+    virtual void OnDeselected() override;
+    virtual bool IsTargetable() const override;
 
 protected:
     // effects events
@@ -469,8 +477,6 @@ private:
 
     void CreateKeybindings();
 
-private:
-
     FTransform GetSpawnArrowTransform() const;
 
     FRotator GetArrowSpawnDirection(
@@ -531,7 +537,6 @@ private:
     void SetSprint(bool bActivate);
     void SprintLoop();
 
-private:
     bool IsStateEqual(EState InState) const;
     bool IsEnoughStamina(float InValue) const;
     void GetMovementVectors(FVector& InOutForward, FVector& InOutRight) const;
@@ -613,6 +618,10 @@ private:
 
     UPROPERTY(EditAnywhere, Category = "Primitive Components")
     UArrowComponent* TargetingArrow;
+
+    // find from hierachy
+    UPROPERTY(EditAnywhere, Category = "Primitive Components")
+    UWidgetComponent* TargetWidget;
 
     UPROPERTY()
     UInGameUI* InGameWidget;

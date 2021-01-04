@@ -37,13 +37,6 @@ UStatsManagerComponent::UStatsManagerComponent()
     
 }
 
-
-// Called when the game starts
-void UStatsManagerComponent::BeginPlay()
-{
-	Super::BeginPlay();
-}
-
 void UStatsManagerComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
     if (GameUtils::IsValid(EquipmentComponent))
@@ -54,35 +47,6 @@ void UStatsManagerComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
     }
 
     Super::EndPlay(EndPlayReason);
-}
-
-void UStatsManagerComponent::OnActiveItemChanged(
-    FStoredItem OldItem, FStoredItem NewItem, EItemType SlotType, int SlotIndex, int ActiveIndex)
-{
-    UpdateBlockBaseValue();
-    
-    if (!EquipmentComponent->IsSlotHidden(SlotType, SlotIndex))
-    {
-        IncludeItemModifiers(OldItem.ItemClass);
-        IncludeItemModifiers(NewItem.ItemClass);        
-    }
-}
-
-void UStatsManagerComponent::OnSlotHiddenChanged(EItemType SlotType, int SlotIndex, FStoredItem ActiveItem, bool bIsHidden)
-{
-    if (bIsHidden)
-    {
-        ExcludeItemModifiers(ActiveItem.ItemClass);
-    }
-    else
-    {
-        IncludeItemModifiers(ActiveItem.ItemClass);
-    }
-}
-
-void UStatsManagerComponent::OnMainHandTypeSwitched(EItemType SlotType)
-{
-    UpdateBlockBaseValue();
 }
 
 void UStatsManagerComponent::Init()
@@ -98,153 +62,30 @@ void UStatsManagerComponent::Init()
     }
 }
 
-void UStatsManagerComponent::ExcludeItemModifiers(TSubclassOf<UItemBase> Item)
-{
-    if (UKismetSystemLibrary::IsValidClass(Item))
-    {
-        UItemBase* ItemBase = NewObject<UItemBase>(GetOwner(), Item);
-
-        IItemHasModifiers* ItemHasModifers = Cast<IItemHasModifiers>(ItemBase);
-        if (ItemHasModifers != nullptr)
-        {
-            TArray<FModifier> Modifiers = ItemHasModifers->GetModifiers();
-
-            for (FModifier Modifier : Modifiers)
-            {
-                RemoveModifier(Modifier.Type, Modifier.Value);
-            }
-        }
-    }
-}
-
-void UStatsManagerComponent::IncludeItemModifiers(TSubclassOf<UItemBase> Item)
-{
-    if (UKismetSystemLibrary::IsValidClass(Item))
-    {
-        UItemBase* ItemBase = NewObject<UItemBase>(GetOwner(), Item);
-
-        IItemHasModifiers* ItemHasModifers = Cast<IItemHasModifiers>(ItemBase);
-        if (ItemHasModifers != nullptr)
-        {
-            TArray<FModifier> Modifiers = ItemHasModifers->GetModifiers();
-
-            for (FModifier Modifier : Modifiers)
-            {
-                AddModifier(Modifier.Type, Modifier.Value);
-            }
-        }
-    }
-}
-
-void UStatsManagerComponent::AddModifier(EStat Type, float Value)
-{
-    if (Value != 0.0f)
-    {
-        int Index = GetStatIndex(Type);
-
-        if (Index >= 0)
-        {
-            Stats[Index].ModifiersValue += Value;
-            OnModifierAdded.Broadcast(Type, Value);
-        }
-    }
-}
-
-void UStatsManagerComponent::RemoveModifier(EStat Type, float Value)
-{
-    if (Value != 0.0f)
-    {
-        int Index = GetStatIndex(Type);
-
-        if (Index >= 0)
-        {
-            Stats[Index].ModifiersValue -= Value;
-
-            OnModifierRemoved.Broadcast(Type, Value);
-        }
-    }
-}
-
-float UStatsManagerComponent::GetStatValue(EStat Type, bool bIncludeModifiers) const
-{
-    int Index = GetStatIndex(Type);
-
-    if (Index >= 0)
-    {
-        float BaseValue = Stats[Index].BaseValue;
-        float ModifierValue = Stats[Index].ModifiersValue;
-
-        if (bIncludeModifiers)
-        {
-            return BaseValue + ModifierValue;
-        }
-        else
-        {
-            return BaseValue;
-        }
-    }
-
-    return 0.0f;
-}
-
-int UStatsManagerComponent::GetStatIndex(EStat Type) const
-{
-    for (int i = 0; i < Stats.Num(); ++i)
-    {
-        if (Stats[i].Type == Type)
-        {
-            return i;
-        }
-    }
-
-    return -1;
-}
-
-float UStatsManagerComponent::GetDamage() const
-{
-    float Damage = GetStatValue(EStat::Damage, true);
-
-    if (UKismetMathLibrary::RandomFloatInRange(1.0f, 100.0f) <= GetStatValue(EStat::CritChance, true))
-    {
-        float CritMultiplier = GetStatValue(EStat::CritMultiplier, true);
-        Damage *= CritMultiplier;
-    }
-
-    return UKismetMathLibrary::FTrunc(Damage);
-}
-
-void UStatsManagerComponent::ChangeStatBaseValue(EStat Type, float NewValue)
-{
-    int Index = GetStatIndex(Type);
-    Stats[Index].BaseValue = NewValue;
-
-    OnBaseValueChanged.Broadcast(Type, NewValue);
-}
-
-void UStatsManagerComponent::TakeDamage(float Damage, bool bIgnoreStamina)
+void UStatsManagerComponent::TakeDamage(float InDamage, bool bInIgnoreStamina)
 {
     GetWorld()->GetTimerManager().ClearTimer(ResetRecentlyReceivedDamageTimerHandle);
 
-    RecentlyReceivedDamage += Damage;
+    RecentlyReceivedDamage += InDamage;
     RecentlyReceivedHitsCount++;
 
     GetWorld()->GetTimerManager().SetTimer(
         ResetRecentlyReceivedDamageTimerHandle, this, &UStatsManagerComponent::ResetRecentlyReceivedDamage, 4.0f, false);
-    
+
     UExtendedStatComponent* HealthStatComp = UDefaultGameInstance::GetExtendedStatComponent(GetOwner(), EStat::Health);
     UExtendedStatComponent* StaminaStatComp = UDefaultGameInstance::GetExtendedStatComponent(GetOwner(), EStat::Stamina);
 
-    float ArmorVal = Damage * (GetStatValue(EStat::Armor, true) / 100.0f);
-    float ReducedDamage = FMath::Clamp(Damage - ArmorVal, 0.0f, Damage - ArmorVal);
-        
+    float ArmorVal = InDamage * (GetStatValue(EStat::Armor, true) / 100.0f);
+    float ReducedDamage = FMath::Clamp(InDamage - ArmorVal, 0.0f, InDamage - ArmorVal);
+
     if (GameUtils::IsValid(HealthStatComp))
     {
-        if (bIgnoreStamina || !GameUtils::IsValid(StaminaStatComp))
+        if (bInIgnoreStamina || !GameUtils::IsValid(StaminaStatComp))
         {
             HealthStatComp->ModifyStat(ReducedDamage * -1.0f, true);
 
             // ???
-            RecentlyReceivedSuccessfulDamage += Damage;
+            RecentlyReceivedSuccessfulDamage += InDamage;
             RecentlyReceivedSuccessfulHitsCount++;
         }
         else
@@ -263,16 +104,165 @@ void UStatsManagerComponent::TakeDamage(float Damage, bool bIgnoreStamina)
                 BlockedDamage = StaminaValue;
                 HealthStatComp->ModifyStat((ReducedDamage - BlockedDamage) * -1.0f, true);
 
-                RecentlyReceivedSuccessfulDamage += Damage;
+                RecentlyReceivedSuccessfulDamage += InDamage;
                 RecentlyReceivedSuccessfulHitsCount++;
             }
 
         }
-    }        
+    }
+}
+
+void UStatsManagerComponent::AddModifier(EStat InType, float InValue)
+{
+    if (InValue != 0.0f)
+    {
+        int Index = GetStatIndex(InType);
+
+        if (Index >= 0)
+        {
+            Stats[Index].ModifiersValue += InValue;
+            OnModifierAdded.Broadcast(InType, InValue);
+        }
+    }
+}
+
+void UStatsManagerComponent::RemoveModifier(EStat InType, float InValue)
+{
+    if (InValue != 0.0f)
+    {
+        int Index = GetStatIndex(InType);
+
+        if (Index >= 0)
+        {
+            Stats[Index].ModifiersValue -= InValue;
+
+            OnModifierRemoved.Broadcast(InType, InValue);
+        }
+    }
+}
+
+float UStatsManagerComponent::GetStatValue(EStat InType, bool bInIncludeModifiers) const
+{
+    int Index = GetStatIndex(InType);
+
+    if (Index >= 0)
+    {
+        float BaseValue = Stats[Index].BaseValue;
+        float ModifierValue = Stats[Index].ModifiersValue;
+
+        if (bInIncludeModifiers)
+        {
+            return BaseValue + ModifierValue;
+        }
+        else
+        {
+            return BaseValue;
+        }
+    }
+
+    return 0.0f;
+}
+
+float UStatsManagerComponent::GetDamage() const
+{
+    float Damage = GetStatValue(EStat::Damage, true);
+
+    if (UKismetMathLibrary::RandomFloatInRange(1.0f, 100.0f) <= GetStatValue(EStat::CritChance, true))
+    {
+        float CritMultiplier = GetStatValue(EStat::CritMultiplier, true);
+        Damage *= CritMultiplier;
+    }
+
+    return UKismetMathLibrary::FTrunc(Damage);
+}
+
+void UStatsManagerComponent::OnActiveItemChanged(
+    FStoredItem InOldItem, FStoredItem InNewItem, EItemType InSlotType, int InSlotIndex, int InActiveIndex)
+{
+    UpdateBlockBaseValue();
     
+    if (!EquipmentComponent->IsSlotHidden(InSlotType, InSlotIndex))
+    {
+        IncludeItemModifiers(InOldItem.ItemClass);
+        IncludeItemModifiers(InNewItem.ItemClass);        
+    }
+}
 
+void UStatsManagerComponent::OnSlotHiddenChanged(
+    EItemType InSlotType, int InSlotIndex, FStoredItem InActiveItem, bool bInIsHidden)
+{
+    if (bInIsHidden)
+    {
+        ExcludeItemModifiers(InActiveItem.ItemClass);
+    }
+    else
+    {
+        IncludeItemModifiers(InActiveItem.ItemClass);
+    }
+}
 
+void UStatsManagerComponent::OnMainHandTypeSwitched(EItemType InSlotType)
+{
+    UpdateBlockBaseValue();
+}
 
+void UStatsManagerComponent::ExcludeItemModifiers(TSubclassOf<UItemBase> InItem)
+{
+    if (UKismetSystemLibrary::IsValidClass(InItem))
+    {
+        UItemBase* ItemBase = NewObject<UItemBase>(GetOwner(), InItem);
+
+        IItemHasModifiers* ItemHasModifers = Cast<IItemHasModifiers>(ItemBase);
+        if (ItemHasModifers != nullptr)
+        {
+            TArray<FModifier> Modifiers = ItemHasModifers->GetModifiers();
+
+            for (FModifier Modifier : Modifiers)
+            {
+                RemoveModifier(Modifier.Type, Modifier.Value);
+            }
+        }
+    }
+}
+
+void UStatsManagerComponent::IncludeItemModifiers(TSubclassOf<UItemBase> InItem)
+{
+    if (UKismetSystemLibrary::IsValidClass(InItem))
+    {
+        UItemBase* ItemBase = NewObject<UItemBase>(GetOwner(), InItem);
+
+        IItemHasModifiers* ItemHasModifers = Cast<IItemHasModifiers>(ItemBase);
+        if (ItemHasModifers != nullptr)
+        {
+            TArray<FModifier> Modifiers = ItemHasModifers->GetModifiers();
+
+            for (FModifier Modifier : Modifiers)
+            {
+                AddModifier(Modifier.Type, Modifier.Value);
+            }
+        }
+    }
+}
+
+int UStatsManagerComponent::GetStatIndex(EStat InType) const
+{
+    for (int i = 0; i < Stats.Num(); ++i)
+    {
+        if (Stats[i].Type == InType)
+        {
+            return i;
+        }
+    }
+
+    return -1;
+}
+
+void UStatsManagerComponent::ChangeStatBaseValue(EStat InType, float InNewValue)
+{
+    int Index = GetStatIndex(InType);
+    Stats[Index].BaseValue = InNewValue;
+
+    OnBaseValueChanged.Broadcast(InType, InNewValue);
 }
 
 void UStatsManagerComponent::ResetRecentlyReceivedDamage()

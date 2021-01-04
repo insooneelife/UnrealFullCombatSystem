@@ -8,8 +8,8 @@
 #include "InventoryComponent.generated.h"
 
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FItemAddedSignature, FStoredItem, AddedItem);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FItemRemovedSignature, FStoredItem, RemainedItem);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FItemAddedSignature, FStoredItem, InAddedItem);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FItemRemovedSignature, FStoredItem, InRemainedItem);
 
 class APickupActor;
 class UItemBase;
@@ -28,46 +28,48 @@ protected:
     virtual void BeginPlay() override;
     virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
-    UFUNCTION()
-        void OnGameLoaded();
+public:
+    UFUNCTION(BlueprintCallable)
+    void UseItem(FGuid InItemId);
 
 public:
-    void AddItem(TSubclassOf<UItemBase> InItemClass, int InAmount);
-    //void RemoveItem(TSubclassOf<UItemBase> InItemClass, int InAmount);
+    int FindIndexByClass(TSubclassOf<UItemBase> InItemClass) const;
 
-    void ClearInventory();
-    void RemoveItemAtIndex(int Index, int InAmount);
+    int FindIndexById(FGuid InItemId) const;
+
+    FStoredItem GetItemAtIndex(int InIndex) const;
+
+    void RemoveItemAtIndex(int InIndex, int InAmount);
+
+    void AddItem(TSubclassOf<UItemBase> InItemClass, int InAmount);
 
     void DropItem(FStoredItem InItem);
 
-    UFUNCTION(BlueprintCallable)
-    void UseItem(FGuid ItemId);
-
-    FStoredItem GetItemAtIndex(int Index) const;
-
-    int FindIndexByClass(TSubclassOf<UItemBase> InItemClass) const;
-
-    int FindIndexById(FGuid Id) const;
-
-    bool IsSlotEmpty(int Index) const;
-
-    bool IsItemValid(FStoredItem Item) const;
-
-public:
-    UPROPERTY(BlueprintAssignable)
-        FItemAddedSignature OnItemAdded;
-
-    UPROPERTY(BlueprintAssignable)
-        FItemRemovedSignature OnItemRemoved;
-
-public:
     const TArray<FStoredItem>& GetInventory() const { return Inventory; }
     void SetInventory(const TArray<FStoredItem>& InInventory) { Inventory = InInventory; }
 
+protected:
+    UFUNCTION()
+    void OnGameLoaded();
+
+private:
+    void ClearInventory();
+
+    bool IsSlotEmpty(int InIndex) const;
+
+    bool IsItemValid(FStoredItem InItem) const;
+
+public:
+    UPROPERTY(BlueprintAssignable)
+    FItemAddedSignature OnItemAdded;
+
+    UPROPERTY(BlueprintAssignable)
+    FItemRemovedSignature OnItemRemoved;
+
 private:
 
-    UPROPERTY(EditAnywhere)
-        TSubclassOf<APickupActor> SpawnPickupActorClass;
+    UPROPERTY(EditAnywhere, Category = "LoadedClass")
+    TSubclassOf<APickupActor> SpawnPickupActorClass;
 
     UPROPERTY(EditAnywhere)
     TArray<FStoredItem> Inventory;

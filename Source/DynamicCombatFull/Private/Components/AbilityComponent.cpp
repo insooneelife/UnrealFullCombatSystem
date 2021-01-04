@@ -75,11 +75,11 @@ void UAbilityComponent::AbilityEffect()
     }
 }
 
-void UAbilityComponent::UpdateSpellIndicatorLocation(FVector NewLocation)
+void UAbilityComponent::UpdateSpellIndicatorLocation(FVector InNewLocation)
 {
     if (SpellIndicator != nullptr)
     {
-        SpellIndicator->SetActorLocation(NewLocation);
+        SpellIndicator->SetActorLocation(InNewLocation);
     }
 }
 
@@ -111,24 +111,24 @@ bool UAbilityComponent::StartAbility()
     return false;
 }
 
-void UAbilityComponent::EndAbility(EAbilityEndResult Result)
+void UAbilityComponent::EndAbility(EAbilityEndResult InResult)
 {
     if (IsUsingAbility())
     {
-        if (Result == EAbilityEndResult::Finished)
+        if (InResult == EAbilityEndResult::Finished)
         {
             HideIndicatorIfNotPressed();
             SetIsCasting(false);
-            CallAbilityEnded(Result);
+            CallAbilityEnded(InResult);
         }
-        else if (Result == EAbilityEndResult::Interrupted)
+        else if (InResult == EAbilityEndResult::Interrupted)
         {
             HideIndicatorIfNotPressed();
             SetIsCasting(false);
             StopAbilityMontage();
-            CallAbilityEnded(Result);
+            CallAbilityEnded(InResult);
         }
-        else if (Result == EAbilityEndResult::Canceled)
+        else if (InResult == EAbilityEndResult::Canceled)
         {
             if ((IsCasting() && CanAbilityBeCancelled()) || !IsCasting())
             {
@@ -136,22 +136,22 @@ void UAbilityComponent::EndAbility(EAbilityEndResult Result)
                 SetIsCasting(false);
                 HideSpellIndicator();
                 StopAbilityMontage();
-                CallAbilityEnded(Result);
+                CallAbilityEnded(InResult);
             }
 
         }
-        else if (Result == EAbilityEndResult::OutOfMana)
+        else if (InResult == EAbilityEndResult::OutOfMana)
         {
             SetIsPressed(false);
             HideSpellIndicator();
             SetIsCasting(false);
-            CallAbilityEnded(Result);
+            CallAbilityEnded(InResult);
         }
-        else if (Result == EAbilityEndResult::Destroyed)
+        else if (InResult == EAbilityEndResult::Destroyed)
         {
             HideSpellIndicator();
             SetIsCasting(false);
-            CallAbilityEnded(Result);
+            CallAbilityEnded(InResult);
         }
     }
 }
@@ -175,15 +175,15 @@ bool UAbilityComponent::CanAbilityBeCancelled() const
 }
 
 void UAbilityComponent::OnActiveItemChanged(
-    FStoredItem OldItem, FStoredItem NewItem, EItemType Type, int SlotIndex, int ActiveIndex)
+    FStoredItem InOldItem, FStoredItem InNewItem, EItemType InType, int InSlotIndex, int InActiveIndex)
 {
-    if (Type == EItemType::None || EquipmentComponent->GetSelectedMainHandType() == Type)
+    if (InType == EItemType::None || EquipmentComponent->GetSelectedMainHandType() == InType)
     {
         UpdateAbilityFromEquipment();
     }
 }
 
-void UAbilityComponent::OnMainHandTypeChanged(EItemType Type)
+void UAbilityComponent::OnMainHandTypeChanged(EItemType InType)
 {
     UpdateAbilityFromEquipment();
 }
@@ -213,9 +213,9 @@ void UAbilityComponent::AbilityReleased()
     }
 }
 
-void UAbilityComponent::ConsumeMana(float Amount)
+void UAbilityComponent::ConsumeMana(float InAmount)
 {
-    OnManaConsumed.Broadcast(Amount);
+    OnManaConsumed.Broadcast(InAmount);
 }
 
 
@@ -256,9 +256,9 @@ void UAbilityComponent::HideSpellIndicator()
     }
 }
 
-float UAbilityComponent::PlayAbilityMontage(UAnimMontage* Montage, float PlayRate, FName Section)
+float UAbilityComponent::PlayAbilityMontage(UAnimMontage* InMontage, float InPlayRate, FName InSection)
 {
-    float Duration = Character->PlayAnimMontage(Montage, PlayRate, Section);
+    float Duration = Character->PlayAnimMontage(InMontage, InPlayRate, InSection);
     return Duration;
 }
 
@@ -374,25 +374,25 @@ void UAbilityComponent::AbilityChanged()
 
 
 
-void UAbilityComponent::UpdateAbility(TSubclassOf<AAbilityBase> AbilityClass)
+void UAbilityComponent::UpdateAbility(TSubclassOf<AAbilityBase> InAbilityClass)
 {
     if (IsCurrentAbilityValid())
     {
-        if (CurrentAbility->GetClass() != AbilityClass)
+        if (CurrentAbility->GetClass() != InAbilityClass)
         {
             EndAbility(EAbilityEndResult::Destroyed);
             CurrentAbility->Destroy();
         }
     }
 
-    if(UKismetSystemLibrary::IsValidClass(AbilityClass))
+    if(UKismetSystemLibrary::IsValidClass(InAbilityClass))
     {
         FActorSpawnParameters Params;
         Params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
         Params.Owner = GetOwner();
         Params.Instigator = nullptr;
 
-        AAbilityBase* Ability = GetWorld()->SpawnActor<AAbilityBase>(AbilityClass, FTransform::Identity, Params);
+        AAbilityBase* Ability = GetWorld()->SpawnActor<AAbilityBase>(InAbilityClass, FTransform::Identity, Params);
         Ability->Init(this);
 
         CurrentAbility = Ability;
@@ -417,21 +417,21 @@ void UAbilityComponent::StopAbilityMontage()
     }
 }
 
-void UAbilityComponent::SetIsPressed(bool bValue)
+void UAbilityComponent::SetIsPressed(bool bInValue)
 {
-    if (IsPressed() != bValue)
+    if (IsPressed() != bInValue)
     {
-        bIsPressed = bValue;
+        bIsPressed = bInValue;
 
         OnPressedChanged.Broadcast(bIsPressed);
     }
 }
 
-void UAbilityComponent::SetIsCasting(bool bValue)
+void UAbilityComponent::SetIsCasting(bool bInValue)
 {
-    if (IsCasting() != bValue)
+    if (IsCasting() != bInValue)
     {
-        bIsCasting = bValue;
+        bIsCasting = bInValue;
         OnCastingChanged.Broadcast(bIsCasting);
     }
 }
@@ -447,13 +447,13 @@ void UAbilityComponent::HideIndicatorIfNotPressed()
     }
 }
 
-void UAbilityComponent::CallAbilityEnded(EAbilityEndResult Result)
+void UAbilityComponent::CallAbilityEnded(EAbilityEndResult InResult)
 {
     if (IsCurrentAbilityValid())
     {
-        CurrentAbility->Ended(Result);
+        CurrentAbility->Ended(InResult);
     }
 
-    OnAbilityEnded.Broadcast(Result);
+    OnAbilityEnded.Broadcast(InResult);
 }
 

@@ -10,8 +10,8 @@
 
 class UCharacterMovementComponent;
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FMovementStateStartSignature, EMovementState, State);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FMovementStateEndSignature, EMovementState, State);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FMovementStateStartSignature, EMovementState, InState);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FMovementStateEndSignature, EMovementState, InState);
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class UMovementSpeedComponent : public UActorComponent
@@ -30,16 +30,7 @@ public:
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
-
 public:
-
-    EMovementState GetMovementState() const;
-    void SetMovementState(EMovementState State);
-
-    void UpdateMaxSpeed();
-    void ToggleState();
-    float GetMaxPossibleSpeed() const;
-
     UFUNCTION(BlueprintCallable)
     float GetWalkSpeed() const { return WalkSpeed; }
 
@@ -48,6 +39,15 @@ public:
 
     UFUNCTION(BlueprintCallable)
     float GetSprintSpeed() const { return SprintSpeed; }
+
+public:
+    void ToggleState();
+    void SetMovementState(EMovementState InState);
+    EMovementState GetMovementState() const { return MovementState; }
+
+private:
+    void UpdateMaxSpeed();
+    float GetMaxPossibleSpeed() const;
 
 public:
 
@@ -59,9 +59,7 @@ public:
 
 private:
     UPROPERTY()
-        UCharacterMovementComponent* Movement;
-
-    EMovementState MovementState;
+    UCharacterMovementComponent* Movement;
 
     UPROPERTY(EditAnywhere)
     EMovementState StartMovementState;
@@ -75,14 +73,14 @@ private:
     UPROPERTY(EditAnywhere)
     float SprintSpeed;
 
-    float TargetSpeed;
-
     UPROPERTY(EditAnywhere)
     float SpeedChangeInterpSpeed;
 
     UPROPERTY(EditAnywhere)
     TArray<EMovementState> StatesToToggle;
 
+    EMovementState MovementState;
+    float TargetSpeed;
     bool bIsUpdatingSpeed;
 		
 };

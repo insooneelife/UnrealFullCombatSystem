@@ -76,6 +76,70 @@ void UExtendedStatComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
     Super::EndPlay(EndPlayReason);
 }
 
+void UExtendedStatComponent::ChangeRegenPercent(int InPercent)
+{
+    RegenValue = ((float)InPercent / 100.0f) * InitialRegenValue;
+}
+
+void UExtendedStatComponent::ModifyStat(float InValue, bool bInInterruptRegeneration)
+{
+    if (InValue != 0.0f)
+    {
+        if (bInInterruptRegeneration)
+        {
+            ClearRegenTimer();
+        }
+
+        SetCurrentValue(CurrentValue + InValue, false);
+        RefreshRegenTimer();
+    }
+}
+
+void UExtendedStatComponent::SetCurrentValue(float InValue, bool bInInterruptRegeneration)
+{
+    CurrentValue = FMath::Clamp(InValue, -100.0f, GetMaxValue());
+
+    OnValueChanged.Broadcast(CurrentValue, GetMaxValue());
+
+    if (bInInterruptRegeneration)
+    {
+        ClearRegenTimer();
+        RefreshRegenTimer();
+    }
+}
+
+void UExtendedStatComponent::OnModifierAdded(EStat InType, float InValue)
+{
+    if (InType == StatType)
+    {
+        AddModifier(InValue);
+    }
+}
+
+void UExtendedStatComponent::OnModifierRemoved(EStat InType, float InValue)
+{
+    if (InType == StatType)
+    {
+        RemoveModifier(InValue);
+    }
+}
+
+void UExtendedStatComponent::OnGameLoaded()
+{
+    FTimerHandle TimerHandle;
+    GetWorld()->GetTimerManager().SetTimer(
+        TimerHandle, this, &UExtendedStatComponent::DelayedTick_OnGameLoaded, 0.0f, false);
+}
+
+void UExtendedStatComponent::OnBaseValueChanged(EStat InStat, float InNewValue)
+{
+    if (InStat == StatType)
+    {
+        TopValue = InNewValue;
+
+        OnValueChanged.Broadcast(CurrentValue, GetMaxValue());
+    }
+}
 
 void UExtendedStatComponent::RefreshRegenTimer()
 {
@@ -97,22 +161,6 @@ void UExtendedStatComponent::StartRegenerating()
         TimerHandle, this, &UExtendedStatComponent::RegenTick, RegenerationTickInterval, true);
 }
 
-void UExtendedStatComponent::OnModifierAdded(EStat Type, float Value)
-{
-    if (Type == StatType)
-    {
-        AddModifier(Value);
-    }
-}
-
-void UExtendedStatComponent::OnModifierRemoved(EStat Type, float Value)
-{
-    if (Type == StatType)
-    {
-        RemoveModifier(Value);
-    }
-}
-
 void UExtendedStatComponent::InitStatManager()
 {
     UStatsManagerComponent* StatsManagerComp = 
@@ -129,14 +177,7 @@ void UExtendedStatComponent::InitStatManager()
     }
 }
 
-void UExtendedStatComponent::OnGameLoaded()
-{
-    FTimerHandle TimerHandle;
-    GetWorld()->GetTimerManager().SetTimer(
-        TimerHandle, this, &UExtendedStatComponent::OnGameLoadedDelayed, 0.0f, false);
-}
-
-void UExtendedStatComponent::OnGameLoadedDelayed()
+void UExtendedStatComponent::DelayedTick_OnGameLoaded()
 {
     ADCSGameMode* GameMode = Cast<ADCSGameMode>(UGameplayStatics::GetGameMode(GetWorld()));
 
@@ -149,16 +190,6 @@ void UExtendedStatComponent::OnGameLoadedDelayed()
             float StatValue = StatValues[StatType];
             SetCurrentValue(StatValue, false);
         }
-    }
-}
-
-void UExtendedStatComponent::OnBaseValueChanged(EStat Stat, float NewValue)
-{
-    if (Stat == StatType)
-    {
-        TopValue = NewValue;
-
-        OnValueChanged.Broadcast(CurrentValue, GetMaxValue());
     }
 }
 
@@ -179,53 +210,21 @@ void UExtendedStatComponent::ClearRegenTimer()
     GetWorld()->GetTimerManager().ClearTimer(RegenTimerHandle);
 }
 
-void UExtendedStatComponent::ChangeRegenPercent(int Percent)
+void UExtendedStatComponent::AddModifier(float InValue)
 {
-    RegenValue = ((float)Percent / 100.0f) * InitialRegenValue;
-}
-
-void UExtendedStatComponent::ModifyStat(float Value, bool bInterruptRegeneration)
-{
-    if (Value != 0.0f)
-    {
-        if (bInterruptRegeneration)
-        {
-            ClearRegenTimer();
-        }
-
-        SetCurrentValue(CurrentValue + Value, false);
-        RefreshRegenTimer();
-    }
-}
-
-
-void UExtendedStatComponent::AddModifier(float Value)
-{
-    ModifierValue = ModifierValue + Value;
+    ModifierValue = ModifierValue + InValue;
 
     SetCurrentValue(FMath::Clamp(CurrentValue, 0.0f, GetMaxValue()), false);
     RefreshRegenTimer();
 }
 
-void UExtendedStatComponent::RemoveModifier(float Value)
+void UExtendedStatComponent::RemoveModifier(float InValue)
 {
-    ModifierValue = ModifierValue - Value;
+    ModifierValue = ModifierValue - InValue;
 
     SetCurrentValue(FMath::Clamp(CurrentValue, 0.0f, GetMaxValue()), false);
     RefreshRegenTimer();
 }
 
-void UExtendedStatComponent::SetCurrentValue(float Value, bool bInterruptRegeneration)
-{
-    CurrentValue = FMath::Clamp(Value, -100.0f, GetMaxValue());
-
-    OnValueChanged.Broadcast(CurrentValue, GetMaxValue());
-
-    if (bInterruptRegeneration)
-    {
-        ClearRegenTimer();
-        RefreshRegenTimer();
-    }
-}
 
 

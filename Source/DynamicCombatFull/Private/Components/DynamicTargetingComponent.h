@@ -9,8 +9,8 @@
 #include "GameCore/CustomStructs.h"
 #include "DynamicTargetingComponent.generated.h"
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FTargetChangedSignature, AActor*, NewTarget);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FTargetingToggledSignature, bool, bEnabled);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FTargetChangedSignature, AActor*, InNewTarget);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FTargetingToggledSignature, bool, bInEnabled);
 
 class ACharacter;
 class UArrowComponent;
@@ -25,39 +25,49 @@ public:
 	UDynamicTargetingComponent();
 
 protected:
-	// Called when the game starts
-	virtual void BeginPlay() override;
 
 public:	
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
     void Init(UArrowComponent* InArrowComp);
-    void DisableCameraLock();
-    void FindTargetWithAxisInput(float AxisValue);
+
     void ToggleCameraLock();
-    bool IsTargetingEnabled() const;
     void FindTargetOnLeft();
     void FindTargetOnRight();
-    void SetFreeCamera(bool bFreeCamera);
+    void FindTargetWithAxisInput(float InAxisValue);
+    void SetFreeCamera(bool bInFreeCamera);
+    void DisableCameraLock();
+
+    FTransform GetSelectedActorTransform() const;
+    bool IsTargetingEnabled() const;
+    void SetBlockingCollisionTypes(const TArray<TEnumAsByte<EObjectTypeQuery>>& InBlockingCollisionTypes)
+    {
+        BlockingCollisionTypes = InBlockingCollisionTypes;
+    }
+
+private:
+
+    void UpdateTarget();
     void FindTarget();
-    bool IsInViewport(FVector2D ScreenPosition);
-    FVector GetLineTraceStartLocation()const;
+    void FindDirectionalTarget(bool bInOnLeft);
     void EnableCameraLock();
     void UpdateCameraLock();
     void SetDebugMode();
-    void CheckTarget();
-    void FindDirectionalTarget(bool bOnLeft);
-    AActor* GetTargetByDotProduct(const TArray<AActor*> Actors, bool bBest) const;
     void UpdateIgnoreLookInput();
-    bool IsAnythingBlockingTrace(AActor* Target, const TArray<AActor*>& ActorsToIgnore) const;
-    void CheckCollisionTypeArrays();
+    void UpdateCollisionTypeArrays();
+
+    bool IsInViewport(FVector2D InScreenPosition) const;
+    FVector GetLineTraceStartLocation()const;
+
+    AActor* GetTargetByDotProduct(const TArray<AActor*>& InActors, bool bInBest) const;
+    bool IsAnythingBlockingTrace(AActor* InTarget, const TArray<AActor*>& InActorsToIgnore) const;
 
     bool GetActorScreenPosition(AActor* InActor, FVector2D& OutScreenPos) const;
-    float GetDistanceToOwner(AActor* OtherActor) const;
-    bool IsTargetRightSide(AActor* PotentialTarget) const;
-    float CalculateDotProductToTarget(AActor* Target) const;
-    bool HasArrayAnyElem(const TArray<AActor*>& Actors) const;
+    float GetDistanceToOwner(AActor* InOtherActor) const;
+    bool IsTargetRightSide(AActor* InPotentialTarget) const;
+    float CalculateDotProductToTarget(AActor* InTarget) const;
+    bool HasArrayAnyElem(const TArray<AActor*>& InActors) const;
 
 public:
     UPROPERTY(BlueprintAssignable)
@@ -65,14 +75,6 @@ public:
 
     UPROPERTY(BlueprintAssignable)
     FTargetingToggledSignature OnTargetingToggled;
-
-public:
-    AActor* GetSelectedActor() const { return SelectedActor; }
-
-    void SetBlockingCollisionTypes(const TArray<TEnumAsByte<EObjectTypeQuery>>& InBlockingCollisionTypes) 
-    {
-        BlockingCollisionTypes = InBlockingCollisionTypes;
-    }
 
 private:
     UPROPERTY()
@@ -102,17 +104,17 @@ private:
     UPROPERTY(EditAnywhere)
     float DisableOnBlockDelay;
 
-
-    EDrawDebugTrace::Type DebugMode;
+    UPROPERTY()
     AActor* SelectedActor;
-    bool bIsTargetingEnabled;
 
     UPROPERTY(EditAnywhere)
     bool bDebug;
 
-    ACharacter* CharacterReference;
-    FTimerHandle CheckTargetTimerHandle;
+    EDrawDebugTrace::Type DebugMode;
+
+    bool bIsTargetingEnabled;
     bool bIsFreeCamera;
+    FTimerHandle CheckTargetTimerHandle;
     FTimerHandle DisableCameraLockTimerHandle;
 
 		

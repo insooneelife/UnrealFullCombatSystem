@@ -8,8 +8,8 @@
 #include "GameCore/CustomStructs.h"
 #include "StateManagerComponent.generated.h"
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FStateChangedSignature, EState, PrevState, EState, NewState);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FActivityChangedSignature, EActivity, Activity, bool, Value);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FStateChangedSignature, EState, InPrevState, EState, InNewState);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FActivityChangedSignature, EActivity, InActivity, bool, bInValue);
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class UStateManagerComponent : public UActorComponent
@@ -20,21 +20,15 @@ public:
 	// Sets default values for this component's properties
 	UStateManagerComponent();
 
-protected:
-	// Called when the game starts
-	virtual void BeginPlay() override;
+public:
+    UFUNCTION(BlueprintCallable)
+    void SetActivity(EActivity InActivity, bool bInValue);
 
 public:
-    void SetState(EState State);
-
-    EState GetState() const;
-
-    UFUNCTION(BlueprintCallable)
-    void SetActivity(EActivity Activity, bool Value);
-
-    bool GetActivityValue(EActivity Activity);
-
+    void SetState(EState InState);
+    bool GetActivityValue(EActivity InActivity);
     void ResetState(float InTime);
+    EState GetState() const { return CurrentState; }
 
 private:
     void SetIdleState() { SetState(EState::Idle); }
@@ -49,6 +43,5 @@ public:
 private:
     EState CurrentState;
     TMap<EActivity, bool> Activities;
-
     FTimerHandle SetIdleStateTimerHandle;
 };

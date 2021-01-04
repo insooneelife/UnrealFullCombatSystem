@@ -8,9 +8,9 @@
 #include "GameCore/CustomStructs.h"
 #include "StatsManagerComponent.generated.h"
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FModifierAddedSignature, EStat, Type, float, Value);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FModifierRemovedSignature, EStat, Type, float, Value);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FBaseValueChangedSignature, EStat, Type, float, Value);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FModifierAddedSignature, EStat, InType, float, InValue);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FModifierRemovedSignature, EStat, InType, float, InValue);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FBaseValueChangedSignature, EStat, InType, float, InValue);
 
 class UEquipmentComponent;
 class UItemBase;
@@ -25,33 +25,33 @@ public:
 	UStatsManagerComponent();
 
 protected:
-	// Called when the game starts
-	virtual void BeginPlay() override;
     virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
-    UFUNCTION()
-    void OnActiveItemChanged(FStoredItem OldItem, FStoredItem NewItem, EItemType SlotType, int SlotIndex, int ActiveIndex);
-
-    UFUNCTION()
-    void OnSlotHiddenChanged(EItemType SlotType, int SlotIndex, FStoredItem ActiveItem, bool bIsHidden);
-
-    UFUNCTION()
-    void OnMainHandTypeSwitched(EItemType SlotType);
-
-public:	
-
+public:
     void Init();
-
-    void ExcludeItemModifiers(TSubclassOf<UItemBase> Item);
-    void IncludeItemModifiers(TSubclassOf<UItemBase> Item);
-    void AddModifier(EStat Type, float Value);
-    void RemoveModifier(EStat Type, float Value);
-    float GetStatValue(EStat Type, bool bIncludeModifiers) const;
-    int GetStatIndex(EStat Type) const;
+    void TakeDamage(float InDamage, bool bInIgnoreStamina);
+    void AddModifier(EStat InType, float InValue);
+    void RemoveModifier(EStat InType, float InValue);
+    float GetStatValue(EStat InType, bool bInIncludeModifiers) const;
     float GetDamage() const;
-    void ChangeStatBaseValue(EStat Type, float NewValue);
 
-    void TakeDamage(float Damage, bool bIgnoreStamina);
+protected:
+    UFUNCTION()
+    void OnActiveItemChanged(
+        FStoredItem InOldItem, FStoredItem InNewItem, EItemType InSlotType, int InSlotIndex, int InActiveIndex);
+
+    UFUNCTION()
+    void OnSlotHiddenChanged(EItemType InSlotType, int InSlotIndex, FStoredItem InActiveItem, bool bInIsHidden);
+
+    UFUNCTION()
+    void OnMainHandTypeSwitched(EItemType InSlotType);
+
+private:	
+
+    void ExcludeItemModifiers(TSubclassOf<UItemBase> InItem);
+    void IncludeItemModifiers(TSubclassOf<UItemBase> InItem);
+    int GetStatIndex(EStat InType) const;
+    void ChangeStatBaseValue(EStat InType, float InNewValue);
     void ResetRecentlyReceivedDamage();
     void UpdateBlockBaseValue();
 

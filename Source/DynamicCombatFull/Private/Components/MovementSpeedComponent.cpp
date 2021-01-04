@@ -40,7 +40,6 @@ void UMovementSpeedComponent::BeginPlay()
     }
 }
 
-
 // Called every frame
 void UMovementSpeedComponent::TickComponent(
     float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
@@ -48,65 +47,6 @@ void UMovementSpeedComponent::TickComponent(
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
     UpdateMaxSpeed();
-}
-
-
-EMovementState UMovementSpeedComponent::GetMovementState() const
-{
-    return MovementState;
-}
-
-void UMovementSpeedComponent::SetMovementState(EMovementState State)
-{
-    if (GameUtils::IsValid(Movement))
-    {
-        OnMovementStateEnd.Broadcast(MovementState);
-        MovementState = StartMovementState;
-
-
-        if (MovementState == EMovementState::Idle)
-        {
-            TargetSpeed = 0.0f;
-        }
-        else if (MovementState == EMovementState::Walk)
-        {
-            TargetSpeed = WalkSpeed;
-        }
-        else if (MovementState == EMovementState::Jog)
-        {
-            TargetSpeed = JogSpeed;
-        }
-        else if (MovementState == EMovementState::Sprint)
-        {
-            TargetSpeed = SprintSpeed;
-        }
-
-        bIsUpdatingSpeed = true;
-
-        OnMovementStateStart.Broadcast(MovementState);
-    }
-}
-
-void UMovementSpeedComponent::UpdateMaxSpeed()
-{
-    if (bIsUpdatingSpeed)
-    {
-        if (GameUtils::IsValid(Movement))
-        {
-            Movement->MaxWalkSpeed = UKismetMathLibrary::FInterpTo(
-                Movement->MaxWalkSpeed, 
-                TargetSpeed, 
-                UGameplayStatics::GetWorldDeltaSeconds(GetWorld()), 
-                SpeedChangeInterpSpeed);
-
-            if (UKismetMathLibrary::NearlyEqual_FloatFloat(Movement->MaxWalkSpeed, TargetSpeed))
-            {
-                Movement->MaxWalkSpeed = TargetSpeed;
-
-                bIsUpdatingSpeed = false;
-            }
-        }
-    }
 }
 
 void UMovementSpeedComponent::ToggleState()
@@ -128,6 +68,58 @@ void UMovementSpeedComponent::ToggleState()
         }
 
         SetMovementState(ChangeState);
+    }
+}
+
+void UMovementSpeedComponent::SetMovementState(EMovementState InState)
+{
+    if (GameUtils::IsValid(Movement))
+    {
+        OnMovementStateEnd.Broadcast(MovementState);
+        MovementState = InState;
+
+        if (MovementState == EMovementState::Idle)
+        {
+            TargetSpeed = 0.0f;
+        }
+        else if (MovementState == EMovementState::Walk)
+        {
+            TargetSpeed = WalkSpeed;
+        }
+        else if (MovementState == EMovementState::Jog)
+        {
+            TargetSpeed = JogSpeed;
+        }
+        else if (MovementState == EMovementState::Sprint)
+        {
+            TargetSpeed = SprintSpeed;
+        }
+
+        bIsUpdatingSpeed = true;
+        OnMovementStateStart.Broadcast(MovementState);
+    }
+}
+
+
+void UMovementSpeedComponent::UpdateMaxSpeed()
+{
+    if (bIsUpdatingSpeed)
+    {
+        if (GameUtils::IsValid(Movement))
+        {
+            Movement->MaxWalkSpeed = UKismetMathLibrary::FInterpTo(
+                Movement->MaxWalkSpeed, 
+                TargetSpeed, 
+                UGameplayStatics::GetWorldDeltaSeconds(GetWorld()), 
+                SpeedChangeInterpSpeed);
+
+            if (UKismetMathLibrary::NearlyEqual_FloatFloat(Movement->MaxWalkSpeed, TargetSpeed))
+            {
+                Movement->MaxWalkSpeed = TargetSpeed;
+
+                bIsUpdatingSpeed = false;
+            }
+        }
     }
 }
 

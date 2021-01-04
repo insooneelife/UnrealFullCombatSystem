@@ -78,7 +78,7 @@ void URotatingComponent::StopRotating()
     OnRotatingEnd.Broadcast();
 }
 
-void URotatingComponent::Debug()
+void URotatingComponent::DebugDraw() const
 {
     IRotatingInterface* RotatingInterface = Cast<IRotatingInterface>(GetOwner());
     if (RotatingInterface == nullptr)
@@ -103,20 +103,15 @@ void URotatingComponent::SetRotationMode(ERotationMode InMode)
             Character->GetCharacterMovement()->bUseControllerDesiredRotation = true;
             Character->GetCharacterMovement()->bOrientRotationToMovement = false;
         }
-        else if(InMode == ERotationMode::OrientToMovement)
+        else if (InMode == ERotationMode::OrientToMovement)
         {
             Character->bUseControllerRotationYaw = false;
             Character->GetCharacterMovement()->bUseControllerDesiredRotation = false;
             Character->GetCharacterMovement()->bOrientRotationToMovement = true;
         }
     }
-
 }
 
-bool URotatingComponent::IsRotating() const
-{
-    return bShouldRotate;
-}
 
 
 

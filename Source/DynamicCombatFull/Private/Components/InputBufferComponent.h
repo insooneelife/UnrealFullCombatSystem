@@ -7,7 +7,7 @@
 #include "GameCore/DataTypes.h"
 #include "InputBufferComponent.generated.h"
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FInputBufferConsumedSignature, EInputBufferKey, Key);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FInputBufferConsumedSignature, EInputBufferKey, InKey);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FInputBufferOpenSignature);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FInputBufferCloseSignature);
 
@@ -21,20 +21,20 @@ public:
 	UInputBufferComponent();
 
 protected:
-	// Called when the game starts
-	virtual void BeginPlay() override;
 
 public:	
-    void ConsumeInputBuffer();
-    void UpdateKey(EInputBufferKey Key);
-
     UFUNCTION(BlueprintCallable)
     void OpenInputBuffer();
 
     UFUNCTION(BlueprintCallable)
     void CloseInputBuffer();
+
+public:
+    void UpdateKey(EInputBufferKey InKey);
     EInputBufferKey GetStoredKey() const { return StoredKey; }
 
+private:
+    void ConsumeInputBuffer();
 
 public:
     UPROPERTY(BlueprintAssignable)

@@ -42,24 +42,24 @@ void UCollisionHandlerComponent::DeactivateCollision()
     OnCollisionDeactivated.Broadcast();
 }
 
-void UCollisionHandlerComponent::ActivateCollision(ECollisionPart CollisionPart)
+void UCollisionHandlerComponent::ActivateCollision(ECollisionPart InCollisionPart)
 {
     HitActors.Empty();
     bCollisionActive = true;
-    OnCollisionActivated.Broadcast(CollisionPart);
+    OnCollisionActivated.Broadcast(InCollisionPart);
 }
 
-void UCollisionHandlerComponent::SetCollisionMeshes(const TArray<FCollisionComponent>& CollComps)
+void UCollisionHandlerComponent::SetCollisionMeshes(const TArray<FCollisionComponent>& InCollComps)
 {
-    CollisionComponents = CollComps;
+    CollisionComponents = InCollComps;
     UpdateLastSocketPositions();
 }
 
-void UCollisionHandlerComponent::SetCollisionMesh(UPrimitiveComponent* WeaponMesh, const TArray<FName>& Sockets)
+void UCollisionHandlerComponent::SetCollisionMesh(UPrimitiveComponent* InWeaponMesh, const TArray<FName>& InSockets)
 {
     FCollisionComponent CollComp;
-    CollComp.Component = WeaponMesh;
-    CollComp.Sockets = Sockets;
+    CollComp.Component = InWeaponMesh;
+    CollComp.Sockets = InSockets;
 
     TArray<FCollisionComponent> CollComps = { CollComp };
     SetCollisionMeshes(CollComps);
@@ -91,10 +91,10 @@ void UCollisionHandlerComponent::PerformTrace()
             for (FName Name : CollComp.Sockets)
             {
                 FName UniqueName = GetUniqueSocketName(CollComp.Component, Name);
-
                 FVector Start = LastSocketLocations[UniqueName];
 
-                TArray<AActor*> IgnoreActors = GetHitActors(CollComp.Component);
+                TArray<AActor*> IgnoreActors = GetHitActorsOrAddOwner(CollComp.Component);
+
                 FVector End = CollComp.Component->GetSocketLocation(Name);
 
                 TArray<FHitResult> OutHits;
@@ -104,7 +104,10 @@ void UCollisionHandlerComponent::PerformTrace()
 
                 for (const FHitResult& Hit : OutHits)
                 {
-                    bool bActorNotContained = !GetHitActors(CollComp.Component).Contains(Hit.GetActor());
+                    if (Hit.GetActor() == GetOwner())
+                        continue;
+
+                    bool bActorNotContained = !GetHitActorsOrAddOwner(CollComp.Component).Contains(Hit.GetActor());
                     bool bNotIgnoredClass = !IsIgnoredClass(Hit.GetActor()->GetClass());
                     bool bCollisionProfileNotContained = 
                         !IgnoredCollisionProfileNames.Contains(Hit.Component->GetCollisionProfileName());
@@ -122,11 +125,11 @@ void UCollisionHandlerComponent::PerformTrace()
     }
 }
 
-bool UCollisionHandlerComponent::IsIgnoredClass(TSubclassOf<AActor> TestClass) const
+bool UCollisionHandlerComponent::IsIgnoredClass(TSubclassOf<AActor> InTestClass) const
 {
     for (TSubclassOf<AActor> ClassType : IgnoredClasses)
     {
-        if (UKismetMathLibrary::ClassIsChildOf(TestClass, ClassType))
+        if (UKismetMathLibrary::ClassIsChildOf(InTestClass, ClassType))
         {
             return true;
         }
@@ -139,18 +142,18 @@ bool UCollisionHandlerComponent::IsCollisionActive() const
     return bCanPerformTrace;
 }
 
-FName UCollisionHandlerComponent::GetUniqueSocketName(UPrimitiveComponent* Component, FName SocketName) const
+FName UCollisionHandlerComponent::GetUniqueSocketName(UPrimitiveComponent* InComponent, FName InSocketName) const
 {
-    return FName(*(UKismetSystemLibrary::GetDisplayName(Component) + SocketName.ToString()));
+    return FName(*(UKismetSystemLibrary::GetDisplayName(InComponent) + InSocketName.ToString()));
 }
 
-int UCollisionHandlerComponent::GetHitActorsIndex(UPrimitiveComponent* Component) const
+int UCollisionHandlerComponent::GetHitActorsIndex(UPrimitiveComponent* InComponent) const
 {
     for (int i = 0; i < HitActors.Num(); ++i)
     {
         const FCollCompHitActors& Data = HitActors[i];
 
-        if (Data.Component == Component)
+        if (Data.Component == InComponent)
         {
             return i;
         }
@@ -158,34 +161,32 @@ int UCollisionHandlerComponent::GetHitActorsIndex(UPrimitiveComponent* Component
     return -1;
 }
 
-TArray<AActor*> UCollisionHandlerComponent::GetHitActors(UPrimitiveComponent* Component)
+TArray<AActor*> UCollisionHandlerComponent::GetHitActorsOrAddOwner(UPrimitiveComponent* InComponent)
 {
-    int Index = GetHitActorsIndex(Component);
+    int Index = GetHitActorsIndex(InComponent);
     if (Index >= 0)
     {
         return HitActors[Index].HitActors;
     }
     else
     {
-        // ???
         TArray<AActor*> Actors{ GetOwner() };
 
         FCollCompHitActors CollCompHitActors;
-        CollCompHitActors.Component = Component;
+        CollCompHitActors.Component = InComponent;
         CollCompHitActors.HitActors = Actors;
 
         int AddIndex = HitActors.Add(CollCompHitActors);
 
         return HitActors[AddIndex].HitActors;
-
     }
 }
 
-void UCollisionHandlerComponent::AddHitActor(UPrimitiveComponent* Component, AActor* HitActor)
+void UCollisionHandlerComponent::AddHitActor(UPrimitiveComponent* InComponent, AActor* InHitActor)
 {
-    int Index = GetHitActorsIndex(Component);
+    int Index = GetHitActorsIndex(InComponent);
     if (Index >= 0)
     {
-        HitActors[Index].HitActors.Add(HitActor);
+        HitActors[Index].HitActors.Add(InHitActor);
     }
 }

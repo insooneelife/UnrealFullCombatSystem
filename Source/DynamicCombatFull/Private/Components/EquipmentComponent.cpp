@@ -76,13 +76,6 @@ UEquipmentComponent::UEquipmentComponent()
     SelectedMainHandType = EItemType::MeleeWeapon;
 }
 
-
-// Called when the game starts
-void UEquipmentComponent::BeginPlay()
-{
-	Super::BeginPlay();
-}
-
 void UEquipmentComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
     for (auto E : DisplayedItems)
@@ -119,6 +112,80 @@ void UEquipmentComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
     Super::EndPlay(EndPlayReason);
 }
 
+ADisplayedItem* UEquipmentComponent::GetDisplayedItem(EItemType InType, int InSlotIndex) const
+{
+    if (DisplayedItems.Contains(InType))
+    {
+        return DisplayedItems[InType].DisplayedItems[InSlotIndex];
+    }
+    return nullptr;
+}
+
+FStoredItem UEquipmentComponent::GetActiveItem(EItemType InType, int InSlotIndex) const
+{
+    int Index = GetEqSlotsIndex(InType);
+    const FEquipmentSlot& Slot = EquipmentSlots[Index].Slots[InSlotIndex];
+    return Slot.Items[Slot.ActiveItemIndex];
+}
+
+
+bool UEquipmentComponent::IsSlotHidden(EItemType InType, int InSlotIndex) const
+{
+    if (IsSlotIndexValid(InType, InSlotIndex))
+    {
+        int Index = GetEqSlotsIndex(InType);
+        const FEquipmentSlot& Slot = EquipmentSlots[Index].Slots[InSlotIndex];
+        return Slot.bIsHidden;
+    }
+
+    return false;
+}
+
+bool UEquipmentComponent::IsShieldEquipped() const
+{
+    if (IsSlotHidden(EItemType::Shield, 0))
+    {
+        return false;
+    }
+    else
+    {
+        FStoredItem Item = GetActiveItem(EItemType::Shield, 0);
+
+        if (IsItemValid(Item))
+        {
+            // ???
+            IItemCanBlock* ItemCanBlock = Cast<IItemCanBlock>(NewObject<UItemBase>(GetOwner(), Item.ItemClass));
+            return ItemCanBlock != nullptr;
+        }
+        else
+        {
+            return false;
+        }
+    }
+}
+
+bool UEquipmentComponent::IsInCombat() const
+{
+    return bIsInCombat;
+}
+
+void UEquipmentComponent::ToggleCombat()
+{
+    SetCombat(!bIsInCombat);
+}
+
+bool UEquipmentComponent::IsTwoHandedWeaponEquipped() const
+{
+    if (IsItemTwoHanded(GetWeapon()))
+    {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
 void UEquipmentComponent::Init()
 {
     // inventory events
@@ -143,6 +210,318 @@ void UEquipmentComponent::Init()
             GameMode->OnGameLoaded.AddDynamic(this, &UEquipmentComponent::OnGameLoaded);
         }        
     }
+}
+
+void UEquipmentComponent::SwitchMainHandType(bool bInForward)
+{
+    int SelectedIndex = MainHandTypes.Find(SelectedMainHandType);
+
+    if (SelectedIndex >= 0)
+    {
+        int NextIndex = GetNextArrayIndex(MainHandTypes, SelectedIndex, bInForward);
+
+        SetMainHandType(MainHandTypes[NextIndex]);
+    }
+}
+
+void UEquipmentComponent::SwitchSlotActiveIndex(
+    EItemType InType, int InSlotIndex, bool bInForward, bool bInIgnoreEmptyItems)
+{
+    if (IsSlotIndexValid(InType, InSlotIndex))
+    {
+        int ActiveItemIndex = GetActiveItemIndex(InType, InSlotIndex);
+
+        int EqSlotsIndex = GetEqSlotsIndex(InType);
+
+        FEquipmentSlot& EqSlot = EquipmentSlots[EqSlotsIndex].Slots[InSlotIndex];
+        const TArray<FStoredItem>& Items = EqSlot.Items;
+
+        int NewIndex = GetNextArrayIndex(Items, ActiveItemIndex, bInForward);
+
+        if (bInIgnoreEmptyItems)
+        {
+            for (int i = 1; i < Items.Num(); ++i)
+            {
+                if (IsItemValid(Items[NewIndex]))
+                {
+                    EqSlot.ActiveItemIndex = NewIndex;
+                    ActiveItemChanged(EqSlot.Items[ActiveItemIndex], EqSlot.Items[NewIndex], InType, InSlotIndex, NewIndex);
+                }
+                else
+                {
+                    NewIndex = GetNextArrayIndex(Items, NewIndex, bInForward);
+                }
+            }
+        }
+        else
+        {
+            EqSlot.ActiveItemIndex = NewIndex;
+            ActiveItemChanged(EqSlot.Items[ActiveItemIndex], EqSlot.Items[NewIndex], InType, InSlotIndex, NewIndex);
+        }
+    }
+}
+
+void UEquipmentComponent::SetMainHandType(EItemType InType)
+{
+    if (MainHandTypes.Find(InType) >= 0)
+    {
+        if (SelectedMainHandType != InType)
+        {
+            EItemType PreviousType = SelectedMainHandType;
+            SelectedMainHandType = InType;
+
+            UpdateCombatType();
+
+            SetSlotHidden(PreviousType, 0, true);
+            SetSlotHidden(SelectedMainHandType, 0, false);
+
+            // Update shield if new weapon is Two Handed
+            FStoredItem Item = GetItemInSlot(SelectedMainHandType, 0, GetActiveItemIndex(SelectedMainHandType, 0));
+            if (IsItemTwoHanded(Item))
+            {
+                SetSlotHidden(EItemType::Shield, 0, true);
+            }
+            else
+            {
+                SetSlotHidden(EItemType::Shield, 0, false);
+            }
+
+
+            SetSlotHidden(
+                EItemType::Arrows,
+                0,
+                !(SelectedMainHandType == EItemType::RangeWeapon && GetCombatType() == ECombatType::Range));
+
+            OnMainHandTypeChanged.Broadcast(SelectedMainHandType);
+        }
+    }
+}
+
+void UEquipmentComponent::SetSlotActiveIndex(EItemType InType, int InSlotIndex, int InNewActiveIndex)
+{
+    if (IsItemIndexValid(InType, InSlotIndex, InNewActiveIndex))
+    {
+        int ActiveItemIndex = GetActiveItemIndex(InType, InSlotIndex);
+
+        int EqSlotIndex = GetEqSlotsIndex(InType);
+
+        if (ActiveItemIndex != InNewActiveIndex &&
+            ActiveItemIndex >= 0 &&
+            InNewActiveIndex >= 0)
+        {
+            FEquipmentSlot& EqSlot = EquipmentSlots[EqSlotIndex].Slots[InSlotIndex];
+            EqSlot.ActiveItemIndex = InNewActiveIndex;
+            ActiveItemChanged(
+                EqSlot.Items[ActiveItemIndex],
+                EqSlot.Items[InNewActiveIndex], InType, InSlotIndex, InNewActiveIndex);
+        }
+    }
+}
+
+FStoredItem UEquipmentComponent::GetItemInSlot(EItemType InType, int InSlotIndex, int InItemIndex) const
+{
+    if (IsItemIndexValid(InType, InSlotIndex, InItemIndex))
+    {
+        return EquipmentSlots[GetEqSlotsIndex(InType)].Slots[InSlotIndex].Items[InItemIndex];
+    }
+    else
+    {
+        return FStoredItem();
+    }
+}
+
+void UEquipmentComponent::UpdateItemInSlot(
+    EItemType InType, 
+    int InSlotIndex, 
+    int InItemIndex, 
+    FStoredItem InItem, 
+    EHandleSameItemMethod InHandleSameItemMethod)
+{
+    if (IsItemIndexValid(InType, InSlotIndex, InItemIndex))
+    {
+        if (IsItemValid(InItem))
+        {
+            // make sure item type is same and slot type
+            if (GetItemType(InItem) == InType)
+            {
+                FStoredItem OldItem = GetItemInSlot(InType, InSlotIndex, InItemIndex);
+
+                if (OldItem.Id == InItem.Id)
+                {
+                    if (InHandleSameItemMethod == EHandleSameItemMethod::Unequip)
+                    {
+                        FStoredItem EmptyItem = FStoredItem();
+
+                        SetItemInSlot(InType, InSlotIndex, InItemIndex, EmptyItem);
+
+                        EquippedItems.Remove(OldItem.Id);
+
+                        BroadcastOnItemInSlotChanged(OldItem, EmptyItem, InType, InSlotIndex, InItemIndex);
+                    }
+                    else
+                    {
+                        SetItemInSlot(InType, InSlotIndex, InItemIndex, InItem);
+
+                        EquippedItems.Remove(OldItem.Id);
+                        EquippedItems.Add(InItem.Id);
+
+                        BroadcastOnItemInSlotChanged(OldItem, InItem, InType, InSlotIndex, InItemIndex);
+                    }
+                }
+                else
+                {
+                    int EqSlotIndex = GetEqSlotsIndex(InType);
+
+                    for (int i = 0; i < EquipmentSlots[EqSlotIndex].Slots.Num(); ++i)
+                    {
+                        FEquipmentSlot Slot = EquipmentSlots[EqSlotIndex].Slots[i];
+
+                        for (int j = 0; j < Slot.Items.Num(); ++j)
+                        {
+                            FStoredItem SItem = Slot.Items[j];
+                            FStoredItem EmptyItem = FStoredItem();
+
+                            if (InItem.Id == SItem.Id)
+                            {
+                                SetItemInSlot(InType, i, j, EmptyItem);
+
+                                EquippedItems.Remove(OldItem.Id);
+
+                                BroadcastOnItemInSlotChanged(OldItem, EmptyItem, InType, InSlotIndex, InItemIndex);
+                            }
+                        }
+                    }
+
+                    SetItemInSlot(InType, InSlotIndex, InItemIndex, InItem);
+
+                    EquippedItems.Remove(OldItem.Id);
+                    EquippedItems.Add(InItem.Id);
+
+                    BroadcastOnItemInSlotChanged(OldItem, InItem, InType, InSlotIndex, InItemIndex);
+                }
+
+            }
+        }
+        else
+        {
+            FStoredItem OldItem = GetItemInSlot(InType, InSlotIndex, InItemIndex);
+            if (IsItemValid(OldItem))
+            {
+                FStoredItem EmptyItem;
+
+                SetItemInSlot(InType, InSlotIndex, InItemIndex, EmptyItem);
+
+                EquippedItems.Remove(OldItem.Id);
+
+                BroadcastOnItemInSlotChanged(OldItem, EmptyItem, InType, InSlotIndex, InItemIndex);
+            }
+        }
+    }
+}
+
+int UEquipmentComponent::GetEqSlotsIndex(EItemType InType) const
+{
+    for (int i = 0; i < EquipmentSlots.Num(); ++i)
+    {
+        if (EquipmentSlots[i].Type == InType)
+        {
+            return i;
+        }
+    }
+
+    return -1;
+}
+
+bool UEquipmentComponent::IsActiveItemIndex(EItemType InType, int InSlotIndex, int InItemIndex) const
+{
+    return GetActiveItemIndex(InType, InSlotIndex) == InItemIndex;
+}
+
+
+bool UEquipmentComponent::IsItemEquipped(FGuid InItemId) const
+{
+    return EquippedItems.Contains(InItemId);
+}
+
+bool UEquipmentComponent::IsItemActive(FGuid InItemId) const
+{
+    return ActiveItems.Find(InItemId) >= 0;
+}
+
+bool UEquipmentComponent::AreArrowsEquipped() const
+{
+    if (IsSlotHidden(EItemType::Arrows, 0))
+    {
+        return false;
+    }
+    else
+    {
+        FStoredItem Item = GetActiveItem(EItemType::Arrows, 0);
+        if (IsItemValid(Item))
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+bool UEquipmentComponent::CanBlock() const
+{
+    if (bIsInCombat)
+    {
+        return CombatType == ECombatType::Melee || CombatType == ECombatType::Unarmed;
+    }
+    else
+    {
+        return false;
+    }
+}
+
+bool UEquipmentComponent::GetBlockValue(float& InValue) const
+{
+    FStoredItem Item = GetActiveItem(EItemType::Shield, 0);
+    InValue = 0.0f;
+
+    if (IsItemValid(Item))
+    {
+        if (!IsSlotHidden(EItemType::Shield, 0))
+        {
+            UItemBase* ItemBase = NewObject<UItemBase>(GetOwner(), Item.ItemClass);
+            IItemCanBlock* ItemCanBlock = Cast<IItemCanBlock>(ItemBase);
+            if (ItemCanBlock != nullptr)
+            {
+                InValue = ItemCanBlock->GetBlockValue();
+                return true;
+            }
+        }
+    }
+
+    Item = GetActiveItem(SelectedMainHandType, 0);
+
+    if (IsItemValid(Item))
+    {
+        if (!IsSlotHidden(SelectedMainHandType, 0))
+        {
+            UItemBase* ItemBase = NewObject<UItemBase>(GetOwner(), Item.ItemClass);
+            IItemCanBlock* ItemCanBlock = Cast<IItemCanBlock>(ItemBase);
+            if (ItemCanBlock != nullptr)
+            {
+                InValue = ItemCanBlock->GetBlockValue();
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+bool UEquipmentComponent::IsWeaponEquipped() const
+{
+    return GetWeaponType() != EWeaponType::None;
 }
 
 void UEquipmentComponent::OnItemModified(FStoredItem InItem)
@@ -170,19 +549,19 @@ void UEquipmentComponent::OnGameLoaded()
     }
 }
 
-void UEquipmentComponent::UpdateDisplayedItem(EItemType Type, int SlotIndex)
+void UEquipmentComponent::UpdateDisplayedItem(EItemType InType, int InSlotIndex)
 {
-    FDisplayedItems* ItemsValue = DisplayedItems.Find(Type);
+    FDisplayedItems* ItemsValue = DisplayedItems.Find(InType);
 
     if (ItemsValue != nullptr)
     {
-        ADisplayedItem* DisplayedItem = ItemsValue->DisplayedItems[SlotIndex];
+        ADisplayedItem* DisplayedItem = ItemsValue->DisplayedItems[InSlotIndex];
         if (DisplayedItem != nullptr)
         {
             DisplayedItem->Destroy();
         }
 
-        FStoredItem ItemData = GetActiveItem(Type, SlotIndex);
+        FStoredItem ItemData = GetActiveItem(InType, InSlotIndex);
 
         if (UKismetSystemLibrary::IsValidClass(ItemData.ItemClass))
         {
@@ -204,8 +583,8 @@ void UEquipmentComponent::UpdateDisplayedItem(EItemType Type, int SlotIndex)
                         GetWorld()->SpawnActor<ADisplayedItem>(
                             DisplayedItemClass, FTransform::Identity, SpawnParameters);
 
-                    SpawnedActor->Init(this, Type, SlotIndex);
-                    ItemsValue->DisplayedItems[SlotIndex] = SpawnedActor;
+                    SpawnedActor->Init(this, InType, InSlotIndex);
+                    ItemsValue->DisplayedItems[InSlotIndex] = SpawnedActor;
                 }
             }
         }
@@ -213,173 +592,46 @@ void UEquipmentComponent::UpdateDisplayedItem(EItemType Type, int SlotIndex)
 
 }
 
-ADisplayedItem* UEquipmentComponent::GetDisplayedItem(EItemType Type, int SlotIndex) const
+void UEquipmentComponent::SetSlotHidden(EItemType InType, int InSlotIndex, bool bInIsHidden)
 {
-    if (DisplayedItems.Contains(Type))
+    bool bIsSlotHidden = IsSlotHidden(InType, InSlotIndex);
+    if (bIsSlotHidden != bInIsHidden)
     {
-        return DisplayedItems[Type].DisplayedItems[SlotIndex];
-    }
-    return nullptr;
-}
+        int Index = GetEqSlotsIndex(InType);
+        FEquipmentSlot& Slot = EquipmentSlots[Index].Slots[InSlotIndex];
 
-bool UEquipmentComponent::IsItemEquipped(FGuid ItemId) const
-{
-    return EquippedItems.Contains(ItemId);
-}
+        Slot.bIsHidden = bInIsHidden;
 
-FStoredItem UEquipmentComponent::GetActiveItem(EItemType Type, int SlotIndex) const
-{
-    int Index = GetEqSlotsIndex(Type);
-    const FEquipmentSlot& Slot = EquipmentSlots[Index].Slots[SlotIndex];
-    return Slot.Items[Slot.ActiveItemIndex];
-}
+        int ActiveItemIndex = GetActiveItemIndex(InType, InSlotIndex);
+        FStoredItem ActiveItem = GetItemInSlot(InType, InSlotIndex, ActiveItemIndex);
 
-bool UEquipmentComponent::IsSlotHidden(EItemType Type, int SlotIndex) const
-{
-    if (IsSlotIndexValid(Type, SlotIndex))
-    {
-        int Index = GetEqSlotsIndex(Type);
-        const FEquipmentSlot& Slot = EquipmentSlots[Index].Slots[SlotIndex];
-        return Slot.bIsHidden;
-    }
-
-    return false;
-}
-
-void UEquipmentComponent::SetSlotHidden(EItemType Type, int SlotIndex, bool bIsHidden)
-{
-    bool bIsSlotHidden = IsSlotHidden(Type, SlotIndex);
-    if (bIsSlotHidden != bIsHidden)
-    {
-        int Index = GetEqSlotsIndex(Type);
-        FEquipmentSlot& Slot = EquipmentSlots[Index].Slots[SlotIndex];
-
-        Slot.bIsHidden = bIsHidden;
-
-        int ActiveItemIndex = GetActiveItemIndex(Type, SlotIndex);
-        FStoredItem ActiveItem = GetItemInSlot(Type, SlotIndex, ActiveItemIndex);
-
-        OnSlotHiddenChanged.Broadcast(Type, SlotIndex, ActiveItem, bIsHidden);
+        OnSlotHiddenChanged.Broadcast(InType, InSlotIndex, ActiveItem, bInIsHidden);
     }
 }
 
-void UEquipmentComponent::UpdateItemInSlot(
-    EItemType Type, int SlotIndex, int ItemIndex, FStoredItem Item, EHandleSameItemMethod HandleSameItemMethod)
-{
-    if (IsItemIndexValid(Type, SlotIndex, ItemIndex))
-    {
-        if (IsItemValid(Item))
-        {
-            // make sure item type is same and slot type
-            if (GetItemType(Item) == Type)
-            {
-                FStoredItem OldItem = GetItemInSlot(Type, SlotIndex, ItemIndex);
 
-                if (OldItem.Id == Item.Id)
-                {
-                    if (HandleSameItemMethod == EHandleSameItemMethod::Unequip)
-                    {
-                        FStoredItem EmptyItem = FStoredItem();
-
-                        SetItemInSlot(Type, SlotIndex, ItemIndex, EmptyItem);
-
-                        EquippedItems.Remove(OldItem.Id);
-
-                        BroadcastOnItemInSlotChanged(OldItem, EmptyItem, Type, SlotIndex, ItemIndex);
-                    }
-                    else
-                    {
-                        SetItemInSlot(Type, SlotIndex, ItemIndex, Item);
-
-                        EquippedItems.Remove(OldItem.Id);
-                        EquippedItems.Add(Item.Id);
-
-                        BroadcastOnItemInSlotChanged(OldItem, Item, Type, SlotIndex, ItemIndex);
-                    }
-                }
-                else
-                {
-                    int EqSlotIndex = GetEqSlotsIndex(Type);
-
-                    for (int i = 0; i < EquipmentSlots[EqSlotIndex].Slots.Num(); ++i)
-                    {
-                        FEquipmentSlot Slot = EquipmentSlots[EqSlotIndex].Slots[i];
-
-                        for (int j = 0; j < Slot.Items.Num(); ++j)
-                        {
-                            FStoredItem SItem = Slot.Items[j];
-                            FStoredItem EmptyItem = FStoredItem();
-
-                            if (Item.Id == SItem.Id)
-                            {
-                                SetItemInSlot(Type, i, j, EmptyItem);
-
-                                EquippedItems.Remove(OldItem.Id);
-
-                                BroadcastOnItemInSlotChanged(OldItem, EmptyItem, Type, SlotIndex, ItemIndex);
-                            }
-                        }
-                    }
-                    //
-
-                    SetItemInSlot(Type, SlotIndex, ItemIndex, Item);
-
-                    EquippedItems.Remove(OldItem.Id);
-                    EquippedItems.Add(Item.Id);
-
-                    BroadcastOnItemInSlotChanged(OldItem, Item, Type, SlotIndex, ItemIndex);
-                }
-
-            }
-        }
-        else
-        {
-            FStoredItem OldItem = GetItemInSlot(Type, SlotIndex, ItemIndex);
-            if (IsItemValid(OldItem))
-            {
-                FStoredItem EmptyItem;
-
-                SetItemInSlot(Type, SlotIndex, ItemIndex, EmptyItem);
-
-                EquippedItems.Remove(OldItem.Id);
-
-                BroadcastOnItemInSlotChanged(OldItem, EmptyItem, Type, SlotIndex, ItemIndex);
-            }
-        }
-    }
-}
 
 void UEquipmentComponent::BroadcastOnItemInSlotChanged(
-    FStoredItem OldItem, FStoredItem NewItem, EItemType Type, int SlotIndex, int ItemIndex)
+    FStoredItem InOldItem, FStoredItem InNewItem, EItemType InType, int InSlotIndex, int InItemIndex)
 {
-    OnItemInSlotChanged.Broadcast(OldItem, NewItem, Type, SlotIndex, ItemIndex);
+    OnItemInSlotChanged.Broadcast(InOldItem, InNewItem, InType, InSlotIndex, InItemIndex);
 
-    if (IsActiveItemIndex(Type, SlotIndex, ItemIndex))
+    if (IsActiveItemIndex(InType, InSlotIndex, InItemIndex))
     {
-        ActiveItemChanged(OldItem, NewItem, Type, SlotIndex, ItemIndex);
+        ActiveItemChanged(InOldItem, InNewItem, InType, InSlotIndex, InItemIndex);
     }
 }
 
-int UEquipmentComponent::GetEqSlotsIndex(EItemType Type) const
-{
-    for (int i = 0; i < EquipmentSlots.Num(); ++i)
-    {
-        if (EquipmentSlots[i].Type == Type)
-        {
-            return i;
-        }
-    }
 
-    return -1;
-}
 
-void UEquipmentComponent::ActiveItemChanged(FStoredItem OldItem, FStoredItem NewItem, EItemType Type, int SlotIndex, int ActiveIndex)
+void UEquipmentComponent::ActiveItemChanged(
+    FStoredItem InOldItem, FStoredItem InNewItem, EItemType InType, int InSlotIndex, int InActiveIndex)
 {
-    if (Type == SelectedMainHandType)
+    if (InType == SelectedMainHandType)
     {
         UpdateCombatType();
 
-        if (IsItemTwoHanded(NewItem))
+        if (IsItemTwoHanded(InNewItem))
         {
             SetSlotHidden(EItemType::Shield, 0, true);
         }
@@ -392,93 +644,25 @@ void UEquipmentComponent::ActiveItemChanged(FStoredItem OldItem, FStoredItem New
             EItemType::Arrows, 0, !(SelectedMainHandType == EItemType::RangeWeapon && GetCombatType() == ECombatType::Range));
     }
 
-    if (OldItem.Id != NewItem.Id)
+    if (InOldItem.Id != InNewItem.Id)
     {
-        ActiveItems.Remove(OldItem.Id);
-        ActiveItems.Add(NewItem.Id);
+        ActiveItems.Remove(InOldItem.Id);
+        ActiveItems.Add(InNewItem.Id);
 
-        UpdateDisplayedItem(Type, SlotIndex);
-        AttachDisplayedItem(Type, SlotIndex);
+        UpdateDisplayedItem(InType, InSlotIndex);
+        AttachDisplayedItem(InType, InSlotIndex);
     }
 
-    OnActiveItemChanged.Broadcast(OldItem, NewItem, Type, SlotIndex, ActiveIndex);
+    OnActiveItemChanged.Broadcast(InOldItem, InNewItem, InType, InSlotIndex, InActiveIndex);
 }
 
-void UEquipmentComponent::SwitchSlotActiveIndex(EItemType Type, int SlotIndex, bool Forward, bool bIgnoreEmptyItems)
+void UEquipmentComponent::UseActiveItemAtSlot(EItemType InType, int InSlotIndex)
 {
-    if (IsSlotIndexValid(Type, SlotIndex))
+    int ActiveItemIndex = GetActiveItemIndex(InType, InSlotIndex);
+    if (IsItemIndexValid(InType, InSlotIndex, ActiveItemIndex))
     {
-        int ActiveItemIndex = GetActiveItemIndex(Type, SlotIndex);
-
-        int EqSlotsIndex = GetEqSlotsIndex(Type);
-
-        FEquipmentSlot& EqSlot = EquipmentSlots[EqSlotsIndex].Slots[SlotIndex];
-        const TArray<FStoredItem>& Items = EqSlot.Items;
-
-        int NewIndex = GetNextArrayIndex(Items, ActiveItemIndex, Forward);
-
-        if (bIgnoreEmptyItems)
-        {
-            for (int i = 1; i < Items.Num(); ++i)
-            {
-                if (IsItemValid(Items[NewIndex]))
-                {
-                    EqSlot.ActiveItemIndex = NewIndex;
-                    ActiveItemChanged(EqSlot.Items[ActiveItemIndex], EqSlot.Items[NewIndex], Type, SlotIndex, NewIndex);
-                }
-                else
-                {
-                    NewIndex = GetNextArrayIndex(Items, NewIndex, Forward);
-                }
-            }
-        }
-        else
-        {
-            EqSlot.ActiveItemIndex = NewIndex;
-            ActiveItemChanged(EqSlot.Items[ActiveItemIndex], EqSlot.Items[NewIndex], Type, SlotIndex, NewIndex);
-        }
-    }
-}
-
-void UEquipmentComponent::SwitchMainHandType(bool bForward)
-{
-    int SelectedIndex = MainHandTypes.Find(SelectedMainHandType);
-
-    if (SelectedIndex >= 0)
-    {
-        int NextIndex = GetNextArrayIndex(MainHandTypes, SelectedIndex, bForward);
-
-        SetMainHandType(MainHandTypes[NextIndex]);
-    }
-}
-
-FStoredItem UEquipmentComponent::GetWeapon() const
-{
-    return GetItemInSlot(SelectedMainHandType, 0, GetActiveItemIndex(SelectedMainHandType, 0));
-}
-
-EItemType UEquipmentComponent::GetSelectedMainHandType() const 
-{
-    return SelectedMainHandType; 
-}
-
-bool UEquipmentComponent::IsItemActive(FGuid ItemId) const
-{
-    return ActiveItems.Find(ItemId) >= 0;
-}
-
-bool UEquipmentComponent::IsActiveItemIndex(EItemType Type, int SlotIndex, int ItemIndex)
-{
-    return GetActiveItemIndex(Type, SlotIndex) == ItemIndex;
-}
-
-void UEquipmentComponent::UseActiveItemAtSlot(EItemType Type, int SlotIndex)
-{
-    int ActiveItemIndex = GetActiveItemIndex(Type, SlotIndex);
-    if (IsItemIndexValid(Type, SlotIndex, ActiveItemIndex))
-    {
-        int EqSlotsIndex = GetEqSlotsIndex(Type);
-        FEquipmentSlot Slot = EquipmentSlots[EqSlotsIndex].Slots[SlotIndex];
+        int EqSlotsIndex = GetEqSlotsIndex(InType);
+        FEquipmentSlot Slot = EquipmentSlots[EqSlotsIndex].Slots[InSlotIndex];
 
         if (!Slot.bIsHidden)
         {
@@ -500,20 +684,17 @@ void UEquipmentComponent::UseActiveItemAtSlot(EItemType Type, int SlotIndex)
                     if (DefaultItem->GetItem().bIsConsumable)
                     {
                         SlotItem.Amount = SlotItem.Amount - 1;
-                        UpdateItemInSlot(Type, SlotIndex, ActiveItemIndex, SlotItem, EHandleSameItemMethod::Update);
+                        UpdateItemInSlot(InType, InSlotIndex, ActiveItemIndex, SlotItem, EHandleSameItemMethod::Update);
                     }
-
                 }
             }
         }
     }
-
-    
 }
 
-bool UEquipmentComponent::FindItem(FStoredItem Item, EItemType& OutType, int& OutSlotIndex, int& OutItemIndex)
+bool UEquipmentComponent::FindItem(FStoredItem InItem, EItemType& OutType, int& OutSlotIndex, int& OutItemIndex) const
 {
-    EItemType ItemType = GetItemType(Item);
+    EItemType ItemType = GetItemType(InItem);
     int EqSlotsIndex = GetEqSlotsIndex(ItemType);
 
     OutType = EItemType::None;
@@ -528,7 +709,7 @@ bool UEquipmentComponent::FindItem(FStoredItem Item, EItemType& OutType, int& Ou
         {
             for (int j = 0; j < Slots[i].Items.Num(); ++j)
             {
-                if (Slots[i].Items[j].Id == Item.Id)
+                if (Slots[i].Items[j].Id == InItem.Id)
                 {
                     OutType = EquipmentSlots[EqSlotsIndex].Type;
                     OutSlotIndex = i;
@@ -562,8 +743,6 @@ void UEquipmentComponent::BuildEquipment(const TArray<FEquipmentSlots>& InEquipm
     }
     DisplayedItems.Empty();
     
-
-
     for (const FEquipmentSlots& Slots : Equipment)
     {
         FDisplayedItems Items;
@@ -576,7 +755,6 @@ void UEquipmentComponent::BuildEquipment(const TArray<FEquipmentSlots>& InEquipm
 
         DisplayedItems.Add(Slots.Type, Items);
     }
-
 
     // unequip all items
     for (int i = 0; i < EquipmentSlots.Num(); ++i)
@@ -682,132 +860,16 @@ void UEquipmentComponent::BuildEquipment(const TArray<FEquipmentSlots>& InEquipm
 
 }
 
-FStoredItem UEquipmentComponent::GetItemInSlot(EItemType Type, int SlotIndex, int ItemIndex) const
+
+void UEquipmentComponent::SetCombat(bool bInValue)
 {
-    if (IsItemIndexValid(Type, SlotIndex, ItemIndex))
+    if (bIsInCombat != bInValue)
     {
-        return EquipmentSlots[GetEqSlotsIndex(Type)].Slots[SlotIndex].Items[ItemIndex];
-    }
-    else
-    {
-        return FStoredItem();
-    }
-}
-
-void UEquipmentComponent::SetSlotActiveIndex(EItemType Type, int SlotIndex, int NewActiveIndex)
-{
-    if (IsItemIndexValid(Type, SlotIndex, NewActiveIndex))
-    {
-        int ActiveItemIndex = GetActiveItemIndex(Type, SlotIndex);
-
-        int EqSlotIndex = GetEqSlotsIndex(Type);
-
-        if (ActiveItemIndex != NewActiveIndex &&
-            ActiveItemIndex >= 0 &&
-            NewActiveIndex >= 0)
-        {
-            FEquipmentSlot& EqSlot = EquipmentSlots[EqSlotIndex].Slots[SlotIndex];
-            EqSlot.ActiveItemIndex = NewActiveIndex;
-            ActiveItemChanged(EqSlot.Items[ActiveItemIndex], EqSlot.Items[NewActiveIndex], Type, SlotIndex, NewActiveIndex);
-        }
-    }
-}
-
-void UEquipmentComponent::SetMainHandType(EItemType Type)
-{
-    if (MainHandTypes.Find(Type) >= 0)
-    {
-        if (SelectedMainHandType != Type)
-        {
-            EItemType PreviousType = SelectedMainHandType;
-            SelectedMainHandType = Type;
-
-            UpdateCombatType();
-
-            SetSlotHidden(PreviousType, 0, true);
-            SetSlotHidden(SelectedMainHandType, 0, false);
-
-            // Update shield if new weapon is Two Handed
-            FStoredItem Item = GetItemInSlot(SelectedMainHandType, 0, GetActiveItemIndex(SelectedMainHandType, 0));
-            if (IsItemTwoHanded(Item))
-            {
-                SetSlotHidden(EItemType::Shield, 0, true);
-            }
-            else
-            {
-                SetSlotHidden(EItemType::Shield, 0, false);
-            }
-
-
-            SetSlotHidden(
-                EItemType::Arrows, 
-                0, 
-                !(SelectedMainHandType == EItemType::RangeWeapon && GetCombatType() == ECombatType::Range));
-
-            OnMainHandTypeChanged.Broadcast(SelectedMainHandType);
-        }
-    }
-}
-
-bool UEquipmentComponent::IsShieldEquipped() const
-{
-    if (IsSlotHidden(EItemType::Shield, 0))
-    {
-        return false;
-    }
-    else
-    {
-        FStoredItem Item = GetActiveItem(EItemType::Shield, 0);
-        
-        if (IsItemValid(Item))
-        {
-            // ???
-            IItemCanBlock* ItemCanBlock = Cast<IItemCanBlock>(NewObject<UItemBase>(GetOwner(), Item.ItemClass));
-            return ItemCanBlock != nullptr;
-        }
-        else
-        {
-            return false;
-        }
-    }
-}
-
-bool UEquipmentComponent::IsInCombat() const 
-{
-    return bIsInCombat; 
-}
-
-void UEquipmentComponent::ToggleCombat()
-{
-    SetCombat(!bIsInCombat);
-}
-
-void UEquipmentComponent::SetCombat(bool bValue)
-{
-    if (bIsInCombat != bValue)
-    {
-        bIsInCombat = bValue;
+        bIsInCombat = bInValue;
         AttachDisplayedItem(SelectedMainHandType, 0);
         AttachDisplayedItem(EItemType::Shield, 0);
 
         OnInCombatChanged.Broadcast(bIsInCombat);
-    }
-}
-
-ECombatType UEquipmentComponent::GetCombatType() const
-{
-    return CombatType;
-}
-
-bool UEquipmentComponent::CanBlock() const
-{
-    if (bIsInCombat)
-    {
-        return CombatType == ECombatType::Melee || CombatType == ECombatType::Unarmed;
-    }
-    else
-    {
-        return false;
     }
 }
 
@@ -852,36 +914,47 @@ void UEquipmentComponent::UpdateCombatType()
     }
 }
 
-bool UEquipmentComponent::GetBlockValue(float& Value) const
+void UEquipmentComponent::SetItemInSlot(EItemType InType, int InSlotIndex, int InItemIndex, FStoredItem InItem)
 {
-    FStoredItem Item = GetActiveItem(EItemType::Shield, 0);
-    Value = 0.0f;
+    int EqSlotsIndex = GetEqSlotsIndex(InType);
+    EquipmentSlots[EqSlotsIndex].Slots[InSlotIndex].Items[InItemIndex] = InItem;
+}
 
-    if (IsItemValid(Item))
+void UEquipmentComponent::AttachDisplayedItem(EItemType InType, int InSlotIndex)
+{
+    ADisplayedItem* DisplayedItem = GetDisplayedItem(InType, InSlotIndex);
+
+    if (GameUtils::IsValid(DisplayedItem))
     {
-        if (!IsSlotHidden(EItemType::Shield, 0))
-        {
-            UItemBase* ItemBase = NewObject<UItemBase>(GetOwner(), Item.ItemClass);
-            IItemCanBlock* ItemCanBlock = Cast<IItemCanBlock>(ItemBase);
-            if (ItemCanBlock != nullptr)
-            {
-                Value = ItemCanBlock->GetBlockValue();
-                return true;
-            }
-        }
+        DisplayedItem->Attach();
     }
+}
 
-    Item = GetActiveItem(SelectedMainHandType, 0);
+FStoredItem UEquipmentComponent::GetWeapon() const
+{
+    return GetItemInSlot(SelectedMainHandType, 0, GetActiveItemIndex(SelectedMainHandType, 0));
+}
 
-    if (IsItemValid(Item))
+EItemType UEquipmentComponent::GetItemType(FStoredItem InItem) const
+{
+    UItemBase* ItemBase = Cast<UItemBase>(InItem.ItemClass->GetDefaultObject());
+    return ItemBase->GetItem().Type;
+}
+
+bool UEquipmentComponent::IsItemValid(FStoredItem InItem) const
+{
+    return UKismetSystemLibrary::IsValidClass(InItem.ItemClass) && InItem.Amount > 0;
+}
+
+bool UEquipmentComponent::IsItemIndexValid(EItemType InType, int InSlotIndex, int InItemIndex) const
+{
+    int EqSlotsIndex = GetEqSlotsIndex(InType);
+    if (EquipmentSlots.IsValidIndex(EqSlotsIndex))
     {
-        if (!IsSlotHidden(SelectedMainHandType, 0))
+        if (EquipmentSlots[EqSlotsIndex].Slots.IsValidIndex(InSlotIndex))
         {
-            UItemBase* ItemBase = NewObject<UItemBase>(GetOwner(), Item.ItemClass);
-            IItemCanBlock* ItemCanBlock = Cast<IItemCanBlock>(ItemBase);
-            if (ItemCanBlock != nullptr)
+            if (EquipmentSlots[EqSlotsIndex].Slots[InSlotIndex].Items.IsValidIndex(InItemIndex))
             {
-                Value = ItemCanBlock->GetBlockValue();
                 return true;
             }
         }
@@ -889,131 +962,35 @@ bool UEquipmentComponent::GetBlockValue(float& Value) const
     return false;
 }
 
-bool UEquipmentComponent::AreArrowsEquipped() const
-{
-    if (IsSlotHidden(EItemType::Arrows, 0))
-    {
-        return false;
-    }
-    else
-    {
-        FStoredItem Item = GetActiveItem(EItemType::Arrows, 0);
-        if (IsItemValid(Item))
-        {
-            return true;
-        }
-        else
-        {
-            return false;
-        }
-    }
 
-    return true;
+
+int UEquipmentComponent::GetActiveItemIndex(EItemType InType, int InSlotIndex) const
+{
+    return EquipmentSlots[GetEqSlotsIndex(InType)].Slots[InSlotIndex].ActiveItemIndex;
 }
 
-bool UEquipmentComponent::IsTwoHandedWeaponEquipped() const
+bool UEquipmentComponent::IsSlotIndexValid(EItemType InType, int InSlotIndex) const
 {
-    if (IsItemTwoHanded(GetWeapon()))
-    {
-        return true;
-    }
-    else
-    {
-        return false;
-    }
-}
-
-
-EWeaponType UEquipmentComponent::GetWeaponType() const 
-{ 
-    return WeaponType; 
-}
-
-bool UEquipmentComponent::IsWeaponEquipped() const
-{
-    return GetWeaponType() != EWeaponType::None;
-}
-
-const TArray<FEquipmentSlots>& UEquipmentComponent::GetEquipmentSlots() const { return EquipmentSlots; }
-
-EItemType UEquipmentComponent::GetItemType(FStoredItem Item) const
-{
-    UItemBase* ItemBase = Cast<UItemBase>(Item.ItemClass->GetDefaultObject());
-    return ItemBase->GetItem().Type;
-}
-
-bool UEquipmentComponent::IsItemValid(FStoredItem Item) const
-{
-    return UKismetSystemLibrary::IsValidClass(Item.ItemClass) && Item.Amount > 0;
-}
-
-bool UEquipmentComponent::IsItemIndexValid(EItemType Type, int SlotIndex, int ItemIndex) const
-{
-    int EqSlotsIndex = GetEqSlotsIndex(Type);
-    if (EquipmentSlots.IsValidIndex(EqSlotsIndex))
-    {
-        if (EquipmentSlots[EqSlotsIndex].Slots.IsValidIndex(SlotIndex))
-        {
-            if (EquipmentSlots[EqSlotsIndex].Slots[SlotIndex].Items.IsValidIndex(ItemIndex))
-            {
-                return true;
-            }
-            else
-            {
-                return false;
-            }
-        }
-        else
-        {
-            return false;
-        }
-    }
-    else
-    {
-        return false;
-    }
-}
-
-void UEquipmentComponent::SetItemInSlot(EItemType Type, int SlotIndex, int ItemIndex, FStoredItem Item)
-{
-    int EqSlotsIndex = GetEqSlotsIndex(Type);
-    EquipmentSlots[EqSlotsIndex].Slots[SlotIndex].Items[ItemIndex] = Item;
-}
-
-int UEquipmentComponent::GetActiveItemIndex(EItemType Type, int SlotIndex) const
-{
-    return EquipmentSlots[GetEqSlotsIndex(Type)].Slots[SlotIndex].ActiveItemIndex;
-}
-
-bool UEquipmentComponent::IsSlotIndexValid(EItemType Type, int SlotIndex) const
-{
-    int EqSlotsIndex = GetEqSlotsIndex(Type);
+    int EqSlotsIndex = GetEqSlotsIndex(InType);
 
     if (EquipmentSlots.IsValidIndex(EqSlotsIndex))
     {
-        if (EquipmentSlots[EqSlotsIndex].Slots.IsValidIndex(SlotIndex))
+        if (EquipmentSlots[EqSlotsIndex].Slots.IsValidIndex(InSlotIndex))
         {
             return true;
         }
-        else
-        {
-            return false;
-        }
     }
-    else
-    {
-        return false;
-    }
+    return false;
 }
 
 template <typename ElementType>
-int UEquipmentComponent::GetNextArrayIndex(TArray<ElementType> Array, int Index, bool bForward) const
+int UEquipmentComponent::GetNextArrayIndex(TArray<ElementType> InArray, int InIndex, bool bInForward) const
 {
-    if (bForward)
+    if (bInForward)
     {
-        if (Array.IsValidIndex(Index + 1))
+        if (InArray.IsValidIndex(InIndex + 1))
         {
-            return Index + 1;
+            return InIndex + 1;
         }
         else
         {
@@ -1022,32 +999,23 @@ int UEquipmentComponent::GetNextArrayIndex(TArray<ElementType> Array, int Index,
     }
     else
     {
-        if (Array.IsValidIndex(Index - 1))
+        if (InArray.IsValidIndex(InIndex - 1))
         {
-            return Index - 1;
+            return InIndex - 1;
         }
         else
         {
-            return Array.Num() - 1;
+            return InArray.Num() - 1;
         }
     }
 }
 
-void UEquipmentComponent::AttachDisplayedItem(EItemType Type, int SlotIndex)
+bool UEquipmentComponent::IsItemTwoHanded(FStoredItem InItem) const
 {
-    ADisplayedItem* DisplayedItem = GetDisplayedItem(Type, SlotIndex);
-
-    if (GameUtils::IsValid(DisplayedItem))
+    if (UKismetSystemLibrary::IsValidClass(InItem.ItemClass))
     {
-        DisplayedItem->Attach();
-    }
-}
-
-bool UEquipmentComponent::IsItemTwoHanded(FStoredItem Item) const
-{
-    if (UKismetSystemLibrary::IsValidClass(Item.ItemClass))
-    {
-        IItemCanBeTwoHanded* ItemCanBeTwoHanded = Cast<IItemCanBeTwoHanded>(NewObject<UItemBase>(GetOwner(), Item.ItemClass));
+        IItemCanBeTwoHanded* ItemCanBeTwoHanded = 
+            Cast<IItemCanBeTwoHanded>(NewObject<UItemBase>(GetOwner(), InItem.ItemClass));
 
         if (ItemCanBeTwoHanded != nullptr)
         {

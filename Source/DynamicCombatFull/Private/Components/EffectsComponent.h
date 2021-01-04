@@ -8,8 +8,8 @@
 #include "GameCore/CustomStructs.h"
 #include "EffectsComponent.generated.h"
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FEffectAppliedSignature, EEffectType, Type);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnEffectRemovedSignature, EEffectType, Type);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FEffectAppliedSignature, EEffectType, InType);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnEffectRemovedSignature, EEffectType, InType);
 
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
 class UEffectsComponent : public UActorComponent
@@ -26,54 +26,46 @@ protected:
 
 public:
     UFUNCTION(BlueprintCallable)
-    bool ApplyEffect(EEffectType Type, float Duration, EApplyEffectMethod Method, AActor* Applier);
-
-    void RemoveEffect(EEffectType Type);
-
-    void AdjustEffectTime(EEffectType Type, float NewDuration);
-
-    void UpdateEffectsDuration();
-
-    void RemoveEffects(TArray<EEffectType> Types);
-
-    bool ApplyBackstabEffect(float Duration, EApplyEffectMethod Method, AActor* Applier, float Damage);
-
-    bool ApplyBurningEffect(float Duration, EApplyEffectMethod Method, AActor* Applier, float Damage);
-
-    void UpdateEffect(EEffectType Type, float Duration, EApplyEffectMethod Method, AActor* Applier);
+    bool ApplyEffect(EEffectType InType, float InDuration, EApplyEffectMethod InMethod, AActor* InApplier);
 
     UFUNCTION(BlueprintCallable)
-    bool IsEffectApplied(EEffectType Type) const;
-
-    bool IsAnyEffectApplied(TArray<EEffectType> Types) const;
-
-    FEffect GetEffect(EEffectType Type) const;
-
-    void PrintEffects();
-
-    int GetEffectIndex(EEffectType Type) const;
+    bool IsEffectApplied(EEffectType InType) const;
 
     UFUNCTION(BlueprintCallable)
-    AActor* GetEffectApplier(EEffectType Type) const;
-
-    static FString GetEEffectTypeAsString(EEffectType EnumValue);
+    AActor* GetEffectApplier(EEffectType InType) const;
 
     UFUNCTION(BlueprintCallable)
     float GetBackstabDamage() const { return BackstabDamage; }
 
 public:
+    bool ApplyBackstabEffect(float InDuration, EApplyEffectMethod InMethod, AActor* InApplier, float InDamage);
+    bool ApplyBurningEffect(float InDuration, EApplyEffectMethod InMethod, AActor* InApplier, float InDamage);
+    void AdjustEffectTime(EEffectType InType, float InNewDuration);
+
+    bool IsAnyEffectApplied(TArray<EEffectType> InTypes) const;
+    void PrintEffects() const;
+
+private:
+    void RemoveEffect(EEffectType InType);
+    void UpdateEffectsDuration();
+    void RemoveEffects(TArray<EEffectType> InTypes);
+    void UpdateEffect(EEffectType InType, float InDuration, EApplyEffectMethod InMethod, AActor* InApplier);
+    FEffect GetEffect(EEffectType InType) const;
+    int GetEffectIndex(EEffectType InType) const;
+
+public:
     UPROPERTY(BlueprintAssignable)
-        FEffectAppliedSignature OnEffectApplied;
+    FEffectAppliedSignature OnEffectApplied;
 
     UPROPERTY(BlueprintAssignable)
-        FOnEffectRemovedSignature OnEffectRemoved;
+    FOnEffectRemovedSignature OnEffectRemoved;
 
 private:
     UPROPERTY(EditAnywhere)
-        float BackstabDamage;
+    float BackstabDamage;
 
     UPROPERTY(EditAnywhere)
-        float BurningDamage;
+    float BurningDamage;
 
     TArray<FEffect> AppliedEffects;
 

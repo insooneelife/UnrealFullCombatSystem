@@ -9,11 +9,11 @@
 #include "AbilityComponent.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FAbilityStartedSignature);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FAbilityEndedSignature, EAbilityEndResult, Result);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FManaConsumedSignature, float, Amount);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FAbilityChangedSignature, AAbilityBase*, NewAbility);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FCastingChangedSignature, bool, bIsCasting);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FPressedChangedSignature, bool, bIsPressed);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FAbilityEndedSignature, EAbilityEndResult, InResult);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FManaConsumedSignature, float, InAmount);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FAbilityChangedSignature, AAbilityBase*, InNewAbility);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FCastingChangedSignature, bool, bInIsCasting);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FPressedChangedSignature, bool, bInIsPressed);
 
 class AAbilityBase;
 class UEquipmentComponent;
@@ -41,19 +41,13 @@ public:
     void AbilityEffect();
 
     UFUNCTION(BlueprintCallable)
-    void UpdateSpellIndicatorLocation(FVector NewLocation);
+    void UpdateSpellIndicatorLocation(FVector InNewLocation);
 
     UFUNCTION(BlueprintCallable)
     bool StartAbility();
 
     UFUNCTION(BlueprintCallable)
-    void EndAbility(EAbilityEndResult Result);
-
-    UFUNCTION(BlueprintCallable)
-    bool IsCasting() const { return bIsCasting; }
-
-    UFUNCTION(BlueprintCallable)
-    bool IsPressed() const { return bIsPressed; }
+    void EndAbility(EAbilityEndResult InResult);
 
     UFUNCTION(BlueprintCallable)
     bool IsUsingAbility() const;
@@ -61,20 +55,27 @@ public:
     UFUNCTION(BlueprintCallable)
     bool CanAbilityBeCancelled() const;
 
+    UFUNCTION(BlueprintCallable)
+    bool IsCasting() const { return bIsCasting; }
+
+    UFUNCTION(BlueprintCallable)
+    bool IsPressed() const { return bIsPressed; }
+
 protected:
     UFUNCTION()
-    void OnActiveItemChanged(FStoredItem OldItem, FStoredItem NewItem, EItemType Type, int SlotIndex, int ActiveIndex);
+    void OnActiveItemChanged(
+        FStoredItem InOldItem, FStoredItem InNewItem, EItemType InType, int InSlotIndex, int InActiveIndex);
 
     UFUNCTION()
-    void OnMainHandTypeChanged(EItemType Type);
+    void OnMainHandTypeChanged(EItemType InType);
 
 public:
     void AbilityPressed();
     void AbilityReleased();
-    void ConsumeMana(float Amount);
+    void ConsumeMana(float InAmount);
     void ShowSpellIndicator(FVector InLocation, float InRadius, UMaterialInterface* InMaterial);
     void HideSpellIndicator();
-    float PlayAbilityMontage(UAnimMontage* Montage, float PlayRate, FName Section);
+    float PlayAbilityMontage(UAnimMontage* InMontage, float InPlayRate, FName InSection);
     bool IsAbilityUsingCrosshair() const;
     FTransform GetEffectTransform() const;
     float GetManaCost() const;
@@ -88,12 +89,12 @@ private:
 
     void UpdateAbilityFromEquipment();
     void AbilityChanged();
-    void UpdateAbility(TSubclassOf<AAbilityBase> Ability);
+    void UpdateAbility(TSubclassOf<AAbilityBase> InAbility);
     void StopAbilityMontage();
-    void SetIsPressed(bool bValue);
-    void SetIsCasting(bool bValue);
+    void SetIsPressed(bool bInValue);
+    void SetIsCasting(bool bInValue);
     void HideIndicatorIfNotPressed();
-    void CallAbilityEnded(EAbilityEndResult Result);
+    void CallAbilityEnded(EAbilityEndResult InResult);
 
 public:
     UPROPERTY(BlueprintAssignable)

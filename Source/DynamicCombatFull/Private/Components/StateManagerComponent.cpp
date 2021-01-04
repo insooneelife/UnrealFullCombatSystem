@@ -14,46 +14,33 @@ UStateManagerComponent::UStateManagerComponent()
     CurrentState = EState::Idle;
 }
 
-
-// Called when the game starts
-void UStateManagerComponent::BeginPlay()
+void UStateManagerComponent::SetActivity(EActivity InActivity, bool bInValue)
 {
-	Super::BeginPlay();	
+    if (GetActivityValue(InActivity) != bInValue)
+    {
+        Activities.Add(InActivity, bInValue);
+
+        OnActivityChanged.Broadcast(InActivity, bInValue);
+    }
 }
 
-void UStateManagerComponent::SetState(EState State)
+void UStateManagerComponent::SetState(EState InState)
 {
     GetWorld()->GetTimerManager().ClearTimer(SetIdleStateTimerHandle);
     EState PrevState = CurrentState;
-    CurrentState = State;
+    CurrentState = InState;
 
     if (PrevState != CurrentState)
     {
         OnStateChanged.Broadcast(PrevState, CurrentState);
     }
-
 }
 
-EState UStateManagerComponent::GetState() const
+bool UStateManagerComponent::GetActivityValue(EActivity InActivity)
 {
-    return CurrentState;
-}
-
-void UStateManagerComponent::SetActivity(EActivity Activity, bool Value)
-{
-    if (GetActivityValue(Activity) != Value)
+    if (Activities.Contains(InActivity))
     {
-        Activities.Add(Activity, Value);
-
-        OnActivityChanged.Broadcast(Activity, Value);
-    }
-}
-
-bool UStateManagerComponent::GetActivityValue(EActivity Activity)
-{
-    if (Activities.Contains(Activity))
-    {
-        return Activities[Activity];
+        return Activities[InActivity];
     }
     return false;
 }

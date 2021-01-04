@@ -35,14 +35,14 @@ void UMontageManagerComponent::BeginPlay()
 }
 
 
-UAnimMontage* UMontageManagerComponent::GetMontageForAction(EMontageAction Action, int Index)
+UAnimMontage* UMontageManagerComponent::GetMontageForAction(EMontageAction InAction, int InIndex)
 {
     FMontageActionRow OutMontageAction;
-    LastRequestedAction = Action;
+    LastRequestedAction = InAction;
 
-    if (GetMontage(Action, OutMontageAction))
+    if (GetMontage(InAction, OutMontageAction))
     {
-        UAnimMontage* AnimMontage = OutMontageAction.Montages[Index];
+        UAnimMontage* AnimMontage = OutMontageAction.Montages[InIndex];
         if (GameUtils::IsValid(AnimMontage))
         {
             return AnimMontage;
@@ -51,10 +51,10 @@ UAnimMontage* UMontageManagerComponent::GetMontageForAction(EMontageAction Actio
     return nullptr;
 }
 
-int UMontageManagerComponent::GetMontageActionLastIndex(EMontageAction Action) const
+int UMontageManagerComponent::GetMontageActionLastIndex(EMontageAction InAction) const
 {
     FMontageActionRow OutMontageAction;
-    if (GetMontage(Action, OutMontageAction))
+    if (GetMontage(InAction, OutMontageAction))
     {
         if (OutMontageAction.Montages.Num() > 0)
         {
@@ -65,9 +65,9 @@ int UMontageManagerComponent::GetMontageActionLastIndex(EMontageAction Action) c
     return -1;
 }
 
-int UMontageManagerComponent::GetRandomMontageIndex(EMontageAction Action) const
+int UMontageManagerComponent::GetRandomMontageIndex(EMontageAction InAction) const
 {
-    return UKismetMathLibrary::RandomIntegerInRange(0, GetMontageActionLastIndex(Action));
+    return UKismetMathLibrary::RandomIntegerInRange(0, GetMontageActionLastIndex(InAction));
 }
 
 EMontageAction UMontageManagerComponent::GetLastRequestedAction() const
@@ -75,11 +75,11 @@ EMontageAction UMontageManagerComponent::GetLastRequestedAction() const
     return LastRequestedAction;
 }
 
-bool UMontageManagerComponent::GetMontage(EMontageAction Action, FMontageActionRow& OutMontageData) const
+bool UMontageManagerComponent::GetMontage(EMontageAction InAction, FMontageActionRow& OutMontageData) const
 {
     IMontageManagerInterface* MontageManagerInterface = Cast<IMontageManagerInterface>(GetOwner());
-    FString EnumStr = GameUtils::GetEnumDisplayNameAsString("EMontageAction", Action);
-    UDataTable* DataTable = MontageManagerInterface->GetMontages(Action);
+    FString EnumStr = GameUtils::GetEnumDisplayNameAsString("EMontageAction", InAction);
+    UDataTable* DataTable = MontageManagerInterface->GetMontages(InAction);
     FMontageActionRow* Item = DataTable->FindRow<FMontageActionRow>(FName(*EnumStr), FString(""));
 
     if (Item != nullptr)

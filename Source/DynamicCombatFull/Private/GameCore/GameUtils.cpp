@@ -2,10 +2,12 @@
 
 
 #include "GameUtils.h"
+#include "Kismet/GameplayStatics.h"
+#include "Kismet/KismetSystemLibrary.h"
+#include "Kismet/KismetStringLibrary.h"
 #include "Sound/SoundBase.h"
 #include "Components/EquipmentComponent.h"
 #include "GameCore/DefaultGameInstance.h"
-#include "Kismet/GameplayStatics.h"
 #include "GamePlay/Items/ObjectItems/ItemBase.h"
 
 const FLinearColor GameUtils::Red(0.53125, 0.06f, 0.0f);
@@ -76,6 +78,28 @@ void GameUtils::PrintHitData(const FHitData& InHitData)
     );
 }
 
+void GameUtils::PrintEffects(
+    UObject* WorldContextObject, const FString& InDisplayName, const TArray<FEffect>& InEffects)
+{
+    UKismetSystemLibrary::PrintString(WorldContextObject, InDisplayName);
+
+    FString LEffects;
+    for (const FEffect& Effect : InEffects)
+    {
+        FString A = GetEnumValueAsString<EEffectType>("EEffectType", Effect.Type);
+        FString B = UKismetStringLibrary::Conv_FloatToString(Effect.Duration);
+
+        LEffects.Append(A);
+        LEffects.Append(TEXT(":"));
+        LEffects.Append(B);
+        LEffects.Append(TEXT("***"));
+    }
+
+    UKismetSystemLibrary::PrintString(
+        WorldContextObject, LEffects, true, true,
+        FLinearColor::Red, UGameplayStatics::GetWorldDeltaSeconds(WorldContextObject));
+}
+
 bool GameUtils::IsValid(const UObjectBase* const InObject)
 {
     if (InObject->IsValidLowLevel())
@@ -88,4 +112,10 @@ bool GameUtils::IsValid(const UObjectBase* const InObject)
         //UE_LOG(LogTemp, Error, TEXT("Is not valid!!"));
         return false;
     }
+}
+
+
+FString GameUtils::GetDebugName(const UObject* const InObject)
+{
+    return InObject == nullptr ? TEXT("InValid") : *InObject->GetName();
 }

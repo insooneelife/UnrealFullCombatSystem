@@ -25,12 +25,11 @@ protected:
     virtual void BeginPlay() override;
 
 public:
-    UAnimMontage* GetMontageForAction(EMontageAction Action, int Index);
-    int GetMontageActionLastIndex(EMontageAction Action) const;
-    int GetRandomMontageIndex(EMontageAction Action) const;
+    UAnimMontage* GetMontageForAction(EMontageAction InAction, int InIndex);
+    int GetMontageActionLastIndex(EMontageAction InAction) const;
+    int GetRandomMontageIndex(EMontageAction InAction) const;
     EMontageAction GetLastRequestedAction() const;
-    
-    bool GetMontage(EMontageAction Action, FMontageActionRow& OutMontageData) const;
+    bool GetMontage(EMontageAction InAction, FMontageActionRow& OutMontageData) const;
 
 private:
     EMontageAction LastRequestedAction;

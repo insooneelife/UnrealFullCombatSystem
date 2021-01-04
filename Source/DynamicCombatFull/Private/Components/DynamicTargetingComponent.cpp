@@ -26,23 +26,6 @@ UDynamicTargetingComponent::UDynamicTargetingComponent()
     DisableOnBlockDelay = 2.0f;
 }
 
-
-// Called when the game starts
-void UDynamicTargetingComponent::BeginPlay()
-{
-	Super::BeginPlay();
-
-    SetDebugMode();
-    CheckCollisionTypeArrays();
-    CharacterReference = Cast<ACharacter>(GetOwner());
-
-    if (!GameUtils::IsValid(CharacterReference))
-    {
-        UE_LOG(LogTemp, Error, TEXT("Casting to owner as character has failed!!"));
-    }
-}
-
-
 // Called every frame
 void UDynamicTargetingComponent::TickComponent(
     float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
@@ -59,35 +42,40 @@ void UDynamicTargetingComponent::Init(UArrowComponent* InArrowComp)
         ArrowComponent = InArrowComp;
         ArrowComponent->SetUsingAbsoluteRotation(true);
     }
+
+    SetDebugMode();
+    UpdateCollisionTypeArrays();
 }
 
-
-void UDynamicTargetingComponent::DisableCameraLock()
+void UDynamicTargetingComponent::ToggleCameraLock()
 {
-    if (bIsTargetingEnabled)
+    if (IsTargetingEnabled())
     {
-        bIsTargetingEnabled = false;
-
-        IIsTargetable* IsTargetable = Cast<IIsTargetable>(SelectedActor);
-        if (IsTargetable != nullptr)
-        {
-            IsTargetable->OnDeselected();
-            SelectedActor = nullptr;
-            GetWorld()->GetTimerManager().ClearTimer(CheckTargetTimerHandle);
-            UpdateIgnoreLookInput();
-
-            OnTargetingToggled.Broadcast(false);            
-        }
+        DisableCameraLock();
+    }
+    else
+    {
+        FindTarget();
     }
 }
 
-void UDynamicTargetingComponent::FindTargetWithAxisInput(float AxisValue)
+void UDynamicTargetingComponent::FindTargetOnLeft()
+{
+    return FindDirectionalTarget(true);
+}
+
+void UDynamicTargetingComponent::FindTargetOnRight()
+{
+    return FindDirectionalTarget(false);
+}
+
+void UDynamicTargetingComponent::FindTargetWithAxisInput(float InAxisValue)
 {
     const float StartRotatingThreshold = 1.5f;
+
     if (GameUtils::IsValid(ArrowComponent) &&
-        //GameUtils::IsValid(SelectedActor) &&
         SelectedActor != nullptr &&
-        FMath::Abs(AxisValue) > StartRotatingThreshold &&
+        FMath::Abs(InAxisValue) > StartRotatingThreshold &&
         !bIsFreeCamera)
     {
         FRotator A = GetOwner()->GetInstigator()->GetControlRotation();
@@ -96,23 +84,24 @@ void UDynamicTargetingComponent::FindTargetWithAxisInput(float AxisValue)
 
         if (FMath::Abs(Delta.Yaw) <= 165.0f)
         {
-            float Yaw = AxisValue * AxisInputSensitivity;
+            float Yaw = InAxisValue * AxisInputSensitivity;
             float Val = UKismetSystemLibrary::MakeLiteralFloat(625.0f) * UGameplayStatics::GetWorldDeltaSeconds(GetWorld());
             float Min = -Val;
             float Max = Val;
-            ArrowComponent->AddLocalRotation(FRotator(Min, Yaw, Max));
+            float ClampedYaw = FMath::Clamp(Yaw, Min, Max);
+            ArrowComponent->AddLocalRotation(FRotator(0.0f, ClampedYaw, 0.0f));
         }
 
         FVector Start = ArrowComponent->GetComponentLocation();
         FVector End = Start + ArrowComponent->GetForwardVector() * TargetingMaxDistance;
 
-        TArray<AActor*> ActorsToIgnore;
+        TArray<AActor*> ActorsToIgnore{ GetOwner() };
 
         TArray<FHitResult> HitResults;
         UKismetSystemLibrary::CapsuleTraceMultiForObjects(
-            GetWorld(), 
-            Start, End, 
-            32.0f, 
+            GetWorld(),
+            Start, End,
+            32.0f,
             TargetingMaxHeight,
             AllowedCollisionTypes, false, ActorsToIgnore, DebugMode, HitResults, true);
 
@@ -131,6 +120,7 @@ void UDynamicTargetingComponent::FindTargetWithAxisInput(float AxisValue)
                         {
                             Cast<IIsTargetable>(SelectedActor)->OnDeselected();
                             SelectedActor = Hit.GetActor();
+
                             IsTargetable->OnSelected();
 
                             OnTargetChanged.Broadcast(SelectedActor);
@@ -150,38 +140,81 @@ void UDynamicTargetingComponent::FindTargetWithAxisInput(float AxisValue)
 }
 
 
-void UDynamicTargetingComponent::ToggleCameraLock()
+void UDynamicTargetingComponent::SetFreeCamera(bool bInFreeCamera)
 {
-    if (IsTargetingEnabled())
+    bIsFreeCamera = bInFreeCamera;
+    UpdateIgnoreLookInput();
+}
+
+void UDynamicTargetingComponent::DisableCameraLock()
+{
+    if (bIsTargetingEnabled)
     {
-        DisableCameraLock();
+        bIsTargetingEnabled = false;
+        IIsTargetable* IsTargetable = Cast<IIsTargetable>(SelectedActor);
+
+        if (IsTargetable != nullptr)
+        {
+            IsTargetable->OnDeselected();
+            SelectedActor = nullptr;
+            
+            GetWorld()->GetTimerManager().ClearTimer(CheckTargetTimerHandle);
+            UpdateIgnoreLookInput();
+
+            OnTargetingToggled.Broadcast(false);            
+        }
     }
-    else
-    {
-        FindTarget();
-    }
+}
+
+FTransform UDynamicTargetingComponent::GetSelectedActorTransform() const
+{
+    return SelectedActor->GetTransform();
 }
 
 bool UDynamicTargetingComponent::IsTargetingEnabled() const
 {
-    return bIsTargetingEnabled;
+    return bIsTargetingEnabled; 
 }
 
-void UDynamicTargetingComponent::FindTargetOnLeft()
+void UDynamicTargetingComponent::UpdateTarget()
 {
-    return FindDirectionalTarget(true);
+    TArray<AActor*> ActorsToIgnore{ SelectedActor };
+
+    if (IsAnythingBlockingTrace(SelectedActor, ActorsToIgnore))
+    {
+        if (!GetWorld()->GetTimerManager().IsTimerActive(DisableCameraLockTimerHandle))
+        {
+            if (DisableOnBlockDelay == 0.0f)
+            {
+                DisableCameraLock();
+            }
+            else
+            {
+                GetWorld()->GetTimerManager().SetTimer(
+                    DisableCameraLockTimerHandle,
+                    this,
+                    &UDynamicTargetingComponent::DisableCameraLock,
+                    DisableOnBlockDelay,
+                    false);
+            }
+        }
+    }
+    else
+    {
+        GetWorld()->GetTimerManager().ClearTimer(DisableCameraLockTimerHandle);
+
+        IIsTargetable* IsTargetable = Cast<IIsTargetable>(SelectedActor);
+        if (IsTargetable != nullptr)
+        {
+            if (!IsTargetable->IsTargetable())
+            {
+                DisableCameraLock();
+                FindTarget();
+            }
+        }
+    }
 }
 
-void UDynamicTargetingComponent::FindTargetOnRight()
-{
-    return FindDirectionalTarget(false);
-}
-
-void UDynamicTargetingComponent::SetFreeCamera(bool bFreeCamera)
-{
-    bIsFreeCamera = bFreeCamera;
-    UpdateIgnoreLookInput();
-}
 
 void UDynamicTargetingComponent::FindTarget()
 {
@@ -193,9 +226,14 @@ void UDynamicTargetingComponent::FindTarget()
     {
         IIsTargetable* IsTargetable = Cast<IIsTargetable>(Actor);
 
-        if (IsTargetable != nullptr && 
+        bool bIsTargetableActor = IsTargetable != nullptr;
+        bool bIstargetable = IsTargetable->IsTargetable();
+        bool bIsNotOwner = GetOwner() != Actor;
+
+        if (bIsTargetableActor &&
             IsTargetable->IsTargetable() && 
-            GetOwner() != SelectedActor)
+            GetOwner() != SelectedActor &&
+            bIsNotOwner)
         {
             FVector2D OutScreenPos;
             if (GetActorScreenPosition(Actor, OutScreenPos))
@@ -240,27 +278,92 @@ void UDynamicTargetingComponent::FindTarget()
     }
 }
 
-bool UDynamicTargetingComponent::IsInViewport(FVector2D ScreenPosition)
+void UDynamicTargetingComponent::FindDirectionalTarget(bool bInOnLeft)
 {
-    FVector2D ViewportSize = UWidgetLayoutLibrary::GetViewportSize(GetWorld());
+    TArray<AActor*> PotentialTargetsRight;
+    TArray<AActor*> PotentialTargetsLeft;
+    if (IsTargetingEnabled())
+    {
+        TArray<AActor*> OutActors;
+        UGameplayStatics::GetAllActorsWithInterface(GetWorld(), UIsTargetable::StaticClass(), OutActors);
 
-    return ScreenPosition.X > 0 &&
-        ScreenPosition.Y > 0 &&
-        ScreenPosition.X <= ViewportSize.X &&
-        ScreenPosition.Y <= ViewportSize.Y;
-}
+        for (AActor* Actor : OutActors)
+        {
+            IIsTargetable* IsTargetable = Cast<IIsTargetable>(Actor);
+            if (IsTargetable != nullptr)
+            {
+                if (IsTargetable->IsTargetable() && 
+                    Actor != SelectedActor && 
+                    GetOwner() != SelectedActor &&
+                    GetOwner() != Actor)
+                {
+                    if (GetDistanceToOwner(Actor) <= TargetingMaxDistance)
+                    {
+                        if (!IsAnythingBlockingTrace(Actor, PotentialTargetsRight))
+                        {
+                            if (!IsAnythingBlockingTrace(Actor, PotentialTargetsLeft))
+                            {
+                                if (IsTargetRightSide(Actor))
+                                {
+                                    PotentialTargetsRight.Add(Actor);
+                                }
+                                else
+                                {
+                                    PotentialTargetsLeft.Add(Actor);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
 
-FVector UDynamicTargetingComponent::GetLineTraceStartLocation() const
-{
-    return GetOwner()->GetActorLocation() +
-        GetOwner()->GetActorForwardVector() * TraceDepthOffset +
-        GetOwner()->GetActorUpVector() * TraceHeightOffset;
+        AActor* LocalPotentialTarget;
+        if (bInOnLeft)
+        {
+            if (HasArrayAnyElem(PotentialTargetsLeft))
+            {
+                LocalPotentialTarget = GetTargetByDotProduct(PotentialTargetsLeft, true);
+            }
+            else
+            {
+                LocalPotentialTarget = GetTargetByDotProduct(PotentialTargetsRight, false);
+            }
+        }
+        else
+        {
+            if (HasArrayAnyElem(PotentialTargetsRight))
+            {
+                LocalPotentialTarget = GetTargetByDotProduct(PotentialTargetsRight, true);
+            }
+            else
+            {
+                LocalPotentialTarget = GetTargetByDotProduct(PotentialTargetsLeft, false);
+            }
+        }
+
+        if (GameUtils::IsValid(LocalPotentialTarget))
+        {
+            IIsTargetable* IsTargetable = Cast<IIsTargetable>(SelectedActor);
+            if (IsTargetable != nullptr)
+            {
+                IsTargetable->OnDeselected();
+                SelectedActor = LocalPotentialTarget;
+
+                IsTargetable = Cast<IIsTargetable>(SelectedActor);
+                if (IsTargetable != nullptr)
+                {
+                    IsTargetable->OnSelected();
+                    OnTargetChanged.Broadcast(SelectedActor);
+                }
+            }
+        }
+    }
 }
 
 void UDynamicTargetingComponent::EnableCameraLock()
 {
     bIsTargetingEnabled = true;
-
     GetWorld()->GetTimerManager().ClearTimer(DisableCameraLockTimerHandle);
     SetDebugMode();
 
@@ -271,7 +374,7 @@ void UDynamicTargetingComponent::EnableCameraLock()
         IsTargetable->OnSelected();
 
         GetWorld()->GetTimerManager().SetTimer(
-            CheckTargetTimerHandle, this, &UDynamicTargetingComponent::CheckTarget, 0.016f, true);
+            CheckTargetTimerHandle, this, &UDynamicTargetingComponent::UpdateTarget, 0.016f, true);
 
         UpdateIgnoreLookInput();
         OnTargetingToggled.Broadcast(true);
@@ -332,159 +435,6 @@ void UDynamicTargetingComponent::SetDebugMode()
     }
 }
 
-void UDynamicTargetingComponent::CheckTarget()
-{
-    TArray<AActor*> ActorsToIgnore{ SelectedActor };
-
-    if (IsAnythingBlockingTrace(SelectedActor, ActorsToIgnore))
-    {
-        if (!GetWorld()->GetTimerManager().IsTimerActive(DisableCameraLockTimerHandle))
-        {
-            if (DisableOnBlockDelay == 0.0f)
-            {
-                DisableCameraLock();
-            }
-            else
-            {
-                GetWorld()->GetTimerManager().SetTimer(
-                    DisableCameraLockTimerHandle, 
-                    this, 
-                    &UDynamicTargetingComponent::DisableCameraLock,
-                    DisableOnBlockDelay, 
-                    false);
-            }
-        }
-    }
-    else
-    {
-        GetWorld()->GetTimerManager().ClearTimer(DisableCameraLockTimerHandle);
-
-        IIsTargetable* IsTargetable = Cast<IIsTargetable>(SelectedActor);
-        if (IsTargetable != nullptr)
-        {
-            if (!IsTargetable->IsTargetable())
-            {
-                DisableCameraLock();
-                FindTarget();
-            }
-        }
-    }
-
-}
-
-void UDynamicTargetingComponent::FindDirectionalTarget(bool bOnLeft)
-{
-    TArray<AActor*> PotentialTargetsRight;
-    TArray<AActor*> PotentialTargetsLeft;
-    if (IsTargetingEnabled())
-    {
-        TArray<AActor*> OutActors;
-        UGameplayStatics::GetAllActorsWithInterface(GetWorld(), UIsTargetable::StaticClass(), OutActors);
-
-        for (AActor* Actor : OutActors)
-        {
-            IIsTargetable* IsTargetable = Cast<IIsTargetable>(Actor);
-            if (IsTargetable != nullptr)
-            {
-                if (IsTargetable->IsTargetable() && Actor != SelectedActor && GetOwner() != SelectedActor)
-                {
-                    if (GetDistanceToOwner(Actor) <= TargetingMaxDistance)
-                    {
-                        if (!IsAnythingBlockingTrace(Actor, PotentialTargetsRight))
-                        {
-                            if (!IsAnythingBlockingTrace(Actor, PotentialTargetsLeft))
-                            {
-                                if (IsTargetRightSide(Actor))
-                                {
-                                    PotentialTargetsRight.Add(Actor);
-                                }
-                                else
-                                {
-                                    PotentialTargetsLeft.Add(Actor);
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        AActor* LocalPotentialTarget;
-        if (bOnLeft)
-        {
-            if (HasArrayAnyElem(PotentialTargetsLeft))
-            {
-                LocalPotentialTarget = GetTargetByDotProduct(PotentialTargetsLeft, true);
-            }
-            else
-            {
-                LocalPotentialTarget = GetTargetByDotProduct(PotentialTargetsRight, false);
-            }
-        }
-        else
-        {
-            if (HasArrayAnyElem(PotentialTargetsRight))
-            {
-                LocalPotentialTarget = GetTargetByDotProduct(PotentialTargetsRight, true);
-            }
-            else
-            {
-                LocalPotentialTarget = GetTargetByDotProduct(PotentialTargetsLeft, false);
-            }
-        }
-
-        if (GameUtils::IsValid(LocalPotentialTarget))
-        {
-            IIsTargetable* IsTargetable = Cast<IIsTargetable>(SelectedActor);
-            if (IsTargetable != nullptr)
-            {
-                IsTargetable->OnDeselected();
-                SelectedActor = LocalPotentialTarget;
-
-                IsTargetable = Cast<IIsTargetable>(SelectedActor);
-                if (IsTargetable != nullptr)
-                {
-                    IsTargetable->OnSelected();
-                    OnTargetChanged.Broadcast(SelectedActor);
-                }
-            }
-        }
-    }
-}
-
-AActor* UDynamicTargetingComponent::GetTargetByDotProduct(const TArray<AActor*> Actors, bool bBest) const
-{
-    float LocalDotProduct = 0.0f;
-    AActor* LocalPotentialTarget = nullptr;
-
-    for (int i = 0; i < Actors.Num(); ++i)
-    {
-        AActor* Actor = Actors[i];
-
-        float DotProduct = CalculateDotProductToTarget(Actor);
-
-        
-
-        if (i == 0)
-        {
-            LocalDotProduct = DotProduct;
-            LocalPotentialTarget = Actor;
-        }
-        else
-        {
-            bool bCondition = bBest ? DotProduct > LocalDotProduct : DotProduct < LocalDotProduct;
-            if (bCondition)
-            {
-                LocalDotProduct = DotProduct;
-                LocalPotentialTarget = Actor;
-            }
-        }
-
-    }
-
-    return LocalPotentialTarget;
-}
-
 void UDynamicTargetingComponent::UpdateIgnoreLookInput()
 {
     AController* Controller = GetOwner()->GetInstigator()->GetController();
@@ -500,20 +450,75 @@ void UDynamicTargetingComponent::UpdateIgnoreLookInput()
             Controller->ResetIgnoreLookInput();
         }
     }
-
 }
 
-bool UDynamicTargetingComponent::IsAnythingBlockingTrace(AActor* Target, const TArray<AActor*>& ActorsToIgnore) const
+void UDynamicTargetingComponent::UpdateCollisionTypeArrays()
+{
+    for (TEnumAsByte<EObjectTypeQuery> ObjType : AllowedCollisionTypes)
+    {
+        BlockingCollisionTypes.Remove(ObjType);
+    }
+}
+
+bool UDynamicTargetingComponent::IsInViewport(FVector2D InScreenPosition) const
+{
+    FVector2D ViewportSize = UWidgetLayoutLibrary::GetViewportSize(GetWorld());
+
+    return InScreenPosition.X > 0 &&
+        InScreenPosition.Y > 0 &&
+        InScreenPosition.X <= ViewportSize.X &&
+        InScreenPosition.Y <= ViewportSize.Y;
+}
+
+FVector UDynamicTargetingComponent::GetLineTraceStartLocation() const
+{
+    return GetOwner()->GetActorLocation() +
+        GetOwner()->GetActorForwardVector() * TraceDepthOffset +
+        GetOwner()->GetActorUpVector() * TraceHeightOffset;
+}
+
+
+AActor* UDynamicTargetingComponent::GetTargetByDotProduct(const TArray<AActor*>& InActors, bool bInBest) const
+{
+    float LocalDotProduct = 0.0f;
+    AActor* LocalPotentialTarget = nullptr;
+
+    for (int i = 0; i < InActors.Num(); ++i)
+    {
+        AActor* Actor = InActors[i];
+        float DotProduct = CalculateDotProductToTarget(Actor);
+
+        if (i == 0)
+        {
+            LocalDotProduct = DotProduct;
+            LocalPotentialTarget = Actor;
+        }
+        else
+        {
+            bool bCondition = bInBest ? DotProduct > LocalDotProduct : DotProduct < LocalDotProduct;
+            if (bCondition)
+            {
+                LocalDotProduct = DotProduct;
+                LocalPotentialTarget = Actor;
+            }
+        }
+
+    }
+
+    return LocalPotentialTarget;
+}
+
+bool UDynamicTargetingComponent::IsAnythingBlockingTrace(AActor* InTarget, const TArray<AActor*>& InActorsToIgnore) const
 {
     if (BlockingCollisionTypes.Num() > 0)
     {
         FVector Start = GetLineTraceStartLocation();
-        FVector End = Target->GetActorLocation();
+        FVector End = InTarget->GetActorLocation();
 
         FHitResult OutHit;
 
         if (UKismetSystemLibrary::LineTraceSingleForObjects(
-            GetWorld(), Start, End, BlockingCollisionTypes, false, ActorsToIgnore, DebugMode, OutHit, true))
+            GetWorld(), Start, End, BlockingCollisionTypes, false, InActorsToIgnore, DebugMode, OutHit, true))
         {
             return true;
         }
@@ -530,14 +535,6 @@ bool UDynamicTargetingComponent::IsAnythingBlockingTrace(AActor* Target, const T
     return true;
 }
 
-void UDynamicTargetingComponent::CheckCollisionTypeArrays()
-{
-    for (TEnumAsByte<EObjectTypeQuery> ObjType : AllowedCollisionTypes)
-    {
-        BlockingCollisionTypes.Remove(ObjType);
-    }
-}
-
 bool UDynamicTargetingComponent::GetActorScreenPosition(AActor* InActor, FVector2D& OutScreenPos) const
 {
     APlayerController* PlayerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
@@ -545,12 +542,12 @@ bool UDynamicTargetingComponent::GetActorScreenPosition(AActor* InActor, FVector
     return UGameplayStatics::ProjectWorldToScreen(PlayerController, InActor->GetActorLocation(), OutScreenPos);
 }
 
-float UDynamicTargetingComponent::GetDistanceToOwner(AActor* OtherActor) const
+float UDynamicTargetingComponent::GetDistanceToOwner(AActor* InOtherActor) const
 {
-    return GetOwner()->GetDistanceTo(OtherActor);
+    return GetOwner()->GetDistanceTo(InOtherActor);
 }
 
-bool UDynamicTargetingComponent::IsTargetRightSide(AActor* PotentialTarget) const
+bool UDynamicTargetingComponent::IsTargetRightSide(AActor* InPotentialTarget) const
 {
     FVector A, B;
 
@@ -562,7 +559,7 @@ bool UDynamicTargetingComponent::IsTargetRightSide(AActor* PotentialTarget) cons
 
     {
         FVector From = GetOwner()->GetActorLocation();
-        FVector To = PotentialTarget->GetActorLocation();
+        FVector To = InPotentialTarget->GetActorLocation();
         B = UKismetMathLibrary::GetDirectionUnitVector(From, To);
     }
 
@@ -578,7 +575,7 @@ bool UDynamicTargetingComponent::IsTargetRightSide(AActor* PotentialTarget) cons
     }
 }
 
-float UDynamicTargetingComponent::CalculateDotProductToTarget(AActor* Target) const
+float UDynamicTargetingComponent::CalculateDotProductToTarget(AActor* InTarget) const
 {
     FVector A, B;
     {
@@ -589,7 +586,7 @@ float UDynamicTargetingComponent::CalculateDotProductToTarget(AActor* Target) co
     
     {
         FVector From = GetOwner()->GetActorLocation();
-        FVector To = Target->GetActorLocation();
+        FVector To = InTarget->GetActorLocation();
         B = UKismetMathLibrary::GetDirectionUnitVector(From, To);
     }
 
@@ -607,3 +604,4 @@ bool UDynamicTargetingComponent::HasArrayAnyElem(const TArray<AActor*>& Actors) 
         return false;
     }
 }
+

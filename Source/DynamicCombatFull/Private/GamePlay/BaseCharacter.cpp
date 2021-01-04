@@ -10,6 +10,7 @@
 #include "Components/AudioComponent.h"
 #include "Components/ArrowComponent.h"
 #include "Components/CapsuleComponent.h"
+#include "Components/WidgetComponent.h"
 #include "Components/Image.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -248,6 +249,13 @@ void ABaseCharacter::OnConstruction(const FTransform& Transform)
     {
         UE_LOG(LogTemp, Error, TEXT("ArrowSpawnLocation is not valid!"));
     }
+
+    TargetWidget = Cast<UWidgetComponent>(GetComponentByClass(UWidgetComponent::StaticClass()));
+    if (!GameUtils::IsValid(TargetWidget))
+    {
+        UE_LOG(LogTemp, Error, TEXT("TargetWidget is not valid!"));
+    }
+    
 }
 
 // Called every frame
@@ -507,7 +515,7 @@ FRotator ABaseCharacter::GetDesiredRotation() const
     if (DynamicTargeting->IsTargetingEnabled())
     {
         float Yaw = UKismetMathLibrary::FindLookAtRotation(
-            GetActorLocation(), DynamicTargeting->GetSelectedActor()->GetActorLocation()).Yaw;
+            GetActorLocation(), DynamicTargeting->GetSelectedActorTransform().GetLocation()).Yaw;
 
         FRotator SampleRotation(GetActorRotation().Pitch, Yaw, GetActorRotation().Roll);
 
@@ -652,7 +660,20 @@ float ABaseCharacter::GetCastingSpeed() const
     return StatsManager->GetStatValue(EStat::CastingSpeed, true);
 }
 
+void ABaseCharacter::OnSelected()
+{
+    TargetWidget->SetHiddenInGame(false, false);
+}
 
+void ABaseCharacter::OnDeselected()
+{
+    TargetWidget->SetHiddenInGame(true, false);
+}
+
+bool ABaseCharacter::IsTargetable() const
+{
+    return IsAlive();
+}
 
 void ABaseCharacter::OnEffectApplied(EEffectType InType)
 {
@@ -1067,6 +1088,7 @@ void ABaseCharacter::OnAxis_HorizontalLook(float AxisValue)
     AddControllerYawInput(Val);
 
     float NewVal = GetInputAxisValue("HorizontalLook");
+
     DynamicTargeting->FindTargetWithAxisInput(NewVal);
 }
 

@@ -111,8 +111,8 @@ public:
 
 public:
     // IIsTargetable
-    virtual bool OnSelected() override;
-    virtual bool OnDeselected() override;
+    virtual void OnSelected() override;
+    virtual void OnDeselected() override;
     virtual bool IsTargetable() const override;
 
     // ICanBeAttacked

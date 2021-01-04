@@ -60,14 +60,82 @@ void UInventoryComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
     Super::EndPlay(EndPlayReason);
 }
 
-void UInventoryComponent::OnGameLoaded()
+void UInventoryComponent::UseItem(FGuid InItemId)
 {
-    ADCSGameMode* GameMode = Cast<ADCSGameMode>(UGameplayStatics::GetGameMode(GetWorld()));
+    int Index = FindIndexById(InItemId);
 
-    if (GameUtils::IsValid(GameMode))
+    if (!IsSlotEmpty(Index))
     {
-        Inventory = GameMode->GetInventory();
-        ClearInventory();
+        UItemBase* ItemBase = NewObject<UItemBase>(GetOwner(), Inventory[Index].ItemClass);
+
+        if (GameUtils::IsValid(ItemBase))
+        {
+            const FItem& UseItemData = ItemBase->GetItem();
+            ItemBase->UseItem(GetOwner());
+
+            if (UseItemData.bIsConsumable)
+            {
+                RemoveItemAtIndex(Index, 1);
+            }
+        }
+    }
+}
+
+
+
+int UInventoryComponent::FindIndexByClass(TSubclassOf<UItemBase> InItemClass) const
+{
+    for (int i = 0; i < Inventory.Num(); ++i)
+    {
+        if (Inventory[i].ItemClass == InItemClass && Inventory[i].Amount >= 1)
+        {
+            return i;
+        }
+    }
+
+    return -1;
+}
+
+int UInventoryComponent::FindIndexById(FGuid InItemId) const
+{
+    for (int i = 0; i < Inventory.Num(); ++i)
+    {
+        if (Inventory[i].Id == InItemId && Inventory[i].Amount >= 1)
+        {
+            return i;
+        }
+    }
+
+    return -1;
+}
+
+
+FStoredItem UInventoryComponent::GetItemAtIndex(int InIndex) const
+{
+    if (IsSlotEmpty(InIndex))
+    {
+        return FStoredItem();
+    }
+    else
+    {
+        return Inventory[InIndex];
+    }
+}
+
+void UInventoryComponent::RemoveItemAtIndex(int InIndex, int InAmount)
+{
+    if (InAmount > 0)
+    {
+        if (!IsSlotEmpty(InIndex))
+        {
+            Inventory[InIndex].Amount -= InAmount;
+
+            FStoredItem SavedItem = Inventory[InIndex];
+
+            ClearInventory();
+
+            OnItemRemoved.Broadcast(SavedItem);
+        }
     }
 }
 
@@ -76,7 +144,7 @@ void UInventoryComponent::AddItem(TSubclassOf<UItemBase> InItemClass, int InAmou
     if (UKismetSystemLibrary::IsValidClass(InItemClass) && InAmount > 0)
     {
         UItemBase* ItemBase = Cast<UItemBase>(InItemClass->GetDefaultObject());
-        if(ItemBase->GetItem().bIsStackable)
+        if (ItemBase->GetItem().bIsStackable)
         {
             int Index = FindIndexByClass(InItemClass);
 
@@ -113,45 +181,6 @@ void UInventoryComponent::AddItem(TSubclassOf<UItemBase> InItemClass, int InAmou
         }
     }
 }
-
-
-void UInventoryComponent::ClearInventory()
-{
-    for (int i = Inventory.Num() - 1; i >= 0; --i)
-    {
-        if (IsSlotEmpty(i))
-        {
-            Inventory.RemoveAt(i);
-        }
-        else
-        {
-            const FItem& Item = GameUtils::GetDefaultItemFromStoredItem(Inventory[i]);
-            
-            if (!Item.bIsStackable)
-            {
-                Inventory[i].Amount = 1;
-            }
-        }
-    }
-}
-
-void UInventoryComponent::RemoveItemAtIndex(int Index, int InAmount)
-{
-    if (InAmount > 0)
-    {
-        if (!IsSlotEmpty(Index))
-        {
-            Inventory[Index].Amount -= InAmount;
-
-            FStoredItem SavedItem = Inventory[Index];
-
-            ClearInventory();
-
-            OnItemRemoved.Broadcast(SavedItem);
-        }
-    }
-}
-
 
 void UInventoryComponent::DropItem(FStoredItem InItem)
 {
@@ -193,10 +222,10 @@ void UInventoryComponent::DropItem(FStoredItem InItem)
         FVector End = Loc + Forward + Up;
 
         ETraceTypeQuery Channel = UEngineTypes::ConvertToTraceType(ECollisionChannel::ECC_Visibility);
-        TArray<AActor*> IgnoreActors { GetOwner() };
+        TArray<AActor*> IgnoreActors{ GetOwner() };
         FHitResult HitResult;
         FVector SpawnLoc = Start;
-        
+
         if (UKismetSystemLibrary::LineTraceSingle(
             GetWorld(), Start, End, Channel, false, IgnoreActors, EDrawDebugTrace::Type::None, HitResult, true))
         {
@@ -213,99 +242,61 @@ void UInventoryComponent::DropItem(FStoredItem InItem)
         if (GameUtils::IsValid(SpawnedActor))
         {
             SpawnedActor->Init(
-                FName(TEXT("Items")), 
+                FName(TEXT("Items")),
                 TMap<TSubclassOf<UItemBase>, int> { { InItem.ItemClass, InItem.Amount } }
             );
             SpawnedActor->AddItem(InItem.ItemClass, InItem.Amount);
         }
     }
-    
 }
 
-void UInventoryComponent::UseItem(FGuid ItemId)
+
+void UInventoryComponent::OnGameLoaded()
 {
-    int Index = FindIndexById(ItemId);
+    ADCSGameMode* GameMode = Cast<ADCSGameMode>(UGameplayStatics::GetGameMode(GetWorld()));
 
-    if (!IsSlotEmpty(Index))
+    if (GameUtils::IsValid(GameMode))
     {
-        UItemBase* ItemBase = NewObject<UItemBase>(GetOwner(), Inventory[Index].ItemClass);
+        Inventory = GameMode->GetInventory();
+        ClearInventory();
+    }
+}
 
-        if (GameUtils::IsValid(ItemBase))
+void UInventoryComponent::ClearInventory()
+{
+    for (int i = Inventory.Num() - 1; i >= 0; --i)
+    {
+        if (IsSlotEmpty(i))
         {
-            const FItem& UseItemData = ItemBase->GetItem();
-            ItemBase->UseItem(GetOwner());
-
-            if (UseItemData.bIsConsumable)
+            Inventory.RemoveAt(i);
+        }
+        else
+        {
+            const FItem& Item = GameUtils::GetDefaultItemFromStoredItem(Inventory[i]);
+            
+            if (!Item.bIsStackable)
             {
-                RemoveItemAtIndex(Index, 1);
+                Inventory[i].Amount = 1;
             }
         }
     }
 }
 
-FStoredItem UInventoryComponent::GetItemAtIndex(int Index) const
+bool UInventoryComponent::IsSlotEmpty(int InIndex) const
 {
-    if (IsSlotEmpty(Index))
+    if (Inventory.IsValidIndex(InIndex))
     {
-        return FStoredItem();
-    }
-    else
-    {
-        return Inventory[Index];
-    }
-}
-
-
-int UInventoryComponent::FindIndexByClass(TSubclassOf<UItemBase> InItemClass) const
-{
-    for (int i = 0; i < Inventory.Num(); ++i)
-    {
-        if (Inventory[i].ItemClass == InItemClass && Inventory[i].Amount >= 1)
-        {
-            return i;
-        }
-    }
-
-    return -1;
-}
-
-
-int UInventoryComponent::FindIndexById(FGuid Id) const
-{
-    for (int i = 0; i < Inventory.Num(); ++i)
-    {
-        if (Inventory[i].Id == Id && Inventory[i].Amount >= 1)
-        {
-            return i;
-        }
-    }
-
-    return -1;
-}
-
-
-bool UInventoryComponent::IsSlotEmpty(int Index) const
-{
-    if (Inventory.IsValidIndex(Index))
-    {
-        if (IsItemValid(Inventory[Index]))
+        if (IsItemValid(Inventory[InIndex]))
         {
             return false;
         }
-        else
-        {
-            return true;
-        }
     }
-    else
-    {
-        return true;
-    }
+    return true;
 }
 
-bool UInventoryComponent::IsItemValid(FStoredItem Item) const
+bool UInventoryComponent::IsItemValid(FStoredItem InItem) const
 {
-    if (Item.Id.IsValid() && UKismetSystemLibrary::IsValidClass(Item.ItemClass) && Item.Amount > 0)
+    if (InItem.Id.IsValid() && UKismetSystemLibrary::IsValidClass(InItem.ItemClass) && InItem.Amount > 0)
     {
         return true;
     }

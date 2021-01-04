@@ -10,13 +10,13 @@
 #include "GameCore/DCSGameMode.h"
 #include "EquipmentComponent.generated.h"
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FInCombatChangedSignature, bool, bIsInCombat);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_FiveParams(FItemInSlotChangedSignature, FStoredItem, OldItem, FStoredItem, NewItem, EItemType, Type, int, SlotIndex, int, ActiveIndex);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_FiveParams(FActiveItemChangedSignature, FStoredItem, OldItem, FStoredItem, NewItem, EItemType, Type, int, SlotIndex, int, ActiveIndex);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_FourParams(FSlotHiddenChangedSignature, EItemType, SlotType, int, SlotIndex, FStoredItem, ActiveItem, bool, bIsHidden);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FMainHandTypeChangedSignature, EItemType, Type);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FCombatTypeChangedSignature, ECombatType, CombatType);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FWeaponTypeChangedSignature, EWeaponType, WeaponType);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FInCombatChangedSignature, bool, bInIsInCombat);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_FiveParams(FItemInSlotChangedSignature, FStoredItem, InOldItem, FStoredItem, InNewItem, EItemType, InType, int, InSlotIndex, int, InActiveIndex);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_FiveParams(FActiveItemChangedSignature, FStoredItem, InOldItem, FStoredItem, InNewItem, EItemType, InType, int, InSlotIndex, int, InActiveIndex);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_FourParams(FSlotHiddenChangedSignature, EItemType, InSlotType, int, InSlotIndex, FStoredItem, InActiveItem, bool, bInIsHidden);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FMainHandTypeChangedSignature, EItemType, InType);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FCombatTypeChangedSignature, ECombatType, InCombatType);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FWeaponTypeChangedSignature, EWeaponType, InWeaponType);
 
 class ADisplayedItem;
 
@@ -30,70 +30,18 @@ public:
 	UEquipmentComponent();
 
 protected:
-	// Called when the game starts
-	virtual void BeginPlay() override;
     virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 public:
-
-    void Init();
-
-    UFUNCTION()
-    void OnItemModified(FStoredItem InItem);
-
-    UFUNCTION()
-    void OnGameLoaded();
-
-    void UpdateDisplayedItem(EItemType Type, int SlotIndex);
+    UFUNCTION(BlueprintCallable)
+    ADisplayedItem* GetDisplayedItem(EItemType InType, int InSlotIndex) const;
 
     UFUNCTION(BlueprintCallable)
-    ADisplayedItem* GetDisplayedItem(EItemType Type, int SlotIndex) const;
-
-    bool IsItemEquipped(FGuid ItemId) const;
+    FStoredItem GetActiveItem(EItemType InType, int InSlotIndex) const;
 
     UFUNCTION(BlueprintCallable)
-    FStoredItem GetActiveItem(EItemType Type, int SlotIndex) const;
+    bool IsSlotHidden(EItemType InType, int InSlotIndex) const;
 
-    UFUNCTION(BlueprintCallable)
-    bool IsSlotHidden(EItemType Type, int SlotIndex) const;
-
-    void SetSlotHidden(EItemType Type, int SlotIndex, bool bIsHidden);
-
-    void UpdateItemInSlot(
-        EItemType Type, int SlotIndex, int ItemIndex, FStoredItem Item, EHandleSameItemMethod HandleSameItemMethod);
-
-    void BroadcastOnItemInSlotChanged(FStoredItem OldItem, FStoredItem NewItem, EItemType Type, int SlotIndex, int ItemIndex);
-
-    int GetEqSlotsIndex(EItemType Type) const;
-
-    // ChangeActiveItem
-    void ActiveItemChanged(FStoredItem OldItem, FStoredItem NewItem, EItemType Type, int SlotIndex, int ActiveIndex);
-
-    void SwitchSlotActiveIndex(EItemType Type, int SlotIndex, bool Forward, bool bIgnoreEmptyItems);
-
-    void SwitchMainHandType(bool bForward);
-
-    FStoredItem GetWeapon() const;
-
-    EItemType GetSelectedMainHandType() const;
-
-    bool IsItemActive(FGuid ItemId) const;
-
-    bool IsActiveItemIndex(EItemType Type, int SlotIndex, int ItemIndex);
-
-    void UseActiveItemAtSlot(EItemType Type, int SlotIndex);
-
-    bool FindItem(FStoredItem Item, EItemType& OutType, int& OutSlotIndex, int& OutItemIndex);
-
-    void BuildEquipment(const TArray<FEquipmentSlots>& InEquipment);
-
-    FStoredItem GetItemInSlot(EItemType Type, int SlotIndex, int ItemIndex) const;
-
-    void SetSlotActiveIndex(EItemType Type, int SlotIndex, int NewActiveIndex);
-
-    void SetMainHandType(EItemType Type);
-
-public:
     UFUNCTION(BlueprintCallable)
     bool IsShieldEquipped() const;
 
@@ -103,79 +51,107 @@ public:
     UFUNCTION(BlueprintCallable)
     void ToggleCombat();
 
-    void SetCombat(bool bValue);
-
-    ECombatType GetCombatType() const;
-
-    bool CanBlock() const;
-
-    void UpdateCombatType();
-
-    bool GetBlockValue(float& Value) const;
-
-    bool AreArrowsEquipped() const;
-
     UFUNCTION(BlueprintCallable)
     bool IsTwoHandedWeaponEquipped() const;
 
-    EWeaponType GetWeaponType() const;
+public:
+    void Init();
+    void SwitchMainHandType(bool bInForward);
+    void SwitchSlotActiveIndex(EItemType InType, int InSlotIndex, bool bInForward, bool bInIgnoreEmptyItems);
+    void SetMainHandType(EItemType InType);
+    void SetSlotActiveIndex(EItemType InType, int InSlotIndex, int InNewActiveIndex);
+    FStoredItem GetItemInSlot(EItemType InType, int InSlotIndex, int InItemIndex) const;
+    void UpdateItemInSlot(
+        EItemType InType, 
+        int InSlotIndex, 
+        int InItemIndex, 
+        FStoredItem InItem, 
+        EHandleSameItemMethod InHandleSameItemMethod);
 
+    int GetEqSlotsIndex(EItemType InType) const;
+    bool IsActiveItemIndex(EItemType InType, int InSlotIndex, int InItemIndex) const;
+    bool IsItemEquipped(FGuid InItemId) const;
+    bool IsItemActive(FGuid InItemId) const;
+    bool AreArrowsEquipped() const;
+    bool CanBlock() const;
+    bool GetBlockValue(float& InValue) const;
     bool IsWeaponEquipped() const;
 
-    const TArray<FEquipmentSlots>& GetEquipmentSlots() const;
-    void SetEquipmentSlots(const TArray<FEquipmentSlots>& InEquipmentSlots) { EquipmentSlots = InEquipmentSlots ;}
+    const TArray<FEquipmentSlots>& GetEquipmentSlots() const { return EquipmentSlots; }
+    void SetEquipmentSlots(const TArray<FEquipmentSlots>& InEquipmentSlots) { EquipmentSlots = InEquipmentSlots; }
+    EItemType GetSelectedMainHandType() const { return SelectedMainHandType; }
+    ECombatType GetCombatType() const { return CombatType; }
+    EWeaponType GetWeaponType() const { return WeaponType; }
+
+protected:
+    UFUNCTION()
+    void OnItemModified(FStoredItem InItem);
+
+    UFUNCTION()
+    void OnGameLoaded();
 
 private:
-    EItemType GetItemType(FStoredItem Item) const;
 
-    bool IsItemValid(FStoredItem Item) const;
+    void UpdateDisplayedItem(EItemType InType, int InSlotIndex);
 
-    bool IsItemIndexValid(EItemType Type, int SlotIndex, int ItemIndex) const;
+    void SetSlotHidden(EItemType InType, int InSlotIndex, bool bInIsHidden);
 
-    void SetItemInSlot(EItemType Type, int SlotIndex, int ItemIndex, FStoredItem Item);
+    void BroadcastOnItemInSlotChanged(
+        FStoredItem InOldItem, FStoredItem InNewItem, EItemType InType, int InSlotIndex, int InItemIndex);
 
-    int GetActiveItemIndex(EItemType Type, int SlotIndex) const;
+    void ActiveItemChanged(
+        FStoredItem InOldItem, FStoredItem InNewItem, EItemType InType, int InSlotIndex, int InActiveIndex);
+    
+    void UseActiveItemAtSlot(EItemType InType, int InSlotIndex);
+    bool FindItem(FStoredItem InItem, EItemType& OutType, int& OutSlotIndex, int& OutItemIndex) const;
+    void BuildEquipment(const TArray<FEquipmentSlots>& InEquipment);
+    void SetCombat(bool bInValue);
+    void UpdateCombatType();
+    void SetItemInSlot(EItemType InType, int InSlotIndex, int InItemIndex, FStoredItem InItem);
+    void AttachDisplayedItem(EItemType InType, int InSlotIndex);
 
-    bool IsSlotIndexValid(EItemType Type, int SlotIndex) const;
+    FStoredItem GetWeapon() const;
+    EItemType GetItemType(FStoredItem InItem) const;
+    bool IsItemValid(FStoredItem InItem) const;
+    bool IsItemIndexValid(EItemType InType, int InSlotIndex, int InItemIndex) const;
 
+    int GetActiveItemIndex(EItemType InType, int InSlotIndex) const;
+    bool IsSlotIndexValid(EItemType InType, int InSlotIndex) const;
     template <typename ElementType>
-    int GetNextArrayIndex(TArray<ElementType> Array, int Index, bool bForward) const;
-
-    void AttachDisplayedItem(EItemType Type, int SlotIndex);
-
-    bool IsItemTwoHanded(FStoredItem Item) const;
+    int GetNextArrayIndex(TArray<ElementType> InArray, int InIndex, bool bInForward) const;
+    bool IsItemTwoHanded(FStoredItem InItem) const;
 
 public:
     UPROPERTY(BlueprintAssignable)
-        FInCombatChangedSignature OnInCombatChanged;
+    FInCombatChangedSignature OnInCombatChanged;
 
     UPROPERTY(BlueprintAssignable)
-        FItemInSlotChangedSignature OnItemInSlotChanged;
+    FItemInSlotChangedSignature OnItemInSlotChanged;
 
     UPROPERTY(BlueprintAssignable)
-        FActiveItemChangedSignature OnActiveItemChanged;
+    FActiveItemChangedSignature OnActiveItemChanged;
 
     UPROPERTY(BlueprintAssignable)
-        FSlotHiddenChangedSignature OnSlotHiddenChanged;
+    FSlotHiddenChangedSignature OnSlotHiddenChanged;
 
     UPROPERTY(BlueprintAssignable)
-        FMainHandTypeChangedSignature OnMainHandTypeChanged;
+    FMainHandTypeChangedSignature OnMainHandTypeChanged;
 
     UPROPERTY(BlueprintAssignable)
-        FCombatTypeChangedSignature OnCombatTypeChanged;
+    FCombatTypeChangedSignature OnCombatTypeChanged;
 
     UPROPERTY(BlueprintAssignable)
-        FWeaponTypeChangedSignature OnWeaponTypeChanged;
+    FWeaponTypeChangedSignature OnWeaponTypeChanged;
 
 private:
 
     UPROPERTY()
     UInventoryComponent* Inventory;
 
-    TMap<EItemType, FDisplayedItems> DisplayedItems;
-
     UPROPERTY(EditAnywhere)
     TArray<FEquipmentSlots> EquipmentSlots;
+
+    TMap<EItemType, FDisplayedItems> DisplayedItems;
 
     TArray<EItemType> MainHandTypes;
 

@@ -22,12 +22,18 @@ public:
     static const FItem& GetDefaultItemFromStoredItem(const FStoredItem& StoredItem);
     static const FItem& GetDefaultItemFromItemClass(TSubclassOf<UItemBase> ItemClass);
 
+    // logs
     static void PrintStoredItem(const FStoredItem& InStoredItem);
     static void PrintHitResult(const FHitResult& InHitResult);
     static void PrintHitData(const FHitData& InHitData);
 
+    // editor logs
+    static void PrintEffects(
+        UObject* WorldContextObject,const FString& InDisplayName, const TArray<FEffect>& InEffects);
+
     // for easy debug
     static bool IsValid(const UObjectBase* const InObject);
+    static FString GetDebugName(const UObject* const InObject);
 
     template<typename ClassType>
     static TSubclassOf<ClassType> LoadAssetClass(FString AssetPath)
@@ -61,28 +67,28 @@ public:
     }
 
     template<typename TEnum>
-    static FORCEINLINE FString GetEnumValueAsString(const FString& EnumName, TEnum Value)
+    static FORCEINLINE FString GetEnumValueAsString(const FString& InEnumName, TEnum InEnumValue)
     {
-        const UEnum* enumPtr = FindObject<UEnum>(ANY_PACKAGE, *EnumName, true);
-        if (!enumPtr) return FString("Invalid");
-        return enumPtr->GetNameByValue((int64)Value).ToString();
+        const UEnum* EnumPtr = FindObject<UEnum>(ANY_PACKAGE, *InEnumName, true);
+        if (!EnumPtr) return FString("Invalid");
+        return EnumPtr->GetNameByValue((int64)InEnumValue).ToString();
     }
 
     template<typename TEnum>
-    static FORCEINLINE FString GetEnumDisplayNameAsString(const FString& EnumName, TEnum Value)
+    static FORCEINLINE FString GetEnumDisplayNameAsString(const FString& InEnumName, TEnum InEnumValue)
     {
-        const UEnum* enumPtr = FindObject<UEnum>(ANY_PACKAGE, *EnumName, true);
-        if (!enumPtr) return FString("Invalid");
-        return enumPtr->GetDisplayNameTextByValue((int64)Value).ToString();
+        const UEnum* EnumPtr = FindObject<UEnum>(ANY_PACKAGE, *InEnumName, true);
+        if (!EnumPtr) return FString("Invalid");
+        return EnumPtr->GetDisplayNameTextByValue((int64)InEnumValue).ToString();
     }
 
     template <typename EnumType>
-    static FORCEINLINE EnumType GetEnumValueFromString(const FString& EnumName, const FString& String)
+    static FORCEINLINE EnumType GetEnumValueFromString(const FString& InEnumName, const FString& InString)
     {
-        UEnum* Enum = FindObject<UEnum>(ANY_PACKAGE, *EnumName, true);
+        UEnum* Enum = FindObject<UEnum>(ANY_PACKAGE, *InEnumName, true);
         if (!Enum) {
             return EnumType(0);
         }
-        return (EnumType)Enum->FindEnumIndex(FName(*String));
+        return (EnumType)Enum->FindEnumIndex(FName(*InString));
     }
 };

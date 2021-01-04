@@ -10,8 +10,8 @@
 #include "CollisionHandlerComponent.generated.h"
 
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FHitSignature, const FHitResult&, Hit);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FCollisionActivatedSignature, ECollisionPart, CollisionPart);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FHitSignature, const FHitResult&, InHit);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FCollisionActivatedSignature, ECollisionPart, InCollisionPart);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FCollisionDeactivatedSignature);
 
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
@@ -32,27 +32,28 @@ public:
     void DeactivateCollision();
 
     UFUNCTION(BlueprintCallable)
-    void ActivateCollision(ECollisionPart CollisionPart);
+    void ActivateCollision(ECollisionPart InCollisionPart);
 
 public:
-    void SetCollisionMeshes(const TArray<FCollisionComponent>& CollComps);
-    void SetCollisionMesh(UPrimitiveComponent* WeaponMesh, const TArray<FName>& Sockets);
+    void SetCollisionMeshes(const TArray<FCollisionComponent>& InCollComps);
+    void SetCollisionMesh(UPrimitiveComponent* InWeaponMesh, const TArray<FName>& InSockets);
 
 private:
 
     void UpdateLastSocketPositions();
     void PerformTrace();
-    bool IsIgnoredClass(TSubclassOf<AActor> TestClass) const;
+    bool IsIgnoredClass(TSubclassOf<AActor> InTestClass) const;
 
     bool IsCollisionActive() const;
 
-    FName GetUniqueSocketName(UPrimitiveComponent* Component, FName SocketName) const;
+    FName GetUniqueSocketName(UPrimitiveComponent* InComponent, FName InSocketName) const;
 
-    int GetHitActorsIndex(UPrimitiveComponent* Component) const;
+    int GetHitActorsIndex(UPrimitiveComponent* InComponent) const;
 
-    TArray<AActor*> GetHitActors(UPrimitiveComponent* Component);
+    // #fix architecture
+    TArray<AActor*> GetHitActorsOrAddOwner(UPrimitiveComponent* InComponent);
 
-    void AddHitActor(UPrimitiveComponent* Component, AActor* HitActor);
+    void AddHitActor(UPrimitiveComponent* InComponent, AActor* InHitActor);
 
 public:
     UPROPERTY(BlueprintAssignable)

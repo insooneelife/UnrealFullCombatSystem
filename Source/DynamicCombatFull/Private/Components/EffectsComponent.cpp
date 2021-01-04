@@ -9,6 +9,7 @@
 #include "GameFramework/Actor.h"
 #include "Engine/World.h"
 #include "UObject/Class.h"
+#include "GameCore/GameUtils.h"
 
 // Sets default values for this component's properties
 UEffectsComponent::UEffectsComponent()
@@ -33,42 +34,111 @@ void UEffectsComponent::BeginPlay()
 }
 
 
-bool UEffectsComponent::ApplyEffect(EEffectType Type, float Duration, EApplyEffectMethod Method, AActor* Applier)
+bool UEffectsComponent::ApplyEffect(EEffectType InType, float InDuration, EApplyEffectMethod InMethod, AActor* InApplier)
 {
     ICanGetEffects* IEffect = Cast<ICanGetEffects>(GetOwner());
 
     if (IEffect != nullptr)
     {
-        if (!IEffect->CanEffectBeApplied(Type, Applier))
+        if (!IEffect->CanEffectBeApplied(InType, InApplier))
         {
             return false;
         }
     }
 
-    UpdateEffect(Type, Duration, Method, Applier);
-    OnEffectApplied.Broadcast(Type);
+    UpdateEffect(InType, InDuration, InMethod, InApplier);
+    OnEffectApplied.Broadcast(InType);
     return true;
 
 }
 
-void UEffectsComponent::RemoveEffect(EEffectType Type)
+bool UEffectsComponent::IsEffectApplied(EEffectType InType) const
 {
-    int Index = AppliedEffects.FindLastByPredicate([Type](const FEffect& Effect) { return Effect.Type == Type; });
+    return GetEffectIndex(InType) >= 0;
+}
+
+AActor* UEffectsComponent::GetEffectApplier(EEffectType InType) const
+{
+    return GetEffect(InType).Applier;
+}
+
+bool UEffectsComponent::ApplyBackstabEffect(
+    float InDuration, EApplyEffectMethod InMethod, AActor* InApplier, float InDamage)
+{
+    ICanGetEffects* IEffect = Cast<ICanGetEffects>(GetOwner());
+
+    if (IEffect != nullptr)
+    {
+        if (!IEffect->CanEffectBeApplied(EEffectType::Backstab, InApplier))
+        {
+            return false;
+        }
+    }
+
+    BackstabDamage = InDamage;
+    UpdateEffect(EEffectType::Backstab, InDuration, InMethod, InApplier);
+    OnEffectApplied.Broadcast(EEffectType::Backstab);
+    return true;
+
+}
+
+bool UEffectsComponent::ApplyBurningEffect(
+    float InDuration, EApplyEffectMethod InMethod, AActor* InApplier, float InDamage)
+{
+    ICanGetEffects* IEffect = Cast<ICanGetEffects>(GetOwner());
+
+    if (IEffect != nullptr)
+    {
+        if (!IEffect->CanEffectBeApplied(EEffectType::Burning, InApplier))
+        {
+            return false;
+        }
+    }
+
+    BurningDamage = InDamage;
+    UpdateEffect(EEffectType::Burning, InDuration, InMethod, InApplier);
+    OnEffectApplied.Broadcast(EEffectType::Burning);
+    return true;
+}
+
+void UEffectsComponent::AdjustEffectTime(EEffectType InType, float InNewDuration)
+{
+    int LIndex = GetEffectIndex(InType);
+
+    if (LIndex >= 0)
+    {
+        AppliedEffects[LIndex].Duration = InNewDuration;
+    }
+}
+
+bool UEffectsComponent::IsAnyEffectApplied(TArray<EEffectType> InTypes) const
+{
+    for (EEffectType EType : InTypes)
+    {
+        if (IsEffectApplied(EType))
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+void UEffectsComponent::PrintEffects() const
+{
+    FString DisplayName = UKismetSystemLibrary::GetDisplayName(GetOwner());
+    GameUtils::PrintEffects(GetWorld(), DisplayName, AppliedEffects);
+}
+
+
+void UEffectsComponent::RemoveEffect(EEffectType InType)
+{
+    int Index = AppliedEffects.FindLastByPredicate([InType](const FEffect& InEffect) { return InEffect.Type == InType; });
 
     if (Index != INDEX_NONE)
     {
         AppliedEffects.RemoveAt(Index);
-        OnEffectRemoved.Broadcast(Type);
-    }
-}
-
-void UEffectsComponent::AdjustEffectTime(EEffectType Type, float NewDuration)
-{
-    int LIndex = GetEffectIndex(Type);
-
-    if (LIndex >= 0)
-    {
-        AppliedEffects[LIndex].Duration = NewDuration;
+        OnEffectRemoved.Broadcast(InType);
     }
 }
 
@@ -96,102 +166,52 @@ void UEffectsComponent::UpdateEffectsDuration()
     }
 }
 
-void UEffectsComponent::RemoveEffects(TArray<EEffectType> Types)
+void UEffectsComponent::RemoveEffects(TArray<EEffectType> InTypes)
 {
-    for (EEffectType Type : Types)
+    for (EEffectType Type : InTypes)
     {
         RemoveEffect(Type);
     }
 }
 
-bool UEffectsComponent::ApplyBackstabEffect(float Duration, EApplyEffectMethod Method, AActor* Applier, float Damage)
+
+void UEffectsComponent::UpdateEffect(
+    EEffectType InType, float InDuration, EApplyEffectMethod InMethod, AActor* InApplier)
 {
-    ICanGetEffects* IEffect = Cast<ICanGetEffects>(GetOwner());
-
-    if (IEffect != nullptr)
-    {
-        if (!IEffect->CanEffectBeApplied(EEffectType::Backstab, Applier))
-        {
-            return false;
-        }
-    }
-
-    BackstabDamage = Damage;
-    UpdateEffect(EEffectType::Backstab, Duration, Method, Applier);
-    OnEffectApplied.Broadcast(EEffectType::Backstab);
-    return true;
-
-}
-
-bool UEffectsComponent::ApplyBurningEffect(float Duration, EApplyEffectMethod Method, AActor* Applier, float Damage)
-{
-    ICanGetEffects* IEffect = Cast<ICanGetEffects>(GetOwner());
-
-    if (IEffect != nullptr)
-    {
-        if (!IEffect->CanEffectBeApplied(EEffectType::Burning, Applier))
-        {
-            return false;
-        }
-    }
-
-    BurningDamage = Damage;
-    UpdateEffect(EEffectType::Burning, Duration, Method, Applier);
-    OnEffectApplied.Broadcast(EEffectType::Burning);
-    return true;
-}
-
-void UEffectsComponent::UpdateEffect(EEffectType Type, float Duration, EApplyEffectMethod Method, AActor* Applier)
-{
-    int LIndex = GetEffectIndex(Type);
+    int LIndex = GetEffectIndex(InType);
 
     if (LIndex >= 0)
     {
-        if (Method == EApplyEffectMethod::Stack)
+        if (InMethod == EApplyEffectMethod::Stack)
         {
-            float NewDuration = AppliedEffects[LIndex].Duration + Duration;
+            float NewDuration = AppliedEffects[LIndex].Duration + InDuration;
             AppliedEffects[LIndex].Duration = NewDuration;
         }
         else
         {
-            AppliedEffects[LIndex].Duration = Duration;
-            AppliedEffects[LIndex].Applier = Applier;
+            AppliedEffects[LIndex].Duration = InDuration;
+            AppliedEffects[LIndex].Applier = InApplier;
         }
     }
     else
     {
         FEffect Effect;
-        Effect.Type = Type;
-        Effect.Duration = Duration;
-        Effect.Applier = Applier;
+        Effect.Type = InType;
+        Effect.Duration = InDuration;
+        Effect.Applier = InApplier;
 
         AppliedEffects.Add(Effect);
     }
 }
 
-bool UEffectsComponent::IsEffectApplied(EEffectType Type) const
-{
-    return GetEffectIndex(Type) >= 0;
-}
 
-bool UEffectsComponent::IsAnyEffectApplied(TArray<EEffectType> Types) const
-{
-    for (EEffectType EType : Types)
-    {
-        if (IsEffectApplied(EType))
-        {
-            return true;
-        }
-    }
 
-    return false;
-}
 
-FEffect UEffectsComponent::GetEffect(EEffectType Type) const
+FEffect UEffectsComponent::GetEffect(EEffectType InType) const
 {
     for (const FEffect& Effect : AppliedEffects)
     {
-        if (Effect.Type == Type)
+        if (Effect.Type == InType)
         {
             return Effect;
         }
@@ -200,51 +220,14 @@ FEffect UEffectsComponent::GetEffect(EEffectType Type) const
     return FEffect();
 }
 
-void UEffectsComponent::PrintEffects()
-{
-    FString DisplayName = UKismetSystemLibrary::GetDisplayName(GetOwner());
-
-    UKismetSystemLibrary::PrintString(GetWorld(), DisplayName);
-
-    FString LEffects;
-    for (const FEffect& Effect : AppliedEffects)
-    {
-        FString A = GetEEffectTypeAsString(Effect.Type);
-        FString B = UKismetStringLibrary::Conv_FloatToString(Effect.Duration);
-
-        LEffects.Append(A);
-        LEffects.Append(TEXT(":"));
-        LEffects.Append(B);
-        LEffects.Append(TEXT("***"));
-    }
-
-
-    UKismetSystemLibrary::PrintString(
-        GetWorld(), LEffects, true, true,
-        FLinearColor::Red, UGameplayStatics::GetWorldDeltaSeconds(GetWorld()));
-}
-
-int UEffectsComponent::GetEffectIndex(EEffectType Type) const
+int UEffectsComponent::GetEffectIndex(EEffectType InType) const
 {
     for (int i = 0; i < AppliedEffects.Num(); ++i)
     {
-        if (AppliedEffects[i].Type == Type)
+        if (AppliedEffects[i].Type == InType)
         {
             return i;
         }
     }
     return -1;
-}
-
-AActor* UEffectsComponent::GetEffectApplier(EEffectType Type) const
-{
-    return GetEffect(Type).Applier;
-}
-
-
-FString UEffectsComponent::GetEEffectTypeAsString(EEffectType EnumValue)
-{
-    const UEnum* EnumPtr = FindObject<UEnum>(ANY_PACKAGE, TEXT("EEffectType"), true);
-    if (!EnumPtr) return FString("Invalid");
-    return EnumPtr->GetNameByValue((int64)EnumValue).ToString();
 }

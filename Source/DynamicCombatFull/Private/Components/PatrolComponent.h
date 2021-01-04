@@ -33,6 +33,7 @@ public:
     bool IsReverseDirection() const { return bReverseDirection; }
 
 private:
+    UPROPERTY()
     APatrolPathActor* PatrolPath;
     int PointIndex;
     bool bReverseDirection;

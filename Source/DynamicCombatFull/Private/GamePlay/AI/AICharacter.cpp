@@ -171,14 +171,12 @@ bool AAICharacter::CanBeInterrupted() const
     return false;
 }
 
-bool AAICharacter::OnSelected()
+void AAICharacter::OnSelected()
 {
-    return false;
 }
 
-bool AAICharacter::OnDeselected()
+void AAICharacter::OnDeselected()
 {
-    return false;
 }
 
 bool AAICharacter::IsTargetable() const

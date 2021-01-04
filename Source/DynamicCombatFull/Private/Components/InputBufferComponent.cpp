@@ -12,28 +12,6 @@ UInputBufferComponent::UInputBufferComponent()
     PrimaryComponentTick.bStartWithTickEnabled = false;
 }
 
-
-// Called when the game starts
-void UInputBufferComponent::BeginPlay()
-{
-	Super::BeginPlay();
-}
-
-void UInputBufferComponent::ConsumeInputBuffer()
-{
-    OnInputBufferConsumed.Broadcast(StoredKey);
-    StoredKey = EInputBufferKey::None;
-}
-
-void UInputBufferComponent::UpdateKey(EInputBufferKey Key)
-{
-    StoredKey = Key;
-    if (!bIsOpen)
-    {
-        ConsumeInputBuffer();
-    }
-}
-
 void UInputBufferComponent::OpenInputBuffer()
 {
     bIsOpen = true;
@@ -44,4 +22,19 @@ void UInputBufferComponent::CloseInputBuffer()
 {
     bIsOpen = false;
     OnInputBufferClose.Broadcast();
+}
+
+void UInputBufferComponent::ConsumeInputBuffer()
+{
+    OnInputBufferConsumed.Broadcast(StoredKey);
+    StoredKey = EInputBufferKey::None;
+}
+
+void UInputBufferComponent::UpdateKey(EInputBufferKey InKey)
+{
+    StoredKey = InKey;
+    if (!bIsOpen)
+    {
+        ConsumeInputBuffer();
+    }
 }

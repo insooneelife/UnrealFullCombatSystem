@@ -29,22 +29,14 @@ UDissolveComponent::UDissolveComponent()
     DissolveColor = FLinearColor(5.0f, 0.0f, 0.0f, 0.0f);
 }
 
-
-// Called when the game starts
-void UDissolveComponent::BeginPlay()
+void UDissolveComponent::StartDissolve(UPrimitiveComponent* InComponent, bool bInReversed)
 {
-    Super::BeginPlay();
-}
-
-
-void UDissolveComponent::StartDessolve(UPrimitiveComponent* Component, bool bReversed)
-{
-    if (GameUtils::IsValid(Component))
+    if (GameUtils::IsValid(InComponent))
     {
-        int LComponentIndex = FindComponent(Component);
+        int LComponentIndex = FindComponent(InComponent);
         if (LComponentIndex >= 0)
         {
-            DissolvedComponents[LComponentIndex].bReverse = bReversed;
+            DissolvedComponents[LComponentIndex].bReverse = bInReversed;
             DissolvedComponents[LComponentIndex].bIsRunning = true;
         }
         else
@@ -53,22 +45,22 @@ void UDissolveComponent::StartDessolve(UPrimitiveComponent* Component, bool bRev
             TArray<UMaterialInterface*> LMaterials;
             TArray<UMaterialInstanceDynamic*> LDissolveMaterials;
 
-            for (int i = 0; i < Component->GetNumMaterials(); ++i)
+            for (int i = 0; i < InComponent->GetNumMaterials(); ++i)
             {
-                LMaterials.Add(Component->GetMaterial(i));
+                LMaterials.Add(InComponent->GetMaterial(i));
 
-                UMaterialInstanceDynamic* MatInstD = Component->CreateDynamicMaterialInstance(i, DissolveMaterial);
+                UMaterialInstanceDynamic* MatInstD = InComponent->CreateDynamicMaterialInstance(i, DissolveMaterial);
                 MatInstD->SetVectorParameterValue(DissolveColorName, DissolveColor);
                 LDissolveMaterials.Add(MatInstD);
             }
 
             // add to dissolve components
             FDissolvedComponent DissComp;
-            DissComp.Component = Component;
-            DissComp.Value = UKismetMathLibrary::Conv_BoolToFloat(bReversed);
+            DissComp.Component = InComponent;
+            DissComp.Value = UKismetMathLibrary::Conv_BoolToFloat(bInReversed);
             DissComp.Materials = LMaterials;
             DissComp.DissolveMaterials = LDissolveMaterials;
-            DissComp.bReverse = bReversed;
+            DissComp.bReverse = bInReversed;
             DissComp.bIsRunning = true;
             DissolvedComponents.Add(DissComp);
         }
@@ -78,9 +70,9 @@ void UDissolveComponent::StartDessolve(UPrimitiveComponent* Component, bool bRev
     }
 }
 
-void UDissolveComponent::StopDissolve(UPrimitiveComponent* Component)
+void UDissolveComponent::StopDissolve(UPrimitiveComponent* InComponent)
 {
-    int LIndex = FindComponent(Component);
+    int LIndex = FindComponent(InComponent);
 
     if (LIndex >= 0)
     {
@@ -150,31 +142,30 @@ void UDissolveComponent::DissolveComponents()
     }
 }
 
-int UDissolveComponent::FindComponent(UPrimitiveComponent* Component)
+void UDissolveComponent::RestoreComponentMaterials(int InIndex)
+{
+    UPrimitiveComponent* Component = DissolvedComponents[InIndex].Component;
+
+    for (int i = 0; i < Component->GetNumMaterials(); ++i)
+    {
+        Component->SetMaterial(i, DissolvedComponents[InIndex].Materials[i]);
+    }
+}
+
+void UDissolveComponent::RemoveComponent(int InIndex)
+{
+    DissolvedComponents.RemoveAt(InIndex);
+}
+
+int UDissolveComponent::FindComponent(UPrimitiveComponent* InComponent) const
 {
     for (int i = 0; i < DissolvedComponents.Num(); ++i)
     {
-        if (DissolvedComponents[i].Component == Component)
+        if (DissolvedComponents[i].Component == InComponent)
         {
             return i;
         }
     }
 
     return -1;
-}
-
-void UDissolveComponent::RestoreComponentMaterials(int Index)
-{
-    UPrimitiveComponent* Component = DissolvedComponents[Index].Component;
-    ;
-
-    for (int i = 0; i < Component->GetNumMaterials(); ++i)
-    {
-        Component->SetMaterial(i, DissolvedComponents[Index].Materials[i]);
-    }
-}
-
-void UDissolveComponent::RemoveComponent(int Index)
-{
-    DissolvedComponents.RemoveAt(Index);
 }

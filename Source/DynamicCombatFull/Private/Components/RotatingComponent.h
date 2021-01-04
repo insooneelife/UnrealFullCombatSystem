@@ -20,12 +20,11 @@ public:
     // Sets default values for this component's properties
     URotatingComponent();
 
-protected:
-
 public:
     // Called every frame
     virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
+public:
     UFUNCTION(BlueprintCallable)
     void StartRotatingWithLimit(float InMaxPossibleRotation, float InMaxDegreesPerSecond);
 
@@ -34,10 +33,15 @@ public:
     
     UFUNCTION(BlueprintCallable)
     void StopRotating();
-    void Debug();
 
+    UFUNCTION(BlueprintCallable)
+    void DebugDraw() const;
+
+public:
     void SetRotationMode(ERotationMode InMode);
-    bool IsRotating() const;
+
+private:
+    bool IsRotating() const { return bShouldRotate; }
 
 public:
     UPROPERTY(BlueprintAssignable)

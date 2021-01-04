@@ -8,7 +8,7 @@
 #include "GameCore/CustomStructs.h"
 #include "DissolveComponent.generated.h"
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FDissolveFinishedSignature, UPrimitiveComponent*, Component, bool, bReversed);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FDissolveFinishedSignature, UPrimitiveComponent*, InComponent, bool, bInReversed);
 
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
 class UDissolveComponent : public UActorComponent
@@ -20,39 +20,43 @@ public:
     UDissolveComponent();
 
 protected:
-    // Called when the game starts
-    virtual void BeginPlay() override;
 
 public:
-    void StartDessolve(UPrimitiveComponent* Component, bool bReversed);
-    void StopDissolve(UPrimitiveComponent* Component);
+    UFUNCTION(BlueprintCallable)
+    void StartDissolve(UPrimitiveComponent* InComponent, bool bInReversed);
+    
+    UFUNCTION(BlueprintCallable)
+    void StopDissolve(UPrimitiveComponent* InComponent);
+
+private:
+
     void DissolveComponents();
-    int FindComponent(UPrimitiveComponent* Component);
-    void RestoreComponentMaterials(int Index);
-    void RemoveComponent(int Index);
+    void RestoreComponentMaterials(int InIndex);
+    void RemoveComponent(int InIndex);
+    int FindComponent(UPrimitiveComponent* InComponent) const;
+
 
 public:
     UPROPERTY(BlueprintAssignable)
-        FDissolveFinishedSignature OnDissolveFinished;
+    FDissolveFinishedSignature OnDissolveFinished;
 
 private:
     UPROPERTY(EditAnywhere)
-        UMaterialInstance* DissolveMaterial;
+    UMaterialInstance* DissolveMaterial;
 
     UPROPERTY(EditAnywhere)
-        FName DissolveValueName;
+    FName DissolveValueName;
 
     UPROPERTY(EditAnywhere)
-        FName DissolveColorName;
+    FName DissolveColorName;
 
     UPROPERTY(EditAnywhere)
-        float DissolveInterpSpeed;
+    float DissolveInterpSpeed;
 
     UPROPERTY(EditAnywhere)
-        FLinearColor DissolveColor;
+    FLinearColor DissolveColor;
 
-    UPROPERTY(EditAnywhere)
-        TArray<FDissolvedComponent> DissolvedComponents;
+    TArray<FDissolvedComponent> DissolvedComponents;
 
     FTimerHandle DissolveComponentsTimerHandle;
 };

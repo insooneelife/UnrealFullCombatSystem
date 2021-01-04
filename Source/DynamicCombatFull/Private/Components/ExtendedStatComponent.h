@@ -8,7 +8,7 @@
 #include "ExtendedStatComponent.generated.h"
 
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FValueChangedSignature, float, NewValue, float, MaxValue);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FValueChangedSignature, float, InNewValue, float, InMaxValue);
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class UExtendedStatComponent : public UActorComponent
@@ -25,51 +25,48 @@ protected:
     virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 public:
-    void RefreshRegenTimer();
-
-    void StartRegenerating();
-
-    UFUNCTION()
-    void OnModifierAdded(EStat Type, float Value);
-
-    UFUNCTION()
-    void OnModifierRemoved(EStat Type, float Value);
-
-    void InitStatManager();
-
-    UFUNCTION()
-    void OnGameLoaded();
-
-    void OnGameLoadedDelayed();
-
-    UFUNCTION()
-    void OnBaseValueChanged(EStat Stat, float NewValue);
-
-    void RegenTick();
-
-    void ClearRegenTimer();
+    UFUNCTION(BlueprintCallable)
+    void ChangeRegenPercent(int InPercent);
 
     UFUNCTION(BlueprintCallable)
-    void ChangeRegenPercent(int Percent);
-
-    UFUNCTION(BlueprintCallable)
-    void ModifyStat(float Value, bool bInterruptRegeneration);
-
-    void AddModifier(float Value);
-    void RemoveModifier(float Value);
-
-    void SetCurrentValue(float Value, bool bInterruptRegeneration);
+    void ModifyStat(float InValue, bool bInInterruptRegeneration);
 
 public:
+
+    float GetCurrentValue() const { return CurrentValue; }
+    void SetCurrentValue(float InValue, bool bInInterruptRegeneration);
+
     EStat GetStatType() const { return StatType; }
     void SetStatType(EStat InStatType) { StatType = InStatType; }
 
     void SetDoesRegenerates(bool bInDoesRegenerates) { bDoesRegenerates = bInDoesRegenerates; }
     void SetRegenValue(float InRegenValue) { RegenValue = InRegenValue; }
     void SetReenableRegenTime(float InReenableRegenTime) { ReenableRegenTime = InReenableRegenTime; }
-
-    float GetCurrentValue() const { return CurrentValue; }
     float GetMaxValue() const { return TopValue + ModifierValue; }
+
+protected:
+    UFUNCTION()
+    void OnModifierAdded(EStat InType, float InValue);
+
+    UFUNCTION()
+    void OnModifierRemoved(EStat InType, float InValue);
+
+    UFUNCTION()
+    void OnGameLoaded();
+
+    UFUNCTION()
+    void OnBaseValueChanged(EStat InStat, float InNewValue);
+
+private:
+    void RefreshRegenTimer();
+    void StartRegenerating();
+    void InitStatManager();
+    void DelayedTick_OnGameLoaded();
+    void RegenTick();
+    void ClearRegenTimer();
+    void AddModifier(float InValue);
+    void RemoveModifier(float InValue);
+
 
 public:
     UPROPERTY(BlueprintAssignable)
@@ -78,11 +75,6 @@ public:
 private:
     UPROPERTY(EditAnywhere)
     EStat StatType;
-
-    float RegenerationTickInterval;
-    float CurrentValue;
-    float TopValue;
-    float ModifierValue;
 
     UPROPERTY(EditAnywhere)
     bool bDoesRegenerates;
@@ -95,4 +87,9 @@ private:
 
     FTimerHandle RegenTimerHandle;
     float InitialRegenValue;
+
+    float RegenerationTickInterval;
+    float CurrentValue;
+    float TopValue;
+    float ModifierValue;
 };
