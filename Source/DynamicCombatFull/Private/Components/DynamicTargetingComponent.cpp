@@ -271,7 +271,7 @@ void UDynamicTargetingComponent::FindTarget()
         }
     }
 
-    if (GameUtils::IsValid(SelectedActor))
+    if (SelectedActor != nullptr)
     {
         EnableCameraLock();
         OnTargetChanged.Broadcast(SelectedActor);
