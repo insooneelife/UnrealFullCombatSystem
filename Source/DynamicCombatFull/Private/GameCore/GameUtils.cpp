@@ -26,6 +26,17 @@ const FItem& GameUtils::GetDefaultItemFromItemClass(TSubclassOf<UItemBase> ItemC
     return DefaultItem->GetItem();
 }
 
+void GameUtils::SetTimerRetriggerable(
+    FTimerManager& InTimerManager,
+    FTimerHandle& InTimerHandle, 
+    TBaseDelegate<void> InObjectDelegate, 
+    float InTime, 
+    bool bInLoop)
+{
+    InTimerManager.ClearTimer(InTimerHandle);
+    InTimerManager.SetTimer(InTimerHandle, InObjectDelegate, InTime, bInLoop);
+}
+
 void GameUtils::PrintStoredItem(const FStoredItem& InStoredItem)
 {
     if (UKismetSystemLibrary::IsValidClass(InStoredItem.ItemClass))

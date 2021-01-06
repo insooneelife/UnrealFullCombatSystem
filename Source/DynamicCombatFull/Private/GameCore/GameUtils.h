@@ -22,6 +22,13 @@ public:
     static const FItem& GetDefaultItemFromStoredItem(const FStoredItem& StoredItem);
     static const FItem& GetDefaultItemFromItemClass(TSubclassOf<UItemBase> ItemClass);
 
+    static void SetTimerRetriggerable(
+        FTimerManager& InTimerManager,
+        FTimerHandle& InTimerHandle,
+        TBaseDelegate<void> InObjectDelegate,
+        float InTime,
+        bool bInLoop);   
+
     // logs
     static void PrintStoredItem(const FStoredItem& InStoredItem);
     static void PrintHitResult(const FHitResult& InHitResult);

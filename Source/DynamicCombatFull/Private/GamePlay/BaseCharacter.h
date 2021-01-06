@@ -14,6 +14,7 @@
 #include "Interfaces/CanOpenUI.h"
 #include "Interfaces/AbilityInterface.h"
 #include "Interfaces/IsTargetable.h"
+#include "Interfaces/CanMeleeAttack.h"
 #include "Components/TimelineComponent.h"
 
 #include "BaseCharacter.generated.h"
@@ -55,7 +56,8 @@ class ABaseCharacter
     public IIsArcher,
     public ICanOpenUI,
     public IAbilityInterface,
-    public IIsTargetable
+    public IIsTargetable,
+    public ICanMeleeAttack
 
 {
 	GENERATED_BODY()
@@ -150,8 +152,13 @@ public:
     // IIsArcher
     UFUNCTION(BlueprintCallable)
     virtual float GetAimAlpha() const override { return AimAlpha; }
+    virtual float GetArrowInitialSpeed() const override { return ArrowInitialSpeed; }
     virtual bool DoesHoldBowString() const override;
     virtual FName GetBowStringSocketName() const override;
+    virtual float BowAttack() override;
+    virtual bool CanBowAttack() const override;
+    virtual FTransform GetSpawnArrowTransform() const override;
+    virtual float GetRangeDamage() const override;
 
     // ICanOpenUI
     virtual void OpenedUI() override;
@@ -172,6 +179,15 @@ public:
     virtual void OnDeselected() override;
     virtual bool IsTargetable() const override;
 
+    // ICanMeleeAttack
+    virtual ACharacter* GetThisCharacter() override { return this; }
+    virtual EMeleeAttackType GetMeleeAttackType() const override { return MeleeAttackType; }
+    virtual void SetMeleeAttackCounter(int Value) override { MeleeAttackCounter = Value; }
+    virtual int GetMeleeAttackCounter()const override { return MeleeAttackCounter; }
+    virtual bool CanMeleeAttack() const override;
+    virtual float GetMeleeDamage() const;
+    virtual float MeleeAttack(EMeleeAttackType InType) override;
+
 protected:
     // effects events
     UFUNCTION()
@@ -179,11 +195,6 @@ protected:
 
     UFUNCTION()
     void OnEffectRemoved(EEffectType InType);
-
-
-    // weapon collision events
-    UFUNCTION()
-    void OnHit(const FHitResult& InHit);
 
     UFUNCTION()
     void OnCollisionActivated(ECollisionPart CollisionPart);
@@ -458,7 +469,6 @@ private:
     void PlayBowDrawSound();
     void AttemptPlayBowDrawSound();
     void AttemptPlayBowDrawSoundDelayed();
-    void ShootArrow();
     void StopBowDrawSound();
 
     void AbilityPressed();
@@ -474,10 +484,10 @@ private:
     void AbilityOnStateChanged(EState NewState);
     void AbilityOnMovementModeChanged(EMovementMode PrevMovementMode, EMovementMode NewMovementMode);
     void SetSpellActiveIndex();
-
+    
     void CreateKeybindings();
 
-    FTransform GetSpawnArrowTransform() const;
+
 
     FRotator GetArrowSpawnDirection(
         FVector InCameraDirection,
@@ -485,9 +495,6 @@ private:
         FVector InImpactPoint, 
         FVector InArrowSpawnLocation) const;
 
-    FHitData MakeMeleeHitData(AActor* HitActor);
-    void ApplyHitImpulseToCharacter(AActor* HitActor, FVector HitNormal, float ImpulsePower);
-    void MeleeAttack(EMeleeAttackType InType);
     void Roll();
     void CustomJump();
     void ToggleCombat();
@@ -495,16 +502,15 @@ private:
     bool AttemptBackstab();
     void UseItem(EItemType InType);
 
-    bool CanMeleeAttack() const;
+
     bool CanRoll() const;
     bool CanBeAttacked() const;
     bool CanBeStunned() const;
     bool CanUseOrSwitchItem() const;
     bool CanOpenUI() const;
-    bool CanBowAttack() const;
     bool CanEnterSlowMotion() const;
 
-    UAnimMontage* GetNextMeleeAttackMontage(EMeleeAttackType AttackType);
+
     UAnimMontage* GetRollMontage() const;
     UAnimMontage* GetStunMontage(EDirection Direction) const;
     UAnimMontage* GetBlockMontage() const;
@@ -512,7 +518,6 @@ private:
     UAnimMontage* GetParriedMontage() const;
     UAnimMontage* GetParryMontage() const;
 
-    void ResetMeleeAttackCounter();
     void ResetAimingMode();
 
     void ShowCrosshair(UTexture2D* InTexture);
@@ -549,8 +554,6 @@ private:
     bool CanBeInterrupted() const;
     void UpdateReceivedHitDirection(FVector InHitFromDirection);
     void LineTraceForInteractable();
-    void SetTimerRetriggerable(
-        FTimerHandle& InTimerHandle, TBaseDelegate<void> InObjectDelegate, float InTime, bool bInLoop);
     void SetData();
 
 private:
@@ -635,7 +638,6 @@ private:
     UPROPERTY()
     AActor* InteractionActor;
 
-
     int MeleeAttackCounter;
     EMeleeAttackType MeleeAttackType;
     float BlockAlpha;
@@ -688,6 +690,9 @@ private:
 
     UPROPERTY(EditAnywhere, Category = "AimAlpha")
     float AimAlpha;
+
+    UPROPERTY(EditAnywhere, Category = "AimAlpha")
+    float ArrowInitialSpeed;
 
     UPROPERTY(EditAnywhere, Category = "SlowMotion")
     bool bIsInSlowMotion;

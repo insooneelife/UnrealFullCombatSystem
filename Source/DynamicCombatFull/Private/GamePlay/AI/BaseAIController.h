@@ -19,34 +19,46 @@ class ABaseAIController : public AAIController
 {
 	GENERATED_BODY()
 	
+public:
+    ABaseAIController();
 
 protected:
     virtual void OnPossess(APawn* InPawn) override;
 
-    UFUNCTION()
-    void OnInCombatChanged(bool bInIsInCombat);
-
 public:        
+    UFUNCTION()
     void UpdateTarget();
 
     UFUNCTION(BlueprintCallable)
-    void SetTarget(AActor* NewTarget);
+    void SetTarget(AActor* InNewTarget);
 
+    UFUNCTION(BlueprintCallable)
     AActor* GetTarget() const { return Target; }
+public:
 
-    void SetIsInCombat(bool bValue);
-
+    void SetIsInCombat(bool bInValue);
     void UpdateSenseTarget();
-
     bool IsEnemy(const FAIStimulus& InAIStimulus, AActor* InActor) const;
-private:
 
+protected:
+    UFUNCTION()
+    void OnInCombatChanged(bool bInIsInCombat);
+
+
+private:
+    UPROPERTY(EditAnywhere, Category = "Blackboard Keys")
     FName TargetKey;
+
+    UPROPERTY(EditAnywhere, Category = "Blackboard Keys")
     FName AttackTypeKey;
+
+    UPROPERTY(EditAnywhere, Category = "Blackboard Keys")
     FName StateKey;
+
+    UPROPERTY(EditAnywhere, Category = "Blackboard Keys")
     FName IsInCombatKey;
 
-    UPROPERTY()
+    UPROPERTY(EditAnywhere, Category = "Components")
     UAIPerceptionComponent* AIPerception;
     
     UPROPERTY()

@@ -3,6 +3,13 @@
 
 #include "AICharacter.h"
 #include "GamePlay/AI/BaseAIController.h"
+#include "GameCore/GameUtils.h"
+
+#include "Components/StatsManagerComponent.h"
+#include "Components/StateManagerComponent.h"
+#include "Components/EquipmentComponent.h"
+#include "Components/ExtendedStatComponent.h"
+#include "Components/EffectsComponent.h"
 
 // Sets default values
 AAICharacter::AAICharacter()
@@ -16,19 +23,67 @@ AAICharacter::AAICharacter()
 void AAICharacter::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
+    StatsManager->Init();
+    Equipment->Init();
+    InitializeStatsWidget();
+
+    ABaseAIController* BaseAIController = Cast<ABaseAIController>(GetController());
+
+    if (GameUtils::IsValid(BaseAIController))
+    {
+        AIController = BaseAIController;
+    }
+
+    float Health = ExtendedHealth->GetMaxValue();
+    ExtendedHealth->SetCurrentValue(Health, false);
 }
 
 void AAICharacter::OnEffectApplied(EEffectType InType)
 {
+    if (InType == EEffectType::Stun)
+    {
+        Stunned();
+    }
+    else if (InType == EEffectType::Backstab)
+    {
+        Backstabbed();
+    }
+    else if (InType == EEffectType::Impact)
+    {
+        Impact();
+    }
+    else if (InType == EEffectType::Parried)
+    {
+        Parried();
+    }
+
+    StateManager->SetState(EState::Disabled);
+
 }
 
 void AAICharacter::OnEffectRemoved(EEffectType InType)
 {
-}
+    if (InType == EEffectType::Stun ||
+        InType == EEffectType::Knockdown ||
+        InType == EEffectType::Impact ||
+        InType == EEffectType::Parried ||
+        InType == EEffectType::Backstab)
+    {
+        TArray<EEffectType> Array 
+        {
+            EEffectType::Stun,
+            EEffectType::Knockdown,
+            EEffectType::Impact,
+            EEffectType::Parried,
+            EEffectType::Backstab
+        };
 
-void AAICharacter::OnHit(const FHitResult& InHit)
-{
+        if (!Effects->IsAnyEffectApplied(Array))
+        {
+            StateManager->ResetState(0.0f);
+        }
+    }
 }
 
 void AAICharacter::OnCollisionActivated(ECollisionPart InCollisionPart)
@@ -119,28 +174,6 @@ void AAICharacter::Backstabbed()
 {
 }
 
-FHitData AAICharacter::MakeMeleeHitData(AActor* InHitActor)
-{
-    return FHitData();
-}
-
-void AAICharacter::ApplyHitImpulseToCharacter(AActor* InActor, FVector InHitNormal, float InImpulsePower)
-{
-}
-
-float AAICharacter::MeleeAttack(EMeleeAttackType InType)
-{
-    return 0.0f;
-}
-
-UAnimMontage* AAICharacter::GetMeleeAttackMontage() const
-{
-    return nullptr;
-}
-
-void AAICharacter::ResetMeleeAttackCounter()
-{
-}
 
 float AAICharacter::Roll(EDirection InDirection)
 {
@@ -212,4 +245,15 @@ FRotator AAICharacter::GetDesiredRotation() const
 UDataTable* AAICharacter::GetMontages(EMontageAction InAction) const
 {
     return nullptr;
+}
+
+
+float AAICharacter::GetMeleeDamage() const
+{
+    return 0.0f;
+}
+
+float AAICharacter::MeleeAttack(EMeleeAttackType InType)
+{
+    return 0.0f;
 }

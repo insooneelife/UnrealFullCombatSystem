@@ -11,6 +11,7 @@
 #include "Interfaces/CanGetEffects.h"
 #include "Interfaces/MontageManagerInterface.h"
 #include "Interfaces/RotatingInterface.h"
+#include "Interfaces/CanMeleeAttack.h"
 #include "AICharacter.generated.h"
 
 class UAnimMontage;
@@ -40,7 +41,8 @@ class AAICharacter
     public ICanBeAttacked, 
     public ICanGetEffects, 
     public IMontageManagerInterface,
-    public IRotatingInterface
+    public IRotatingInterface,
+    public ICanMeleeAttack
 {
 	GENERATED_BODY()
 
@@ -52,15 +54,32 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
+public:
+    UFUNCTION(BlueprintCallable)
+        ABaseAIController* GetAIController() const { return AIController; }
+
+public:
+    UBehaviorTree* GetBTree() const { return BTree; }
+
+    UEquipmentComponent* GetEquipment() const { return Equipment; }
+
+    UStateManagerComponent* GetStateManager() const { return StateManager; }
+
+    UStatsManagerComponent* GetStatsManager() const { return StatsManager; }
+
+    UPatrolComponent* GetPatrol() const { return Patrol; }
+
+    UExtendedStatComponent* GetExtendedStamina() const { return ExtendedStamina; }
+
+    UMontageManagerComponent* GetMontageManager() const { return MontageManager; }
+
+protected:
+
     UFUNCTION()
         void OnEffectApplied(EEffectType InType);
 
     UFUNCTION()
         void OnEffectRemoved(EEffectType InType);
-
-    // weapon collision events
-    UFUNCTION()
-        void OnHit(const FHitResult& InHit);
 
     UFUNCTION()
         void OnCollisionActivated(ECollisionPart InCollisionPart);
@@ -94,12 +113,6 @@ public:
     void Impact();
     void Backstabbed();
 
-    FHitData MakeMeleeHitData(AActor* InHitActor);
-    void ApplyHitImpulseToCharacter(AActor* InActor, FVector InHitNormal, float InImpulsePower);
-
-    float MeleeAttack(EMeleeAttackType InType);
-    UAnimMontage* GetMeleeAttackMontage() const;
-    void ResetMeleeAttackCounter();
     float Roll(EDirection InDirection);
 
 public:
@@ -108,6 +121,7 @@ public:
     bool IsCombatTypePure(ECombatType InType) const;
     void UpdateReceivedHitDirection(float InHitFromDirection);
     bool CanBeInterrupted() const;
+
 
 public:
     // IIsTargetable
@@ -137,10 +151,18 @@ public:
     // IMontageManagerInterface
     virtual UDataTable* GetMontages(EMontageAction InAction) const override;
 
+    // ICanMeleeAttack
+    virtual ACharacter* GetThisCharacter() override { return this; }
+    virtual EMeleeAttackType GetMeleeAttackType() const override { return MeleeAttackType; }
+    virtual void SetMeleeAttackCounter(int Value) override { MeleeAttackCounter = Value; }
+    virtual int GetMeleeAttackCounter()const override { return MeleeAttackCounter; }
+    virtual bool CanMeleeAttack() const override { return true; }
+    virtual float GetMeleeDamage() const override;
+    virtual float MeleeAttack(EMeleeAttackType InType) override;
+
 public:
 
-    UFUNCTION(BlueprintCallable)
-    ABaseAIController* GetAIController() const { return AIController; }
+
 
 private:
 

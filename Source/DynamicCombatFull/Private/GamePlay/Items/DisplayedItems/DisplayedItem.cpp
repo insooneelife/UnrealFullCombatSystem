@@ -25,7 +25,8 @@ void ADisplayedItem::NativeInit(UEquipmentComponent* InEquipmentComponent, EItem
     Type = InType;
     SlotIndex = InSlotIndex;
 
-    TArray<UActorComponent*> Components = GetComponentsByClass(UPrimitiveComponent::StaticClass());
+    TArray<UActorComponent*> Components;
+    GetComponents(UPrimitiveComponent::StaticClass(), Components);
 
     for (UActorComponent* Component : Components)
     {

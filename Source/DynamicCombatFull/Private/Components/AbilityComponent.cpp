@@ -188,6 +188,37 @@ void UAbilityComponent::OnMainHandTypeChanged(EItemType InType)
     UpdateAbilityFromEquipment();
 }
 
+void UAbilityComponent::UpdateAbility(TSubclassOf<AAbilityBase> InAbilityClass)
+{
+    if (IsCurrentAbilityValid())
+    {
+        if (CurrentAbility->GetClass() != InAbilityClass)
+        {
+            EndAbility(EAbilityEndResult::Destroyed);
+            CurrentAbility->Destroy();
+        }
+    }
+
+    if (UKismetSystemLibrary::IsValidClass(InAbilityClass))
+    {
+        FActorSpawnParameters Params;
+        Params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
+        Params.Owner = GetOwner();
+        Params.Instigator = nullptr;
+
+        AAbilityBase* Ability = GetWorld()->SpawnActor<AAbilityBase>(InAbilityClass, FTransform::Identity, Params);
+        Ability->Init(this);
+
+        CurrentAbility = Ability;
+    }
+    else
+    {
+        CurrentAbility = nullptr;
+    }
+
+    AbilityChanged();
+}
+
 void UAbilityComponent::AbilityPressed()
 {
     if (IsCurrentAbilityValid())
@@ -371,41 +402,6 @@ void UAbilityComponent::AbilityChanged()
     }
     OnAbilityChanged.Broadcast(CurrentAbility);
 }
-
-
-
-void UAbilityComponent::UpdateAbility(TSubclassOf<AAbilityBase> InAbilityClass)
-{
-    if (IsCurrentAbilityValid())
-    {
-        if (CurrentAbility->GetClass() != InAbilityClass)
-        {
-            EndAbility(EAbilityEndResult::Destroyed);
-            CurrentAbility->Destroy();
-        }
-    }
-
-    if(UKismetSystemLibrary::IsValidClass(InAbilityClass))
-    {
-        FActorSpawnParameters Params;
-        Params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
-        Params.Owner = GetOwner();
-        Params.Instigator = nullptr;
-
-        AAbilityBase* Ability = GetWorld()->SpawnActor<AAbilityBase>(InAbilityClass, FTransform::Identity, Params);
-        Ability->Init(this);
-
-        CurrentAbility = Ability;
-    }
-    else
-    {
-        CurrentAbility = nullptr;
-    }
-
-    AbilityChanged();
-}
-
-
 
 void UAbilityComponent::StopAbilityMontage()
 {

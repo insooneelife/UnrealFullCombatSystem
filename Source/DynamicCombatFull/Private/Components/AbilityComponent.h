@@ -70,6 +70,7 @@ protected:
     void OnMainHandTypeChanged(EItemType InType);
 
 public:
+    void UpdateAbility(TSubclassOf<AAbilityBase> InAbility);
     void AbilityPressed();
     void AbilityReleased();
     void ConsumeMana(float InAmount);
@@ -89,7 +90,6 @@ private:
 
     void UpdateAbilityFromEquipment();
     void AbilityChanged();
-    void UpdateAbility(TSubclassOf<AAbilityBase> InAbility);
     void StopAbilityMontage();
     void SetIsPressed(bool bInValue);
     void SetIsCasting(bool bInValue);

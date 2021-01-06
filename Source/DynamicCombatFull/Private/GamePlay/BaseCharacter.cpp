@@ -87,6 +87,7 @@ ABaseCharacter::ABaseCharacter()
     StoredMovementState = EMovementState::Idle;
     RollStaminaCost = 25.0f;
     SprintStaminaCost = 0.5f;
+    ArrowInitialSpeed = 7000.0f;
 
     static UTexture2D* LoadedObject =
         GameUtils::LoadAssetObject<UTexture2D>("/Game/DynamicCombatSystem/Widgets/Textures/T_Crosshair");
@@ -632,6 +633,118 @@ FName ABaseCharacter::GetBowStringSocketName() const
     return FName("bow_string");
 }
 
+float ABaseCharacter::BowAttack()
+{
+    if (CanBowAttack())
+    {
+        FStoredItem Item = Equipment->GetActiveItem(EItemType::Arrows, 0);
+        SpawnArrowProjectile(Item);
+
+        FGuid ItemId = Equipment->GetActiveItem(EItemType::Arrows, 0).Id;
+        int ItemIndex = Inventory->FindIndexById(ItemId);
+        Inventory->RemoveItemAtIndex(ItemIndex, 1);
+
+        StateManager->SetState(EState::Attacking);
+
+        int MontageIndex = Equipment->AreArrowsEquipped() ? 0 : 1;
+        UAnimMontage* AnimMontage = MontageManager->GetMontageForAction(EMontageAction::ShootArrow, MontageIndex);
+
+        if (GameUtils::IsValid(AnimMontage))
+        {
+            return PlayAnimMontage(AnimMontage);
+        }
+        else
+        {
+            StateManager->ResetState(0.0f);
+        }
+    }
+
+    return 0.0f;
+}
+
+bool ABaseCharacter::CanBowAttack() const
+{
+    return
+        Equipment->IsInCombat() &&
+        Equipment->AreArrowsEquipped() &&
+        IsCombatTypeEqual(ECombatType::Range);
+}
+
+FTransform ABaseCharacter::GetSpawnArrowTransform() const
+{
+    FVector ArrowSpawnLoc = ArrowSpawnLocation->GetComponentLocation();
+    FVector CameraDirection = FollowCamera->GetForwardVector();
+    FRotator ArrowSpawnDirection = UKismetMathLibrary::Conv_VectorToRotator(CameraDirection);
+
+    float VectorLength = (CameraBoom->GetComponentLocation() - FollowCamera->GetComponentLocation()).Size();
+    const float TraceLength = 10000.0f;
+
+    FVector LineTraceStart = FollowCamera->GetComponentLocation() + VectorLength * CameraDirection;
+    FVector LineTraceEnd = FollowCamera->GetComponentLocation() + CameraDirection * TraceLength;
+
+    for (int i = 0; i <= 20; ++i)
+    {
+        float Z = (float)i * 5.0f;
+        FVector HeightVec = FVector(0.0f, 0.0f, Z);
+        FVector LineTraceStartWithHeight = LineTraceStart - HeightVec;
+        FVector LineTraceEndWithHeight = LineTraceEnd - HeightVec;
+        FVector CurrentTraceDirection = UKismetMathLibrary::GetDirectionUnitVector(LineTraceStart, LineTraceEndWithHeight);
+
+        // projectile
+        ETraceTypeQuery Channel = UEngineTypes::ConvertToTraceType(ECollisionChannel::ECC_GameTraceChannel1);
+        TArray<AActor*> ActorsToIgnore;
+        FHitResult OutHit;
+
+        if (UKismetSystemLibrary::LineTraceSingle(
+            GetWorld(),
+            LineTraceStartWithHeight,
+            LineTraceEndWithHeight,
+            Channel,
+            false,
+            ActorsToIgnore,
+            EDrawDebugTrace::Type::None,
+            OutHit,
+            true))
+        {
+            FVector ImpactPoint = OutHit.ImpactPoint;
+            AActor* HitActor = OutHit.GetActor();
+
+            ICanBeAttacked* CanBeAttacked = Cast<ICanBeAttacked>(HitActor);
+
+            if (i == 0)
+            {
+                ArrowSpawnDirection = GetArrowSpawnDirection(
+                    CameraDirection, CurrentTraceDirection, ImpactPoint, ArrowSpawnLoc);
+
+                if (CanBeAttacked != nullptr)
+                {
+                    return FTransform(ArrowSpawnDirection, ArrowSpawnLoc);
+                }
+            }
+            else
+            {
+                if ((ArrowSpawnLoc - ImpactPoint).Size() > 1000.0f)
+                {
+                    if (CanBeAttacked != nullptr)
+                    {
+                        ArrowSpawnDirection = GetArrowSpawnDirection(
+                            CameraDirection, CurrentTraceDirection, ImpactPoint, ArrowSpawnLoc);
+
+                        return FTransform(ArrowSpawnDirection, ArrowSpawnLoc);
+                    }
+                }
+            }
+        }
+    }
+
+    return FTransform(ArrowSpawnDirection, ArrowSpawnLoc);
+}
+
+float ABaseCharacter::GetRangeDamage() const
+{
+    return StatsManager->GetDamage();
+}
+
 void ABaseCharacter::OpenedUI()
 {
     GetWorld()->GetTimerManager().ClearTimer(CheckForInteractableTimerHandle);
@@ -673,6 +786,55 @@ void ABaseCharacter::OnDeselected()
 bool ABaseCharacter::IsTargetable() const
 {
     return IsAlive();
+}
+
+float ABaseCharacter::GetMeleeDamage() const
+{
+    return StatsManager->GetDamage();
+}
+
+bool ABaseCharacter::CanMeleeAttack() const
+{
+    return
+        IsStateEqual(EState::Idle) &&
+        Equipment->IsInCombat() &&
+        (IsCombatTypeEqual(ECombatType::Unarmed) || IsCombatTypeEqual(ECombatType::Melee)) &&
+        IsEnoughStamina(1.0f);
+}
+
+float ABaseCharacter::MeleeAttack(EMeleeAttackType InType)
+{
+    if (CanMeleeAttack())
+    {
+        MeleeAttackType = GetCharacterMovement()->IsFalling() ? EMeleeAttackType::Falling : InType;
+        StateManager->SetState(EState::Attacking);
+        GetWorld()->GetTimerManager().ClearTimer(ResetMeleeAttackCounterTimerHandle);
+
+        UAnimMontage* AnimMontage = GetNextMeleeAttackMontage(MontageManager, MeleeAttackType);
+        FString EnumStr = GameUtils::GetEnumValueAsString("EMeleeAttackType", MeleeAttackType);
+
+        if (GameUtils::IsValid(AnimMontage))
+        {
+            float Value = StatsManager->GetStatValue(EStat::AttackSpeed, true);
+            float Duration = PlayAnimMontage(AnimMontage, Value);
+            float Time = Duration * 0.8f;
+
+            GetWorld()->GetTimerManager().SetTimer(
+                ResetMeleeAttackCounterTimerHandle, this, &ABaseCharacter::ResetMeleeAttackCounter, Time, false);
+
+            float StaminaCost = StatsManager->GetStatValue(EStat::MeleeAttackStaminaCost, true);
+            float FinalCost = UDefaultGameInstance::ScaleMeleeAttackStaminaCostByType(StaminaCost, MeleeAttackType);
+            ExtendedStamina->ModifyStat(FinalCost * -1.0f, true);
+
+            return Duration;
+        }
+        else
+        {
+            StateManager->ResetState(0.0f);
+            ResetMeleeAttackCounter();
+        }
+    }
+    return 0.0f;
 }
 
 void ABaseCharacter::OnEffectApplied(EEffectType InType)
@@ -720,38 +882,6 @@ void ABaseCharacter::OnEffectRemoved(EEffectType InType)
         }
 
         InputBuffer->CloseInputBuffer();
-    }
-}
-
-// on hit melee attack
-void ABaseCharacter::OnHit(const FHitResult& InHit)
-{
-    FVector HitLocation = InHit.Location;
-    FVector HitNormal = InHit.Normal;
-    AActor* HitActor = InHit.GetActor();
-    ICanBeAttacked* CanBeAttacked = Cast<ICanBeAttacked>(HitActor);
-    FHitData HitData = MakeMeleeHitData(InHit.GetActor());
-
-    if (CanBeAttacked != nullptr)
-    {
-        EAttackResult OutAttackResult;
-        bool bTakeDamageResult = CanBeAttacked->TakeDamage(HitData, OutAttackResult);
-
-        ApplyHitImpulseToCharacter(HitActor, HitNormal, 15000.0f);
-
-        if (bTakeDamageResult)
-        {
-            UDefaultGameInstance* DefaultGameInstance = Cast<UDefaultGameInstance>(GetGameInstance());
-            DefaultGameInstance->PlayHitSound(this, HitActor, HitLocation);
-            HitActor->GetComponentByClass(UEffectsComponent::StaticClass());
-            UEffectsComponent* EffectsComponent =
-                Cast<UEffectsComponent>(HitActor->GetComponentByClass(UEffectsComponent::StaticClass()));
-
-            if (GameUtils::IsValid(EffectsComponent))
-            {
-                EffectsComponent->ApplyEffect(EEffectType::Stun, 2.0f, EApplyEffectMethod::Replace, this);
-            }
-        }
     }
 }
 
@@ -1348,7 +1478,7 @@ void ABaseCharacter::OnActionReleased_BowAttack()
         StopAiming();
         if (AimAlpha >= 0.8f)
         {
-            ShootArrow();
+            BowAttack();
         }
 
         GetWorld()->GetTimerManager().SetTimer(
@@ -1663,7 +1793,8 @@ void ABaseCharacter::AttemptPlayBowDrawSound()
     GetWorld()->GetTimerManager().SetTimer(
         PlayBowDrawSoundTimerHandle, this, &ABaseCharacter::PlayBowDrawSound, 0.1f, true);
 
-    SetTimerRetriggerable(
+    GameUtils::SetTimerRetriggerable(
+        GetWorld()->GetTimerManager(),
         RetriggerableDelayTimerHandle,
         FTimerDelegate::CreateUObject(this, &ABaseCharacter::AttemptPlayBowDrawSoundDelayed),
         1.0f,
@@ -1673,66 +1804,6 @@ void ABaseCharacter::AttemptPlayBowDrawSound()
 void ABaseCharacter::AttemptPlayBowDrawSoundDelayed()
 {
     GetWorld()->GetTimerManager().ClearTimer(PlayBowDrawSoundTimerHandle);
-}
-
-void ABaseCharacter::ShootArrow()
-{
-    if (CanBowAttack())
-    {
-        FStoredItem Item = Equipment->GetActiveItem(EItemType::Arrows, 0);
-        UArrowItem* ArrowItem = Item.ItemClass->GetDefaultObject<UArrowItem>();
-
-        if (!GameUtils::IsValid(ArrowItem))
-        {
-            UE_LOG(LogTemp, Error, TEXT("ArrowItem is not valid!  Item Id : %s"), *Item.Id.ToString());
-            GameUtils::PrintStoredItem(Item);
-            return;
-        }
-
-        TSubclassOf<AActor> ProjectileClass = ArrowItem->GetProjectile();
-
-        if (!UKismetSystemLibrary::IsValidClass(ProjectileClass))
-        {
-            UE_LOG(LogTemp, Error, TEXT("ProjectileClass is not valid!  Item Id : %s"), *Item.Id.ToString());
-            GameUtils::PrintStoredItem(Item);
-            return;
-        }
-
-        FTransform SpawnTransform = GetSpawnArrowTransform();
-
-        FActorSpawnParameters SpawnInfo;
-        SpawnInfo.Owner = this;
-        SpawnInfo.Instigator = this;
-        SpawnInfo.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-
-        AArrowProjectileBase* ProjectileBase =
-            GetWorld()->SpawnActor<AArrowProjectileBase>(ProjectileClass, SpawnTransform, SpawnInfo);
-
-        if (GameUtils::IsValid(ProjectileBase))
-        {
-            float Damage = StatsManager->GetDamage() * AimAlpha;
-            ProjectileBase->Init(Damage, 7000.0f * AimAlpha);
-        }
-
-        FGuid ItemId = Equipment->GetActiveItem(EItemType::Arrows, 0).Id;
-        int ItemIndex = Inventory->FindIndexById(ItemId);
-
-        Inventory->RemoveItemAtIndex(ItemIndex, 1);
-
-        StateManager->SetState(EState::Attacking);
-
-        int MontageIndex = Equipment->AreArrowsEquipped() ? 0 : 1;
-        UAnimMontage* AnimMontage = MontageManager->GetMontageForAction(EMontageAction::ShootArrow, MontageIndex);
-
-        if (GameUtils::IsValid(AnimMontage))
-        {
-            PlayAnimMontage(AnimMontage);
-        }
-        else
-        {
-            StateManager->ResetState(0.0f);
-        }
-    }
 }
 
 void ABaseCharacter::StopBowDrawSound()
@@ -1818,76 +1889,6 @@ void ABaseCharacter::SetSpellActiveIndex()
     }
 }
 
-FTransform ABaseCharacter::GetSpawnArrowTransform() const
-{
-    FVector ArrowSpawnLoc = ArrowSpawnLocation->GetComponentLocation();
-    FVector CameraDirection = FollowCamera->GetForwardVector();
-    FRotator ArrowSpawnDirection = UKismetMathLibrary::Conv_VectorToRotator(CameraDirection);
-
-    float VectorLength = (CameraBoom->GetComponentLocation() - FollowCamera->GetComponentLocation()).Size();
-    const float TraceLength = 10000.0f;
-
-    FVector LineTraceStart = FollowCamera->GetComponentLocation() + VectorLength * CameraDirection;
-    FVector LineTraceEnd = FollowCamera->GetComponentLocation() + CameraDirection * TraceLength;
-
-    for (int i = 0; i <= 20; ++i)
-    {
-        float Z = (float)i * 5.0f;
-        FVector HeightVec = FVector(0.0f, 0.0f, Z);
-        FVector LineTraceStartWithHeight = LineTraceStart - HeightVec;
-        FVector LineTraceEndWithHeight = LineTraceEnd - HeightVec;
-        FVector CurrentTraceDirection = UKismetMathLibrary::GetDirectionUnitVector(LineTraceStart, LineTraceEndWithHeight);
-
-        // projectile
-        ETraceTypeQuery Channel = UEngineTypes::ConvertToTraceType(ECollisionChannel::ECC_GameTraceChannel1);
-        TArray<AActor*> ActorsToIgnore;
-        FHitResult OutHit;
-
-        if (UKismetSystemLibrary::LineTraceSingle(
-            GetWorld(),
-            LineTraceStartWithHeight,
-            LineTraceEndWithHeight,
-            Channel,
-            false,
-            ActorsToIgnore,
-            EDrawDebugTrace::Type::None,
-            OutHit,
-            true))
-        {
-            FVector ImpactPoint = OutHit.ImpactPoint;
-            AActor* HitActor = OutHit.GetActor();
-
-            ICanBeAttacked* CanBeAttacked = Cast<ICanBeAttacked>(HitActor);
-
-            if (i == 0)
-            {
-                ArrowSpawnDirection = GetArrowSpawnDirection(
-                    CameraDirection, CurrentTraceDirection, ImpactPoint, ArrowSpawnLoc);
-
-                if (CanBeAttacked != nullptr)
-                {
-                    return FTransform(ArrowSpawnDirection, ArrowSpawnLoc);
-                }
-            }
-            else
-            {
-                if ((ArrowSpawnLoc - ImpactPoint).Size() > 1000.0f)
-                {
-                    if (CanBeAttacked != nullptr)
-                    {
-                        ArrowSpawnDirection = GetArrowSpawnDirection(
-                            CameraDirection, CurrentTraceDirection, ImpactPoint, ArrowSpawnLoc);
-
-                        return FTransform(ArrowSpawnDirection, ArrowSpawnLoc);
-                    }
-                }
-            }
-        }
-    }
-
-    return FTransform(ArrowSpawnDirection, ArrowSpawnLoc);
-}
-
 FRotator ABaseCharacter::GetArrowSpawnDirection(
     FVector InCameraDirection,
     FVector InCurrentTraceDirection,
@@ -1904,66 +1905,6 @@ FRotator ABaseCharacter::GetArrowSpawnDirection(
     FVector To = FollowCamera->GetComponentLocation() + InCameraDirection * Val;
     
     return UKismetMathLibrary::Conv_VectorToRotator(UKismetMathLibrary::GetDirectionUnitVector(From, To));
-}
-
-FHitData ABaseCharacter::MakeMeleeHitData(AActor* HitActor)
-{
-    float Damage = StatsManager->GetDamage();
-    float ScaledDamage = UDefaultGameInstance::ScaleMeleeDamageByType(Damage, MeleeAttackType);
-
-    FVector HitFromDirection =
-        UKismetMathLibrary::GetDirectionUnitVector(GetActorLocation(), HitActor->GetActorLocation());
-
-    bool CanBeParried = MeleeAttackType == EMeleeAttackType::Light;
-    FHitData HitData(ScaledDamage, this, HitFromDirection, CanBeParried, true, true);
-
-    return HitData;
-}
-
-void ABaseCharacter::ApplyHitImpulseToCharacter(AActor* HitActor, FVector HitNormal, float ImpulsePower)
-{
-    ACharacter* Character = Cast<ACharacter>(HitActor);
-
-    if (GameUtils::IsValid(Character))
-    {
-        if (Character->GetMesh()->IsAnySimulatingPhysics())
-        {
-            FVector Impulse = HitNormal * -1.0f * ImpulsePower;
-            Character->GetMesh()->AddImpulse(Impulse);
-        }
-    }
-}
-
-void ABaseCharacter::MeleeAttack(EMeleeAttackType InType)
-{
-    if (CanMeleeAttack())
-    {
-        MeleeAttackType = GetCharacterMovement()->IsFalling() ? EMeleeAttackType::Falling : InType;
-        StateManager->SetState(EState::Attacking);
-        GetWorld()->GetTimerManager().ClearTimer(ResetMeleeAttackCounterTimerHandle);
-
-        UAnimMontage* AnimMontage = GetNextMeleeAttackMontage(MeleeAttackType);
-        FString EnumStr = GameUtils::GetEnumValueAsString("EMeleeAttackType", MeleeAttackType);
-
-        if (GameUtils::IsValid(AnimMontage))
-        {
-            float Value = StatsManager->GetStatValue(EStat::AttackSpeed, true);
-            float Duration = PlayAnimMontage(AnimMontage, Value);
-            float Time = Duration * 0.8f;
-
-            GetWorld()->GetTimerManager().SetTimer(
-                ResetMeleeAttackCounterTimerHandle, this, &ABaseCharacter::ResetMeleeAttackCounter, Time, false);
-
-            float StaminaCost = StatsManager->GetStatValue(EStat::MeleeAttackStaminaCost, true);
-            float FinalCost = UDefaultGameInstance::ScaleMeleeAttackStaminaCostByType(StaminaCost, MeleeAttackType);
-            ExtendedStamina->ModifyStat(FinalCost * -1.0f, true);
-        }
-        else
-        {
-            StateManager->ResetState(0.0f);
-            ResetMeleeAttackCounter();
-        }
-    }
 }
 
 void ABaseCharacter::Roll()
@@ -2130,15 +2071,6 @@ void ABaseCharacter::UseItem(EItemType InType)
     }
 }
 
-bool ABaseCharacter::CanMeleeAttack() const
-{
-    return
-        IsStateEqual(EState::Idle) &&
-        Equipment->IsInCombat() &&
-        (IsCombatTypeEqual(ECombatType::Unarmed) || IsCombatTypeEqual(ECombatType::Melee)) &&
-        IsEnoughStamina(1.0f);
-}
-
 bool ABaseCharacter::CanRoll() const
 {
     return IsIdleAndNotFalling() && IsEnoughStamina(1.0f);
@@ -2185,34 +2117,11 @@ bool ABaseCharacter::CanOpenUI() const
     }
 }
 
-bool ABaseCharacter::CanBowAttack() const
-{
-    return 
-        Equipment->IsInCombat() &&
-        Equipment->AreArrowsEquipped() &&
-        IsCombatTypeEqual(ECombatType::Range);
-}
-
 bool ABaseCharacter::CanEnterSlowMotion() const
 {
     return IsActivityEqual(EActivity::IsLookingForward) && (IsStateEqual(EState::Attacking) || IsIdleAndNotFalling());
 }
 
-UAnimMontage* ABaseCharacter::GetNextMeleeAttackMontage(EMeleeAttackType AttackType)
-{
-    EMontageAction Action = UDefaultGameInstance::ConvertMeleeAttackTypeToAction(AttackType);
-    int LastIndex = MontageManager->GetMontageActionLastIndex(Action);
-    int Index = MeleeAttackCounter > LastIndex ? LastIndex : MeleeAttackCounter;
-    UAnimMontage* AnimMontage = MontageManager->GetMontageForAction(Action, Index);
-
-    MeleeAttackCounter++;
-    if (MeleeAttackCounter > LastIndex)
-    {
-        MeleeAttackCounter = 0;
-    }
-
-    return AnimMontage;
-}
 
 UAnimMontage* ABaseCharacter::GetRollMontage() const
 {
@@ -2297,11 +2206,6 @@ UAnimMontage* ABaseCharacter::GetParryMontage() const
 {
     int Index = Equipment->IsShieldEquipped() ? 1 : 0;
     return MontageManager->GetMontageForAction(EMontageAction::Parry, Index);
-}
-
-void ABaseCharacter::ResetMeleeAttackCounter()
-{
-    MeleeAttackCounter = 0;
 }
 
 void ABaseCharacter::ResetAimingMode()
@@ -2708,15 +2612,6 @@ void ABaseCharacter::LineTraceForInteractable()
         }
     }
 }
-
-void ABaseCharacter::SetTimerRetriggerable(
-    FTimerHandle& InTimerHandle, TBaseDelegate<void> InObjectDelegate, float InTime, bool bInLoop)
-{
-    GetWorld()->GetTimerManager().ClearTimer(InTimerHandle);
-    GetWorld()->GetTimerManager().SetTimer(InTimerHandle, InObjectDelegate, InTime, bInLoop);
-}
-
-
 
 void ABaseCharacter::SetData()
 {

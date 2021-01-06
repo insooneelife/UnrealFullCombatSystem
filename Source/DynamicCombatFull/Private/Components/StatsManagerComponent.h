@@ -34,6 +34,7 @@ public:
     void RemoveModifier(EStat InType, float InValue);
     float GetStatValue(EStat InType, bool bInIncludeModifiers) const;
     float GetDamage() const;
+    int GetRecentlyReceivedHitsCount() const { return RecentlyReceivedHitsCount; }
 
 protected:
     UFUNCTION()
@@ -56,7 +57,7 @@ private:
     void UpdateBlockBaseValue();
 
     float GetRecentlyReceivedDamage() const { return RecentlyReceivedDamage; }
-    int GetRecentlyReceivedHitsCount() const { return RecentlyReceivedHitsCount; }
+
     int GetRecentlyReceivedSuccessfulHitsCount() const { return RecentlyReceivedSuccessfulHitsCount; }
     float GetRecentlyReceivedSuccessfulDamage() const { return RecentlyReceivedSuccessfulDamage; }
 
