@@ -37,6 +37,7 @@ public:
 public:
     void SetCollisionMeshes(const TArray<FCollisionComponent>& InCollComps);
     void SetCollisionMesh(UPrimitiveComponent* InWeaponMesh, const TArray<FName>& InSockets);
+    void AddIgnoredClass(TSubclassOf<AActor> IgnoredClass);
 
 private:
 

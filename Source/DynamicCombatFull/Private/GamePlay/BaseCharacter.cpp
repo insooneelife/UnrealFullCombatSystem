@@ -146,10 +146,7 @@ void ABaseCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
-    
-
     DynamicTargeting->Init(TargetingArrow);
-
     StatsManager->Init();
     Equipment->Init();
 
@@ -198,6 +195,39 @@ void ABaseCharacter::BeginPlay()
 
 void ABaseCharacter::EndPlay(const EEndPlayReason::Type EndPlayResult)
 {
+    Effects->OnEffectApplied.RemoveDynamic(this, &ABaseCharacter::OnEffectApplied);
+    Effects->OnEffectRemoved.RemoveDynamic(this, &ABaseCharacter::OnEffectRemoved);
+
+    MeleeCollisionHandler->OnHit.RemoveDynamic(this, &ABaseCharacter::OnHit);
+    MeleeCollisionHandler->OnCollisionActivated.RemoveDynamic(this, &ABaseCharacter::OnCollisionActivated);
+
+    InputBuffer->OnInputBufferConsumed.RemoveDynamic(this, &ABaseCharacter::OnInputBufferConsumed);
+    InputBuffer->OnInputBufferClose.RemoveDynamic(this, &ABaseCharacter::OnInputBufferClose);
+
+    DynamicTargeting->OnTargetingToggled.RemoveDynamic(this, &ABaseCharacter::OnTargetingToggled);
+
+    Equipment->OnActiveItemChanged.RemoveDynamic(this, &ABaseCharacter::OnActiveItemChanged);
+    Equipment->OnCombatTypeChanged.RemoveDynamic(this, &ABaseCharacter::OnCombatTypeChanged);
+    Equipment->OnMainHandTypeChanged.RemoveDynamic(this, &ABaseCharacter::OnMainHandTypeChanged);
+    Equipment->OnInCombatChanged.RemoveDynamic(this, &ABaseCharacter::OnInCombatChanged);
+
+    MovementSpeed->OnMovementStateStart.RemoveDynamic(this, &ABaseCharacter::OnMovementStateStart);
+    MovementSpeed->OnMovementStateEnd.RemoveDynamic(this, &ABaseCharacter::OnMovementStateEnd);
+
+    StateManager->OnStateChanged.RemoveDynamic(this, &ABaseCharacter::OnStateChanged);
+    StateManager->OnActivityChanged.RemoveDynamic(this, &ABaseCharacter::OnActivityChanged);
+
+    ExtendedHealth->OnValueChanged.RemoveDynamic(this, &ABaseCharacter::OnValueChanged_ExtendedHealth);
+    ExtendedStamina->OnValueChanged.RemoveDynamic(this, &ABaseCharacter::OnValueChanged_ExtendedStamina);
+
+    Rotating->OnRotatingEnd.RemoveDynamic(this, &ABaseCharacter::OnRotatingEnd);
+
+    AbilityComponent->OnManaConsumed.RemoveDynamic(this, &ABaseCharacter::OnManaConsumed);
+    AbilityComponent->OnAbilityStarted.RemoveDynamic(this, &ABaseCharacter::OnAbilityStarted);
+    AbilityComponent->OnAbilityEnded.RemoveDynamic(this, &ABaseCharacter::OnAbilityEnded);
+    AbilityComponent->OnAbilityChanged.RemoveDynamic(this, &ABaseCharacter::OnAbilityChanged);
+    ExtendedMana->OnValueChanged.RemoveDynamic(this, &ABaseCharacter::OnValueChanged_ExtendedMana);
+
     Super::EndPlay(EndPlayResult);
 }
 
@@ -379,83 +409,6 @@ void ABaseCharacter::CalculateLeanAmount(float& OutLeanAmount, float& OutInterpS
     OutInterpSpeed = bLean ? 1.0f : 10.0f;
 }
 
-bool ABaseCharacter::TakeDamage(const FHitData& HitData, EAttackResult& OutResult)
-{
-    if (CanBeAttacked())
-    {
-        UpdateReceivedHitDirection(HitData.HitFromDirection);
-
-        UDefaultGameInstance* DefaultGameInstance = Cast<UDefaultGameInstance>(GetGameInstance());
-
-        if (HitData.Damage != 0.0f)
-        {
-            // If hit was successfully Parried, apply Parried effect on attacker and don't subtract health
-            bool bParried =
-                ReceivedHitDirection == EDirection::Front &&
-                IsActivityEqual(EActivity::CanParryHit) &&
-                HitData.bCanBeParried;
-
-            if (bParried)
-            {
-                UEffectsComponent* EffectsComponent =
-                    Cast<UEffectsComponent>(HitData.DamageCauser->GetComponentByClass(UEffectsComponent::StaticClass()));
-
-                if (GameUtils::IsValid(EffectsComponent))
-                {
-                    bool bApplied =
-                        EffectsComponent->ApplyEffect(EEffectType::Parried, 1.0f, EApplyEffectMethod::Replace, this);
-
-                    if (bApplied)
-                    {
-                        DefaultGameInstance->PlayParrySound(this, HitData.DamageCauser, GetActorLocation());
-                    }
-                }
-
-                OutResult = EAttackResult::Parried;
-                return false;
-            }
-
-            // Check if hit was successfully blocked
-
-            bool bBlocked = ReceivedHitDirection == EDirection::Front && BlockAlpha >= 1.0f && HitData.bCanBeBlocked;
-
-            StatsManager->TakeDamage(HitData.Damage, !bBlocked);
-
-            if (IsAlive() && bBlocked)
-            {
-                DefaultGameInstance->PlayBlockSound(this, HitData.DamageCauser, GetActorLocation());
-                Block();
-
-                if (ExtendedStamina->GetCurrentValue() > 0.0f)
-                {
-                    if (HitData.bCanReceiveImpact &&
-                        (Equipment->IsShieldEquipped() || !IsCombatTypeEqual(ECombatType::Unarmed)))
-                    {
-                        UEffectsComponent* EffectsComponent = Cast<UEffectsComponent>(
-                            HitData.DamageCauser->GetComponentByClass(UEffectsComponent::StaticClass()));
-
-                        if (GameUtils::IsValid(EffectsComponent))
-                        {
-                            EffectsComponent->ApplyEffect(EEffectType::Impact, 1.0f, EApplyEffectMethod::Replace, this);
-                        }
-                    }
-
-                }
-
-                OutResult = EAttackResult::Blocked;
-                return false;
-            }
-
-
-            OutResult = EAttackResult::Success;
-            return true;
-        }
-    }
-
-    OutResult = EAttackResult::Failed;
-    return false;
-}
-
 bool ABaseCharacter::IsAlive() const
 {
     return !IsStateEqual(EState::Dead);
@@ -466,33 +419,53 @@ FName ABaseCharacter::GetHeadSocket() const
     return FName("head");
 }
 
-bool ABaseCharacter::CanEffectBeApplied(EEffectType Type, AActor* Applier)
+bool ABaseCharacter::CanBeAttacked() const
 {
-    if (CanBeAttacked())
+    if (IsCharacterAlive())
     {
-        if (Type == EEffectType::Stun)
-        {
-            return CanBeStunned() && CanBeInterrupted();
-        }
-        else if (Type == EEffectType::Burning)
-        {
-            return true;
-        }
-        else if (Type == EEffectType::Backstab)
-        {
-            return CanBeStunned() && CanBeInterrupted();
-        }
-        else if (Type == EEffectType::Impact)
-        {
-            return CanBeInterrupted();
-        }
-        else if (Type == EEffectType::Parried)
-        {
-            return CanBeInterrupted();
-        }
+        return !IsActivityEqual(EActivity::IsImmortal);
     }
+    else
+    {
+        return false;
+    }
+}
 
-    return false;
+void ABaseCharacter::Block()
+{
+    UAnimMontage* AnimMontage = GetBlockMontage();
+
+    if (GameUtils::IsValid(AnimMontage))
+    {
+        PlayAnimMontage(AnimMontage);
+        ResetMeleeAttackCounter();
+    }
+}
+
+bool ABaseCharacter::IsBlocked() const
+{
+    return GetReceivedHitDirection() == EDirection::Front && 
+    GetBlockAlpha() >= 1.0f;
+}
+
+void ABaseCharacter::UpdateReceivedHitDirection(FVector InHitFromDirection)
+{
+    ReceivedHitDirection = UDefaultGameInstance::GetHitDirection(InHitFromDirection, this);
+}
+
+bool ABaseCharacter::CanBeStunned() const
+{
+    return !GetCharacterMovement()->IsFalling() && !Effects->IsEffectApplied(EEffectType::Backstab);
+}
+
+bool ABaseCharacter::CanBeInterrupted() const
+{
+    return !IsActivityEqual(EActivity::CantBeInterrupted);
+}
+
+bool ABaseCharacter::CanBeBackstabbed() const
+{
+    return CanBeStunned();
 }
 
 FRotator ABaseCharacter::GetDesiredRotation() const
@@ -811,7 +784,6 @@ float ABaseCharacter::MeleeAttack(EMeleeAttackType InType)
         GetWorld()->GetTimerManager().ClearTimer(ResetMeleeAttackCounterTimerHandle);
 
         UAnimMontage* AnimMontage = GetNextMeleeAttackMontage(MontageManager, MeleeAttackType);
-        FString EnumStr = GameUtils::GetEnumValueAsString("EMeleeAttackType", MeleeAttackType);
 
         if (GameUtils::IsValid(AnimMontage))
         {
@@ -882,38 +854,6 @@ void ABaseCharacter::OnEffectRemoved(EEffectType InType)
         }
 
         InputBuffer->CloseInputBuffer();
-    }
-}
-
-void ABaseCharacter::OnCollisionActivated(ECollisionPart CollisionPart)
-{
-    if (CollisionPart == ECollisionPart::MainHandItem)
-    {
-        EItemType ItemType = Equipment->GetSelectedMainHandType();
-        ADisplayedItem* DisplayedItem = Equipment->GetDisplayedItem(ItemType, 0);
-
-        if (GameUtils::IsValid(DisplayedItem))
-        {
-            MeleeCollisionHandler->SetCollisionMesh(
-                DisplayedItem->GetPrimaryComponent(), DisplayedItem->GetPrimaryComponent()->GetAllSocketNames());
-
-        }
-    }
-    else if (CollisionPart == ECollisionPart::RightHand)
-    {
-        MeleeCollisionHandler->SetCollisionMesh(GetMesh(), RightHandCollisionSockets);
-    }
-    else if (CollisionPart == ECollisionPart::LeftHand)
-    {
-        MeleeCollisionHandler->SetCollisionMesh(GetMesh(), LeftHandCollisionSockets);
-    }
-    else if (CollisionPart == ECollisionPart::RightFoot)
-    {
-        MeleeCollisionHandler->SetCollisionMesh(GetMesh(), RightFootCollisionSockets);
-    }
-    else if (CollisionPart == ECollisionPart::LeftFoot)
-    {
-        MeleeCollisionHandler->SetCollisionMesh(GetMesh(), LeftFootCollisionSockets);
     }
 }
 
@@ -1889,6 +1829,25 @@ void ABaseCharacter::SetSpellActiveIndex()
     }
 }
 
+UAnimMontage* ABaseCharacter::GetRollMontage() const
+{
+    EMontageAction RollDirection;
+
+    if (!HasMovementInput())
+    {
+        RollDirection = EMontageAction::RollBackward;
+
+        UAnimMontage* AnimMontage = MontageManager->GetMontageForAction(RollDirection, 0);
+        if (GameUtils::IsValid(AnimMontage))
+        {
+            return AnimMontage;
+        }
+    }
+
+    RollDirection = EMontageAction::RollForward;
+    return MontageManager->GetMontageForAction(RollDirection, 0);
+}
+
 FRotator ABaseCharacter::GetArrowSpawnDirection(
     FVector InCameraDirection,
     FVector InCurrentTraceDirection,
@@ -2076,23 +2035,6 @@ bool ABaseCharacter::CanRoll() const
     return IsIdleAndNotFalling() && IsEnoughStamina(1.0f);
 }
 
-bool ABaseCharacter::CanBeAttacked() const
-{
-    if (IsCharacterAlive())
-    {
-        return !IsActivityEqual(EActivity::IsImmortal);
-    }
-    else
-    {
-        return false;
-    }
-}
-
-bool ABaseCharacter::CanBeStunned() const
-{
-    return !GetCharacterMovement()->IsFalling() && !Effects->IsEffectApplied(EEffectType::Backstab);
-}
-
 bool ABaseCharacter::CanUseOrSwitchItem() const
 {
     if (IsCharacterAlive())
@@ -2123,90 +2065,6 @@ bool ABaseCharacter::CanEnterSlowMotion() const
 }
 
 
-UAnimMontage* ABaseCharacter::GetRollMontage() const
-{
-    EMontageAction RollDirection;
-    if (!HasMovementInput())
-    {
-        RollDirection = EMontageAction::RollBackward;
-
-        UAnimMontage* AnimMontage = MontageManager->GetMontageForAction(RollDirection, 0);
-        if (GameUtils::IsValid(AnimMontage))
-        {
-            return AnimMontage;
-        }
-    }
-
-    RollDirection = EMontageAction::RollForward;
-    return MontageManager->GetMontageForAction(RollDirection, 0);
-}
-
-UAnimMontage* ABaseCharacter::GetStunMontage(EDirection Direction) const
-{
-    EMontageAction StunDirection;
-    if (Direction == EDirection::Front)
-    {
-        StunDirection = EMontageAction::StunFront;
-    }
-    else if (Direction == EDirection::Back)
-    {
-        StunDirection = EMontageAction::StunBack;
-    }
-    else if (Direction == EDirection::Left)
-    {
-        StunDirection = EMontageAction::StunLeft;
-    }
-    else 
-    {
-        StunDirection = EMontageAction::StunRight;
-    }
-
-    int Index = MontageManager->GetRandomMontageIndex(StunDirection);
-    UAnimMontage* AnimMontage = MontageManager->GetMontageForAction(StunDirection, Index);
-
-    if (GameUtils::IsValid(AnimMontage))
-    {
-        return AnimMontage;
-    }
-    else
-    {
-        if (StunDirection != EMontageAction::StunFront)
-        {
-            Index = MontageManager->GetRandomMontageIndex(EMontageAction::StunFront);
-            return MontageManager->GetMontageForAction(EMontageAction::StunFront, Index);
-        }
-        else
-        {
-            return nullptr;
-        }
-    }
-}
-
-UAnimMontage* ABaseCharacter::GetBlockMontage() const
-{
-    int Index = Equipment->IsShieldEquipped() ? 1 : 0;
-    return MontageManager->GetMontageForAction(EMontageAction::Block, Index);
-}
-
-UAnimMontage* ABaseCharacter::GetImpactMontage() const
-{
-    EMontageAction MontageActionType = EMontageAction::Impact;
-    int Index = MontageManager->GetRandomMontageIndex(MontageActionType);
-    return MontageManager->GetMontageForAction(MontageActionType, Index);
-}
-
-UAnimMontage* ABaseCharacter::GetParriedMontage() const
-{
-    EMontageAction MontageActionType = EMontageAction::Parried;
-    int Index = MontageManager->GetRandomMontageIndex(MontageActionType);
-    return MontageManager->GetMontageForAction(MontageActionType, Index);
-}
-
-UAnimMontage* ABaseCharacter::GetParryMontage() const
-{
-    int Index = Equipment->IsShieldEquipped() ? 1 : 0;
-    return MontageManager->GetMontageForAction(EMontageAction::Parry, Index);
-}
 
 void ABaseCharacter::ResetAimingMode()
 {
@@ -2347,17 +2205,6 @@ void ABaseCharacter::LoopSlowMotion()
     else
     {
         StopSlotMotion();
-    }
-}
-
-void ABaseCharacter::Block()
-{
-    UAnimMontage* AnimMontage = GetBlockMontage();
-
-    if (GameUtils::IsValid(AnimMontage))
-    {
-        PlayAnimMontage(AnimMontage);
-        ResetMeleeAttackCounter();
     }
 }
 
@@ -2559,16 +2406,6 @@ bool ABaseCharacter::IsCharacterAlive() const
 bool ABaseCharacter::CanUseOrSwitch() const
 {
     return CanUseOrSwitchItem();
-}
-
-bool ABaseCharacter::CanBeInterrupted() const
-{
-    return !IsActivityEqual(EActivity::CantBeInterrupted);
-}
-
-void ABaseCharacter::UpdateReceivedHitDirection(FVector InHitFromDirection)
-{
-    ReceivedHitDirection = UDefaultGameInstance::GetHitDirection(InHitFromDirection, this);
 }
 
 void ABaseCharacter::LineTraceForInteractable()

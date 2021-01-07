@@ -28,6 +28,8 @@ public:
     UFUNCTION(BlueprintCallable)
     void StopDissolve(UPrimitiveComponent* InComponent);
 
+    void SetDissolveInterpSpeed(float InDissolveInterpSpeed) { DissolveInterpSpeed  = InDissolveInterpSpeed; }
+
 private:
 
     void DissolveComponents();

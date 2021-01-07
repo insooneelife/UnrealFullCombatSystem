@@ -65,6 +65,11 @@ void UCollisionHandlerComponent::SetCollisionMesh(UPrimitiveComponent* InWeaponM
     SetCollisionMeshes(CollComps);
 }
 
+void UCollisionHandlerComponent::AddIgnoredClass(TSubclassOf<AActor> IgnoredClass)
+{
+    IgnoredClasses.Add(IgnoredClass);
+}
+
 void UCollisionHandlerComponent::UpdateLastSocketPositions()
 {
     for (const FCollisionComponent& CollComp : CollisionComponents)

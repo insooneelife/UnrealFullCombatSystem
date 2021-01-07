@@ -18,6 +18,11 @@ bool UBehaviorComponent::IsEnemy(AActor* InActor) const
     return CheckClass(InActor, Enemies);
 }
 
+void UBehaviorComponent::AddEnemy(TSubclassOf<AActor> Enemy)
+{
+    Enemies.Add(Enemy);
+}
+
 bool UBehaviorComponent::CheckClass(AActor* InActor, const TArray<TSubclassOf<AActor>>& InEnemies) const
 {
     for (TSubclassOf<AActor> ActorClass : InEnemies)

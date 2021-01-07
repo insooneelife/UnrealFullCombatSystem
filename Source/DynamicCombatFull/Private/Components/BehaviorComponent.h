@@ -20,6 +20,8 @@ public:
     UFUNCTION(BlueprintCallable)
     bool IsEnemy(AActor* InActor) const;
 
+    void AddEnemy(TSubclassOf<AActor> Enemy);
+
 private:
     bool CheckClass(AActor* InActor, const TArray<TSubclassOf<AActor>>& InEnemies) const;
 

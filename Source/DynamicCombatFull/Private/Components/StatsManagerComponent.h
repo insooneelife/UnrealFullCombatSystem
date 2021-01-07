@@ -35,6 +35,9 @@ public:
     float GetStatValue(EStat InType, bool bInIncludeModifiers) const;
     float GetDamage() const;
     int GetRecentlyReceivedHitsCount() const { return RecentlyReceivedHitsCount; }
+    float GetRecentlyReceivedDamage() const { return RecentlyReceivedDamage; }
+    int GetRecentlyReceivedSuccessfulHitsCount() const { return RecentlyReceivedSuccessfulHitsCount; }
+    float GetRecentlyReceivedSuccessfulDamage() const { return RecentlyReceivedSuccessfulDamage; }
 
 protected:
     UFUNCTION()
@@ -56,10 +59,6 @@ private:
     void ResetRecentlyReceivedDamage();
     void UpdateBlockBaseValue();
 
-    float GetRecentlyReceivedDamage() const { return RecentlyReceivedDamage; }
-
-    int GetRecentlyReceivedSuccessfulHitsCount() const { return RecentlyReceivedSuccessfulHitsCount; }
-    float GetRecentlyReceivedSuccessfulDamage() const { return RecentlyReceivedSuccessfulDamage; }
 
 public:
     UPROPERTY(BlueprintAssignable)

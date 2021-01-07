@@ -15,6 +15,7 @@
 #include "Interfaces/AbilityInterface.h"
 #include "Interfaces/IsTargetable.h"
 #include "Interfaces/CanMeleeAttack.h"
+#include "Interfaces/MontageAction.h"
 #include "Components/TimelineComponent.h"
 
 #include "BaseCharacter.generated.h"
@@ -57,7 +58,8 @@ class ABaseCharacter
     public ICanOpenUI,
     public IAbilityInterface,
     public IIsTargetable,
-    public ICanMeleeAttack
+    public ICanMeleeAttack,
+    public IMontageAction
 
 {
 	GENERATED_BODY()
@@ -114,13 +116,10 @@ public:
     UMovementSpeedComponent* GetMovementSpeedComp() const { return MovementSpeed; }
 
     UFUNCTION(BlueprintCallable)
-    UExtendedStatComponent* GetExtendedStaminaComp() const { return ExtendedStamina; }
+    float GetBlockAlpha() const { return BlockAlpha; }
 
     UFUNCTION(BlueprintCallable)
     bool IsInSlowMotion() const { return bIsInSlowMotion; }
-
-    UFUNCTION(BlueprintCallable)
-    float GetBlockAlpha() const { return BlockAlpha; }
 
     UFUNCTION(BlueprintCallable)
     void SetBlockAlpha(float InBlockAlpha) { BlockAlpha = InBlockAlpha; }
@@ -128,20 +127,33 @@ public:
 public:
     // interfaces
     // ICanBeAttacked
+    virtual UStateManagerComponent* GetStateManager() const override { return StateManager; }
+    virtual UStatsManagerComponent* GetStatsManager() const override { return StatsManager; }
+
+    UFUNCTION(BlueprintCallable)
+    virtual UExtendedStatComponent* GetExtendedStaminaComp() const override { return ExtendedStamina; }
+
     UFUNCTION(BlueprintNativeEvent, BlueprintCallable, meta = (DisplayName = "TakeDamage", ScriptName = "TakeDamage"))
     bool K2_TakeDamage(const FHitData& InHitData, EAttackResult& OutResult);
 
     virtual bool K2_TakeDamage_Implementation(const FHitData& InHitData, EAttackResult& OutResult) override
     {
-        return TakeDamage(InHitData, OutResult);
+        return ICanBeAttacked::TakeDamage(InHitData, OutResult);
     }
 
-    virtual bool TakeDamage(const FHitData& InHitData, EAttackResult& OutResult) override;
+    //virtual bool TakeDamage(const FHitData& InHitData, EAttackResult& OutResult) override;
     virtual bool IsAlive() const override;
     virtual FName GetHeadSocket() const override;
+    virtual bool CanBeAttacked() const override;
+    virtual void Block() override;
+    virtual bool IsBlocked() const override;
+    virtual void UpdateReceivedHitDirection(FVector InHitFromDirection) override;
+    virtual EDirection GetReceivedHitDirection() const override { return ReceivedHitDirection; }
 
     // ICanGetEffects
-    virtual bool CanEffectBeApplied(EEffectType Type, AActor* Applier) override;
+    virtual bool CanBeStunned() const override;
+    virtual bool CanBeInterrupted() const override;
+    virtual bool CanBeBackstabbed() const override;
 
     // IRotatingInterface
     virtual FRotator GetDesiredRotation() const override;
@@ -181,12 +193,23 @@ public:
 
     // ICanMeleeAttack
     virtual ACharacter* GetThisCharacter() override { return this; }
+    virtual UCollisionHandlerComponent* GetMeleeCollisionHandler() const override { return MeleeCollisionHandler; }
     virtual EMeleeAttackType GetMeleeAttackType() const override { return MeleeAttackType; }
     virtual void SetMeleeAttackCounter(int Value) override { MeleeAttackCounter = Value; }
     virtual int GetMeleeAttackCounter()const override { return MeleeAttackCounter; }
     virtual bool CanMeleeAttack() const override;
     virtual float GetMeleeDamage() const;
     virtual float MeleeAttack(EMeleeAttackType InType) override;
+
+    virtual const TArray<FName>& GetLeftHandCollisionSockets() const override { return LeftHandCollisionSockets; }
+    virtual const TArray<FName>& GetRightHandCollisionSockets() const override { return RightHandCollisionSockets; }
+    virtual const TArray<FName>& GetRightFootCollisionSockets() const override { return RightFootCollisionSockets; }
+    virtual const TArray<FName>& GetLeftFootCollisionSockets() const override { return LeftFootCollisionSockets; }
+
+
+    // IMontageAction
+    virtual UEquipmentComponent* GetEquipment() const override { return Equipment; }
+    virtual UMontageManagerComponent* GetMontageManager() const override { return MontageManager; }
 
 protected:
     // effects events
@@ -195,9 +218,6 @@ protected:
 
     UFUNCTION()
     void OnEffectRemoved(EEffectType InType);
-
-    UFUNCTION()
-    void OnCollisionActivated(ECollisionPart CollisionPart);
 
     // input buffer events
     UFUNCTION()
@@ -488,7 +508,7 @@ private:
     void CreateKeybindings();
 
 
-
+    UAnimMontage* GetRollMontage() const;
     FRotator GetArrowSpawnDirection(
         FVector InCameraDirection,
         FVector InCurrentTraceDirection, 
@@ -504,19 +524,10 @@ private:
 
 
     bool CanRoll() const;
-    bool CanBeAttacked() const;
-    bool CanBeStunned() const;
+
     bool CanUseOrSwitchItem() const;
     bool CanOpenUI() const;
     bool CanEnterSlowMotion() const;
-
-
-    UAnimMontage* GetRollMontage() const;
-    UAnimMontage* GetStunMontage(EDirection Direction) const;
-    UAnimMontage* GetBlockMontage() const;
-    UAnimMontage* GetImpactMontage() const;
-    UAnimMontage* GetParriedMontage() const;
-    UAnimMontage* GetParryMontage() const;
 
     void ResetAimingMode();
 
@@ -530,7 +541,6 @@ private:
     void StopSlotMotion();
     void LoopSlowMotion();
 
-    void Block();
     void Stunned();
     void Death();
     void Parried();
@@ -551,8 +561,7 @@ private:
     bool HasMovementInput() const;
     bool IsCharacterAlive() const;
     bool CanUseOrSwitch() const;
-    bool CanBeInterrupted() const;
-    void UpdateReceivedHitDirection(FVector InHitFromDirection);
+
     void LineTraceForInteractable();
     void SetData();
 

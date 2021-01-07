@@ -18,6 +18,10 @@ protected:
 
     virtual void NativeConstruct() override;
 
+public:
+    UStatBarUI* GetStamina() const { return Stamina; }
+    UStatBarUI* GetHealth() const { return Health; }
+
 private:
     UPROPERTY(meta = (BindWidget))
         class UStatBarUI* Stamina;

@@ -9,6 +9,9 @@
 #include "Interfaces/CanBeAttacked.h"
 #include "Components/EffectsComponent.h"
 #include "Components/MontageManagerComponent.h"
+#include "Components/CollisionHandlerComponent.h"
+#include "Components/EquipmentComponent.h"
+#include "GamePlay/Items/DisplayedItems/DisplayedItem.h"
 
 // Add default functionality here for any ICanMeleeAttack functions that are not pure virtual.
 FHitData ICanMeleeAttack::MakeMeleeHitData(AActor* HitActor)
@@ -97,4 +100,46 @@ UAnimMontage* ICanMeleeAttack::GetNextMeleeAttackMontage(
     SetMeleeAttackCounter(MeleeAttackCounter);
 
     return AnimMontage;
+}
+
+
+void ICanMeleeAttack::OnCollisionActivated(ECollisionPart CollisionPart)
+{
+    ACharacter* ThisCharacter = GetThisCharacter();
+    UCollisionHandlerComponent* MeleeCollisionHandler = GetMeleeCollisionHandler();
+    UEquipmentComponent* Equipment = GetEquipment();
+
+    if (GameUtils::IsValid(MeleeCollisionHandler) &&
+        GameUtils::IsValid(Equipment) &&
+        GameUtils::IsValid(ThisCharacter))
+    {
+        if (CollisionPart == ECollisionPart::MainHandItem)
+        {
+            EItemType ItemType = Equipment->GetSelectedMainHandType();
+            ADisplayedItem* DisplayedItem = Equipment->GetDisplayedItem(ItemType, 0);
+
+            if (GameUtils::IsValid(DisplayedItem))
+            {
+                MeleeCollisionHandler->SetCollisionMesh(
+                    DisplayedItem->GetPrimaryComponent(), DisplayedItem->GetPrimaryComponent()->GetAllSocketNames());
+
+            }
+        }
+        else if (CollisionPart == ECollisionPart::RightHand)
+        {
+            MeleeCollisionHandler->SetCollisionMesh(ThisCharacter->GetMesh(), GetRightHandCollisionSockets());
+        }
+        else if (CollisionPart == ECollisionPart::LeftHand)
+        {
+            MeleeCollisionHandler->SetCollisionMesh(ThisCharacter->GetMesh(), GetLeftHandCollisionSockets());
+        }
+        else if (CollisionPart == ECollisionPart::RightFoot)
+        {
+            MeleeCollisionHandler->SetCollisionMesh(ThisCharacter->GetMesh(), GetRightFootCollisionSockets());
+        }
+        else if (CollisionPart == ECollisionPart::LeftFoot)
+        {
+            MeleeCollisionHandler->SetCollisionMesh(ThisCharacter->GetMesh(), GetLeftFootCollisionSockets());
+        }
+    }
 }

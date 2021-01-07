@@ -12,6 +12,7 @@
 #include "Interfaces/MontageManagerInterface.h"
 #include "Interfaces/RotatingInterface.h"
 #include "Interfaces/CanMeleeAttack.h"
+#include "Interfaces/MontageAction.h"
 #include "AICharacter.generated.h"
 
 class UAnimMontage;
@@ -42,7 +43,8 @@ class AAICharacter
     public ICanGetEffects, 
     public IMontageManagerInterface,
     public IRotatingInterface,
-    public ICanMeleeAttack
+    public ICanMeleeAttack,
+    public IMontageAction
 {
 	GENERATED_BODY()
 
@@ -53,25 +55,22 @@ public:
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+    virtual void EndPlay(const EEndPlayReason::Type EndPlayResult) override;
 
 public:
+    virtual void OnConstruction(const FTransform& Transform) override;
+
     UFUNCTION(BlueprintCallable)
         ABaseAIController* GetAIController() const { return AIController; }
 
 public:
     UBehaviorTree* GetBTree() const { return BTree; }
 
-    UEquipmentComponent* GetEquipment() const { return Equipment; }
 
-    UStateManagerComponent* GetStateManager() const { return StateManager; }
-
-    UStatsManagerComponent* GetStatsManager() const { return StatsManager; }
 
     UPatrolComponent* GetPatrol() const { return Patrol; }
 
     UExtendedStatComponent* GetExtendedStamina() const { return ExtendedStamina; }
-
-    UMontageManagerComponent* GetMontageManager() const { return MontageManager; }
 
 protected:
 
@@ -81,10 +80,9 @@ protected:
     UFUNCTION()
         void OnEffectRemoved(EEffectType InType);
 
-    UFUNCTION()
-        void OnCollisionActivated(ECollisionPart InCollisionPart);
-
     void HandleMeshOnDeath();
+
+    void Delayed_HandleMeshOnDeath();
 
     UFUNCTION(BlueprintCallable)
         void OnValueChanged_ExtendedHealth(float InNewValue, float InMaxValue);
@@ -92,26 +90,17 @@ protected:
     void InitializeStatsWidget();
 
 public:	
-    UAnimMontage* GetStunMontage(EDirection InDirection) const;
-
-    UAnimMontage* GetBlockMontage() const;
-    UAnimMontage* GetImpactMontage() const;
-    UAnimMontage* GetParriedMontage() const;
-    UAnimMontage* GetRollMontage() const;
-
-    bool CanBeStunned() const;
-    bool CanBeAttacked() const;
-    bool CanBeBackstabbed() const;
 
     void ShowStatsWidget();
     void HideStatsWidget();
 
     void Death();
     void Stunned();
-    void Block();
     void Parried();
     void Impact();
     void Backstabbed();
+
+    void PlayEffectMontage(UAnimMontage* AnimMontage, EEffectType EffectType);
 
     float Roll(EDirection InDirection);
 
@@ -119,9 +108,6 @@ public:
     bool IsStateEqualPure(EState InState) const;
     bool IsActivityPure(EActivity InActivity) const;
     bool IsCombatTypePure(ECombatType InType) const;
-    void UpdateReceivedHitDirection(float InHitFromDirection);
-    bool CanBeInterrupted() const;
-
 
 public:
     // IIsTargetable
@@ -130,20 +116,32 @@ public:
     virtual bool IsTargetable() const override;
 
     // ICanBeAttacked
+    virtual UStateManagerComponent* GetStateManager() const override { return StateManager; }
+    virtual UStatsManagerComponent* GetStatsManager() const override { return StatsManager; }
+    virtual UExtendedStatComponent* GetExtendedStaminaComp() const override { return ExtendedStamina; }
+
     UFUNCTION(BlueprintNativeEvent, BlueprintCallable, meta = (DisplayName = "TakeDamage", ScriptName = "TakeDamage"))
         bool K2_TakeDamage(const FHitData& InHitData, EAttackResult& OutResult);
 
     virtual bool K2_TakeDamage_Implementation(const FHitData& InHitData, EAttackResult& OutResult) override
     {
-        return TakeDamage(InHitData, OutResult);
+        return ICanBeAttacked::TakeDamage(InHitData, OutResult);
     }
 
-    virtual bool TakeDamage(const FHitData& InHitData, EAttackResult& OutResult) override;
+    virtual void ReportDamage(const FHitData& InHitData) override;
+
     virtual bool IsAlive() const override;
     virtual FName GetHeadSocket() const override;
+    virtual bool CanBeAttacked() const override;
+    virtual void Block() override;
+    virtual bool IsBlocked() const override;
+    virtual void UpdateReceivedHitDirection(FVector InHitFromDirection) override;
+    virtual EDirection GetReceivedHitDirection() const override { return ReceivedHitDirection; }
 
     // ICanGetEffects
-    virtual bool CanEffectBeApplied(EEffectType Type, AActor* Applier) override;
+    virtual bool CanBeStunned() const override;
+    virtual bool CanBeInterrupted() const override;
+    virtual bool CanBeBackstabbed() const override;
 
     // IRotatingInterface
     virtual FRotator GetDesiredRotation() const override;
@@ -153,6 +151,8 @@ public:
 
     // ICanMeleeAttack
     virtual ACharacter* GetThisCharacter() override { return this; }
+    virtual UCollisionHandlerComponent* GetMeleeCollisionHandler() const override { return MeleeCollisionHandler; }
+    virtual UEquipmentComponent* GetEquipment() const override { return Equipment; }
     virtual EMeleeAttackType GetMeleeAttackType() const override { return MeleeAttackType; }
     virtual void SetMeleeAttackCounter(int Value) override { MeleeAttackCounter = Value; }
     virtual int GetMeleeAttackCounter()const override { return MeleeAttackCounter; }
@@ -160,72 +160,78 @@ public:
     virtual float GetMeleeDamage() const override;
     virtual float MeleeAttack(EMeleeAttackType InType) override;
 
+    virtual const TArray<FName>& GetLeftHandCollisionSockets() const override { return LeftHandCollisionSockets; }
+    virtual const TArray<FName>& GetRightHandCollisionSockets() const override { return RightHandCollisionSockets; }
+    virtual const TArray<FName>& GetRightFootCollisionSockets() const override { return RightFootCollisionSockets; }
+    virtual const TArray<FName>& GetLeftFootCollisionSockets() const override { return LeftFootCollisionSockets; }
+
+    // IMontageAction
+    virtual UMontageManagerComponent* GetMontageManager() const override { return MontageManager; }
+
 public:
 
+    UAnimMontage* GetRollMontage(EDirection InDirection) const;
 
+    void SetData();
 
 private:
+    UPROPERTY(EditAnywhere, Category = "Components")
+    UMovementSpeedComponent* MovementSpeed;
 
-    UPROPERTY(EditAnywhere, Category = "AI")
-    UBehaviorTree* BTree;
+    UPROPERTY(EditAnywhere, Category = "Components")
+    UPatrolComponent* Patrol;
+
+    UPROPERTY(EditAnywhere, Category = "Components")
+    UStateManagerComponent* StateManager;
+
+    UPROPERTY(EditAnywhere, Category = "Components")
+    UStatsManagerComponent* StatsManager;
+
+    UPROPERTY(EditAnywhere, Category = "Components")
+    URotatingComponent* Rotating;
+
+    UPROPERTY(EditAnywhere, Category = "Components")
+    UExtendedStatComponent* ExtendedStamina;
+
+    UPROPERTY(EditAnywhere, Category = "Components")
+    UEquipmentComponent* Equipment;
+
+    UPROPERTY(EditAnywhere, Category = "Components")
+    UDissolveComponent* Dissolve;
+
+    UPROPERTY(EditAnywhere, Category = "Components")
+    UEffectsComponent* Effects;
+
+    UPROPERTY(EditAnywhere, Category = "Components")
+    UBehaviorComponent* Behavior;
+
+    UPROPERTY(EditAnywhere, Category = "Components")
+    UMontageManagerComponent* MontageManager;
+
+    UPROPERTY(EditAnywhere, Category = "Components")
+    UExtendedStatComponent* ExtendedHealth;
+
+    UPROPERTY(EditAnywhere, Category = "Components")
+    UCollisionHandlerComponent* MeleeCollisionHandler;
+
+    // find from hierachy
+    UPROPERTY(EditAnywhere, Category = "Primitive Components")
+    UWidgetComponent* TargetWidget;
+
+    // find from hierachy
+    UPROPERTY(EditAnywhere, Category = "Primitive Components")
+    UWidgetComponent* StatBarsWidget;
 
     // find in beginplay
     UPROPERTY()
-        ABaseAIController* AIController;
+    ABaseAIController* AIController;
 
     // ???
     UPROPERTY()
     UStatBarUI* HealthUI;
 
+    UPROPERTY()
     TArray<AActor*> AttachedActors;
-
-    UPROPERTY(EditAnywhere, Category = "Components")
-        UMovementSpeedComponent* MovementSpeed;
-
-    UPROPERTY(EditAnywhere, Category = "Components")
-        UPatrolComponent* Patrol;
-
-    UPROPERTY(EditAnywhere, Category = "Components")
-        UStateManagerComponent* StateManager;
-
-    UPROPERTY(EditAnywhere, Category = "Components")
-        UStatsManagerComponent* StatsManager;
-
-    UPROPERTY(EditAnywhere, Category = "Components")
-        URotatingComponent* Rotating;
-
-    UPROPERTY(EditAnywhere, Category = "Components")
-        UExtendedStatComponent* ExtendedStamina;
-
-    UPROPERTY(EditAnywhere, Category = "Components")
-        UEquipmentComponent* Equipment;
-
-    UPROPERTY(EditAnywhere, Category = "Components")
-        UDissolveComponent* Dissolve;
-
-    UPROPERTY(EditAnywhere, Category = "Components")
-        UEffectsComponent* Effects;
-
-    UPROPERTY(EditAnywhere, Category = "Components")
-        UBehaviorComponent* Behavior;
-
-    UPROPERTY(EditAnywhere, Category = "Components")
-        UMontageManagerComponent* MontageManager;
-
-
-    UPROPERTY(EditAnywhere, Category = "Components")
-        UExtendedStatComponent* ExtendedHealth;
-
-    UPROPERTY(EditAnywhere, Category = "Components")
-        UCollisionHandlerComponent* MeleeCollisionHandler;
-
-    // find from hierachy
-    UPROPERTY(EditAnywhere, Category = "Components")
-        UWidgetComponent* TargetWidget;
-
-    // find from hierachy
-    UPROPERTY(EditAnywhere, Category = "Components")
-        UWidgetComponent* StatBarsWidget;
 
 
     UPROPERTY(EditAnywhere, Category = "Combat")
@@ -255,4 +261,8 @@ private:
     UPROPERTY(EditAnywhere, Category = "Combat")
     int RecentlyReceivedHitsCountStunLimit;
 
+    UPROPERTY(EditAnywhere, Category = "AI")
+    UBehaviorTree* BTree;
+
+    FTimerHandle ResetMeleeAttackCounterTimerHandle;
 };

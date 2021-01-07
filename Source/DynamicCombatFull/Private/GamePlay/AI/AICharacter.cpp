@@ -2,14 +2,34 @@
 
 
 #include "AICharacter.h"
+#include "BrainComponent.h"
+#include "Kismet/KismetMathLibrary.h"
+#include "Components/WidgetComponent.h"
+#include "Components/CapsuleComponent.h"
+#include "GameFramework/CharacterMovementComponent.h"
+#include "BehaviorTree/BlackboardComponent.h"
+#include "Perception/AISense_Damage.h"
+
 #include "GamePlay/AI/BaseAIController.h"
 #include "GameCore/GameUtils.h"
-
+#include "GameCore/CustomStructs.h"
+#include "GameCore/DefaultGameInstance.h"
 #include "Components/StatsManagerComponent.h"
 #include "Components/StateManagerComponent.h"
 #include "Components/EquipmentComponent.h"
 #include "Components/ExtendedStatComponent.h"
 #include "Components/EffectsComponent.h"
+#include "Components/CollisionHandlerComponent.h"
+#include "Components/DissolveComponent.h"
+#include "Components/MontageManagerComponent.h"
+#include "Components/BehaviorComponent.h"
+#include "Components/MovementSpeedComponent.h"
+#include "Components/PatrolComponent.h"
+#include "Components/RotatingComponent.h"
+#include "GamePlay/Items/DisplayedItems/DisplayedItem.h"
+#include "UI/AIStatBarsUI.h"
+#include "UI/StatBarUI.h"
+
 
 // Sets default values
 AAICharacter::AAICharacter()
@@ -17,6 +37,53 @@ AAICharacter::AAICharacter()
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
+    ReceivedHitDirection = EDirection::Front;
+    RecentlyReceivedDamageStunLimit = 40.0f;
+    RecentlyReceivedHitsCountStunLimit = 2;
+
+    LeftHandCollisionSockets =
+    {
+        FName(TEXT("left_hand_1")),
+        FName(TEXT("left_hand_2")),
+    };
+
+    RightHandCollisionSockets =
+    {
+        FName(TEXT("right_hand_1")),
+        FName(TEXT("right_hand_2")),
+    };
+
+    RightFootCollisionSockets =
+    {
+        FName(TEXT("right_foot_1")),
+        FName(TEXT("right_foot_2")),
+    };
+
+    LeftFootCollisionSockets =
+    {
+        FName(TEXT("left_foot_1")),
+        FName(TEXT("left_foot_2")),
+    };
+
+    
+    //static UBehaviorTree* LoadedObject =
+    //    GameUtils::LoadAssetObject<UBehaviorTree>("/Game/DynamicCombatSystem/Blueprints/AI/Mage/BT_MageAI");
+    //BTree = LoadedObject;
+
+
+    MovementSpeed = CreateDefaultSubobject<UMovementSpeedComponent>("MovementSpeed");
+    Patrol = CreateDefaultSubobject<UPatrolComponent>("Patrol");
+    StateManager = CreateDefaultSubobject<UStateManagerComponent>("StateManager");
+    StatsManager = CreateDefaultSubobject<UStatsManagerComponent>("StatsManager");
+    Rotating = CreateDefaultSubobject<URotatingComponent>("Rotating");
+    ExtendedStamina = CreateDefaultSubobject<UExtendedStatComponent>("ExtendedStamina");
+    Equipment = CreateDefaultSubobject<UEquipmentComponent>("Equipment");
+    Dissolve = CreateDefaultSubobject<UDissolveComponent>("Dissolve");
+    Effects = CreateDefaultSubobject<UEffectsComponent>("Effects");
+    Behavior = CreateDefaultSubobject<UBehaviorComponent>("Behavior");
+    MontageManager = CreateDefaultSubobject<UMontageManagerComponent>("MontageManager");
+    ExtendedHealth = CreateDefaultSubobject<UExtendedStatComponent>("ExtendedHealth");
+    MeleeCollisionHandler = CreateDefaultSubobject<UCollisionHandlerComponent>("MeleeCollisionHandler");
 }
 
 // Called when the game starts or when spawned
@@ -34,9 +101,47 @@ void AAICharacter::BeginPlay()
     {
         AIController = BaseAIController;
     }
+    else
+    {
+        UE_LOG(LogTemp, Error, TEXT("AIController is not valid!"));
+    }
 
     float Health = ExtendedHealth->GetMaxValue();
     ExtendedHealth->SetCurrentValue(Health, false);
+
+    Effects->OnEffectApplied.AddDynamic(this, &AAICharacter::OnEffectApplied);
+    Effects->OnEffectRemoved.AddDynamic(this, &AAICharacter::OnEffectRemoved);
+    MeleeCollisionHandler->OnHit.AddDynamic(this, &AAICharacter::OnHit);
+    MeleeCollisionHandler->OnCollisionActivated.AddDynamic(this, &AAICharacter::OnCollisionActivated);
+    ExtendedHealth->OnValueChanged.AddDynamic(this, &AAICharacter::OnValueChanged_ExtendedHealth);
+}
+
+void AAICharacter::EndPlay(const EEndPlayReason::Type EndPlayResult)
+{
+    Effects->OnEffectApplied.RemoveDynamic(this, &AAICharacter::OnEffectApplied);
+    Effects->OnEffectRemoved.RemoveDynamic(this, &AAICharacter::OnEffectRemoved);
+    MeleeCollisionHandler->OnHit.RemoveDynamic(this, &AAICharacter::OnHit);
+    MeleeCollisionHandler->OnCollisionActivated.RemoveDynamic(this, &AAICharacter::OnCollisionActivated);
+    ExtendedHealth->OnValueChanged.RemoveDynamic(this, &AAICharacter::OnValueChanged_ExtendedHealth);
+
+    Super::EndPlay(EndPlayResult);
+}
+
+void AAICharacter::OnConstruction(const FTransform& Transform)
+{    
+    TargetWidget = Cast<UWidgetComponent>(GetComponentByClass(UWidgetComponent::StaticClass()));
+
+    if (!GameUtils::IsValid(TargetWidget))
+    {
+        UE_LOG(LogTemp, Error, TEXT("TargetWidget is not valid!"));
+    }
+
+    StatBarsWidget = Cast<UWidgetComponent>(GetComponentByClass(UWidgetComponent::StaticClass()));
+
+    if (!GameUtils::IsValid(StatBarsWidget))
+    {
+        UE_LOG(LogTemp, Error, TEXT("StatBarsWidget is not valid!"));
+    }    
 }
 
 void AAICharacter::OnEffectApplied(EEffectType InType)
@@ -86,160 +191,298 @@ void AAICharacter::OnEffectRemoved(EEffectType InType)
     }
 }
 
-void AAICharacter::OnCollisionActivated(ECollisionPart InCollisionPart)
-{
-}
-
 void AAICharacter::HandleMeshOnDeath()
 {
+    GetAttachedActors(AttachedActors);
+
+    GetMesh()->SetCollisionProfileName(FName("Ragdoll"));
+    GetMesh()->SetSimulatePhysics(true);
+
+    // Simulate physics on main hand/shield items if character is in combat
+    if (Equipment->IsInCombat())
+    {
+        EItemType MainHandType = Equipment->GetSelectedMainHandType();
+        ADisplayedItem* MainHandItem = Equipment->GetDisplayedItem(MainHandType, 0);
+
+        if (GameUtils::IsValid(MainHandItem))
+        {
+            MainHandItem->SimulatePhysics();
+        }
+
+        if (!Equipment->IsSlotHidden(EItemType::Shield, 0))
+        {
+            ADisplayedItem* ShieldItem = Equipment->GetDisplayedItem(EItemType::Shield, 0);
+
+            if (GameUtils::IsValid(ShieldItem))
+            {
+                ShieldItem->SimulatePhysics();
+            }
+        }
+    }
+
+    FTimerHandle TimerHandle;
+    GetWorld()->GetTimerManager().SetTimer(
+        TimerHandle, this, &AAICharacter::Delayed_HandleMeshOnDeath, 3.0f, false);
+}
+
+void AAICharacter::Delayed_HandleMeshOnDeath()
+{
+    for (AActor* Actor : AttachedActors)
+    {
+        if (GameUtils::IsValid(Actor))
+        {
+            TArray<UActorComponent*> DissolveComponents =
+                Actor->GetComponentsByTag(UPrimitiveComponent::StaticClass(), "Dissolve");
+
+            for (UActorComponent* DissolveComp : DissolveComponents)
+            {
+                Dissolve->StartDissolve(Cast<UPrimitiveComponent>(DissolveComp), false);
+
+            }
+        }
+    }
+
+    Dissolve->StartDissolve(GetMesh(), false);
 }
 
 void AAICharacter::OnValueChanged_ExtendedHealth(float InNewValue, float InMaxValue)
 {
+    if (InNewValue <= 0.0f)
+    {
+        Death();
+    }
 }
 
 void AAICharacter::InitializeStatsWidget()
 {
-}
+    UAIStatBarsUI* AIStatBarsUI = Cast<UAIStatBarsUI>(StatBarsWidget->GetUserWidgetObject());
 
-UAnimMontage* AAICharacter::GetStunMontage(EDirection InDirection) const
-{
-    return nullptr;
-}
-
-UAnimMontage* AAICharacter::GetBlockMontage() const
-{
-    return nullptr;
-}
-
-UAnimMontage* AAICharacter::GetImpactMontage() const
-{
-    return nullptr;
-}
-
-UAnimMontage* AAICharacter::GetParriedMontage() const
-{
-    return nullptr;
-}
-
-UAnimMontage* AAICharacter::GetRollMontage() const
-{
-    return nullptr;
-}
-
-bool AAICharacter::CanBeStunned() const
-{
-    return false;
-}
-
-bool AAICharacter::CanBeAttacked() const
-{
-    return false;
-}
-
-bool AAICharacter::CanBeBackstabbed() const
-{
-    return false;
+    if (GameUtils::IsValid(AIStatBarsUI))
+    {
+        AIStatBarsUI->GetHealth()->Init(ExtendedHealth);
+        AIStatBarsUI->GetStamina()->Init(ExtendedStamina);
+    }
 }
 
 void AAICharacter::ShowStatsWidget()
 {
+    StatBarsWidget->SetHiddenInGame(false);
 }
 
 void AAICharacter::HideStatsWidget()
 {
+    StatBarsWidget->SetHiddenInGame(true);
 }
 
 void AAICharacter::Death()
 {
+    StateManager->SetState(EState::Dead);
+    HandleMeshOnDeath();
+
+    UAnimInstance* AnimInstance = (GetMesh()) ? GetMesh()->GetAnimInstance() : nullptr;
+    if (GameUtils::IsValid(AnimInstance))
+    {
+        AnimInstance->Montage_Stop(0.2f);
+    }
+
+    AIController->StopMovement();
+    GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::Type::NoCollision);
+
+    if (GameUtils::IsValid(AIController->GetBrainComponent()))
+    {
+        AIController->GetBrainComponent()->StopLogic("");
+        HideStatsWidget();
+
+        MeleeCollisionHandler->DeactivateCollision();
+
+        SetLifeSpan(8.0f);
+    }    
 }
 
 void AAICharacter::Stunned()
 {
-}
-
-void AAICharacter::Block()
-{
+    PlayEffectMontage(GetStunMontage(ReceivedHitDirection), EEffectType::Stun);
 }
 
 void AAICharacter::Parried()
 {
+    PlayEffectMontage(GetParriedMontage(), EEffectType::Parried);
 }
 
 void AAICharacter::Impact()
 {
+    PlayEffectMontage(GetImpactMontage(), EEffectType::Impact);
 }
 
 void AAICharacter::Backstabbed()
 {
+    UAnimMontage* AnimMontage = MontageManager->GetMontageForAction(EMontageAction::Backstabbed, 0);
+    PlayEffectMontage(AnimMontage, EEffectType::Backstab);
 }
 
+void AAICharacter::PlayEffectMontage(UAnimMontage* AnimMontage, EEffectType EffectType)
+{
+    AIController->StopMovement();
+
+    UAnimInstance* AnimInstance = (GetMesh()) ? GetMesh()->GetAnimInstance() : nullptr;
+    if (GameUtils::IsValid(AnimInstance))
+    {
+        AnimInstance->Montage_Stop(0.2f);
+
+        if (GameUtils::IsValid(AnimMontage))
+        {
+            float Duration = PlayAnimMontage(AnimMontage);
+            Effects->AdjustEffectTime(EffectType, Duration);
+        }
+    }
+}
 
 float AAICharacter::Roll(EDirection InDirection)
 {
-    return 0.0f;
+    StateManager->SetState(EState::Rolling);
+    UAnimMontage* AnimMontage = GetRollMontage(InDirection);
+
+    if (GameUtils::IsValid(AnimMontage))
+    {
+        float Duration = PlayAnimMontage(AnimMontage);
+
+        StateManager->ResetState(Duration);
+        return Duration;
+    }
+    else
+    {
+        StateManager->ResetState(0.0f);
+        return 0.0f;
+    }
 }
 
 bool AAICharacter::IsStateEqualPure(EState InState) const
 {
-    return false;
+    return (StateManager->GetState() == InState);
 }
 
 bool AAICharacter::IsActivityPure(EActivity InActivity) const
 {
-    return false;
+    return StateManager->GetActivityValue(InActivity);
 }
 
 bool AAICharacter::IsCombatTypePure(ECombatType InType) const
 {
-    return false;
-}
-
-void AAICharacter::UpdateReceivedHitDirection(float InHitFromDirection)
-{
-}
-
-bool AAICharacter::CanBeInterrupted() const
-{
-    return false;
+    return Equipment->GetCombatType() == InType;
 }
 
 void AAICharacter::OnSelected()
 {
+    TargetWidget->SetHiddenInGame(true);
 }
 
 void AAICharacter::OnDeselected()
 {
+    TargetWidget->SetHiddenInGame(false);
 }
 
 bool AAICharacter::IsTargetable() const
 {
-    return false;
+    return IsAlive();
 }
 
-bool AAICharacter::TakeDamage(const FHitData& InHitData, EAttackResult& OutResult)
+void AAICharacter::ReportDamage(const FHitData& InHitData)
 {
-    return false;
+    UAISense_Damage::ReportDamageEvent(
+        GetWorld(), this, InHitData.DamageCauser, InHitData.Damage, GetActorLocation(), GetActorLocation());
 }
 
 bool AAICharacter::IsAlive() const
 {
-    return false;
+    return !IsStateEqualPure(EState::Dead);
 }
 
 FName AAICharacter::GetHeadSocket() const
 {
-    return FName();
+    return FName("head");
 }
 
-bool AAICharacter::CanEffectBeApplied(EEffectType Type, AActor* Applier)
+bool AAICharacter::CanBeAttacked() const
 {
-    return false;
+    return IsAlive() && !IsActivityPure(EActivity::IsImmortal);
+}
+
+void AAICharacter::Block()
+{
+    UAnimMontage* AnimMontage = GetBlockMontage();
+
+    if (GameUtils::IsValid(AnimMontage))
+    {
+        PlayAnimMontage(AnimMontage);
+    }
+}
+
+bool AAICharacter::IsBlocked() const
+{
+    return
+        ReceivedHitDirection == EDirection::Front &&
+        IsActivityPure(EActivity::IsBlockingPressed);
+}
+
+void AAICharacter::UpdateReceivedHitDirection(FVector InHitFromDirection)
+{
+    ReceivedHitDirection = UDefaultGameInstance::GetHitDirection(InHitFromDirection, this);
+}
+
+bool AAICharacter::CanBeStunned() const
+{
+    if (Effects->IsEffectApplied(EEffectType::Backstab))
+    {
+        return false;
+    }
+    else
+    {
+        if (StatsManager->GetRecentlyReceivedSuccessfulDamage() < RecentlyReceivedDamageStunLimit)
+        {
+            return true;
+        }
+        else
+        {
+            return StatsManager->GetRecentlyReceivedSuccessfulHitsCount() <= RecentlyReceivedHitsCountStunLimit;
+        }
+    }
+}
+
+bool AAICharacter::CanBeInterrupted() const
+{
+    return !IsActivityPure(EActivity::CantBeInterrupted);
+}
+
+bool AAICharacter::CanBeBackstabbed() const
+{
+    return 
+        !Effects->IsEffectApplied(EEffectType::Backstab) &&
+        !GameUtils::IsValid(AIController->GetTarget());
 }
 
 FRotator AAICharacter::GetDesiredRotation() const
 {
-    return FRotator();
+    UBlackboardComponent* Blackboard = AIController->GetBlackboardComponent();
+
+    if (GameUtils::IsValid(Blackboard))
+    {
+        if (GameUtils::IsValid(AIController))
+        {
+            AActor* Target = AIController->GetTarget();
+            if (GameUtils::IsValid(Target))
+            {
+                FVector ActorLoc = GetActorLocation();
+                FVector TargetActorLoc =  Target->GetActorLocation();
+
+                FRotator ActorRot = GetActorRotation();
+                FRotator LookAtRot = UKismetMathLibrary::FindLookAtRotation(ActorLoc, TargetActorLoc);
+
+                return FRotator(ActorRot.Pitch, LookAtRot.Yaw, ActorRot.Roll);
+            }
+        }
+    }
+
+    return GetActorRotation();
 }
 
 UDataTable* AAICharacter::GetMontages(EMontageAction InAction) const
@@ -250,10 +493,166 @@ UDataTable* AAICharacter::GetMontages(EMontageAction InAction) const
 
 float AAICharacter::GetMeleeDamage() const
 {
-    return 0.0f;
+    return StatsManager->GetDamage();
 }
 
 float AAICharacter::MeleeAttack(EMeleeAttackType InType)
 {
+    MeleeAttackType = InType;
+    StateManager->SetState(EState::Attacking);
+    GetWorld()->GetTimerManager().ClearTimer(ResetMeleeAttackCounterTimerHandle);
+
+    UAnimMontage* AnimMontage = GetNextMeleeAttackMontage(MontageManager, MeleeAttackType);
+
+    if (GameUtils::IsValid(AnimMontage))
+    {
+        float Value = StatsManager->GetStatValue(EStat::AttackSpeed, true);
+        float Duration = PlayAnimMontage(AnimMontage, Value);
+        float Time = Duration * 1.5f;
+
+        StateManager->ResetState(Duration);
+
+        GetWorld()->GetTimerManager().SetTimer(
+            ResetMeleeAttackCounterTimerHandle, this, &AAICharacter::ResetMeleeAttackCounter, Time, false);
+
+        float StaminaCost = StatsManager->GetStatValue(EStat::MeleeAttackStaminaCost, true);
+        float FinalCost = UDefaultGameInstance::ScaleMeleeAttackStaminaCostByType(StaminaCost, MeleeAttackType);
+        ExtendedStamina->ModifyStat(FinalCost * -1.0f, true);
+
+        return Duration;
+    }
+    else
+    {
+        StateManager->ResetState(0.0f);
+    }
+    
     return 0.0f;
+}
+
+UAnimMontage* AAICharacter::GetRollMontage(EDirection InDirection) const
+{
+    EMontageAction MontageActionType;
+
+    if (InDirection == EDirection::Front)
+    {
+        MontageActionType = EMontageAction::RollForward;
+    }
+    else if (InDirection == EDirection::Back)
+    {
+        MontageActionType = EMontageAction::RollBackward;
+    }
+    else if (InDirection == EDirection::Right)
+    {
+        MontageActionType = EMontageAction::RollRight;
+    }
+    else
+    {
+        MontageActionType = EMontageAction::RollLeft;
+    }
+
+    return MontageManager->GetMontageForAction(MontageActionType, 0);
+}
+
+
+void AAICharacter::SetData()
+{
+    GetCharacterMovement()->bOrientRotationToMovement = true;
+
+    MeleeCollisionHandler->AddIgnoredClass(AAICharacter::StaticClass());
+
+    ExtendedHealth->SetStatType(EStat::Health);
+    ExtendedStamina->SetStatType(EStat::Stamina);
+    ExtendedStamina->SetDoesRegenerates(true);
+    ExtendedStamina->SetRegenValue(2.0f);
+    ExtendedStamina->SetReenableRegenTime(1.5f);
+
+    Behavior->AddEnemy(ABaseAIController::StaticClass());
+
+    Dissolve->SetDissolveInterpSpeed(0.4f);
+
+    MovementSpeed->SetWalkSpeed(185.0f);
+    MovementSpeed->SetJogSpeed(375.0f);
+    MovementSpeed->SetSprintSpeed(500.0f);
+
+    /*
+    Equipment->SetEquipmentSlots({
+        FEquipmentSlots(EItemType::Spell, TArray<FEquipmentSlot> {
+            FEquipmentSlot(TArray<FStoredItem>{
+                FStoredItem(FireballBPClass),
+                FStoredItem(InfernoBPClass),
+                FStoredItem(VortexBPClass),
+                FStoredItem(TeleportBPClass),
+                FStoredItem(InstantHealBPClass)
+            },
+            0, false)
+        }),
+
+        FEquipmentSlots(EItemType::Shield, TArray<FEquipmentSlot> {
+            FEquipmentSlot(TArray<FStoredItem>{FStoredItem(SteelShieldBPClass)}, 0, false)
+        }),
+
+        FEquipmentSlots(EItemType::Head, TArray<FEquipmentSlot> {
+            FEquipmentSlot(TArray<FStoredItem>{FStoredItem()}, 0, false)
+        }),
+        FEquipmentSlots(EItemType::Top, TArray<FEquipmentSlot> {
+            FEquipmentSlot(TArray<FStoredItem>{FStoredItem()}, 0, false)
+        }),
+        FEquipmentSlots(EItemType::Legs, TArray<FEquipmentSlot> {
+            FEquipmentSlot(TArray<FStoredItem>{FStoredItem()}, 0, false)
+        }),
+        FEquipmentSlots(EItemType::Hands, TArray<FEquipmentSlot> {
+            FEquipmentSlot(TArray<FStoredItem>{FStoredItem()}, 0, false)
+        }),
+        FEquipmentSlots(EItemType::Feet, TArray<FEquipmentSlot> {
+            FEquipmentSlot(TArray<FStoredItem>{FStoredItem()}, 0, false)
+        }),
+        FEquipmentSlots(EItemType::Arrows, TArray<FEquipmentSlot> {
+            FEquipmentSlot(TArray<FStoredItem>{
+                FStoredItem(ElvenArrowBPClass), FStoredItem(ExplosiveArrowBPClass)
+            },
+            0, false)
+        }),
+        FEquipmentSlots(EItemType::Tool, TArray<FEquipmentSlot> {
+            FEquipmentSlot(TArray<FStoredItem>{
+                FStoredItem(HealthPotionBPClass),
+                FStoredItem(),
+                FStoredItem(),
+                FStoredItem(),
+                FStoredItem(),
+                FStoredItem(),
+                FStoredItem(),
+                FStoredItem(),
+                FStoredItem(),
+                FStoredItem()
+            },
+            0, false)
+        }),
+        FEquipmentSlots(EItemType::Ring, TArray<FEquipmentSlot> {
+            FEquipmentSlot(TArray<FStoredItem>{FStoredItem()}, 0, false),
+            FEquipmentSlot(TArray<FStoredItem>{FStoredItem()}, 0, false),
+            FEquipmentSlot(TArray<FStoredItem>{FStoredItem()}, 0, false),
+            FEquipmentSlot(TArray<FStoredItem>{FStoredItem()}, 0, false)
+        }),
+        FEquipmentSlots(EItemType::MeleeWeapon, TArray<FEquipmentSlot> {
+            FEquipmentSlot(TArray<FStoredItem>{
+                FStoredItem(SteelSwordBPClass),
+                FStoredItem(GreatSwordBPClass),
+                FStoredItem()
+            },
+            0, false)
+        }),
+        FEquipmentSlots(EItemType::RangeWeapon, TArray<FEquipmentSlot> {
+            FEquipmentSlot(TArray<FStoredItem>{
+                FStoredItem(ElvenBowBPClass),
+                FStoredItem(),
+                FStoredItem()
+            },
+            0, false)
+        }),
+        FEquipmentSlots(EItemType::Necklace, TArray<FEquipmentSlot> {
+            FEquipmentSlot(TArray<FStoredItem>{FStoredItem()}, 0, false)
+        }),
+        });
+
+        */
 }

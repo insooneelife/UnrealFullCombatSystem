@@ -45,6 +45,10 @@ public:
     void SetMovementState(EMovementState InState);
     EMovementState GetMovementState() const { return MovementState; }
 
+    void SetWalkSpeed(float InWalkSpeed) { WalkSpeed = InWalkSpeed; }
+    void SetJogSpeed(float InJogSpeed) { JogSpeed = InJogSpeed; }
+    void SetSprintSpeed(float InSprintSpeed) { SprintSpeed = InSprintSpeed; }
+
 private:
     void UpdateMaxSpeed();
     float GetMaxPossibleSpeed() const;

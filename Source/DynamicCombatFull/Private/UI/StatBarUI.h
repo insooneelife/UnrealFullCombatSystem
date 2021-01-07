@@ -26,9 +26,9 @@ protected:
 
     UFUNCTION()
     void OnValueChanged(float InNewValue, float InMaxValue);
-    void Init(UExtendedStatComponent* InStatComp);
-
+    
 public:
+    void Init(UExtendedStatComponent* InStatComp);
     void UpdatePercent(float InPercent);
     void SetFillColor(FLinearColor InColor);
     void UpdateWidth(float InMaxValue);

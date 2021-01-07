@@ -15,6 +15,8 @@ class UCanMeleeAttack : public UInterface
 	GENERATED_BODY()
 };
 
+class UCollisionHandlerComponent;
+class UEquipmentComponent;
 class UAnimMontage;
 class AActor;
 class UMontageManagerComponent;
@@ -28,12 +30,18 @@ class ICanMeleeAttack
 	// Add interface functions to this class. This is the class that will be inherited to implement this interface.
 public:
     virtual ACharacter* GetThisCharacter() = 0;
+    virtual UCollisionHandlerComponent* GetMeleeCollisionHandler() const = 0;
+    virtual UEquipmentComponent* GetEquipment() const = 0;
     virtual EMeleeAttackType GetMeleeAttackType() const = 0;
     virtual void SetMeleeAttackCounter(int Value) = 0;
     virtual int GetMeleeAttackCounter() const = 0;
     virtual bool CanMeleeAttack() const = 0;
     virtual float GetMeleeDamage() const = 0;
     virtual float MeleeAttack(EMeleeAttackType InType) = 0;
+    virtual const TArray<FName>& GetLeftHandCollisionSockets() const = 0;
+    virtual const TArray<FName>& GetRightHandCollisionSockets() const = 0;
+    virtual const TArray<FName>& GetRightFootCollisionSockets() const = 0;
+    virtual const TArray<FName>& GetLeftFootCollisionSockets() const = 0;
 
     FHitData MakeMeleeHitData(AActor* HitActor);
 
@@ -47,4 +55,7 @@ public:
     // weapon collision events
     UFUNCTION()
     virtual void OnHit(const FHitResult& InHit);
+
+    UFUNCTION()
+    virtual void OnCollisionActivated(ECollisionPart CollisionPart);
 };

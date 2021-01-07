@@ -24,5 +24,13 @@ class ICanGetEffects
         // Add interface functions to this class. This is the class that will be inherited to implement this interface.
 public:
 
-    virtual bool CanEffectBeApplied(EEffectType Type, AActor* Applier) = 0;
+    virtual bool CanEffectBeApplied(EEffectType Type, AActor* Applier);
+
+    virtual bool CanBeAttacked() const = 0;
+
+    virtual bool CanBeStunned() const = 0;
+
+    virtual bool CanBeInterrupted() const = 0;
+
+    virtual bool CanBeBackstabbed() const = 0;
 };
