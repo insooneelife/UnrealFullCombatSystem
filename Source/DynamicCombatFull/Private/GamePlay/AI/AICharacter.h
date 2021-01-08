@@ -226,13 +226,9 @@ private:
     UPROPERTY()
     ABaseAIController* AIController;
 
-    // ???
-    UPROPERTY()
-    UStatBarUI* HealthUI;
 
     UPROPERTY()
     TArray<AActor*> AttachedActors;
-
 
     UPROPERTY(EditAnywhere, Category = "Combat")
     EDirection ReceivedHitDirection;

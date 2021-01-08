@@ -84,6 +84,12 @@ AAICharacter::AAICharacter()
     MontageManager = CreateDefaultSubobject<UMontageManagerComponent>("MontageManager");
     ExtendedHealth = CreateDefaultSubobject<UExtendedStatComponent>("ExtendedHealth");
     MeleeCollisionHandler = CreateDefaultSubobject<UCollisionHandlerComponent>("MeleeCollisionHandler");
+
+    TargetWidget = CreateDefaultSubobject<UWidgetComponent>("TargetWidget");
+    StatBarsWidget = CreateDefaultSubobject<UWidgetComponent>("StatBarsWidget");
+    GetMesh()->AttachToComponent(StatBarsWidget, FAttachmentTransformRules::KeepRelativeTransform);
+
+    SetData();
 }
 
 // Called when the game starts or when spawned
@@ -129,19 +135,7 @@ void AAICharacter::EndPlay(const EEndPlayReason::Type EndPlayResult)
 
 void AAICharacter::OnConstruction(const FTransform& Transform)
 {    
-    TargetWidget = Cast<UWidgetComponent>(GetComponentByClass(UWidgetComponent::StaticClass()));
-
-    if (!GameUtils::IsValid(TargetWidget))
-    {
-        UE_LOG(LogTemp, Error, TEXT("TargetWidget is not valid!"));
-    }
-
-    StatBarsWidget = Cast<UWidgetComponent>(GetComponentByClass(UWidgetComponent::StaticClass()));
-
-    if (!GameUtils::IsValid(StatBarsWidget))
-    {
-        UE_LOG(LogTemp, Error, TEXT("StatBarsWidget is not valid!"));
-    }    
+     
 }
 
 void AAICharacter::OnEffectApplied(EEffectType InType)
@@ -574,25 +568,29 @@ void AAICharacter::SetData()
     MovementSpeed->SetJogSpeed(375.0f);
     MovementSpeed->SetSprintSpeed(500.0f);
 
-    /*
+    FString ObjectItemDir("/Game/DynamicCombatSystem/Blueprints/Items/ObjectItems/Instances/");
+    auto SteelHelmetBPClass = GameUtils::LoadAssetClass<UItemBase>(ObjectItemDir + FString("SteelHelmetBP"));
+    auto ElvenBowBPClass = GameUtils::LoadAssetClass<UItemBase>(ObjectItemDir + FString("ElvenBowBP"));
+    auto ElvenArrowBPClass = GameUtils::LoadAssetClass<UItemBase>(ObjectItemDir + FString("ElvenArrowBP"));
+    
+
+    // for archer
     Equipment->SetEquipmentSlots({
         FEquipmentSlots(EItemType::Spell, TArray<FEquipmentSlot> {
             FEquipmentSlot(TArray<FStoredItem>{
-                FStoredItem(FireballBPClass),
-                FStoredItem(InfernoBPClass),
-                FStoredItem(VortexBPClass),
-                FStoredItem(TeleportBPClass),
-                FStoredItem(InstantHealBPClass)
+                FStoredItem(),
+                FStoredItem(),
+                FStoredItem()
             },
             0, false)
         }),
 
         FEquipmentSlots(EItemType::Shield, TArray<FEquipmentSlot> {
-            FEquipmentSlot(TArray<FStoredItem>{FStoredItem(SteelShieldBPClass)}, 0, false)
+            FEquipmentSlot(TArray<FStoredItem>{FStoredItem()}, 0, false)
         }),
 
         FEquipmentSlots(EItemType::Head, TArray<FEquipmentSlot> {
-            FEquipmentSlot(TArray<FStoredItem>{FStoredItem()}, 0, false)
+            FEquipmentSlot(TArray<FStoredItem>{FStoredItem(FGuid::NewGuid(), SteelHelmetBPClass, 1)}, 0, false)
         }),
         FEquipmentSlots(EItemType::Top, TArray<FEquipmentSlot> {
             FEquipmentSlot(TArray<FStoredItem>{FStoredItem()}, 0, false)
@@ -608,51 +606,30 @@ void AAICharacter::SetData()
         }),
         FEquipmentSlots(EItemType::Arrows, TArray<FEquipmentSlot> {
             FEquipmentSlot(TArray<FStoredItem>{
-                FStoredItem(ElvenArrowBPClass), FStoredItem(ExplosiveArrowBPClass)
+                FStoredItem(FGuid::NewGuid(), ElvenArrowBPClass, 999)
             },
             0, false)
         }),
         FEquipmentSlots(EItemType::Tool, TArray<FEquipmentSlot> {
             FEquipmentSlot(TArray<FStoredItem>{
-                FStoredItem(HealthPotionBPClass),
-                FStoredItem(),
-                FStoredItem(),
-                FStoredItem(),
-                FStoredItem(),
-                FStoredItem(),
-                FStoredItem(),
-                FStoredItem(),
                 FStoredItem(),
                 FStoredItem()
             },
             0, false)
         }),
-        FEquipmentSlots(EItemType::Ring, TArray<FEquipmentSlot> {
-            FEquipmentSlot(TArray<FStoredItem>{FStoredItem()}, 0, false),
-            FEquipmentSlot(TArray<FStoredItem>{FStoredItem()}, 0, false),
-            FEquipmentSlot(TArray<FStoredItem>{FStoredItem()}, 0, false),
-            FEquipmentSlot(TArray<FStoredItem>{FStoredItem()}, 0, false)
-        }),
         FEquipmentSlots(EItemType::MeleeWeapon, TArray<FEquipmentSlot> {
             FEquipmentSlot(TArray<FStoredItem>{
-                FStoredItem(SteelSwordBPClass),
-                FStoredItem(GreatSwordBPClass),
                 FStoredItem()
             },
             0, false)
         }),
         FEquipmentSlots(EItemType::RangeWeapon, TArray<FEquipmentSlot> {
             FEquipmentSlot(TArray<FStoredItem>{
-                FStoredItem(ElvenBowBPClass),
-                FStoredItem(),
-                FStoredItem()
+                FStoredItem(FGuid::NewGuid(), ElvenBowBPClass, 1)
             },
             0, false)
-        }),
-        FEquipmentSlots(EItemType::Necklace, TArray<FEquipmentSlot> {
-            FEquipmentSlot(TArray<FStoredItem>{FStoredItem()}, 0, false)
-        }),
+        })
         });
 
-        */
+        
 }
