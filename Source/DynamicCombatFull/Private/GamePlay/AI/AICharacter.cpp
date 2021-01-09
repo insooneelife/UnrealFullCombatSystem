@@ -29,6 +29,8 @@
 #include "GamePlay/Items/DisplayedItems/DisplayedItem.h"
 #include "UI/AIStatBarsUI.h"
 #include "UI/StatBarUI.h"
+#include "UI/LockIconUI.h"
+#include "GamePlay/BaseCharacter.h"
 
 
 // Sets default values
@@ -65,11 +67,12 @@ AAICharacter::AAICharacter()
         FName(TEXT("left_foot_2")),
     };
 
-    
-    //static UBehaviorTree* LoadedObject =
-    //    GameUtils::LoadAssetObject<UBehaviorTree>("/Game/DynamicCombatSystem/Blueprints/AI/Mage/BT_MageAI");
-    //BTree = LoadedObject;
+    bUseControllerRotationYaw = false;
+    AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
 
+    static TSubclassOf<ABaseAIController> LoadedClass =
+        GameUtils::LoadAssetClass<ABaseAIController>("/Game/DynamicCombatSystem/Blueprints/AI/BaseAIControllerBP");
+    AIControllerClass = LoadedClass;
 
     MovementSpeed = CreateDefaultSubobject<UMovementSpeedComponent>("MovementSpeed");
     Patrol = CreateDefaultSubobject<UPatrolComponent>("Patrol");
@@ -86,8 +89,10 @@ AAICharacter::AAICharacter()
     MeleeCollisionHandler = CreateDefaultSubobject<UCollisionHandlerComponent>("MeleeCollisionHandler");
 
     TargetWidget = CreateDefaultSubobject<UWidgetComponent>("TargetWidget");
+    TargetWidget->AttachToComponent(GetCapsuleComponent(), FAttachmentTransformRules::KeepRelativeTransform);
+
     StatBarsWidget = CreateDefaultSubobject<UWidgetComponent>("StatBarsWidget");
-    GetMesh()->AttachToComponent(StatBarsWidget, FAttachmentTransformRules::KeepRelativeTransform);
+    StatBarsWidget->AttachToComponent(GetMesh(), FAttachmentTransformRules::KeepRelativeTransform);
 
     SetData();
 }
@@ -552,6 +557,12 @@ void AAICharacter::SetData()
 {
     GetCharacterMovement()->bOrientRotationToMovement = true;
 
+    GetCapsuleComponent()->SetCapsuleHalfHeight(96.0f);
+    GetCapsuleComponent()->SetCapsuleRadius(42.0f);
+
+    GetMesh()->SetRelativeLocation(FVector(0.0f, 0.0f, -97.0f));
+    GetMesh()->SetRelativeRotation(FQuat(FRotator(0.0f, -90.0f, 0.0f)));
+
     MeleeCollisionHandler->AddIgnoredClass(AAICharacter::StaticClass());
 
     ExtendedHealth->SetStatType(EStat::Health);
@@ -560,7 +571,7 @@ void AAICharacter::SetData()
     ExtendedStamina->SetRegenValue(2.0f);
     ExtendedStamina->SetReenableRegenTime(1.5f);
 
-    Behavior->AddEnemy(ABaseAIController::StaticClass());
+    Behavior->AddEnemy(ABaseCharacter::StaticClass());
 
     Dissolve->SetDissolveInterpSpeed(0.4f);
 
@@ -568,68 +579,26 @@ void AAICharacter::SetData()
     MovementSpeed->SetJogSpeed(375.0f);
     MovementSpeed->SetSprintSpeed(500.0f);
 
-    FString ObjectItemDir("/Game/DynamicCombatSystem/Blueprints/Items/ObjectItems/Instances/");
-    auto SteelHelmetBPClass = GameUtils::LoadAssetClass<UItemBase>(ObjectItemDir + FString("SteelHelmetBP"));
-    auto ElvenBowBPClass = GameUtils::LoadAssetClass<UItemBase>(ObjectItemDir + FString("ElvenBowBP"));
-    auto ElvenArrowBPClass = GameUtils::LoadAssetClass<UItemBase>(ObjectItemDir + FString("ElvenArrowBP"));
-    
 
-    // for archer
-    Equipment->SetEquipmentSlots({
-        FEquipmentSlots(EItemType::Spell, TArray<FEquipmentSlot> {
-            FEquipmentSlot(TArray<FStoredItem>{
-                FStoredItem(),
-                FStoredItem(),
-                FStoredItem()
-            },
-            0, false)
-        }),
+    TargetWidget->SetRelativeLocation(FVector(0.0f, 0.0f, 200.0f));
+    TargetWidget->SetWidgetSpace(EWidgetSpace::Screen);
 
-        FEquipmentSlots(EItemType::Shield, TArray<FEquipmentSlot> {
-            FEquipmentSlot(TArray<FStoredItem>{FStoredItem()}, 0, false)
-        }),
+    static TSubclassOf<UAIStatBarsUI> LoadedAIStatBarsUIClass =
+        GameUtils::LoadAssetClass<UAIStatBarsUI>("/Game/DynamicCombatSystem/Widgets/AIStatBarsWB");
 
-        FEquipmentSlots(EItemType::Head, TArray<FEquipmentSlot> {
-            FEquipmentSlot(TArray<FStoredItem>{FStoredItem(FGuid::NewGuid(), SteelHelmetBPClass, 1)}, 0, false)
-        }),
-        FEquipmentSlots(EItemType::Top, TArray<FEquipmentSlot> {
-            FEquipmentSlot(TArray<FStoredItem>{FStoredItem()}, 0, false)
-        }),
-        FEquipmentSlots(EItemType::Legs, TArray<FEquipmentSlot> {
-            FEquipmentSlot(TArray<FStoredItem>{FStoredItem()}, 0, false)
-        }),
-        FEquipmentSlots(EItemType::Hands, TArray<FEquipmentSlot> {
-            FEquipmentSlot(TArray<FStoredItem>{FStoredItem()}, 0, false)
-        }),
-        FEquipmentSlots(EItemType::Feet, TArray<FEquipmentSlot> {
-            FEquipmentSlot(TArray<FStoredItem>{FStoredItem()}, 0, false)
-        }),
-        FEquipmentSlots(EItemType::Arrows, TArray<FEquipmentSlot> {
-            FEquipmentSlot(TArray<FStoredItem>{
-                FStoredItem(FGuid::NewGuid(), ElvenArrowBPClass, 999)
-            },
-            0, false)
-        }),
-        FEquipmentSlots(EItemType::Tool, TArray<FEquipmentSlot> {
-            FEquipmentSlot(TArray<FStoredItem>{
-                FStoredItem(),
-                FStoredItem()
-            },
-            0, false)
-        }),
-        FEquipmentSlots(EItemType::MeleeWeapon, TArray<FEquipmentSlot> {
-            FEquipmentSlot(TArray<FStoredItem>{
-                FStoredItem()
-            },
-            0, false)
-        }),
-        FEquipmentSlots(EItemType::RangeWeapon, TArray<FEquipmentSlot> {
-            FEquipmentSlot(TArray<FStoredItem>{
-                FStoredItem(FGuid::NewGuid(), ElvenBowBPClass, 1)
-            },
-            0, false)
-        })
-        });
+    TargetWidget->SetWidgetClass(LoadedAIStatBarsUIClass);
+    TargetWidget->SetDrawSize(FVector2D(150.0f, 10.0f));
+    TargetWidget->SetHiddenInGame(true);
 
-        
+
+    StatBarsWidget->SetRelativeLocation(FVector(0.0f, 0.0f, 18.0f));
+    StatBarsWidget->SetWidgetSpace(EWidgetSpace::Screen);
+
+    static TSubclassOf<ULockIconUI> LoadedLockIconWBClass =
+        GameUtils::LoadAssetClass<ULockIconUI>("/Game/DynamicCombatSystem/Widgets/LockIconWB");
+
+    StatBarsWidget->SetWidgetClass(LoadedLockIconWBClass);
+    StatBarsWidget->SetDrawSize(FVector2D(150.0f, 10.0f));
+    StatBarsWidget->SetHiddenInGame(true);
+
 }

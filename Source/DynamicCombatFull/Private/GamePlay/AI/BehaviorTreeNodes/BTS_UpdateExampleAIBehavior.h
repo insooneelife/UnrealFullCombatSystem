@@ -30,8 +30,10 @@ public:
         AAIController* InOwnerController,
         APawn* InControlledPawn) override;
 
+    UFUNCTION()
     void OnStateChanged(EState InPrevState, EState InNewState);
 
+    UFUNCTION()
     void OnStaminaValueChanged(float InNewValue, float InMaxValue);
 
     void Delayed_Set();

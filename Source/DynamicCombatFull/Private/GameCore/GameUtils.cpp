@@ -2,6 +2,7 @@
 
 
 #include "GameUtils.h"
+#include "DrawDebugHelpers.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "Kismet/KismetStringLibrary.h"
@@ -130,3 +131,17 @@ FString GameUtils::GetDebugName(const UObject* const InObject)
 {
     return InObject == nullptr ? TEXT("InValid") : *InObject->GetName();
 }
+
+
+void GameUtils::DrawPoint(UWorld* InWorld, FVector InLocation)
+{
+    DrawDebugPoint(InWorld, InLocation, 20, FColor::Red, true);
+}
+
+
+void GameUtils::DrawArrow(UWorld* InWorld, FVector Start, FVector End)
+{
+    DrawDebugDirectionalArrow(InWorld, Start, End, 12.f, FColor::Magenta, true, -1.f, 0, 5.f);
+}
+
+

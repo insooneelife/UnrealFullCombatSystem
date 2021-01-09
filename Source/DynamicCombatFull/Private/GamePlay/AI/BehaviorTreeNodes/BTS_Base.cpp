@@ -3,15 +3,40 @@
 #include "BehaviorTree/BTFunctionLibrary.h"
 #include "BlueprintNodeHelpers.h"
 #include "BehaviorTree/BehaviorTree.h"
+#include "GameCore/GameUtils.h"
 
 UBTS_Base::UBTS_Base(const FObjectInitializer& ObjectInitializer)
     : Super(ObjectInitializer)
-{}
+{
+    bCreateNodeInstance = true;
+
+
+}
 
 void UBTS_Base::SetOwner(AActor* InActorOwner)
 {
     ActorOwner = InActorOwner;
     AIOwner = Cast<AAIController>(InActorOwner);
+
+    UE_LOG(LogTemp, Error, TEXT("UBTS_Base  SetOwner  Owner : %s"),
+        *GameUtils::GetDebugName(ActorOwner)
+    );
+}
+
+/** called when node instance is added to tree */
+void UBTS_Base::OnInstanceCreated(UBehaviorTreeComponent& OwnerComp)
+{
+    UE_LOG(LogTemp, Error, TEXT("UBTS_Base  OnInstanceCreated  Owner : %s"),
+        *GameUtils::GetDebugName(OwnerComp.GetOwner())
+    );
+}
+
+/** called when node instance is removed from tree */
+void UBTS_Base::OnInstanceDestroyed(UBehaviorTreeComponent& OwnerComp)
+{
+    UE_LOG(LogTemp, Error, TEXT("UBTS_Base  OnInstanceDestroyed  Owner : %s"),
+        *GameUtils::GetDebugName(OwnerComp.GetOwner())
+    );
 }
 
 void UBTS_Base::OnBecomeRelevant(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
@@ -30,6 +55,11 @@ void UBTS_Base::OnSearchStart(FBehaviorTreeSearchData& SearchData)
 {
     Super::OnSearchStart(SearchData);
     ReceiveSearchStartAI(SearchData.OwnerComp, AIOwner, AIOwner->GetPawn());
+
+    UE_LOG(LogTemp, Error, TEXT("OnSearchStart  OnInstanceCreated  AIOwner : %s   Pawn : %s"),
+        *GameUtils::GetDebugName(AIOwner),
+        *GameUtils::GetDebugName(AIOwner->GetPawn())
+    );
 }
 
 void UBTS_Base::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds)

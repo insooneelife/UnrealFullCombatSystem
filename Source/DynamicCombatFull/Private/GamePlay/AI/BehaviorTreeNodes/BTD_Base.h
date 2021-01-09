@@ -16,6 +16,8 @@ class UBTD_Base : public UBTDecorator
 	
 public:
 
+    UBTD_Base(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
+
     virtual bool CalculateRawConditionValue(
         UBehaviorTreeComponent& InOwnerComp, uint8* InNodeMemory) const override final;
 

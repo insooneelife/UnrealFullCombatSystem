@@ -598,12 +598,7 @@ bool ABaseCharacter::DoesHoldBowString() const
         IsIdleAndNotFalling() &&
         Equipment->IsInCombat() &&
         IsCombatTypeEqual(ECombatType::Range) &&
-        GetMesh()->GetAnimInstance()->IsAnyMontagePlaying();
-}
-
-FName ABaseCharacter::GetBowStringSocketName() const
-{
-    return FName("bow_string");
+        !GetMesh()->GetAnimInstance()->IsAnyMontagePlaying();
 }
 
 float ABaseCharacter::BowAttack()
@@ -613,7 +608,7 @@ float ABaseCharacter::BowAttack()
         FStoredItem Item = Equipment->GetActiveItem(EItemType::Arrows, 0);
         SpawnArrowProjectile(Item);
 
-        FGuid ItemId = Equipment->GetActiveItem(EItemType::Arrows, 0).Id;
+        FGuid ItemId = Item.Id;
         int ItemIndex = Inventory->FindIndexById(ItemId);
         Inventory->RemoveItemAtIndex(ItemIndex, 1);
 
@@ -633,14 +628,6 @@ float ABaseCharacter::BowAttack()
     }
 
     return 0.0f;
-}
-
-bool ABaseCharacter::CanBowAttack() const
-{
-    return
-        Equipment->IsInCombat() &&
-        Equipment->AreArrowsEquipped() &&
-        IsCombatTypeEqual(ECombatType::Range);
 }
 
 FTransform ABaseCharacter::GetSpawnArrowTransform() const
@@ -713,10 +700,6 @@ FTransform ABaseCharacter::GetSpawnArrowTransform() const
     return FTransform(ArrowSpawnDirection, ArrowSpawnLoc);
 }
 
-float ABaseCharacter::GetRangeDamage() const
-{
-    return StatsManager->GetDamage();
-}
 
 void ABaseCharacter::OpenedUI()
 {

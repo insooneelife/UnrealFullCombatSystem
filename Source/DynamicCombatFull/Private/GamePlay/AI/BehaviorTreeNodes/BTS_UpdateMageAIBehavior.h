@@ -29,6 +29,7 @@ public:
         AAIController* InOwnerController,
         APawn* InControlledPawn) override;
 
+    UFUNCTION()
     void OnStateChanged(EState InPrevState, EState InNewState);
 
     void Update();

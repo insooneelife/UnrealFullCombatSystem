@@ -162,15 +162,16 @@ public:
     virtual UDataTable* GetMontages(EMontageAction InAction) const override;
 
     // IIsArcher
-    UFUNCTION(BlueprintCallable)
+    UFUNCTION(BlueprintNativeEvent, BlueprintCallable, meta = (DisplayName = "GetAimAlpha", ScriptName = "GetAimAlpha"))
+        float K2_GetAimAlpha() const;
+
+    virtual float K2_GetAimAlpha_Implementation() const { return GetAimAlpha(); }
+
     virtual float GetAimAlpha() const override { return AimAlpha; }
     virtual float GetArrowInitialSpeed() const override { return ArrowInitialSpeed; }
     virtual bool DoesHoldBowString() const override;
-    virtual FName GetBowStringSocketName() const override;
     virtual float BowAttack() override;
-    virtual bool CanBowAttack() const override;
     virtual FTransform GetSpawnArrowTransform() const override;
-    virtual float GetRangeDamage() const override;
 
     // ICanOpenUI
     virtual void OpenedUI() override;

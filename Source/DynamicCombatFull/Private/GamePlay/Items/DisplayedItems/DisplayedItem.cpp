@@ -31,7 +31,8 @@ void ADisplayedItem::NativeInit(UEquipmentComponent* InEquipmentComponent, EItem
     for (UActorComponent* Component : Components)
     {
         UPrimitiveComponent* PrimitiveComp = Cast<UPrimitiveComponent>(Component);
-        if (PrimitiveComp->IsValidLowLevel())
+        
+        if (GameUtils::IsValid(PrimitiveComp))
         {
             PrimitiveComp->SetCollisionEnabled(ECollisionEnabled::Type::NoCollision);
         }

@@ -43,7 +43,8 @@ void UBTS_UpdateArcherAIBehavior::ReceiveSearchStartAI(
         ControlledCharacter = Character;
         OwnerController = InOwnerController;
 
-        Character->GetStateManager()->OnStateChanged.AddDynamic(this, &UBTS_UpdateArcherAIBehavior::OnStateChanged);
+        Character->GetStateManager()->OnStateChanged.AddUniqueDynamic(
+            this, &UBTS_UpdateArcherAIBehavior::OnStateChanged);
     }
 }
 
@@ -98,7 +99,8 @@ void UBTS_UpdateArcherAIBehavior::UpdateBehavior()
             }
             else
             {
-                UBlackboardComponent* BlackboardComp = UBTFunctionLibrary::GetOwnersBlackboard(this);
+                UBlackboardComponent* BlackboardComp = OwnerController->GetBlackboardComponent();
+                
                 if (!GameUtils::IsValid(BlackboardComp))
                 {
                     return;
@@ -110,7 +112,7 @@ void UBTS_UpdateArcherAIBehavior::UpdateBehavior()
                 EAIBehavior Behavior = ControlledCharacter->GetPatrol()->IsPatrolPathValid() ?
                     EAIBehavior::Patrol : EAIBehavior::Idle;
 
-                if (GameUtils::IsValid(Target))
+                if (Target != nullptr)
                 {
                     ICanBeAttacked* CanBeAttacked = Cast<ICanBeAttacked>(Target);
                     if (CanBeAttacked != nullptr)
@@ -172,8 +174,8 @@ void UBTS_UpdateArcherAIBehavior::UpdateActivities()
     {
         if (GameUtils::IsValid(ControlledCharacter))
         {
-            UBlackboardComponent* BlackboardComp = UBTFunctionLibrary::GetOwnersBlackboard(this);
-
+            UBlackboardComponent* BlackboardComp = OwnerController->GetBlackboardComponent();
+            
             if (!GameUtils::IsValid(BlackboardComp))
             {
                 return;
@@ -200,5 +202,6 @@ void UBTS_UpdateArcherAIBehavior::UpdateActivities()
 
 void UBTS_UpdateArcherAIBehavior::SetBehavior(EAIBehavior InBehavior)
 {
-    UBTFunctionLibrary::SetBlackboardValueAsEnum(this, BehaviorKey, (uint8)InBehavior);
+    UBlackboardComponent* BlackboardComp = OwnerController->GetBlackboardComponent();
+    BlackboardComp->SetValueAsEnum(BehaviorKey.SelectedKeyName, (uint8)InBehavior);
 }

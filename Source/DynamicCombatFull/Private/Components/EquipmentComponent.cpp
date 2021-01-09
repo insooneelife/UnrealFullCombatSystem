@@ -93,7 +93,7 @@ void UEquipmentComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 
     DisplayedItems.Empty();
 
-    if (GameUtils::IsValid(Inventory))
+    if (Inventory != nullptr)
     {
         Inventory->OnItemRemoved.RemoveDynamic(this, &UEquipmentComponent::OnItemModified);
         Inventory->OnItemAdded.RemoveDynamic(this, &UEquipmentComponent::OnItemModified);
@@ -191,7 +191,7 @@ void UEquipmentComponent::Init()
     // inventory events
     Inventory = Cast <UInventoryComponent> (GetOwner()->GetComponentByClass(UInventoryComponent::StaticClass()));
 
-    if (GameUtils::IsValid(Inventory))
+    if (Inventory != nullptr)
     {
         Inventory->OnItemRemoved.AddDynamic(this, &UEquipmentComponent::OnItemModified);
         Inventory->OnItemAdded.AddDynamic(this, &UEquipmentComponent::OnItemModified);
@@ -670,7 +670,7 @@ void UEquipmentComponent::UseActiveItemAtSlot(EItemType InType, int InSlotIndex)
 
             if (IsItemValid(SlotItem))
             {
-                if (GameUtils::IsValid(Inventory))
+                if (Inventory != nullptr)
                 {
                     Inventory->UseItem(SlotItem.Id);
                 }
@@ -823,7 +823,7 @@ void UEquipmentComponent::BuildEquipment(const TArray<FEquipmentSlots>& InEquipm
                 int ItemIndex = k;
                 FStoredItem Item = Equipment[i].Slots[j].Items[k];
 
-                if (GameUtils::IsValid(Inventory))
+                if (Inventory != nullptr)
                 {
                     // If owner has inventory component, check only class, amount doesn't matter
                     if (UKismetSystemLibrary::IsValidClass(Item.ItemClass))
@@ -867,7 +867,10 @@ void UEquipmentComponent::SetCombat(bool bInValue)
     {
         bIsInCombat = bInValue;
         AttachDisplayedItem(SelectedMainHandType, 0);
-        AttachDisplayedItem(EItemType::Shield, 0);
+        if (SelectedMainHandType == EItemType::MeleeWeapon)
+        {
+            AttachDisplayedItem(EItemType::Shield, 0);
+        }
 
         OnInCombatChanged.Broadcast(bIsInCombat);
     }
@@ -922,6 +925,10 @@ void UEquipmentComponent::SetItemInSlot(EItemType InType, int InSlotIndex, int I
 
 void UEquipmentComponent::AttachDisplayedItem(EItemType InType, int InSlotIndex)
 {
+    FString EnumStr = GameUtils::GetEnumValueAsString("EItemType", InType);
+
+    UE_LOG(LogTemp, Error, TEXT("AttachDisplayedItem  InType : %s"), *EnumStr);
+
     ADisplayedItem* DisplayedItem = GetDisplayedItem(InType, InSlotIndex);
 
     if (GameUtils::IsValid(DisplayedItem))

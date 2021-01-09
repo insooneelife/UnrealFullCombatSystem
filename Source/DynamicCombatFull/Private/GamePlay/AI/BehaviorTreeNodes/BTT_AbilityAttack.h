@@ -23,6 +23,7 @@ public:
     virtual void ReceiveExecuteAI(AAIController* OwnerController, APawn* ControlledPawn);
     virtual void ReceiveAbortAI(AAIController* OwnerController, APawn* ControlledPawn);
 
+    UFUNCTION()
     void OnAbilityEnded(EAbilityEndResult InResult);
     void AbilityAttack(APawn* InControlledPawn);
 

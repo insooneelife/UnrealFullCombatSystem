@@ -19,6 +19,12 @@ class UBTS_Base : public UBTService
 
     virtual void SetOwner(AActor* ActorOwner) override;
 
+    /** called when node instance is added to tree */
+    virtual void OnInstanceCreated(UBehaviorTreeComponent& OwnerComp) override ;
+
+    /** called when node instance is removed from tree */
+    virtual void OnInstanceDestroyed(UBehaviorTreeComponent& OwnerComp) override;
+
 protected:
     /** Cached AIController owner of BehaviorTreeComponent. */
     UPROPERTY(Transient)

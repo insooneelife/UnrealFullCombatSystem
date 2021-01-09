@@ -7,6 +7,12 @@
 #include "BlueprintNodeHelpers.h"
 #include "BehaviorTree/BehaviorTree.h"
 
+UBTT_Base::UBTT_Base(const FObjectInitializer& ObjectInitializer)
+    : Super(ObjectInitializer)
+{
+    bCreateNodeInstance = true;
+}
+
 EBTNodeResult::Type UBTT_Base::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
 {
     if (AIOwner != nullptr)
@@ -14,7 +20,7 @@ EBTNodeResult::Type UBTT_Base::ExecuteTask(UBehaviorTreeComponent& OwnerComp, ui
         ReceiveExecuteAI(AIOwner, AIOwner->GetPawn());
     }
 
-    return EBTNodeResult::Succeeded;
+    return EBTNodeResult::InProgress;
 }
 
 EBTNodeResult::Type UBTT_Base::AbortTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)

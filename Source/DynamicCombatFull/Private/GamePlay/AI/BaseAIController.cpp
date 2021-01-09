@@ -7,9 +7,11 @@
 #include "BehaviorTree/BlackboardComponent.h"
 #include "Perception/AIPerceptionComponent.h"
 #include "Perception/AISense_Damage.h"
+#include "Perception/AISense_Sight.h"
 #include "Components/EquipmentComponent.h"
 #include "Components/BehaviorComponent.h"
 #include "GameCore/DefaultGameInstance.h"
+#include "GameCore/GameUtils.h"
 #include "AICharacter.h"
 
 ABaseAIController::ABaseAIController()
@@ -28,9 +30,10 @@ void ABaseAIController::OnPossess(APawn* InPawn)
 
     PossesedAICharacter = Cast<AAICharacter>(InPawn);
 
-    if (PossesedAICharacter->IsValidLowLevel())
+    if (GameUtils::IsValid(PossesedAICharacter))
     {
         RunBehaviorTree(PossesedAICharacter->GetBTree());
+
         FTimerHandle UpdateTargetTimerHandle;
         GetWorld()->GetTimerManager().SetTimer(
             UpdateTargetTimerHandle, this, &ABaseAIController::UpdateTarget, 1.0f, true);
@@ -40,6 +43,7 @@ void ABaseAIController::OnPossess(APawn* InPawn)
 
 void ABaseAIController::UpdateTarget()
 {
+    UE_LOG(LogTemp, Error, TEXT("UpdateTarget !!!!!!!!!!!!!!!!!!!!!!!!!!!!!"));
     TArray<AActor*> LocalPerceivedActors;
     TArray<AActor*> LocalEnemyActors;
 
@@ -49,7 +53,8 @@ void ABaseAIController::UpdateTarget()
         if (CanBeAttackedOwner->IsAlive())
         {
             TArray<AActor*> OutActors;
-            AIPerception->GetKnownPerceivedActors(nullptr, OutActors);
+            AIPerception->GetKnownPerceivedActors(UAISense_Sight::StaticClass(), OutActors);
+            UE_LOG(LogTemp, Error, TEXT("IsAlive !!!!!!!!!!!!!!!!!!!!!!!!!!!!!  KnownActors : %d"), OutActors.Num());
 
             for (AActor* Actor : OutActors)
             {
@@ -59,21 +64,31 @@ void ABaseAIController::UpdateTarget()
                 {
                     if (CanBeAttackedActor->IsAlive())
                     {
+
                         LocalPerceivedActors.Add(Actor);
+
+                        UE_LOG(LogTemp, Error, TEXT("IsAlive !!!!!!!!!!!!!!!!!!!!!!!!!!!!!  PerceivedActors : %d "), 
+                            LocalPerceivedActors.Num());
                     }
                 }
             }
 
             LocalEnemyActors = UDefaultGameInstance::SelectEnemyActors(GetPawn(), LocalPerceivedActors);
 
+            UE_LOG(LogTemp, Error, TEXT("LocalEnemyActors : %d "), LocalEnemyActors.Num());
+
             if (LocalEnemyActors.Num() > 0)
             {
                 AActor* TargetActor = UDefaultGameInstance::GetClosestActor(GetPawn(), LocalEnemyActors);
                 SetTarget(TargetActor);
+
+                UE_LOG(LogTemp, Error, TEXT("SetTarget : %s "), *TargetActor->GetFName().ToString());
             }
             else
             {
                 SetTarget(nullptr);
+
+                UE_LOG(LogTemp, Error, TEXT("SetTarget : nullptr "));
             }
             
             ACharacter* PlayerCharacter = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
@@ -95,7 +110,7 @@ void ABaseAIController::SetTarget(AActor* InNewTarget)
     {
         Target = InNewTarget;
 
-        if (Blackboard->IsValidLowLevel())
+        if (GameUtils::IsValid(Blackboard))
         {
             Blackboard->SetValueAsObject(TargetKey, InNewTarget);
         }
@@ -107,7 +122,7 @@ void ABaseAIController::SetIsInCombat(bool bValue)
     if (bValue != bIsInCombat)
     {
         bIsInCombat = bValue;
-        if (Blackboard->IsValidLowLevel())
+        if (GameUtils::IsValid(Blackboard))
         {
             Blackboard->SetValueAsBool(IsInCombatKey, bIsInCombat);
         }
@@ -132,7 +147,7 @@ bool ABaseAIController::IsEnemy(const FAIStimulus& InAIStimulus, AActor* InActor
         UBehaviorComponent* BehaviorComp = 
             Cast<UBehaviorComponent>(GetPawn()->GetComponentByClass(UBehaviorComponent::StaticClass()));
 
-        if (!BehaviorComp->IsValidLowLevel())
+        if (!GameUtils::IsValid(BehaviorComp))
         {
             return false;
         }

@@ -27,11 +27,6 @@ void UStatBarUI::NativePreConstruct()
 void UStatBarUI::NativeConstruct()
 {
     Super::NativeConstruct();
-
-    UExtendedStatComponent* Comp =
-        UDefaultGameInstance::GetExtendedStatComponent(GetOwningPlayerPawn(), ExtendedStatType);
-
-    Init(Comp);
 }
 
 void UStatBarUI::NativeDestruct()

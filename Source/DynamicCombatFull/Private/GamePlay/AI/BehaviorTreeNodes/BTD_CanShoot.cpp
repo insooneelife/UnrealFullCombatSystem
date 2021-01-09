@@ -9,6 +9,7 @@
 #include "BlueprintNodeHelpers.h"
 #include "BehaviorTree/BehaviorTree.h"
 #include "Interfaces/IsArcher.h"
+#include "GameCore/GameUtils.h"
 
 bool UBTD_CanShoot::PerformConditionCheckAI(
     UBehaviorTreeComponent& InOwnerComp,
@@ -19,7 +20,7 @@ bool UBTD_CanShoot::PerformConditionCheckAI(
     APawn* ControlledPawn = InControlledPawn;
     AActor* Target = Cast<AActor>(InOwnerComp.GetBlackboardComponent()->GetValueAsObject(TargetKey.SelectedKeyName));
 
-    if (Target->IsValidLowLevel())
+    if (GameUtils::IsValid(Target))
     {
         FVector Start = ControlledPawn->GetActorLocation();
         FVector End = Target->GetActorLocation();

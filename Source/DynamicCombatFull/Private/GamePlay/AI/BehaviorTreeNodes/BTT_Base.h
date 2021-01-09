@@ -14,6 +14,9 @@ class UBTT_Base : public UBTTaskNode
 {
 	GENERATED_BODY()
 	
+public:
+    UBTT_Base(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
+
 private:
     virtual EBTNodeResult::Type ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) override;
     virtual EBTNodeResult::Type AbortTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) override;

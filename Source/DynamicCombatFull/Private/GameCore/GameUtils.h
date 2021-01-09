@@ -42,6 +42,9 @@ public:
     static bool IsValid(const UObjectBase* const InObject);
     static FString GetDebugName(const UObject* const InObject);
 
+    static void DrawPoint(UWorld* InWorld, FVector InLocation);
+    static void DrawArrow(UWorld* InWorld, FVector Start, FVector End);
+
     template<typename ClassType>
     static TSubclassOf<ClassType> LoadAssetClass(FString AssetPath)
     {

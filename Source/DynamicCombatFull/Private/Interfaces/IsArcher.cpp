@@ -7,6 +7,8 @@
 #include "GameCore/GameUtils.h"
 #include "GamePlay/Items/ObjectItems/ArrowItem.h"
 #include "GamePlay/Projectiles/ArrowProjectileBase.h"
+#include "Components/EquipmentComponent.h"
+#include "Components/StatsManagerComponent.h"
 
 void IIsArcher::SpawnArrowProjectile(const FStoredItem& Item)
 {
@@ -44,4 +46,27 @@ void IIsArcher::SpawnArrowProjectile(const FStoredItem& Item)
         float Damage = GetRangeDamage() * AimAlpha;
         ProjectileBase->Init(Damage, ArrowInitialSpeed * AimAlpha);
     }
+}
+
+
+FName IIsArcher::GetBowStringSocketName() const
+{
+    return FName("bow_string");
+}
+
+bool IIsArcher::CanBowAttack() const
+{
+    UEquipmentComponent* Equipment = GetEquipment();
+
+    return
+        Equipment->IsInCombat() &&
+        Equipment->AreArrowsEquipped() &&
+        Equipment->GetCombatType() == ECombatType::Range;
+}
+
+
+float IIsArcher::GetRangeDamage() const
+{
+    UStatsManagerComponent* StatsManager = GetStatsManager();
+    return StatsManager->GetDamage();
 }

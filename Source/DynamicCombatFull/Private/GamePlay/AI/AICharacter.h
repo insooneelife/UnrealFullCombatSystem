@@ -172,9 +172,10 @@ public:
 
     UAnimMontage* GetRollMontage(EDirection InDirection) const;
 
+private:
     void SetData();
 
-private:
+protected:
     UPROPERTY(EditAnywhere, Category = "Components")
     UMovementSpeedComponent* MovementSpeed;
 
