@@ -9,7 +9,8 @@ UBTS_Base::UBTS_Base(const FObjectInitializer& ObjectInitializer)
     : Super(ObjectInitializer)
 {
     bCreateNodeInstance = true;
-
+    bNotifyBecomeRelevant = true;
+    bNotifyCeaseRelevant = true;
 
 }
 

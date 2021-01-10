@@ -40,6 +40,8 @@ public:
     void UpdateSenseTarget();
     bool IsEnemy(const FAIStimulus& InAIStimulus, AActor* InActor) const;
 
+    UAIPerceptionComponent* GetAIPerception() const { return AIPerception; }
+
 protected:
     UFUNCTION()
     void OnInCombatChanged(bool bInIsInCombat);

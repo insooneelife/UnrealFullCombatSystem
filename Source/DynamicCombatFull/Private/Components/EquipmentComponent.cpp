@@ -926,9 +926,6 @@ void UEquipmentComponent::SetItemInSlot(EItemType InType, int InSlotIndex, int I
 void UEquipmentComponent::AttachDisplayedItem(EItemType InType, int InSlotIndex)
 {
     FString EnumStr = GameUtils::GetEnumValueAsString("EItemType", InType);
-
-    UE_LOG(LogTemp, Error, TEXT("AttachDisplayedItem  InType : %s"), *EnumStr);
-
     ADisplayedItem* DisplayedItem = GetDisplayedItem(InType, InSlotIndex);
 
     if (GameUtils::IsValid(DisplayedItem))

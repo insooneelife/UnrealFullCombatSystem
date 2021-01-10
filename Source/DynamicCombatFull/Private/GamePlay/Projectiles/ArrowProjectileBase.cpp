@@ -79,7 +79,9 @@ void AArrowProjectileBase::OnHit(const FHitResult& InHit)
                 HitData.DamageCauser = GetOwner();
                 HitData.HitFromDirection =
                     UKismetMathLibrary::GetDirectionUnitVector(HitLocation, HitActor->GetActorLocation());
+                HitData.bCanReceiveImpact = false;
                 HitData.bCanBeBlocked = true;
+                HitData.bCanBeParried = false;
 
                 bool bAttackResult = CanBeAttacked->TakeDamage(HitData, AttackResult);
 

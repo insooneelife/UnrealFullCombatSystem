@@ -68,7 +68,7 @@ void UBTS_Strafe::Strafe(const UBehaviorTreeComponent& OwnerBTree)
     UEnvQueryInstanceBlueprintWrapper* QueryInstance =
         UEnvQueryManager::RunEQSQuery(GetWorld(), Query, ControlledPawn, EEnvQueryRunMode::RandomBest5Pct, nullptr);
 
-    QueryInstance->GetOnQueryFinishedEvent().AddDynamic(this, &UBTS_Strafe::OnQueryFinished);
+    QueryInstance->GetOnQueryFinishedEvent().AddUniqueDynamic(this, &UBTS_Strafe::OnQueryFinished);
 }
 
 

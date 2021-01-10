@@ -36,7 +36,7 @@ UAnimMontage* IMontageAction::GetStunMontage(EDirection Direction) const
     int Index = MontageManager->GetRandomMontageIndex(StunDirection);
     UAnimMontage* AnimMontage = MontageManager->GetMontageForAction(StunDirection, Index);
 
-    if (GameUtils::IsValid(AnimMontage))
+    if (AnimMontage != nullptr)
     {
         return AnimMontage;
     }

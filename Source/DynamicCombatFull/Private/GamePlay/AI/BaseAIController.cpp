@@ -43,7 +43,6 @@ void ABaseAIController::OnPossess(APawn* InPawn)
 
 void ABaseAIController::UpdateTarget()
 {
-    UE_LOG(LogTemp, Error, TEXT("UpdateTarget !!!!!!!!!!!!!!!!!!!!!!!!!!!!!"));
     TArray<AActor*> LocalPerceivedActors;
     TArray<AActor*> LocalEnemyActors;
 
@@ -53,9 +52,8 @@ void ABaseAIController::UpdateTarget()
         if (CanBeAttackedOwner->IsAlive())
         {
             TArray<AActor*> OutActors;
-            AIPerception->GetKnownPerceivedActors(UAISense_Sight::StaticClass(), OutActors);
-            UE_LOG(LogTemp, Error, TEXT("IsAlive !!!!!!!!!!!!!!!!!!!!!!!!!!!!!  KnownActors : %d"), OutActors.Num());
-
+            AIPerception->GetKnownPerceivedActors(nullptr, OutActors);
+            
             for (AActor* Actor : OutActors)
             {
                 ICanBeAttacked* CanBeAttackedActor = Cast<ICanBeAttacked>(Actor);
@@ -64,31 +62,26 @@ void ABaseAIController::UpdateTarget()
                 {
                     if (CanBeAttackedActor->IsAlive())
                     {
-
                         LocalPerceivedActors.Add(Actor);
-
-                        UE_LOG(LogTemp, Error, TEXT("IsAlive !!!!!!!!!!!!!!!!!!!!!!!!!!!!!  PerceivedActors : %d "), 
-                            LocalPerceivedActors.Num());
                     }
                 }
             }
 
             LocalEnemyActors = UDefaultGameInstance::SelectEnemyActors(GetPawn(), LocalPerceivedActors);
 
-            UE_LOG(LogTemp, Error, TEXT("LocalEnemyActors : %d "), LocalEnemyActors.Num());
+            UE_LOG(LogTemp, Error, TEXT("ABaseAIController UpdateTarget LocalEnemyActors : %d "), LocalEnemyActors.Num());
 
             if (LocalEnemyActors.Num() > 0)
             {
                 AActor* TargetActor = UDefaultGameInstance::GetClosestActor(GetPawn(), LocalEnemyActors);
                 SetTarget(TargetActor);
-
-                UE_LOG(LogTemp, Error, TEXT("SetTarget : %s "), *TargetActor->GetFName().ToString());
+                UE_LOG(LogTemp, Error, TEXT("ABaseAIController UpdateTarget SetTarget : %s "), *TargetActor->GetFName().ToString());
             }
             else
             {
                 SetTarget(nullptr);
 
-                UE_LOG(LogTemp, Error, TEXT("SetTarget : nullptr "));
+                UE_LOG(LogTemp, Error, TEXT("ABaseAIController UpdateTarget SetTarget : nullptr "));
             }
             
             ACharacter* PlayerCharacter = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);

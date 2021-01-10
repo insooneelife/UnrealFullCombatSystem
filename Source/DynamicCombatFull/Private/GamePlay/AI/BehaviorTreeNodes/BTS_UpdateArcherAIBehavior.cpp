@@ -150,6 +150,17 @@ void UBTS_UpdateArcherAIBehavior::UpdateBehavior()
                                         Flee();
                                     }
                                 }
+                                else
+                                {
+                                    if (DistanceToTarget >= 2500.0f)
+                                    {
+                                        SetBehavior(EAIBehavior::Approach);
+                                    }
+                                    else
+                                    {
+                                        SetBehavior(EAIBehavior::RangeAttack);
+                                    }
+                                }
                             }
                         }
                         else
@@ -191,6 +202,9 @@ void UBTS_UpdateArcherAIBehavior::UpdateActivities()
             {
                 bool bValue = StateManager->GetState() == EState::Idle && Equipment->IsInCombat();
                 StateManager->SetActivity(EActivity::IsAimingPressed, bValue);
+            }
+            else if (AIBehaviorType == EAIBehavior::MeleeAttack)
+            {
             }
             else
             {

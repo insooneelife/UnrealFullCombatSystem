@@ -16,7 +16,7 @@
 #include "GamePlay/AI/BaseAIController.h"
 #include "GameCore/GameUtils.h"
 
-AArcherAICharacter::AArcherAICharacter()
+AArcherAICharacter::AArcherAICharacter() : ArrowInitialSpeed(3500.0)
 {
     static UBehaviorTree* LoadedObject =
         GameUtils::LoadAssetObject<UBehaviorTree>("/Game/DynamicCombatSystem/Blueprints/AI/Archer/ArcherAIBP");

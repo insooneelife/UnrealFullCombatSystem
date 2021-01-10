@@ -63,6 +63,9 @@ public:
     UFUNCTION(BlueprintCallable)
         ABaseAIController* GetAIController() const { return AIController; }
 
+    UFUNCTION(BlueprintCallable)
+        EState GetState() const;
+
 public:
     UBehaviorTree* GetBTree() const { return BTree; }
 

@@ -80,7 +80,10 @@ bool UMontageManagerComponent::GetMontage(EMontageAction InAction, FMontageActio
     IMontageManagerInterface* MontageManagerInterface = Cast<IMontageManagerInterface>(GetOwner());
     FString EnumStr = GameUtils::GetEnumDisplayNameAsString("EMontageAction", InAction);
 
-    UE_LOG(LogTemp, Error, TEXT("GetMontage  %s"), *EnumStr);
+    UE_LOG(LogTemp, Error, TEXT("GetMontage  Action : %s   Owner : %s"),
+        *EnumStr,
+        *GameUtils::GetDebugName(GetOwner())
+        );
 
     UDataTable* DataTable = MontageManagerInterface->GetMontages(InAction);
     FMontageActionRow* Item = DataTable->FindRow<FMontageActionRow>(FName(*EnumStr), FString(""));

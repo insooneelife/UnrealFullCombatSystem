@@ -143,6 +143,11 @@ void AAICharacter::OnConstruction(const FTransform& Transform)
      
 }
 
+EState AAICharacter::GetState() const
+{
+    return StateManager->GetState();
+}
+
 void AAICharacter::OnEffectApplied(EEffectType InType)
 {
     if (InType == EEffectType::Stun)
@@ -162,6 +167,7 @@ void AAICharacter::OnEffectApplied(EEffectType InType)
         Parried();
     }
 
+    UE_LOG(LogTemp, Error, TEXT("OnEffectApplied  Disabled"), *GameUtils::GetDebugName(this));
     StateManager->SetState(EState::Disabled);
 
 }
@@ -387,8 +393,18 @@ bool AAICharacter::IsTargetable() const
 
 void AAICharacter::ReportDamage(const FHitData& InHitData)
 {
+    UE_LOG(LogTemp, Error, TEXT("AAICharacter  ReportDamage   This : %s  DamageCauser : %s   Damage : %f"),
+        *GameUtils::GetDebugName(this),
+        *GameUtils::GetDebugName(InHitData.DamageCauser),
+        InHitData.Damage);
+
     UAISense_Damage::ReportDamageEvent(
-        GetWorld(), this, InHitData.DamageCauser, InHitData.Damage, GetActorLocation(), GetActorLocation());
+        GetWorld(), 
+        this,
+        InHitData.DamageCauser, 
+        InHitData.Damage,
+        InHitData.DamageCauser->GetActorLocation(),
+        GetActorLocation());
 }
 
 bool AAICharacter::IsAlive() const
