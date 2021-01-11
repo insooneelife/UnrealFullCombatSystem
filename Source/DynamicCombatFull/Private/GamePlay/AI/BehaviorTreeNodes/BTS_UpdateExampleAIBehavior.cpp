@@ -3,7 +3,6 @@
 
 #include "BTS_UpdateExampleAIBehavior.h"
 #include "Kismet/KismetMathLibrary.h"
-#include "BehaviorTree/BTFunctionLibrary.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "BehaviorTree/BehaviorTree.h"
 #include "AIController.h"
@@ -25,6 +24,38 @@ UBTS_UpdateExampleAIBehavior::UBTS_UpdateExampleAIBehavior(const FObjectInitiali
 {
 }
 
+void UBTS_UpdateExampleAIBehavior::OnInstanceCreated(UBehaviorTreeComponent& OwnerComp)
+{
+    Super::OnInstanceCreated(OwnerComp);
+}
+
+void UBTS_UpdateExampleAIBehavior::OnInstanceDestroyed(UBehaviorTreeComponent& OwnerComp)
+{
+    Super::OnInstanceDestroyed(OwnerComp);
+
+    ControlledCharacter->GetStateManager()->OnStateChanged.RemoveDynamic(
+        this, &UBTS_UpdateExampleAIBehavior::OnStateChanged);
+
+    ControlledCharacter->GetExtendedStamina()->OnValueChanged.RemoveDynamic(
+        this, &UBTS_UpdateExampleAIBehavior::OnStaminaValueChanged);
+}
+
+void UBTS_UpdateExampleAIBehavior::SetOwner(AActor* InActorOwner)
+{
+    Super::SetOwner(InActorOwner);
+
+    AAICharacter* Character = Cast<AAICharacter>(AIOwner->GetPawn());
+    if (GameUtils::IsValid(Character))
+    {
+        ControlledCharacter = Character;
+        ControlledCharacter->GetStateManager()->OnStateChanged.AddDynamic(
+            this, &UBTS_UpdateExampleAIBehavior::OnStateChanged);
+
+        ControlledCharacter->GetExtendedStamina()->OnValueChanged.AddDynamic(
+            this, &UBTS_UpdateExampleAIBehavior::OnStaminaValueChanged);
+    }
+}
+
 void UBTS_UpdateExampleAIBehavior::ReceiveTickAI(
     UBehaviorTreeComponent& OwnerBTree,
     AAIController* InOwnerController,
@@ -37,18 +68,6 @@ void UBTS_UpdateExampleAIBehavior::ReceiveTickAI(
 void UBTS_UpdateExampleAIBehavior::ReceiveSearchStartAI(
     UBehaviorTreeComponent& OwnerBTree, AAIController* InOwnerController, APawn* InControlledPawn)
 {
-    AAICharacter* Character = Cast<AAICharacter>(InControlledPawn);
-    if (GameUtils::IsValid(Character))
-    {
-        ControlledCharacter = Character;
-        OwnerController = InOwnerController;
-
-        Character->GetStateManager()->OnStateChanged.AddDynamic(
-            this, &UBTS_UpdateExampleAIBehavior::OnStateChanged);
-
-        Character->GetExtendedStamina()->OnValueChanged.AddDynamic(
-            this, &UBTS_UpdateExampleAIBehavior::OnStaminaValueChanged);
-    }
 }
 
 void UBTS_UpdateExampleAIBehavior::OnStateChanged(EState InPrevState, EState InNewState)
@@ -87,7 +106,7 @@ void UBTS_UpdateExampleAIBehavior::Update()
 
 void UBTS_UpdateExampleAIBehavior::UpdateBehavior()
 {
-    if (GameUtils::IsValid(OwnerController))
+    if (GameUtils::IsValid(AIOwner))
     {
         if (GameUtils::IsValid(ControlledCharacter))
         {
@@ -101,7 +120,7 @@ void UBTS_UpdateExampleAIBehavior::UpdateBehavior()
             }
             else
             {
-                UBlackboardComponent* BlackboardComp = UBTFunctionLibrary::GetOwnersBlackboard(this);
+                UBlackboardComponent* BlackboardComp = AIOwner->GetBlackboardComponent();
                 if (!GameUtils::IsValid(BlackboardComp))
                 {
                     return;
@@ -113,7 +132,7 @@ void UBTS_UpdateExampleAIBehavior::UpdateBehavior()
                 EAIBehavior Behavior = ControlledCharacter->GetPatrol()->IsPatrolPathValid() ?
                     EAIBehavior::Patrol : EAIBehavior::Idle;
 
-                if (GameUtils::IsValid(Target))
+                if (Target != nullptr)
                 {
                     ICanBeAttacked* CanBeAttacked = Cast<ICanBeAttacked>(Target);
                     if (CanBeAttacked != nullptr)
@@ -242,12 +261,11 @@ void UBTS_UpdateExampleAIBehavior::UpdateBehavior()
 
 void UBTS_UpdateExampleAIBehavior::UpdateActivities()
 {
-    if (GameUtils::IsValid(OwnerController))
+    if (GameUtils::IsValid(AIOwner))
     {
         if (GameUtils::IsValid(ControlledCharacter))
         {
-            UBlackboardComponent* BlackboardComp = UBTFunctionLibrary::GetOwnersBlackboard(this);
-
+            UBlackboardComponent* BlackboardComp = AIOwner->GetBlackboardComponent();
             if (!GameUtils::IsValid(BlackboardComp))
             {
                 return;
@@ -275,6 +293,10 @@ void UBTS_UpdateExampleAIBehavior::UpdateActivities()
 
 void UBTS_UpdateExampleAIBehavior::SetBehavior(EAIBehavior InBehavior)
 {
-    UBTFunctionLibrary::SetBlackboardValueAsEnum(this, BehaviorKey, (uint8)InBehavior);
+    UBlackboardComponent* BlackboardComp = AIOwner->GetBlackboardComponent();
+    if (GameUtils::IsValid(BlackboardComp))
+    {
+        BlackboardComp->SetValueAsEnum(BehaviorKey.SelectedKeyName, (uint8)InBehavior);
+    }
 }
 

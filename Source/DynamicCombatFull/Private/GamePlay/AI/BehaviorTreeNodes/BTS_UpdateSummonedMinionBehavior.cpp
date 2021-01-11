@@ -2,7 +2,6 @@
 
 
 #include "BTS_UpdateSummonedMinionBehavior.h"
-#include "BehaviorTree/BTFunctionLibrary.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "AIController.h"
 #include "GameCore/GameUtils.h"
@@ -18,6 +17,32 @@ UBTS_UpdateSummonedMinionBehavior::UBTS_UpdateSummonedMinionBehavior(const FObje
 {
 }
 
+void UBTS_UpdateSummonedMinionBehavior::OnInstanceCreated(UBehaviorTreeComponent& OwnerComp)
+{
+    Super::OnInstanceCreated(OwnerComp);
+}
+
+void UBTS_UpdateSummonedMinionBehavior::OnInstanceDestroyed(UBehaviorTreeComponent& OwnerComp)
+{
+    Super::OnInstanceDestroyed(OwnerComp);
+
+    ControlledCharacter->GetStateManager()->OnStateChanged.RemoveDynamic(
+        this, &UBTS_UpdateSummonedMinionBehavior::OnStateChanged);
+}
+
+void UBTS_UpdateSummonedMinionBehavior::SetOwner(AActor* InActorOwner)
+{
+    Super::SetOwner(InActorOwner);
+
+    AAICharacter* Character = Cast<AAICharacter>(AIOwner->GetPawn());
+    if (GameUtils::IsValid(Character))
+    {
+        ControlledCharacter = Character;
+        ControlledCharacter->GetStateManager()->OnStateChanged.AddDynamic(
+            this, &UBTS_UpdateSummonedMinionBehavior::OnStateChanged);
+    }
+}
+
 void UBTS_UpdateSummonedMinionBehavior::ReceiveTickAI(UBehaviorTreeComponent& OwnerBTree, AAIController* InOwnerController, APawn* InControlledPawn, float InDeltaSeconds)
 {
     UpdateBehavior();
@@ -25,15 +50,6 @@ void UBTS_UpdateSummonedMinionBehavior::ReceiveTickAI(UBehaviorTreeComponent& Ow
 
 void UBTS_UpdateSummonedMinionBehavior::ReceiveSearchStartAI(UBehaviorTreeComponent& OwnerBTree, AAIController* InOwnerController, APawn* InControlledPawn)
 {
-    AAICharacter* Character = Cast<AAICharacter>(InControlledPawn);
-    if (GameUtils::IsValid(Character))
-    {
-        ControlledCharacter = Character;
-        OwnerController = InOwnerController;
-
-        Character->GetStateManager()->OnStateChanged.AddDynamic(
-            this, &UBTS_UpdateSummonedMinionBehavior::OnStateChanged);
-    }
 }
 
 void UBTS_UpdateSummonedMinionBehavior::OnStateChanged(EState InPrevState, EState InNewState)
@@ -47,7 +63,7 @@ void UBTS_UpdateSummonedMinionBehavior::OnStateChanged(EState InPrevState, EStat
 void UBTS_UpdateSummonedMinionBehavior::UpdateBehavior()
 {
 
-    if (GameUtils::IsValid(OwnerController))
+    if (GameUtils::IsValid(AIOwner))
     {
         if (GameUtils::IsValid(ControlledCharacter))
         {
@@ -61,7 +77,7 @@ void UBTS_UpdateSummonedMinionBehavior::UpdateBehavior()
             }
             else
             {
-                UBlackboardComponent* BlackboardComp = UBTFunctionLibrary::GetOwnersBlackboard(this);
+                UBlackboardComponent* BlackboardComp = AIOwner->GetBlackboardComponent();
                 if (!GameUtils::IsValid(BlackboardComp))
                 {
                     return;
@@ -110,7 +126,11 @@ void UBTS_UpdateSummonedMinionBehavior::UpdateBehavior()
 
 void UBTS_UpdateSummonedMinionBehavior::SetBehavior(EAIBehavior InBehavior)
 {
-    UBTFunctionLibrary::SetBlackboardValueAsEnum(this, BehaviorKey, (uint8)InBehavior);
+    UBlackboardComponent* BlackboardComp = AIOwner->GetBlackboardComponent();
+    if (GameUtils::IsValid(BlackboardComp))
+    {
+        BlackboardComp->SetValueAsEnum(BehaviorKey.SelectedKeyName, (uint8)InBehavior);
+    }
 }
 
 

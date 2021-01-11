@@ -32,6 +32,10 @@ public:
 
     UImage* GetCrosshair() const { return Crosshair; }
 
+    UStatBarUI* GetHealthBar() const { return Health; }
+    UStatBarUI* GetManaBar() const { return Mana; }
+    UStatBarUI* GetStaminaBar() const { return Stamina; }
+
 private:
 
     UPROPERTY(meta = (BindWidget))

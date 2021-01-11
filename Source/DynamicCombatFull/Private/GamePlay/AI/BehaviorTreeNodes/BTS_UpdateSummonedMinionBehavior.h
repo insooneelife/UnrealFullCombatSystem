@@ -19,6 +19,10 @@ class UBTS_UpdateSummonedMinionBehavior : public UBTS_Base
 public:
     UBTS_UpdateSummonedMinionBehavior(const FObjectInitializer& ObjectInitializer);
 
+    virtual void OnInstanceCreated(UBehaviorTreeComponent& OwnerComp) override;
+    virtual void OnInstanceDestroyed(UBehaviorTreeComponent& OwnerComp) override;
+    virtual void SetOwner(AActor* InActorOwner) override;
+
     virtual void ReceiveTickAI(
         UBehaviorTreeComponent& OwnerBTree,
         AAIController* InOwnerController,
@@ -38,9 +42,6 @@ public:
     void SetBehavior(EAIBehavior InBehavior);
 
 private:
-    UPROPERTY()
-        AAIController* OwnerController;
-
     UPROPERTY()
         AAICharacter* ControlledCharacter;
 

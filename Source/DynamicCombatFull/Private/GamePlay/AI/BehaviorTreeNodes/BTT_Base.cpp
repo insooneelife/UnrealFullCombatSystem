@@ -3,7 +3,6 @@
 
 #include "BTT_Base.h"
 #include "AIController.h"
-#include "BehaviorTree/BTFunctionLibrary.h"
 #include "BlueprintNodeHelpers.h"
 #include "BehaviorTree/BehaviorTree.h"
 
@@ -11,6 +10,7 @@ UBTT_Base::UBTT_Base(const FObjectInitializer& ObjectInitializer)
     : Super(ObjectInitializer)
 {
     bCreateNodeInstance = true;
+    bNotifyTick = true;
 }
 
 EBTNodeResult::Type UBTT_Base::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
@@ -33,6 +33,22 @@ EBTNodeResult::Type UBTT_Base::AbortTask(UBehaviorTreeComponent& OwnerComp, uint
     return EBTNodeResult::Aborted;
 }
 
+void UBTT_Base::OnInstanceCreated(UBehaviorTreeComponent& OwnerComp)
+{
+    Super::OnInstanceCreated(OwnerComp);
+}
+
+void UBTT_Base::OnInstanceDestroyed(UBehaviorTreeComponent& OwnerComp)
+{
+    Super::OnInstanceDestroyed(OwnerComp);
+}
+
+void UBTT_Base::SetOwner(AActor* InActorOwner)
+{
+    ActorOwner = InActorOwner;
+    AIOwner = Cast<AAIController>(InActorOwner);
+}
+
 void UBTT_Base::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds)
 {
     if (TickInterval.Tick(DeltaSeconds))
@@ -45,12 +61,6 @@ void UBTT_Base::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, f
         }
         TickInterval.Reset();
     }
-}
-
-void UBTT_Base::SetOwner(AActor* InActorOwner)
-{
-    ActorOwner = InActorOwner;
-    AIOwner = Cast<AAIController>(InActorOwner);
 }
 
 void UBTT_Base::FinishExecute(bool bSuccess)

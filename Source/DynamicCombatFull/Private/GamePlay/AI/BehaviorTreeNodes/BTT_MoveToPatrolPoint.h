@@ -20,6 +20,10 @@ public:
     UBTT_MoveToPatrolPoint(const FObjectInitializer& ObjectInitializer);
 
 public:
+    virtual void OnInstanceCreated(UBehaviorTreeComponent& OwnerComp) override;
+    virtual void OnInstanceDestroyed(UBehaviorTreeComponent& OwnerComp) override;
+    virtual void SetOwner(AActor* InActorOwner) override;
+
     virtual void ReceiveExecuteAI(AAIController* OwnerController, APawn* ControlledPawn);
     virtual void ReceiveAbortAI(AAIController* OwnerController, APawn* ControlledPawn);
     

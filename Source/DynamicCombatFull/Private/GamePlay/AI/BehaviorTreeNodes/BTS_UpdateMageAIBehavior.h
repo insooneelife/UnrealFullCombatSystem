@@ -18,6 +18,10 @@ class UBTS_UpdateMageAIBehavior : public UBTS_Base
 public:
     UBTS_UpdateMageAIBehavior(const FObjectInitializer& ObjectInitializer);
 
+    virtual void OnInstanceCreated(UBehaviorTreeComponent& OwnerComp) override;
+    virtual void OnInstanceDestroyed(UBehaviorTreeComponent& OwnerComp) override;
+    virtual void SetOwner(AActor* InActorOwner) override;
+
     virtual void ReceiveTickAI(
         UBehaviorTreeComponent& OwnerBTree,
         AAIController* InOwnerController,
@@ -29,6 +33,8 @@ public:
         AAIController* InOwnerController,
         APawn* InControlledPawn) override;
 
+    
+
     UFUNCTION()
     void OnStateChanged(EState InPrevState, EState InNewState);
 
@@ -39,9 +45,6 @@ public:
     void SetBehavior(EAIBehavior InBehavior);
 
 private:
-    UPROPERTY()
-        AAIController* OwnerController;
-
     UPROPERTY()
         AAICharacter* ControlledCharacter;
 

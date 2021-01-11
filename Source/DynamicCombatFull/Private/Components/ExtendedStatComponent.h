@@ -33,6 +33,7 @@ public:
 
 public:
 
+
     float GetCurrentValue() const { return CurrentValue; }
     void SetCurrentValue(float InValue, bool bInInterruptRegeneration);
 

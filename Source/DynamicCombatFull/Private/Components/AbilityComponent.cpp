@@ -91,7 +91,9 @@ bool UAbilityComponent::StartAbility()
 
         if (AbilityInterface != nullptr)
         {
-            if (AbilityInterface->CanCastAbility())
+            bool bCanCastAbility = AbilityInterface->CanCastAbility();
+
+            if (bCanCastAbility)
             {
                 if (IsCasting())
                 {
@@ -101,13 +103,11 @@ bool UAbilityComponent::StartAbility()
                 {
                     SetIsCasting(true);
                     OnAbilityStarted.Broadcast();
-
                     return true;
                 }
             }
         }
     }
-
     return false;
 }
 
@@ -196,9 +196,20 @@ void UAbilityComponent::UpdateAbility(TSubclassOf<AAbilityBase> InAbilityClass)
         {
             EndAbility(EAbilityEndResult::Destroyed);
             CurrentAbility->Destroy();
+
+            SpawnAbility(InAbilityClass);
+            AbilityChanged();
         }
     }
+    else
+    {
+        SpawnAbility(InAbilityClass);
+        AbilityChanged();
+    }    
+}
 
+void UAbilityComponent::SpawnAbility(TSubclassOf<AAbilityBase> InAbilityClass)
+{
     if (UKismetSystemLibrary::IsValidClass(InAbilityClass))
     {
         FActorSpawnParameters Params;
@@ -215,8 +226,6 @@ void UAbilityComponent::UpdateAbility(TSubclassOf<AAbilityBase> InAbilityClass)
     {
         CurrentAbility = nullptr;
     }
-
-    AbilityChanged();
 }
 
 void UAbilityComponent::AbilityPressed()

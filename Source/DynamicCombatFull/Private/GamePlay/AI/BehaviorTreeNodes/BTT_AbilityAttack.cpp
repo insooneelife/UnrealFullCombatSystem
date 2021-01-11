@@ -5,15 +5,49 @@
 #include "GameCore/GameUtils.h"
 #include "GamePlay/Abilities/AIAbilityBase.h"
 #include "Components/AbilityComponent.h"
+#include "GamePlay/AI/BaseAIController.h"
+#include "GamePlay/AI/AICharacter.h"
 
 UBTT_AbilityAttack::UBTT_AbilityAttack(const FObjectInitializer& ObjectInitializer)
     :
-    Super(ObjectInitializer)
+    Super(ObjectInitializer),
+    bActivateCallback(false)
 {
     TSubclassOf<AAIAbilityBase> LoadedClass = GameUtils::LoadAssetClass<AAIAbilityBase>(
         "/Game/DynamicCombatSystem/Blueprints/Abilities/AI/AITeleportAbilityBP");
 
     AbilityClass = LoadedClass;
+}
+
+void UBTT_AbilityAttack::OnInstanceCreated(UBehaviorTreeComponent& OwnerComp)
+{
+    Super::OnInstanceCreated(OwnerComp);
+}
+
+void UBTT_AbilityAttack::OnInstanceDestroyed(UBehaviorTreeComponent& OwnerComp)
+{
+    Super::OnInstanceDestroyed(OwnerComp);
+
+    UAbilityComponent* AbilityComponent =
+        Cast<UAbilityComponent>(AIOwner->GetPawn()->GetComponentByClass(UAbilityComponent::StaticClass()));
+
+    if (GameUtils::IsValid(AbilityComponent))
+    {
+        AbilityComponent->OnAbilityEnded.RemoveDynamic(this, &UBTT_AbilityAttack::OnAbilityEnded);
+    }
+}
+
+void UBTT_AbilityAttack::SetOwner(AActor* InActorOwner)
+{
+    Super::SetOwner(InActorOwner);
+
+    UAbilityComponent* AbilityComponent =
+        Cast<UAbilityComponent>(AIOwner->GetPawn()->GetComponentByClass(UAbilityComponent::StaticClass()));
+
+    if (GameUtils::IsValid(AbilityComponent))
+    {
+        AbilityComponent->OnAbilityEnded.AddDynamic(this, &UBTT_AbilityAttack::OnAbilityEnded);
+    }
 }
 
 void UBTT_AbilityAttack::ReceiveExecuteAI(AAIController* OwnerController, APawn* ControlledPawn)
@@ -36,7 +70,11 @@ void UBTT_AbilityAttack::ReceiveAbortAI(AAIController* OwnerController, APawn* C
 
 void UBTT_AbilityAttack::OnAbilityEnded(EAbilityEndResult InResult)
 {
-    FinishExecute(true);
+    if (bActivateCallback)
+    {
+        FinishExecute(true);
+        bActivateCallback = false;
+    }
 }
 
 void UBTT_AbilityAttack::AbilityAttack(APawn* InControlledPawn)
@@ -51,8 +89,8 @@ void UBTT_AbilityAttack::AbilityAttack(APawn* InControlledPawn)
         AbilityComponent->AbilityReleased();
 
         if (AbilityComponent->IsCasting())
-        {
-            AbilityComponent->OnAbilityEnded.AddDynamic(this, &UBTT_AbilityAttack::OnAbilityEnded);
+        {   
+            bActivateCallback = true;
         }
         else
         {

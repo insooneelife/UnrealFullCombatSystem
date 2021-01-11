@@ -2,7 +2,6 @@
 
 
 #include "BTS_UpdateArcherAIBehavior.h"
-#include "BehaviorTree/BTFunctionLibrary.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "BehaviorTree/BehaviorTree.h"
 #include "AIController.h"
@@ -23,6 +22,33 @@ UBTS_UpdateArcherAIBehavior::UBTS_UpdateArcherAIBehavior(const FObjectInitialize
 {
 }
 
+
+void UBTS_UpdateArcherAIBehavior::OnInstanceCreated(UBehaviorTreeComponent& OwnerComp)
+{
+    Super::OnInstanceCreated(OwnerComp);
+}
+
+void UBTS_UpdateArcherAIBehavior::OnInstanceDestroyed(UBehaviorTreeComponent& OwnerComp)
+{
+    Super::OnInstanceDestroyed(OwnerComp);
+
+    ControlledCharacter->GetStateManager()->OnStateChanged.RemoveDynamic(
+        this, &UBTS_UpdateArcherAIBehavior::OnStateChanged);
+}
+
+void UBTS_UpdateArcherAIBehavior::SetOwner(AActor* InActorOwner)
+{
+    Super::SetOwner(InActorOwner);
+
+    AAICharacter* Character = Cast<AAICharacter>(AIOwner->GetPawn());
+    if (GameUtils::IsValid(Character))
+    {
+        ControlledCharacter = Character;
+        ControlledCharacter->GetStateManager()->OnStateChanged.AddDynamic(
+            this, &UBTS_UpdateArcherAIBehavior::OnStateChanged);
+    }
+}
+
 void UBTS_UpdateArcherAIBehavior::ReceiveTickAI(
     UBehaviorTreeComponent& OwnerBTree,
     AAIController* InOwnerController, 
@@ -37,15 +63,6 @@ void UBTS_UpdateArcherAIBehavior::ReceiveSearchStartAI(
     AAIController* InOwnerController,
     APawn* InControlledPawn)
 {
-    AAICharacter* Character = Cast<AAICharacter>(InControlledPawn);
-    if (GameUtils::IsValid(Character))
-    {
-        ControlledCharacter = Character;
-        OwnerController = InOwnerController;
-
-        Character->GetStateManager()->OnStateChanged.AddUniqueDynamic(
-            this, &UBTS_UpdateArcherAIBehavior::OnStateChanged);
-    }
 }
 
 void UBTS_UpdateArcherAIBehavior::OnStateChanged(EState InPrevState, EState InNewState)
@@ -66,7 +83,7 @@ void UBTS_UpdateArcherAIBehavior::Update()
 
 void UBTS_UpdateArcherAIBehavior::Flee()
 {
-    ABaseAIController* Controller = Cast<ABaseAIController>(OwnerController);
+    ABaseAIController* Controller = Cast<ABaseAIController>(AIOwner);
     Controller->UpdateSenseTarget();
     bIsFleeing = true;
 
@@ -85,7 +102,7 @@ void UBTS_UpdateArcherAIBehavior::Delayed_Flee()
 
 void UBTS_UpdateArcherAIBehavior::UpdateBehavior()
 {
-    if (GameUtils::IsValid(OwnerController))
+    if (GameUtils::IsValid(AIOwner))
     {
         if (GameUtils::IsValid(ControlledCharacter))
         {
@@ -99,15 +116,14 @@ void UBTS_UpdateArcherAIBehavior::UpdateBehavior()
             }
             else
             {
-                UBlackboardComponent* BlackboardComp = OwnerController->GetBlackboardComponent();
+                UBlackboardComponent* BlackboardComp = AIOwner->GetBlackboardComponent();
                 
                 if (!GameUtils::IsValid(BlackboardComp))
                 {
                     return;
                 }
 
-                AActor* Target = 
-                    Cast<AActor>(BlackboardComp->GetValueAsObject(TargetKey.SelectedKeyName));
+                AActor* Target = Cast<AActor>(BlackboardComp->GetValueAsObject(TargetKey.SelectedKeyName));
 
                 EAIBehavior Behavior = ControlledCharacter->GetPatrol()->IsPatrolPathValid() ?
                     EAIBehavior::Patrol : EAIBehavior::Idle;
@@ -126,8 +142,8 @@ void UBTS_UpdateArcherAIBehavior::UpdateBehavior()
                             float MaxValue = ControlledCharacter->GetExtendedStamina()->GetMaxValue();
                             float StaminaPercent = (Value / MaxValue) * 100.0f;
 
-                            UEquipmentComponent* TargetEquipment = 
-                                Cast<UEquipmentComponent>(Target->GetComponentByClass(UEquipmentComponent::StaticClass()));
+                            UEquipmentComponent* TargetEquipment = Cast<UEquipmentComponent>(
+                                Target->GetComponentByClass(UEquipmentComponent::StaticClass()));
 
                             if (bIsFleeing)
                             {
@@ -181,11 +197,11 @@ void UBTS_UpdateArcherAIBehavior::UpdateBehavior()
 
 void UBTS_UpdateArcherAIBehavior::UpdateActivities()
 {
-    if (GameUtils::IsValid(OwnerController))
+    if (GameUtils::IsValid(AIOwner))
     {
         if (GameUtils::IsValid(ControlledCharacter))
         {
-            UBlackboardComponent* BlackboardComp = OwnerController->GetBlackboardComponent();
+            UBlackboardComponent* BlackboardComp = AIOwner->GetBlackboardComponent();
             
             if (!GameUtils::IsValid(BlackboardComp))
             {
@@ -216,6 +232,6 @@ void UBTS_UpdateArcherAIBehavior::UpdateActivities()
 
 void UBTS_UpdateArcherAIBehavior::SetBehavior(EAIBehavior InBehavior)
 {
-    UBlackboardComponent* BlackboardComp = OwnerController->GetBlackboardComponent();
+    UBlackboardComponent* BlackboardComp = AIOwner->GetBlackboardComponent();
     BlackboardComp->SetValueAsEnum(BehaviorKey.SelectedKeyName, (uint8)InBehavior);
 }

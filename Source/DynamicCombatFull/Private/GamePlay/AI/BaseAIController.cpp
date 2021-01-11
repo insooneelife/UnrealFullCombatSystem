@@ -69,19 +69,14 @@ void ABaseAIController::UpdateTarget()
 
             LocalEnemyActors = UDefaultGameInstance::SelectEnemyActors(GetPawn(), LocalPerceivedActors);
 
-            UE_LOG(LogTemp, Error, TEXT("ABaseAIController UpdateTarget LocalEnemyActors : %d "), LocalEnemyActors.Num());
-
             if (LocalEnemyActors.Num() > 0)
             {
                 AActor* TargetActor = UDefaultGameInstance::GetClosestActor(GetPawn(), LocalEnemyActors);
                 SetTarget(TargetActor);
-                UE_LOG(LogTemp, Error, TEXT("ABaseAIController UpdateTarget SetTarget : %s "), *TargetActor->GetFName().ToString());
             }
             else
             {
                 SetTarget(nullptr);
-
-                UE_LOG(LogTemp, Error, TEXT("ABaseAIController UpdateTarget SetTarget : nullptr "));
             }
             
             ACharacter* PlayerCharacter = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);

@@ -39,6 +39,9 @@ AAICharacter::AAICharacter()
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
+    bUseControllerRotationYaw = false;
+    AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
+
     ReceivedHitDirection = EDirection::Front;
     RecentlyReceivedDamageStunLimit = 40.0f;
     RecentlyReceivedHitsCountStunLimit = 2;
@@ -67,8 +70,7 @@ AAICharacter::AAICharacter()
         FName(TEXT("left_foot_2")),
     };
 
-    bUseControllerRotationYaw = false;
-    AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
+
 
     static TSubclassOf<ABaseAIController> LoadedClass =
         GameUtils::LoadAssetClass<ABaseAIController>("/Game/DynamicCombatSystem/Blueprints/AI/BaseAIControllerBP");
@@ -167,7 +169,6 @@ void AAICharacter::OnEffectApplied(EEffectType InType)
         Parried();
     }
 
-    UE_LOG(LogTemp, Error, TEXT("OnEffectApplied  Disabled"), *GameUtils::GetDebugName(this));
     StateManager->SetState(EState::Disabled);
 
 }
@@ -393,11 +394,6 @@ bool AAICharacter::IsTargetable() const
 
 void AAICharacter::ReportDamage(const FHitData& InHitData)
 {
-    UE_LOG(LogTemp, Error, TEXT("AAICharacter  ReportDamage   This : %s  DamageCauser : %s   Damage : %f"),
-        *GameUtils::GetDebugName(this),
-        *GameUtils::GetDebugName(InHitData.DamageCauser),
-        InHitData.Damage);
-
     UAISense_Damage::ReportDamageEvent(
         GetWorld(), 
         this,
@@ -484,7 +480,7 @@ FRotator AAICharacter::GetDesiredRotation() const
         if (GameUtils::IsValid(AIController))
         {
             AActor* Target = AIController->GetTarget();
-            if (GameUtils::IsValid(Target))
+            if (Target != nullptr)
             {
                 FVector ActorLoc = GetActorLocation();
                 FVector TargetActorLoc =  Target->GetActorLocation();
@@ -596,24 +592,24 @@ void AAICharacter::SetData()
     MovementSpeed->SetSprintSpeed(500.0f);
 
 
-    TargetWidget->SetRelativeLocation(FVector(0.0f, 0.0f, 200.0f));
+    TargetWidget->SetRelativeLocation(FVector(0.0f, 0.0f, 18.0f));
     TargetWidget->SetWidgetSpace(EWidgetSpace::Screen);
-
-    static TSubclassOf<UAIStatBarsUI> LoadedAIStatBarsUIClass =
-        GameUtils::LoadAssetClass<UAIStatBarsUI>("/Game/DynamicCombatSystem/Widgets/AIStatBarsWB");
-
-    TargetWidget->SetWidgetClass(LoadedAIStatBarsUIClass);
-    TargetWidget->SetDrawSize(FVector2D(150.0f, 10.0f));
-    TargetWidget->SetHiddenInGame(true);
-
-
-    StatBarsWidget->SetRelativeLocation(FVector(0.0f, 0.0f, 18.0f));
-    StatBarsWidget->SetWidgetSpace(EWidgetSpace::Screen);
 
     static TSubclassOf<ULockIconUI> LoadedLockIconWBClass =
         GameUtils::LoadAssetClass<ULockIconUI>("/Game/DynamicCombatSystem/Widgets/LockIconWB");
 
-    StatBarsWidget->SetWidgetClass(LoadedLockIconWBClass);
+    TargetWidget->SetWidgetClass(LoadedLockIconWBClass);
+    TargetWidget->SetDrawSize(FVector2D(150.0f, 10.0f));
+    TargetWidget->SetHiddenInGame(true);
+
+
+    StatBarsWidget->SetRelativeLocation(FVector(0.0f, 0.0f, 200.0f));
+    StatBarsWidget->SetWidgetSpace(EWidgetSpace::Screen);
+
+    static TSubclassOf<UAIStatBarsUI> LoadedAIStatBarsUIClass =
+        GameUtils::LoadAssetClass<UAIStatBarsUI>("/Game/DynamicCombatSystem/Widgets/AIStatBarsWB");
+
+    StatBarsWidget->SetWidgetClass(LoadedAIStatBarsUIClass);
     StatBarsWidget->SetDrawSize(FVector2D(150.0f, 10.0f));
     StatBarsWidget->SetHiddenInGame(true);
 

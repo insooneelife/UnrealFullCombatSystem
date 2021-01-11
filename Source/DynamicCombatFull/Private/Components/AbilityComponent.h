@@ -70,7 +70,8 @@ protected:
     void OnMainHandTypeChanged(EItemType InType);
 
 public:
-    void UpdateAbility(TSubclassOf<AAbilityBase> InAbility);
+    void UpdateAbility(TSubclassOf<AAbilityBase> InAbilityClass);
+    void SpawnAbility(TSubclassOf<AAbilityBase> InAbilityClass);
     void AbilityPressed();
     void AbilityReleased();
     void ConsumeMana(float InAmount);
@@ -85,6 +86,7 @@ public:
     bool ShouldRotateOnPressed() const;
     bool IsPlayingAbilityMontage() const;
     ACharacter* GetCharacter() const { return Character; }
+    void SetUpdateEquipmentAbility(bool bInValue) { bUpdateEquipmentAbility = bInValue; }
 
 private:
 

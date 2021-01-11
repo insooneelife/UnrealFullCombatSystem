@@ -2,7 +2,6 @@
 
 
 #include "BTS_UpdateMageAIBehavior.h"
-#include "BehaviorTree/BTFunctionLibrary.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "BehaviorTree/BehaviorTree.h"
 #include "AIController.h"
@@ -23,22 +22,46 @@ UBTS_UpdateMageAIBehavior::UBTS_UpdateMageAIBehavior(const FObjectInitializer& O
 {
 }
 
-void UBTS_UpdateMageAIBehavior::ReceiveTickAI(UBehaviorTreeComponent& OwnerBTree, AAIController* InOwnerController, APawn* InControlledPawn, float InDeltaSeconds)
+void UBTS_UpdateMageAIBehavior::OnInstanceCreated(UBehaviorTreeComponent& OwnerComp)
+{
+    Super::OnInstanceCreated(OwnerComp);
+}
+
+void UBTS_UpdateMageAIBehavior::OnInstanceDestroyed(UBehaviorTreeComponent& OwnerComp)
+{
+    Super::OnInstanceDestroyed(OwnerComp);
+
+    ControlledCharacter->GetStateManager()->OnStateChanged.RemoveDynamic(
+        this, &UBTS_UpdateMageAIBehavior::OnStateChanged);
+}
+
+void UBTS_UpdateMageAIBehavior::SetOwner(AActor* InActorOwner)
+{
+    Super::SetOwner(InActorOwner);
+
+    AAICharacter* Character = Cast<AAICharacter>(AIOwner->GetPawn());
+    if (GameUtils::IsValid(Character))
+    {
+        ControlledCharacter = Character;
+        ControlledCharacter->GetStateManager()->OnStateChanged.AddDynamic(
+            this, &UBTS_UpdateMageAIBehavior::OnStateChanged);
+    }
+}
+
+void UBTS_UpdateMageAIBehavior::ReceiveTickAI(
+    UBehaviorTreeComponent& OwnerBTree,
+    AAIController* InOwnerController, 
+    APawn* InControlledPawn,
+    float InDeltaSeconds)
 {
     Update();
 }
 
-void UBTS_UpdateMageAIBehavior::ReceiveSearchStartAI(UBehaviorTreeComponent& OwnerBTree, AAIController* InOwnerController, APawn* InControlledPawn)
+void UBTS_UpdateMageAIBehavior::ReceiveSearchStartAI(
+    UBehaviorTreeComponent& OwnerBTree, 
+    AAIController* InOwnerController,
+    APawn* InControlledPawn)
 {
-    AAICharacter* Character = Cast<AAICharacter>(InControlledPawn);
-    if (GameUtils::IsValid(Character))
-    {
-        ControlledCharacter = Character;
-        OwnerController = InOwnerController;
-
-        Character->GetStateManager()->OnStateChanged.AddDynamic(
-            this, &UBTS_UpdateMageAIBehavior::OnStateChanged);
-    }
 }
 
 void UBTS_UpdateMageAIBehavior::OnStateChanged(EState InPrevState, EState InNewState)
@@ -58,7 +81,7 @@ void UBTS_UpdateMageAIBehavior::Update()
 
 void UBTS_UpdateMageAIBehavior::UpdateBehavior()
 {
-    if (GameUtils::IsValid(OwnerController))
+    if (GameUtils::IsValid(AIOwner))
     {
         if (GameUtils::IsValid(ControlledCharacter))
         {
@@ -72,19 +95,18 @@ void UBTS_UpdateMageAIBehavior::UpdateBehavior()
             }
             else
             {
-                UBlackboardComponent* BlackboardComp = UBTFunctionLibrary::GetOwnersBlackboard(this);
+                UBlackboardComponent* BlackboardComp = AIOwner->GetBlackboardComponent();
                 if (!GameUtils::IsValid(BlackboardComp))
                 {
                     return;
                 }
 
-                AActor* Target =
-                    Cast<AActor>(BlackboardComp->GetValueAsObject(TargetKey.SelectedKeyName));
+                AActor* Target = Cast<AActor>(BlackboardComp->GetValueAsObject(TargetKey.SelectedKeyName));
 
                 EAIBehavior Behavior = ControlledCharacter->GetPatrol()->IsPatrolPathValid() ?
                     EAIBehavior::Patrol : EAIBehavior::Idle;
 
-                if (GameUtils::IsValid(Target))
+                if (Target != nullptr)
                 {
                     ICanBeAttacked* CanBeAttacked = Cast<ICanBeAttacked>(Target);
                     if (CanBeAttacked != nullptr)
@@ -121,5 +143,9 @@ void UBTS_UpdateMageAIBehavior::UpdateBehavior()
 
 void UBTS_UpdateMageAIBehavior::SetBehavior(EAIBehavior InBehavior)
 {
-    UBTFunctionLibrary::SetBlackboardValueAsEnum(this, BehaviorKey, (uint8)InBehavior);
+    UBlackboardComponent* BlackboardComp = AIOwner->GetBlackboardComponent();
+    if (GameUtils::IsValid(BlackboardComp))
+    {
+        BlackboardComp->SetValueAsEnum(BehaviorKey.SelectedKeyName, (uint8)InBehavior);
+    }
 }

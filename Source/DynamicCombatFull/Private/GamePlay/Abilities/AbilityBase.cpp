@@ -143,8 +143,10 @@ float AAbilityBase::GetCastingSpeed() const
     if (AbilityInterface != nullptr)
     {
         float Value = AbilityInterface->GetCastingSpeed();
+
         if (Value > 0.0f)
         {
+
             return Value;
         }
     }
@@ -154,14 +156,25 @@ float AAbilityBase::GetCastingSpeed() const
 
 bool AAbilityBase::FindGroundLocation(FVector StartLocation, float GroundOffset, FVector& OutGroundLocation, FVector& OutNormal) const
 {
-    FVector EndLocation = StartLocation + FVector(0, 0, 2000.0f);
-    TArray<TEnumAsByte<EObjectTypeQuery>> Array { UEngineTypes::ConvertToObjectType(ECollisionChannel::ECC_WorldStatic) };
+    FVector EndLocation = StartLocation - FVector(0, 0, 2000.0f);
+    TArray<TEnumAsByte<EObjectTypeQuery>> Array 
+    { 
+        UEngineTypes::ConvertToObjectType(ECollisionChannel::ECC_WorldStatic) 
+    };
 
     TArray<AActor*> IgnoreActors;
     FHitResult HitResult;
 
     bool bHit = UKismetSystemLibrary::LineTraceSingleForObjects(
-        GetWorld(), StartLocation, EndLocation, Array, false, IgnoreActors, EDrawDebugTrace::Type::None, HitResult, true);
+        GetWorld(), 
+        StartLocation, 
+        EndLocation, 
+        Array, 
+        false, 
+        IgnoreActors, 
+        EDrawDebugTrace::Type::None,
+        HitResult, 
+        true);
 
     if (bHit)
     {

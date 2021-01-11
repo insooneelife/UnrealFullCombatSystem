@@ -37,6 +37,8 @@
 #include "UI/InteractionMessageUI.h"
 #include "UI/InventoryUI.h"
 #include "UI/EquipmentUI.h"
+#include "UI/LockIconUI.h"
+#include "UI/StatBarUI.h"
 #include "GamePlay/Abilities/AbilityBase.h"
 #include "GameCore/DefaultGameInstance.h"
 #include "GamePlay/Items/DisplayedItems/DisplayedItem.h"
@@ -51,6 +53,9 @@ ABaseCharacter::ABaseCharacter()
 {
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
+
+    bUseControllerRotationYaw = false;
+    AutoPossessPlayer = EAutoReceiveInput::Player0;
 
     ReceivedHitDirection = EDirection::Front;
 
@@ -138,6 +143,24 @@ ABaseCharacter::ABaseCharacter()
     Equipment = CreateDefaultSubobject<UEquipmentComponent>("Equipment");
     AbilityComponent = CreateDefaultSubobject<UAbilityComponent>("AbilityComponent");
     
+    TargetWidget = CreateDefaultSubobject<UWidgetComponent>("TargetWidget");
+    TargetWidget->AttachToComponent(GetCapsuleComponent(), FAttachmentTransformRules::KeepRelativeTransform);
+
+    TargetingArrow = CreateDefaultSubobject<UArrowComponent>("TargetingArrow");
+    TargetingArrow->AttachToComponent(GetCapsuleComponent(), FAttachmentTransformRules::KeepRelativeTransform);
+
+    ArrowSpawnLocation = CreateDefaultSubobject<USceneComponent>("ArrowSpawnLocation");
+    ArrowSpawnLocation->AttachToComponent(GetMesh(), FAttachmentTransformRules::KeepRelativeTransform);
+
+    EffectsAudio = CreateDefaultSubobject<UAudioComponent>("EffectsAudio");
+    EffectsAudio->AttachToComponent(GetMesh(), FAttachmentTransformRules::KeepRelativeTransform);
+
+    CameraBoom = CreateDefaultSubobject<USpringArmComponent>("CameraBoom");
+    CameraBoom->AttachToComponent(GetCapsuleComponent(), FAttachmentTransformRules::KeepRelativeTransform);
+
+    FollowCamera = CreateDefaultSubobject<UCameraComponent>("FollowCamera");
+    FollowCamera->AttachToComponent(CameraBoom, FAttachmentTransformRules::KeepRelativeTransform);
+
     SetData();
 }
 
@@ -154,6 +177,11 @@ void ABaseCharacter::BeginPlay()
     
     InGameWidget = Cast<UInGameUI>(CreateWidget(PlayerController, InGameUIClass));
     InGameWidget->AddToViewport();
+
+    InGameWidget->GetHealthBar()->Init(ExtendedHealth);
+    InGameWidget->GetManaBar()->Init(ExtendedMana);
+    InGameWidget->GetStaminaBar()->Init(ExtendedStamina);
+
     CreateKeybindings();
 
     GetWorld()->GetTimerManager().SetTimer(
@@ -233,60 +261,7 @@ void ABaseCharacter::EndPlay(const EEndPlayReason::Type EndPlayResult)
 
 void ABaseCharacter::OnConstruction(const FTransform& Transform)
 {
-    UArrowComponent* ArrowComp = Cast<UArrowComponent>(GetComponentByClass(UArrowComponent::StaticClass()));
-    TargetingArrow = ArrowComp;
-
-    if (!GameUtils::IsValid(TargetingArrow))
-    {
-        UE_LOG(LogTemp, Error, TEXT("TargetingArrow is not valid!"));
-    }
-
-    UCameraComponent* Camera = Cast<UCameraComponent>(GetComponentByClass(UCameraComponent::StaticClass()));
-    FollowCamera = Camera;
-
-    if (!GameUtils::IsValid(FollowCamera))
-    {
-        UE_LOG(LogTemp, Error, TEXT("FollowCamera is not valid!"));
-    }
-
-    USpringArmComponent* Boom = Cast<USpringArmComponent>(GetComponentByClass(USpringArmComponent::StaticClass()));
-    CameraBoom = Boom;
-
-    if (!GameUtils::IsValid(CameraBoom))
-    {
-        UE_LOG(LogTemp, Error, TEXT("CameraBoom is not valid!"));
-    }
-    else
-    {
-        InitialCameraArmLength = CameraBoom->TargetArmLength;
-        InitialCameraLagSpeed = CameraBoom->CameraLagSpeed;
-    }
-
-    UAudioComponent* Audio = Cast<UAudioComponent>(GetComponentByClass(UAudioComponent::StaticClass()));
-    EffectsAudio = Audio;
-
-    if (!GameUtils::IsValid(EffectsAudio))
-    {
-        UE_LOG(LogTemp, Error, TEXT("EffectsAudio is not valid!"));
-    }
-
-    TArray<UActorComponent*> FoundCompArray = GetComponentsByTag(USceneComponent::StaticClass(), "ArrowSpawnLocation");
-
-    if (FoundCompArray.Num() > 0)
-    {
-        ArrowSpawnLocation = Cast<USceneComponent>(FoundCompArray[0]);;
-    }
-    else
-    {
-        UE_LOG(LogTemp, Error, TEXT("ArrowSpawnLocation is not valid!"));
-    }
-
-    TargetWidget = Cast<UWidgetComponent>(GetComponentByClass(UWidgetComponent::StaticClass()));
-    if (!GameUtils::IsValid(TargetWidget))
-    {
-        UE_LOG(LogTemp, Error, TEXT("TargetWidget is not valid!"));
-    }
-    
+    Super::OnConstruction(Transform);
 }
 
 // Called every frame
@@ -635,7 +610,7 @@ FTransform ABaseCharacter::GetSpawnArrowTransform() const
     FVector ArrowSpawnLoc = ArrowSpawnLocation->GetComponentLocation();
     FVector CameraDirection = FollowCamera->GetForwardVector();
     FRotator ArrowSpawnDirection = UKismetMathLibrary::Conv_VectorToRotator(CameraDirection);
-
+    
     float VectorLength = (CameraBoom->GetComponentLocation() - FollowCamera->GetComponentLocation()).Size();
     const float TraceLength = 10000.0f;
 
@@ -1141,14 +1116,13 @@ void ABaseCharacter::OnAxis_HorizontalLook(float AxisValue)
     AddControllerYawInput(Val);
 
     float NewVal = GetInputAxisValue("HorizontalLook");
-
     DynamicTargeting->FindTargetWithAxisInput(NewVal);
 }
 
 void ABaseCharacter::OnAxis_VerticalLook(float AxisValue)
 {
     float Val = AxisValue * VerticalLookRate * GetWorld()->GetDeltaSeconds();
-    AddControllerPitchInput(AxisValue);
+    AddControllerPitchInput(Val);
 }
 
 void ABaseCharacter::OnActionPressed_ToggleMovement()
@@ -2437,7 +2411,7 @@ void ABaseCharacter::SetData()
 {
     GetCharacterMovement()->JumpZVelocity = 600.0f;
     GetCharacterMovement()->AirControl = 0.2f;
-    GetCharacterMovement()->RotationRate = FRotator(0.0f, 0.0f, 540.0f);
+    GetCharacterMovement()->RotationRate = FRotator(0.0f, 540.0f, 0.0f);
     GetCharacterMovement()->bOrientRotationToMovement = true;
     GetCharacterMovement()->NavAgentProps.AgentRadius = 42.0f;
     GetCharacterMovement()->NavAgentProps.AgentHeight = 192.0f;
@@ -2585,4 +2559,28 @@ void ABaseCharacter::SetData()
     ExtendedMana->SetRegenValue(1.75f);
     ExtendedMana->SetReenableRegenTime(1.5f);
 
+
+    TargetWidget->SetRelativeLocation(FVector(0.0f, 0.0f, 18.0f));
+    TargetWidget->SetWidgetSpace(EWidgetSpace::Screen);
+
+    static TSubclassOf<ULockIconUI> LoadedLockIconWBClass =
+        GameUtils::LoadAssetClass<ULockIconUI>("/Game/DynamicCombatSystem/Widgets/LockIconWB");
+
+    TargetWidget->SetWidgetClass(LoadedLockIconWBClass);
+    TargetWidget->SetDrawSize(FVector2D(35.0f, 35.0f));
+    TargetWidget->SetHiddenInGame(true);
+
+    ArrowSpawnLocation->SetRelativeLocation(FVector(-15.25f, 15.45f, 149.33f));
+    //ArrowSpawnLocation->ComponentTags.Add(FName("ArrowSpawnLocation"));
+
+    CameraBoom->TargetArmLength = 450.0f;
+    CameraBoom->SocketOffset = FVector(0.0f, 30.0f, 100.0f);
+    CameraBoom->bUsePawnControlRotation = true;
+    CameraBoom->bEnableCameraLag = true;
+    CameraBoom->bEnableCameraRotationLag = true;
+    CameraBoom->CameraLagSpeed = 15.0f;
+    CameraBoom->CameraRotationLagSpeed = 15.0f;
+
+    InitialCameraArmLength = CameraBoom->TargetArmLength;
+    InitialCameraLagSpeed = CameraBoom->CameraLagSpeed;
 }

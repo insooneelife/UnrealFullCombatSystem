@@ -65,10 +65,16 @@ void UBTS_Strafe::ReceiveDeactivationAI(UBehaviorTreeComponent& OwnerBTree, AAIC
 void UBTS_Strafe::Strafe(const UBehaviorTreeComponent& OwnerBTree)
 {
     UEnvQuery* Query = GetStrafeQuery(OwnerBTree);
-    UEnvQueryInstanceBlueprintWrapper* QueryInstance =
-        UEnvQueryManager::RunEQSQuery(GetWorld(), Query, ControlledPawn, EEnvQueryRunMode::RandomBest5Pct, nullptr);
+    if (Query != nullptr)
+    {
+        UEnvQueryInstanceBlueprintWrapper* QueryInstance =
+            UEnvQueryManager::RunEQSQuery(GetWorld(), Query, ControlledPawn, EEnvQueryRunMode::RandomBest5Pct, nullptr);
 
-    QueryInstance->GetOnQueryFinishedEvent().AddUniqueDynamic(this, &UBTS_Strafe::OnQueryFinished);
+        if (GameUtils::IsValid(QueryInstance))
+        {
+            QueryInstance->GetOnQueryFinishedEvent().AddDynamic(this, &UBTS_Strafe::OnQueryFinished);
+        }
+    }
 }
 
 
@@ -92,7 +98,7 @@ UEnvQuery* UBTS_Strafe::GetStrafeQuery(const UBehaviorTreeComponent& OwnerBTree)
 {
     AActor* Target = Cast<AActor>(OwnerBTree.GetBlackboardComponent()->GetValueAsObject(TargetKey.SelectedKeyName));
 
-    if (GameUtils::IsValid(Target))
+    if (Target != nullptr)
     {
         if (GameUtils::IsValid(ControlledPawn))
         {

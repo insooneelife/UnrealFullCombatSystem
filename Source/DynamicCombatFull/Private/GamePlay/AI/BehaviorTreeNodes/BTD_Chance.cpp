@@ -8,5 +8,7 @@ bool UBTD_Chance::PerformConditionCheckAI(
     AAIController* InOwnerController,
     APawn* InControlledPawn) const
 {
-    return FMath::RandRange(1, 100) <= Chance;
+    int Val = FMath::RandRange(1, 100);
+
+    return Val <= Chance;
 }

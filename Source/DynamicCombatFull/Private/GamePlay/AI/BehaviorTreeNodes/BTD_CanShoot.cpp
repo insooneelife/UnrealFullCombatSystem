@@ -5,7 +5,6 @@
 #include "Kismet/KismetSystemLibrary.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "BehaviorTree/BlackboardComponent.h"
-#include "BehaviorTree/BTFunctionLibrary.h"
 #include "BlueprintNodeHelpers.h"
 #include "BehaviorTree/BehaviorTree.h"
 #include "Interfaces/IsArcher.h"

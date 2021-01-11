@@ -14,14 +14,20 @@ class AAIAbilityBase;
 UCLASS()
 class UBTT_AbilityAttack : public UBTT_Base
 {
-	GENERATED_BODY()
-	
+	GENERATED_BODY()    
+
 public:
     UBTT_AbilityAttack(const FObjectInitializer& ObjectInitializer);
 
 public:
+    virtual void OnInstanceCreated(UBehaviorTreeComponent& OwnerComp) override;
+    virtual void OnInstanceDestroyed(UBehaviorTreeComponent& OwnerComp) override;
+    virtual void SetOwner(AActor* InActorOwner) override;
+
     virtual void ReceiveExecuteAI(AAIController* OwnerController, APawn* ControlledPawn);
     virtual void ReceiveAbortAI(AAIController* OwnerController, APawn* ControlledPawn);
+    
+
 
     UFUNCTION()
     void OnAbilityEnded(EAbilityEndResult InResult);
@@ -30,4 +36,6 @@ public:
 private:
     UPROPERTY(EditAnywhere)
     TSubclassOf<AAIAbilityBase> AbilityClass;
+
+    bool bActivateCallback;
 };

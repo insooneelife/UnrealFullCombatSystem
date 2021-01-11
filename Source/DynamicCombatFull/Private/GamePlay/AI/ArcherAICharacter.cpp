@@ -16,10 +16,11 @@
 #include "GamePlay/AI/BaseAIController.h"
 #include "GameCore/GameUtils.h"
 
-AArcherAICharacter::AArcherAICharacter() : ArrowInitialSpeed(3500.0)
+AArcherAICharacter::AArcherAICharacter() 
+    : ArrowInitialSpeed(3500.0f)
 {
     static UBehaviorTree* LoadedObject =
-        GameUtils::LoadAssetObject<UBehaviorTree>("/Game/DynamicCombatSystem/Blueprints/AI/Archer/ArcherAIBP");
+        GameUtils::LoadAssetObject<UBehaviorTree>("/Game/DynamicCombatSystem/Blueprints/AI/Archer/ArcherAIBT");
     BTree = LoadedObject;
 
     static USoundBase* LoadedDrawBowSoundObject =

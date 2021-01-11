@@ -147,18 +147,17 @@ void UExtendedStatComponent::RefreshRegenTimer()
     {
         if (!GetWorld()->GetTimerManager().IsTimerActive(RegenTimerHandle))
         {
+            FTimerHandle TimerHandle;
             GetWorld()->GetTimerManager().SetTimer(
-                RegenTimerHandle, this, &UExtendedStatComponent::StartRegenerating, ReenableRegenTime, false);
+                TimerHandle, this, &UExtendedStatComponent::StartRegenerating, ReenableRegenTime, false);
         }
     }
 }
 
 void UExtendedStatComponent::StartRegenerating()
 {
-    FTimerHandle TimerHandle;
-
     GetWorld()->GetTimerManager().SetTimer(
-        TimerHandle, this, &UExtendedStatComponent::RegenTick, RegenerationTickInterval, true);
+        RegenTimerHandle, this, &UExtendedStatComponent::RegenTick, RegenerationTickInterval, true);
 }
 
 void UExtendedStatComponent::InitStatManager()
