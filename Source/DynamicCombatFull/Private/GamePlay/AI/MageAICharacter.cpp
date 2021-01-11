@@ -42,10 +42,6 @@ AMageAICharacter::AMageAICharacter()
     auto MagicWandBPClass = GameUtils::LoadAssetClass<UItemBase>(ObjectItemDir + FString("MagicWandBP"));
     auto FireballBPClass = GameUtils::LoadAssetClass<UItemBase>(ObjectItemDir + FString("FireballBP"));
 
-    //auto InfernoBPClass = GameUtils::LoadAssetClass<UItemBase>(ObjectItemDir + FString("InfernoBP"));
-    //auto InstantHealBPClass = GameUtils::LoadAssetClass<UItemBase>(ObjectItemDir + FString("InstantHealBP"));
-    //auto TeleportBPClass = GameUtils::LoadAssetClass<UItemBase>(ObjectItemDir + FString("TeleportBP"));
-
     Equipment->SetEquipmentSlots({
         FEquipmentSlots(EItemType::Spell, TArray<FEquipmentSlot> {
             FEquipmentSlot(TArray<FStoredItem>{
