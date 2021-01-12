@@ -34,10 +34,6 @@ void UMovementSpeedComponent::BeginPlay()
         GetOwner()->GetComponentByClass(UCharacterMovementComponent::StaticClass()));
 
     SetMovementState(MovementState);
-    if (!GameUtils::IsValid(Movement))
-    {
-        UE_LOG(LogTemp, Error, TEXT("Movement is not valid!!"));
-    }
 }
 
 // Called every frame

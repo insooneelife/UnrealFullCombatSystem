@@ -24,14 +24,6 @@ UMontageManagerComponent::UMontageManagerComponent()
 void UMontageManagerComponent::BeginPlay()
 {
     Super::BeginPlay();
-
-    IMontageManagerInterface* MontageManagerInterface = Cast<IMontageManagerInterface>(GetOwner());
-
-    if (MontageManagerInterface == nullptr)
-    {
-        FString Name = UGameplayStatics::GetObjectClass(GetOwner())->GetDisplayNameText().ToString();
-        UE_LOG(LogTemp, Error, TEXT("Does not implement interface IMontageManager!  %s"), *Name);
-    }
 }
 
 
@@ -80,22 +72,22 @@ bool UMontageManagerComponent::GetMontage(EMontageAction InAction, FMontageActio
     IMontageManagerInterface* MontageManagerInterface = Cast<IMontageManagerInterface>(GetOwner());
     FString EnumStr = GameUtils::GetEnumDisplayNameAsString("EMontageAction", InAction);
 
-    UE_LOG(LogTemp, Error, TEXT("GetMontage  Action : %s   Owner : %s"),
-        *EnumStr,
-        *GameUtils::GetDebugName(GetOwner())
-        );
-
-    UDataTable* DataTable = MontageManagerInterface->GetMontages(InAction);
-    FMontageActionRow* Item = DataTable->FindRow<FMontageActionRow>(FName(*EnumStr), FString(""));
-
-    if (Item != nullptr)
+    if (MontageManagerInterface != nullptr)
     {
-        OutMontageData = *Item;
-        return true;
+        UDataTable* DataTable = MontageManagerInterface->GetMontages(InAction);
+        FMontageActionRow* Item = DataTable->FindRow<FMontageActionRow>(FName(*EnumStr), FString(""));
+
+        if (Item != nullptr)
+        {
+            OutMontageData = *Item;
+            return true;
+        }
+        else
+        {
+            return false;
+        }
     }
-    else
-    {
-        return false;
-    }
+
+    return false;
 }
 

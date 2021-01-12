@@ -25,18 +25,10 @@ void UPatrolComponent::BeginPlay()
 
 void UPatrolComponent::Init()
 {
-    UE_LOG(LogTemp, Error, TEXT("UPatrolComponent Init"));
     TArray<AActor*> FoundActors;
     UGameplayStatics::GetAllActorsOfClass(GetWorld(), APatrolPathActor::StaticClass(), FoundActors);
 
-    for (AActor* Actor : FoundActors)
-    {
-        UE_LOG(LogTemp, Error, TEXT("UPatrolComponent Init  for   %s"), *GameUtils::GetDebugName(Actor));
-    }
-
     PatrolPath = Cast<APatrolPathActor>(UDefaultGameInstance::GetClosestActor(GetOwner(), FoundActors));
-
-    UE_LOG(LogTemp, Error, TEXT("UPatrolComponent Init  PatrolPath   %s"), *GameUtils::GetDebugName(PatrolPath));
 }
 
 void UPatrolComponent::UpdatePatrolIndex()
