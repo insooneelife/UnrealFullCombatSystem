@@ -19,7 +19,7 @@ FVector AAIAbilityBase::GetTargetLoc() const
 {
     AActor* Target = GetTarget();
 
-    if (GameUtils::IsValid(Target))
+    if (Target != nullptr)
     {
         return Target->GetActorLocation();
     }
