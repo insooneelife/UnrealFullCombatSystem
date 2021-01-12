@@ -5,7 +5,7 @@
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
 #include "AIStatBarsUI.generated.h"
-
+class UStatBarUI;
 /**
  * 
  */

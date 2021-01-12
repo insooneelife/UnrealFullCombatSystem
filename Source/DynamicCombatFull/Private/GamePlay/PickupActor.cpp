@@ -8,6 +8,7 @@
 #include "Kismet/BlueprintMapLibrary.h"
 #include "Components/SceneComponent.h"
 #include "Components/BoxComponent.h"
+#include "Particles/ParticleSystem.h"
 #include "Particles/ParticleSystemComponent.h"
 #include "Components/InventoryComponent.h"
 #include "GameCore/GameUtils.h"
@@ -27,9 +28,15 @@ APickupActor::APickupActor()
     RootComponent = CreateDefaultSubobject<USceneComponent>("Scene");
     Box = CreateDefaultSubobject<UBoxComponent>("Box");
     Box->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
+    Box->SetRelativeLocation(FVector(0.0f, 0.0f, 30.0f));
 
     ParticleSystem = CreateDefaultSubobject<UParticleSystemComponent>("ParticleSystem");
     ParticleSystem->AttachToComponent(Box, FAttachmentTransformRules::KeepRelativeTransform);
+    ParticleSystem->SetRelativeLocation(FVector(0.0f, 0.0f, 35.0f));
+
+    static UParticleSystem* LoadedParticleObject =
+        GameUtils::LoadAssetObject<UParticleSystem>(TEXT("/Game/DynamicCombatSystem/VFX/P_Soul"));
+    ParticleSystem->SetTemplate(LoadedParticleObject);
 }
 
 void APickupActor::Init(FName InName, const TMap<TSubclassOf<UItemBase>, int>& InItems)

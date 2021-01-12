@@ -14,12 +14,12 @@ ASpellIndicatorActor::ASpellIndicatorActor()
 	PrimaryActorTick.bCanEverTick = false;
     PrimaryActorTick.bStartWithTickEnabled = false;
 
-    RootComponent = Scene = CreateDefaultSubobject<USceneComponent>("Scene");
+    RootComponent = CreateDefaultSubobject<USceneComponent>("Scene");
     Decal = CreateDefaultSubobject<UDecalComponent>("Decal");
-    Decal->AttachToComponent(Scene, FAttachmentTransformRules::KeepRelativeTransform);
+    Decal->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
+    Decal->SetRelativeRotation(FRotator(-90.0f, 0.0f, 0.0f));
 
-    static UMaterialInterface* LoadedObject = 
-        GameUtils::LoadAssetObject<UMaterialInterface>(
+    static UMaterialInterface* LoadedObject = GameUtils::LoadAssetObject<UMaterialInterface>(
             TEXT("/Game/DynamicCombatSystem/VFX/Materials/MI_SpellIndicatror_01"));
 
     SetMaterial(LoadedObject);

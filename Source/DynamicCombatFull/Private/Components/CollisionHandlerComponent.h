@@ -38,6 +38,9 @@ public:
     void SetCollisionMeshes(const TArray<FCollisionComponent>& InCollComps);
     void SetCollisionMesh(UPrimitiveComponent* InWeaponMesh, const TArray<FName>& InSockets);
     void AddIgnoredClass(TSubclassOf<AActor> IgnoredClass);
+    void AddIgnoredCollisionProfileNames(FName InProfileName);
+    void AddObjectTypesToCollideWith(TEnumAsByte<EObjectTypeQuery> InObjectType);
+    void SetTraceRadius(float InTraceRadius) { TraceRadius = InTraceRadius; }
 
 private:
 

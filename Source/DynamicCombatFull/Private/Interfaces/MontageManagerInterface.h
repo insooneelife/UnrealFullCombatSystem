@@ -6,6 +6,7 @@
 #include "UObject/Interface.h"
 #include "Engine/DataTable.h"
 #include "Animation/AnimMontage.h"
+#include "GameCore/DataTypes.h"
 #include "MontageManagerInterface.generated.h"
 
 // This class does not need to be modified.

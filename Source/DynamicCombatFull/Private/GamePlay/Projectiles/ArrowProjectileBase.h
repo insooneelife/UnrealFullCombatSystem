@@ -14,6 +14,7 @@ class UProjectileMovementComponent;
 class UCollisionHandlerComponent;
 class UPrimitiveComponent;
 class UArrowItem;
+class AImpaledArrowActor;
 
 
 UCLASS()
@@ -35,6 +36,8 @@ protected:
     UFUNCTION()
     void OnHit(const FHitResult& InHit);
 
+    virtual void OnArrowHit(const FHitResult& InHit);
+
 public:	
     void Init(float InDamage, float InInitialSpeed);
 
@@ -45,7 +48,7 @@ public:
     UFUNCTION(BlueprintCallable)
     bool IsEnemy(AActor* InTarget) const;
 
-    UFUNCTION(BlueprintImplementableEvent, Category = "Blueprint")
+    //UFUNCTION(BlueprintImplementableEvent, Category = "Blueprint")
     void SpawnImpaledArrow(USceneComponent* InComponent, FName InSocketName, AActor* InActor, FVector InLocation);
 
     UFUNCTION(BlueprintCallable)
@@ -63,7 +66,7 @@ public:
     UFUNCTION(BlueprintCallable)
         float GetImpulsePower() const { return ImpulsePower; }
 
-private:
+protected:
     UPROPERTY(EditAnywhere, Category = "Projectile")
     float Damage;
 
@@ -84,6 +87,9 @@ private:
 
     UPROPERTY(EditAnywhere)
     UParticleSystemComponent* ParticleSystem;
+
+    UPROPERTY(EditAnywhere)
+    TSubclassOf<AImpaledArrowActor> ImpaledArrowClass;
 
 public:
     UPROPERTY(EditAnywhere, BlueprintReadOnly)

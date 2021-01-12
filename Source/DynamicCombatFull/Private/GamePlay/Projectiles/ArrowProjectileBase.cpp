@@ -15,6 +15,7 @@
 #include "GameCore/DefaultGameInstance.h"
 #include "Interfaces/CanBeAttacked.h"
 #include "GameCore/GameUtils.h"
+#include "GamePlay/ImpaledArrowActor.h"
 
 // Sets default values
 AArrowProjectileBase::AArrowProjectileBase()
@@ -28,6 +29,10 @@ AArrowProjectileBase::AArrowProjectileBase()
     LifeTime = 15.0f;
     ImpulsePower = 20000.0f;
 
+    TSubclassOf<AImpaledArrowActor> LoadedClass = GameUtils::LoadAssetClass<AImpaledArrowActor>(
+        "/Game/DynamicCombatSystem/Blueprints/Projectiles/ImpaledArrowBP");
+    ImpaledArrowClass = LoadedClass;
+
     StaticMesh = CreateDefaultSubobject<UStaticMeshComponent>("StaticMesh");
     RootComponent = StaticMesh;
     ParticleSystem = CreateDefaultSubobject<UParticleSystemComponent>("Particle");
@@ -35,6 +40,22 @@ AArrowProjectileBase::AArrowProjectileBase()
 
     ProjectileMovement = CreateDefaultSubobject<UProjectileMovementComponent>("ProjectileMovement");
     CollisionHandler = CreateDefaultSubobject<UCollisionHandlerComponent>("CollisionHandler");
+
+    ProjectileMovement->bRotationFollowsVelocity = true;
+    ProjectileMovement->ProjectileGravityScale = 0.0f;
+
+    CollisionHandler->AddIgnoredCollisionProfileNames("Pawn");
+    CollisionHandler->SetTraceRadius(0.5f);
+
+    CollisionHandler->AddObjectTypesToCollideWith(
+        UEngineTypes::ConvertToObjectType(ECollisionChannel::ECC_WorldStatic));
+
+    CollisionHandler->AddObjectTypesToCollideWith(
+        UEngineTypes::ConvertToObjectType(ECollisionChannel::ECC_PhysicsBody));
+
+    // interactable
+    CollisionHandler->AddObjectTypesToCollideWith(
+        UEngineTypes::ConvertToObjectType(ECollisionChannel::ECC_GameTraceChannel2));
 }
 
 // Called when the game starts or when spawned
@@ -56,6 +77,11 @@ void AArrowProjectileBase::BeginPlayDelayed()
 }
 
 void AArrowProjectileBase::OnHit(const FHitResult& InHit)
+{
+    OnArrowHit(InHit);
+}
+
+void AArrowProjectileBase::OnArrowHit(const FHitResult& InHit)
 {
     FVector HitLocation = InHit.Location;
     FVector HitNormal = InHit.Normal;
@@ -169,5 +195,26 @@ bool AArrowProjectileBase::IsEnemy(AActor* InTarget) const
     }
 
     return true;
+}
+
+void AArrowProjectileBase::SpawnImpaledArrow(
+    USceneComponent* InComponent,
+    FName InSocketName, 
+    AActor* InActor, 
+    FVector InLocation)
+{
+    ProjectileMovement->StopMovementImmediately();
+
+    FActorSpawnParameters Params;
+    Params.Owner = InActor;
+    Params.Instigator = GetOwner()->GetInstigator();
+    Params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+
+    FTransform SpawnTransform = FTransform(GetActorRotation(), InLocation, GetActorScale3D());
+
+    AImpaledArrowActor* SpawnedActor = GetWorld()->SpawnActor<AImpaledArrowActor>(
+        ImpaledArrowClass, SpawnTransform, Params);
+    SpawnedActor->Init(StaticMesh->GetStaticMesh(), this); 
+    SpawnedActor->AttachToComponent(InComponent, FAttachmentTransformRules::KeepWorldTransform, InSocketName);
 }
 

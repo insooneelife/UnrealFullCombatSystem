@@ -7,8 +7,8 @@ public class DynamicCombatFull : ModuleRules
 	public DynamicCombatFull(ReadOnlyTargetRules Target) : base(Target)
 	{
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
-	
-		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "UMG", "Slate", "SlateCore", "GameplayTasks" });
+		
+		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "UMG", "Slate", "SlateCore", "GameplayTasks", "AIModule" });
 
 		PrivateDependencyModuleNames.AddRange(new string[] {  });
 

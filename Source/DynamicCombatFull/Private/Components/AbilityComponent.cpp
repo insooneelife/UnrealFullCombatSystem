@@ -23,8 +23,8 @@ UAbilityComponent::UAbilityComponent()
 
     bUpdateEquipmentAbility = true;
 
-    TSubclassOf<ASpellIndicatorActor> LoadedClass =
-        GameUtils::LoadAssetClass<ASpellIndicatorActor>(TEXT("/Game/DynamicCombatSystem/Blueprints/SpellIndicatorActorBP"));
+    TSubclassOf<ASpellIndicatorActor> LoadedClass = GameUtils::LoadAssetClass<ASpellIndicatorActor>(
+        TEXT("/Game/DynamicCombatSystem/Blueprints/SpellIndicatorActorBP"));
     SpawnIndicatorClass = LoadedClass;
         
 }

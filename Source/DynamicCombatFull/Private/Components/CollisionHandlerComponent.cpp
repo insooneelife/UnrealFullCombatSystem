@@ -70,6 +70,16 @@ void UCollisionHandlerComponent::AddIgnoredClass(TSubclassOf<AActor> IgnoredClas
     IgnoredClasses.Add(IgnoredClass);
 }
 
+void UCollisionHandlerComponent::AddIgnoredCollisionProfileNames(FName InProfileName)
+{
+    IgnoredCollisionProfileNames.Add(InProfileName);
+}
+
+void UCollisionHandlerComponent::AddObjectTypesToCollideWith(TEnumAsByte<EObjectTypeQuery> InObjectType)
+{
+    ObjectTypesToCollideWith.Add(InObjectType);
+}
+
 void UCollisionHandlerComponent::UpdateLastSocketPositions()
 {
     for (const FCollisionComponent& CollComp : CollisionComponents)

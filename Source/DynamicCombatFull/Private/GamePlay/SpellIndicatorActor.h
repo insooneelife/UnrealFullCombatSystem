@@ -31,8 +31,6 @@ public:
 
 
 private:
-    UPROPERTY(EditAnywhere)
-    USceneComponent* Scene;
 
     UPROPERTY(EditAnywhere)
     UDecalComponent* Decal;
