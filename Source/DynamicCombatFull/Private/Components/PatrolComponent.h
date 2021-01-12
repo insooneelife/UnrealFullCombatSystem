@@ -22,7 +22,7 @@ protected:
 	virtual void BeginPlay() override;
 
 public:	
-	
+    void Init();
     void UpdatePatrolIndex();
     FVector GetSplinePointLocation(int InPointIndex) const;
     bool IsPatrolPathValid() const;

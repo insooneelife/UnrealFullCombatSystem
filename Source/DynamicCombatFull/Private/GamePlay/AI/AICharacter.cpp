@@ -11,6 +11,7 @@
 #include "Perception/AISense_Damage.h"
 
 #include "GamePlay/AI/BaseAIController.h"
+#include "GamePlay/PatrolPathActor.h"
 #include "GameCore/GameUtils.h"
 #include "GameCore/CustomStructs.h"
 #include "GameCore/DefaultGameInstance.h"
@@ -106,6 +107,7 @@ void AAICharacter::BeginPlay()
 
     StatsManager->Init();
     Equipment->Init();
+    Patrol->Init();
     InitializeStatsWidget();
 
     ABaseAIController* BaseAIController = Cast<ABaseAIController>(GetController());
@@ -118,6 +120,7 @@ void AAICharacter::BeginPlay()
     {
         UE_LOG(LogTemp, Error, TEXT("AIController is not valid!"));
     }
+
 
     float Health = ExtendedHealth->GetMaxValue();
     ExtendedHealth->SetCurrentValue(Health, false);

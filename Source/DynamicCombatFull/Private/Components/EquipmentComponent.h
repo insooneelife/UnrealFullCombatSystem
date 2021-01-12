@@ -151,6 +151,7 @@ private:
     UPROPERTY(EditAnywhere)
     TArray<FEquipmentSlots> EquipmentSlots;
 
+    UPROPERTY(EditAnywhere)
     TMap<EItemType, FDisplayedItems> DisplayedItems;
 
     TArray<EItemType> MainHandTypes;

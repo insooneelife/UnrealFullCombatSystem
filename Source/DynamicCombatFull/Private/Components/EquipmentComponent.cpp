@@ -566,7 +566,6 @@ void UEquipmentComponent::UpdateDisplayedItem(EItemType InType, int InSlotIndex)
         if (UKismetSystemLibrary::IsValidClass(ItemData.ItemClass))
         {
             UItemBase* ItemBase = NewObject<UItemBase>(GetOwner(), ItemData.ItemClass);
-
             IItemIsDisplayed* ItemIsDisplayed = Cast<IItemIsDisplayed>(ItemBase);
 
             if (ItemIsDisplayed != nullptr)

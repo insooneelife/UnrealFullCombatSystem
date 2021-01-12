@@ -2,8 +2,10 @@
 
 
 #include "PatrolComponent.h"
+#include "Kismet/GameplayStatics.h"
 #include "GamePlay/PatrolPathActor.h"
 #include "GameCore/GameUtils.h"
+#include "GameCore/DefaultGameInstance.h"
 
 // Sets default values for this component's properties
 UPatrolComponent::UPatrolComponent()
@@ -19,6 +21,22 @@ UPatrolComponent::UPatrolComponent()
 void UPatrolComponent::BeginPlay()
 {
 	Super::BeginPlay();
+}
+
+void UPatrolComponent::Init()
+{
+    UE_LOG(LogTemp, Error, TEXT("UPatrolComponent Init"));
+    TArray<AActor*> FoundActors;
+    UGameplayStatics::GetAllActorsOfClass(GetWorld(), APatrolPathActor::StaticClass(), FoundActors);
+
+    for (AActor* Actor : FoundActors)
+    {
+        UE_LOG(LogTemp, Error, TEXT("UPatrolComponent Init  for   %s"), *GameUtils::GetDebugName(Actor));
+    }
+
+    PatrolPath = Cast<APatrolPathActor>(UDefaultGameInstance::GetClosestActor(GetOwner(), FoundActors));
+
+    UE_LOG(LogTemp, Error, TEXT("UPatrolComponent Init  PatrolPath   %s"), *GameUtils::GetDebugName(PatrolPath));
 }
 
 void UPatrolComponent::UpdatePatrolIndex()
