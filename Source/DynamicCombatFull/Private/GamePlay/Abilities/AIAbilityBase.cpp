@@ -9,6 +9,12 @@
 #include "GamePlay/AI/AICharacter.h"
 #include "GameCore/GameUtils.h"
 
+
+AAIAbilityBase::AAIAbilityBase()
+{
+    RootComponent = CreateDefaultSubobject<USceneComponent>("Scene");
+}
+
 void AAIAbilityBase::NativeInit(UAbilityComponent* InAbilityComponent)
 {
     Super::NativeInit(InAbilityComponent);

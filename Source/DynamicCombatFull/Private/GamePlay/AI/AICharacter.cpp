@@ -213,7 +213,7 @@ void AAICharacter::HandleMeshOnDeath()
         EItemType MainHandType = Equipment->GetSelectedMainHandType();
         ADisplayedItem* MainHandItem = Equipment->GetDisplayedItem(MainHandType, 0);
 
-        if (GameUtils::IsValid(MainHandItem))
+        if (MainHandItem != nullptr)
         {
             MainHandItem->SimulatePhysics();
         }
@@ -222,7 +222,7 @@ void AAICharacter::HandleMeshOnDeath()
         {
             ADisplayedItem* ShieldItem = Equipment->GetDisplayedItem(EItemType::Shield, 0);
 
-            if (GameUtils::IsValid(ShieldItem))
+            if (ShieldItem != nullptr)
             {
                 ShieldItem->SimulatePhysics();
             }
@@ -501,7 +501,7 @@ FRotator AAICharacter::GetDesiredRotation() const
 
 UDataTable* AAICharacter::GetMontages(EMontageAction InAction) const
 {
-    return nullptr;
+    return Montages;
 }
 
 

@@ -34,6 +34,7 @@ void ABowDisplayedItem::EndPlay(const EEndPlayReason::Type EndPlayReason)
 void ABowDisplayedItem::NativeInit(UEquipmentComponent* InEquipmentComponent, EItemType InType, int InSlotIndex)
 {
     Super::NativeInit(InEquipmentComponent, InType, InSlotIndex);
+    
     UpdateArrowMesh();
     EquipmentComponent->OnActiveItemChanged.AddDynamic(this, &ABowDisplayedItem::OnActiveItemChanged);
 }

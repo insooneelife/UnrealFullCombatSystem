@@ -105,6 +105,7 @@ UAnimMontage* ICanMeleeAttack::GetNextMeleeAttackMontage(
 
 void ICanMeleeAttack::OnCollisionActivated(ECollisionPart CollisionPart)
 {
+    UE_LOG(LogTemp, Error, TEXT("ICanMeleeAttack UpdateOnCollisionActivated"));
     ACharacter* ThisCharacter = GetThisCharacter();
     UCollisionHandlerComponent* MeleeCollisionHandler = GetMeleeCollisionHandler();
     UEquipmentComponent* Equipment = GetEquipment();

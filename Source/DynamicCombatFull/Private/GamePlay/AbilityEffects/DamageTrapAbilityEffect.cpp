@@ -32,18 +32,26 @@ ADamageTrapAbilityEffect::ADamageTrapAbilityEffect()
         GameUtils::LoadAssetObject<USoundBase>(TEXT("/Game/DynamicCombatSystem/SFX/CUE/CUE_GroundExplosion"));
     ExplosionSound = LoadedSoundObject;
 
-    RootComponent = CreateDefaultSubobject<USceneComponent>("Scene");
     SphereComponent = CreateDefaultSubobject<USphereComponent>("Sphere");
-    DecalComponent = CreateDefaultSubobject<UDecalComponent>("Decal");
-
     SphereComponent->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
+    SphereComponent->SetCollisionEnabled(ECollisionEnabled::Type::QueryOnly);
+    SphereComponent->SetCollisionObjectType(ECollisionChannel::ECC_WorldDynamic);
+    SphereComponent->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
+    SphereComponent->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Overlap);
+
+    DecalComponent = CreateDefaultSubobject<UDecalComponent>("Decal");
     DecalComponent->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
+}
+
+void ADamageTrapAbilityEffect::BeginPlay()
+{
+    Super::BeginPlay();
 }
 
 void ADamageTrapAbilityEffect::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
     this->SphereComponent->OnComponentBeginOverlap.RemoveDynamic(
-        this, &ADamageTrapAbilityEffect::OnComponentBeginOverlap);
+        this, &ADamageTrapAbilityEffect::OnSphereBeginOverlap);
 
     Super::EndPlay(EndPlayReason);
 }
@@ -72,19 +80,19 @@ void ADamageTrapAbilityEffect::Init(
     float InDuration,
     float InActivationDelay)
 {
-    Super::Init(InDamageRadius, InDamage, InImpulse);
+    Super::Init(InDamageRadius, InDamage, InImpulse, false);
     TrapRadius = InTrapRadius;
     Duration = InDuration;
     ActivationDelay = InActivationDelay;
 
     this->SphereComponent->OnComponentBeginOverlap.AddDynamic(
-        this, &ADamageTrapAbilityEffect::OnComponentBeginOverlap);
+        this, &ADamageTrapAbilityEffect::OnSphereBeginOverlap);
 
     SetLifeSpan(Duration);
     SphereComponent->SetSphereRadius(TrapRadius);
 }
 
-void ADamageTrapAbilityEffect::OnComponentBeginOverlap(
+void ADamageTrapAbilityEffect::OnSphereBeginOverlap(
     UPrimitiveComponent* OverlappedComponent,
     AActor* OtherActor,
     UPrimitiveComponent* OtherComp,
@@ -96,12 +104,27 @@ void ADamageTrapAbilityEffect::OnComponentBeginOverlap(
     {
         if(!IsImmortal(OtherActor))
         {
-            DisableTrap();
-            DamageToShapeArea();
-            SpawnHitParticle();
-            PlaySound();
-            Destroy();
+            ExecuteTrap();
         }
+        else
+        {
+            UStateManagerComponent* StateManager = Cast<UStateManagerComponent>(
+                OtherActor->GetComponentByClass(UStateManagerComponent::StaticClass()));
+
+            if (GameUtils::IsValid(StateManager))
+            {
+                StateManager->OnActivityChanged.AddDynamic(
+                    this, &ADamageTrapAbilityEffect::OnTargetActivityChanged);
+            }
+        }
+    }
+}
+
+void ADamageTrapAbilityEffect::OnTargetActivityChanged(EActivity InActivity, bool bInValue)
+{
+    if (InActivity == EActivity::IsImmortal && !bInValue)
+    {
+        ExecuteTrap();
     }
 }
 
@@ -138,16 +161,25 @@ void ADamageTrapAbilityEffect::PlaySound()
 
 bool ADamageTrapAbilityEffect::IsImmortal(AActor* InActor) const
 {
-    UStateManagerComponent* StatsManagerComp =
+    UStateManagerComponent* StateManager =
         Cast<UStateManagerComponent>(InActor->GetComponentByClass(UStateManagerComponent::StaticClass()));
 
-    if (GameUtils::IsValid(StatsManagerComp))
+    if (GameUtils::IsValid(StateManager))
     {
-        if (StatsManagerComp->GetActivityValue(EActivity::IsImmortal))
+        if (StateManager->GetActivityValue(EActivity::IsImmortal))
         {
             return true;
         }
     }
 
     return false;
+}
+
+void ADamageTrapAbilityEffect::ExecuteTrap()
+{
+    DisableTrap();
+    DamageToShapeArea();
+    SpawnHitParticle();
+    PlaySound();
+    Destroy();
 }

@@ -168,7 +168,8 @@ void UInventoryComponent::AddItem(TSubclassOf<UItemBase> InItemClass, int InAmou
         {
             if (InAmount > 1)
             {
-                UE_LOG(LogTemp, Warning, TEXT("Tried to add more than 1 unstuckable item : %s"), *InItemClass->GetName());
+                UE_LOG(LogTemp, Warning, TEXT("Tried to add more than 1 unstuckable item : %s"), 
+                    *InItemClass->GetName());
             }
 
             FStoredItem NewItem;

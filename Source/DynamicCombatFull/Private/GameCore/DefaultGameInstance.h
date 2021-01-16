@@ -10,6 +10,8 @@
 
 
 class UExtendedStatComponent;
+class UParticleSystem;
+class USoundBase;
 /**
  *
  */
@@ -17,6 +19,9 @@ UCLASS()
 class UDefaultGameInstance : public UGameInstance
 {
     GENERATED_BODY()
+
+public:
+    UDefaultGameInstance();
 
 public:
     static const FName Inventory;
@@ -66,4 +71,10 @@ public:
 
     UPROPERTY()
         USoundBase* BlockShieldSound;
+
+    UPROPERTY()
+    UParticleSystem* ExplosionParticle;
+
+    UPROPERTY()
+    USoundBase* GroundExplosionSound;
 };

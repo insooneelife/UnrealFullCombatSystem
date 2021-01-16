@@ -32,6 +32,6 @@ void ADamageCapsuleAbilityEffect::GetTraceObjects(TArray<FHitResult>& OutHits) c
 
 void ADamageCapsuleAbilityEffect::Init(float InDamageRadius, float InDamage, float InImpulse, float InHalfHeight)
 {
-    Super::Init(InDamageRadius, InDamage, InImpulse);
+    Super::Init(InDamageRadius, InDamage, InImpulse, true);
     HalfHeight = InHalfHeight;
 }

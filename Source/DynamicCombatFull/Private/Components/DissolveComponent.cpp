@@ -49,7 +49,9 @@ void UDissolveComponent::StartDissolve(UPrimitiveComponent* InComponent, bool bI
             {
                 LMaterials.Add(InComponent->GetMaterial(i));
 
-                UMaterialInstanceDynamic* MatInstD = InComponent->CreateDynamicMaterialInstance(i, DissolveMaterial);
+                UMaterialInstanceDynamic* MatInstD = 
+                    InComponent->CreateDynamicMaterialInstance(i, DissolveMaterial);
+
                 MatInstD->SetVectorParameterValue(DissolveColorName, DissolveColor);
                 LDissolveMaterials.Add(MatInstD);
             }

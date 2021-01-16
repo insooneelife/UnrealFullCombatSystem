@@ -15,6 +15,9 @@ UCLASS()
 class AAIAbilityBase : public AAbilityBase
 {
 	GENERATED_BODY()
+public:
+    AAIAbilityBase();
+
 protected:
     virtual void NativeInit(UAbilityComponent* InAbilityComponent) override;
 

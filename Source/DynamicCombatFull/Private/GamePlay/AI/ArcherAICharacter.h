@@ -50,9 +50,6 @@ public:
     virtual float BowAttack() override;
     virtual FTransform GetSpawnArrowTransform() const override;
 
-    // IMontageManagerInterface
-    virtual UDataTable* GetMontages(EMontageAction InAction) const override;
-
 protected:
     UFUNCTION()
     void OnActivityChanged(EActivity InActivity, bool bValue);
@@ -67,7 +64,4 @@ private:
 
     UPROPERTY(EditAnywhere, Category = "LoadedObject")
     USoundBase* DefaultDrawBowSoundObject;
-
-    UPROPERTY(EditAnywhere, Category = "LoadedObject")
-    UDataTable* AIArcherMontages;
 };

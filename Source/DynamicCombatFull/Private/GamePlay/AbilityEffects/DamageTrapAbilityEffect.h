@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "GameCore/DataTypes.h"
 #include "GamePlay/AbilityEffects/DamageAbilityEffectBase.h"
 #include "DamageTrapAbilityEffect.generated.h"
 
@@ -11,6 +12,7 @@ class USceneComponent;
 class USoundBase;
 class USphereComponent;
 class UParticleSystem;
+class UPrimitiveComponent;
 
 UCLASS()
 class ADamageTrapAbilityEffect : public ADamageAbilityEffectBase
@@ -22,6 +24,8 @@ public:
 	ADamageTrapAbilityEffect();
 
 protected:
+    virtual void BeginPlay() override;
+
 	// Called when the game starts or when spawned
     virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
@@ -38,13 +42,16 @@ public:
         float InActivationDelay);
 
     UFUNCTION()
-    void OnComponentBeginOverlap(
+    void OnSphereBeginOverlap(
         UPrimitiveComponent* OverlappedComponent,
         AActor* OtherActor,
         UPrimitiveComponent* OtherComp,
         int32 OtherBodyIndex,
         bool bFromSweep,
         const FHitResult& SweepResult);
+
+    UFUNCTION()
+    void OnTargetActivityChanged(EActivity InActivity, bool bInValue);
 
     void EnableTrap();
     void DisableTrap();
@@ -54,6 +61,8 @@ public:
     void PlaySound();
 
     bool IsImmortal(AActor* InActor) const;
+
+    void ExecuteTrap();
 
 private:
 

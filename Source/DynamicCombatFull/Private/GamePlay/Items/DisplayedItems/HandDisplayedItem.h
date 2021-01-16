@@ -7,6 +7,7 @@
 #include "GameCore/CustomStructs.h"
 #include "HandDisplayedItem.generated.h"
 
+class UStaticMeshComponent;
 /**
  * 
  */
@@ -15,6 +16,9 @@ class AHandDisplayedItem : public ADisplayedItem
 {
 	GENERATED_BODY()
         
+public:
+    AHandDisplayedItem();
+
 protected:
     virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
@@ -30,4 +34,7 @@ public:
 protected:
     UPROPERTY(EditAnywhere, Category = "Sockets")
     FName HandAttachmentSocket;
+
+    UPROPERTY(EditAnywhere)
+    UStaticMeshComponent* StaticMesh;
 };

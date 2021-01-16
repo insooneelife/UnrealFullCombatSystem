@@ -524,6 +524,21 @@ bool UEquipmentComponent::IsWeaponEquipped() const
     return GetWeaponType() != EWeaponType::None;
 }
 
+void UEquipmentComponent::SetCombat(bool bInValue)
+{
+    if (bIsInCombat != bInValue)
+    {
+        bIsInCombat = bInValue;
+        AttachDisplayedItem(SelectedMainHandType, 0);
+        if (SelectedMainHandType == EItemType::MeleeWeapon)
+        {
+            AttachDisplayedItem(EItemType::Shield, 0);
+        }
+
+        OnInCombatChanged.Broadcast(bIsInCombat);
+    }
+}
+
 void UEquipmentComponent::OnItemModified(FStoredItem InItem)
 {
     EItemType ItemType;
@@ -860,21 +875,6 @@ void UEquipmentComponent::BuildEquipment(const TArray<FEquipmentSlots>& InEquipm
 }
 
 
-void UEquipmentComponent::SetCombat(bool bInValue)
-{
-    if (bIsInCombat != bInValue)
-    {
-        bIsInCombat = bInValue;
-        AttachDisplayedItem(SelectedMainHandType, 0);
-        if (SelectedMainHandType == EItemType::MeleeWeapon)
-        {
-            AttachDisplayedItem(EItemType::Shield, 0);
-        }
-
-        OnInCombatChanged.Broadcast(bIsInCombat);
-    }
-}
-
 void UEquipmentComponent::UpdateCombatType()
 {
     ECombatType PreviousCombatType = CombatType;
@@ -927,7 +927,7 @@ void UEquipmentComponent::AttachDisplayedItem(EItemType InType, int InSlotIndex)
     FString EnumStr = GameUtils::GetEnumValueAsString("EItemType", InType);
     ADisplayedItem* DisplayedItem = GetDisplayedItem(InType, InSlotIndex);
 
-    if (GameUtils::IsValid(DisplayedItem))
+    if (DisplayedItem != nullptr)
     {
         DisplayedItem->Attach();
     }

@@ -32,6 +32,7 @@ class UEffectsComponent;
 class UBehaviorComponent;
 class UMontageManagerComponent;
 class UCollisionHandlerComponent;
+class UDataTable;
 
 
 UCLASS()
@@ -69,8 +70,6 @@ public:
 public:
     UBehaviorTree* GetBTree() const { return BTree; }
 
-
-
     UPatrolComponent* GetPatrol() const { return Patrol; }
 
     UExtendedStatComponent* GetExtendedStamina() const { return ExtendedStamina; }
@@ -78,10 +77,10 @@ public:
 protected:
 
     UFUNCTION()
-        void OnEffectApplied(EEffectType InType);
+    void OnEffectApplied(EEffectType InType);
 
     UFUNCTION()
-        void OnEffectRemoved(EEffectType InType);
+    void OnEffectRemoved(EEffectType InType);
 
     void HandleMeshOnDeath();
 
@@ -263,6 +262,9 @@ protected:
 
     UPROPERTY(EditAnywhere, Category = "AI")
     UBehaviorTree* BTree;
+
+    UPROPERTY(EditAnywhere, Category = "LoadedObject")
+    UDataTable* Montages;
 
     FTimerHandle ResetMeleeAttackCounterTimerHandle;
 };

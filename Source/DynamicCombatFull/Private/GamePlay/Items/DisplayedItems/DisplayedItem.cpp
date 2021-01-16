@@ -12,7 +12,7 @@
 // Sets default values
 ADisplayedItem::ADisplayedItem()
 {
-    RootComponent = CreateDefaultSubobject<USceneComponent>("Scene");
+    //RootComponent = CreateDefaultSubobject<USceneComponent>("Scene");
 
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = false;
@@ -89,6 +89,8 @@ bool ADisplayedItem::Attach()
 
         if (GameUtils::IsValid(Character))
         {
+            UPrimitiveComponent* PrimitiveComponent = GetPrimaryComponent();
+
             FAttachmentTransformRules AttachmentRules(
                 EAttachmentRule::KeepRelative, EAttachmentRule::KeepRelative, EAttachmentRule::KeepRelative, false);
 

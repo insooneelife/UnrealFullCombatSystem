@@ -144,4 +144,7 @@ void GameUtils::DrawArrow(UWorld* InWorld, FVector Start, FVector End)
     DrawDebugDirectionalArrow(InWorld, Start, End, 12.f, FColor::Magenta, true, -1.f, 0, 5.f);
 }
 
-
+UDefaultGameInstance* GameUtils::GetDefaultGameInstance(UWorld* InWorld)
+{
+    return Cast<UDefaultGameInstance>(InWorld->GetGameInstance());
+}

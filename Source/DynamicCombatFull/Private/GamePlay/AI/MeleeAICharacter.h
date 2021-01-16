@@ -19,11 +19,5 @@ public:
     AMeleeAICharacter();
 
 public:
-    // IMontageManagerInterface
-    virtual UDataTable* GetMontages(EMontageAction InAction) const override;
-
-
 private:
-    UPROPERTY(EditAnywhere, Category = "LoadedObject")
-    UDataTable* AIMeleeMontages;
 };

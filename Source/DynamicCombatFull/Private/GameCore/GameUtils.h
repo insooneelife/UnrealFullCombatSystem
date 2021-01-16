@@ -5,9 +5,11 @@
 #include "CoreMinimal.h"
 #include "GameCore/DataTypes.h"
 #include "GameCore/CustomStructs.h"
+#include "GameCore/DefaultGameInstance.h"
 #include "GamePlay/Items/ObjectItems/ItemBase.h"
 
 class UExtendedStatComponent;
+class UDefaultGameInstance;
 /**
  * 
  */
@@ -44,6 +46,8 @@ public:
 
     static void DrawPoint(UWorld* InWorld, FVector InLocation);
     static void DrawArrow(UWorld* InWorld, FVector Start, FVector End);
+
+    static UDefaultGameInstance* GetDefaultGameInstance(UWorld* InWorld);
 
     template<typename ClassType>
     static TSubclassOf<ClassType> LoadAssetClass(FString AssetPath)

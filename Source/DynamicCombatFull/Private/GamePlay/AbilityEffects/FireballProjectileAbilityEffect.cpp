@@ -32,14 +32,7 @@ AFireballProjectileAbilityEffect::AFireballProjectileAbilityEffect()
     StopHomingDistance = 300.0f;
     ImpulsePower = 30000.0f;
 
-    CollisionHandler = CreateDefaultSubobject<UCollisionHandlerComponent>("CollisionHandler");
-    ProjectileMovement = CreateDefaultSubobject<UProjectileMovementComponent>("Projectile");
-
-    RootComponent = CollisionSphere = CreateDefaultSubobject<UStaticMeshComponent>("CollisionSphere");
-    ParticleSystem = CreateDefaultSubobject<UParticleSystemComponent>("ParticleSystem");
-    ParticleSystem->AttachToComponent(CollisionSphere, FAttachmentTransformRules::KeepRelativeTransform);
-
-    static UParticleSystem* LoadedParticleObject = 
+    static UParticleSystem* LoadedParticleObject =
         GameUtils::LoadAssetObject<UParticleSystem>(TEXT("/Game/DynamicCombatSystem/VFX/P_FireballHit"));
     HitParticle = LoadedParticleObject;
 
@@ -50,6 +43,44 @@ AFireballProjectileAbilityEffect::AFireballProjectileAbilityEffect()
     static UParticleSystem* LoadedFireballParticleObject =
         GameUtils::LoadAssetObject<UParticleSystem>(TEXT("/Game/DynamicCombatSystem/VFX/P_FireballHit"));
     FireballHitParticle = LoadedFireballParticleObject;
+
+
+    CollisionHandler = CreateDefaultSubobject<UCollisionHandlerComponent>("CollisionHandler");
+    ProjectileMovement = CreateDefaultSubobject<UProjectileMovementComponent>("Projectile");
+
+    RootComponent = CollisionSphere = CreateDefaultSubobject<UStaticMeshComponent>("CollisionSphere");
+
+    static UStaticMesh* LoadedStaticMeshObject =
+        GameUtils::LoadAssetObject<UStaticMesh>(TEXT("/Game/DynamicCombatSystem/Meshes/SM_CollisionSphere"));
+    
+    CollisionSphere->SetStaticMesh(LoadedStaticMeshObject);
+
+    ParticleSystem = CreateDefaultSubobject<UParticleSystemComponent>("ParticleSystem");
+    ParticleSystem->AttachToComponent(CollisionSphere, FAttachmentTransformRules::KeepRelativeTransform);
+
+    static UParticleSystem* LoadedFireballObject =
+        GameUtils::LoadAssetObject<UParticleSystem>(TEXT("/Game/DynamicCombatSystem/VFX/P_Fireball"));
+
+    ParticleSystem->SetTemplate(LoadedFireballObject);
+
+
+    CollisionHandler->AddIgnoredCollisionProfileNames("Pawn");
+    CollisionHandler->SetTraceRadius(15.0f);
+
+    CollisionHandler->AddObjectTypesToCollideWith(
+        UEngineTypes::ConvertToObjectType(ECollisionChannel::ECC_WorldStatic));
+
+    CollisionHandler->AddObjectTypesToCollideWith(
+        UEngineTypes::ConvertToObjectType(ECollisionChannel::ECC_PhysicsBody));
+
+    // interactable
+    CollisionHandler->AddObjectTypesToCollideWith(
+        UEngineTypes::ConvertToObjectType(ECollisionChannel::ECC_GameTraceChannel2));
+
+    ProjectileMovement->MaxSpeed = 2000.0f;
+    ProjectileMovement->bRotationFollowsVelocity = true;
+    ProjectileMovement->ProjectileGravityScale = 0.0f;
+    
 }
 
 void AFireballProjectileAbilityEffect::EndPlay(const EEndPlayReason::Type EndPlayReason)

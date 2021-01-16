@@ -3,6 +3,7 @@
 
 #include "DefaultGameInstance.h"
 #include "Sound/SoundBase.h"
+#include "Particles/ParticleSystem.h"
 #include "Kismet/GameplayStatics.h"
 #include "UObject/ConstructorHelpers.h"
 #include "Engine/World.h"
@@ -26,18 +27,17 @@ const FName UDefaultGameInstance::Back = FName("Back");
 
 UDefaultGameInstance::UDefaultGameInstance(const FObjectInitializer& ObjectInitializer)
 {
-    static USoundBase* LoadedHitHandsSoundObject =
-        GameUtils::LoadAssetObject<USoundBase>("/Game/DynamicCombatSystem/SFX/CUE/CUE_HitHands");
-    DefaultHitSound = LoadedHitHandsSoundObject;
+    DefaultHitSound = GameUtils::LoadAssetObject<USoundBase>("/Game/DynamicCombatSystem/SFX/CUE/CUE_HitHands");
+    SwordHitSound = GameUtils::LoadAssetObject<USoundBase>("/Game/DynamicCombatSystem/SFX/CUE/CUE_HitSword");
+    AxeHitSound = SwordHitSound;
+    BlockShieldSound = GameUtils::LoadAssetObject<USoundBase>("/Game/DynamicCombatSystem/SFX/CUE/Cue_BlockShieldMetal");
 
-    static USoundBase* LoadedHitSwordSoundObject =
-        GameUtils::LoadAssetObject<USoundBase>("/Game/DynamicCombatSystem/SFX/CUE/CUE_HitSword");
-    SwordHitSound = LoadedHitSwordSoundObject;
-    AxeHitSound = LoadedHitSwordSoundObject;
+    ExplosionParticle = GameUtils::LoadAssetObject<UParticleSystem>("/Game/DynamicCombatSystem/VFX/P_Explosion");
+    GroundExplosionSound = GameUtils::LoadAssetObject<USoundBase>("/Game/DynamicCombatSystem/SFX/CUE/CUE_GroundExplosion");
 
-    static USoundBase* LoadedBlockShieldSoundObject =
-        GameUtils::LoadAssetObject<USoundBase>("/Game/DynamicCombatSystem/SFX/CUE/Cue_BlockShieldMetal");
-    BlockShieldSound = LoadedBlockShieldSoundObject;
+
+
+    // GameUtils::GetDefaultGameInstance(GetWorld())->ExplosionParticle;
 }
 
 

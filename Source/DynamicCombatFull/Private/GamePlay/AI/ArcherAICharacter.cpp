@@ -29,7 +29,7 @@ AArcherAICharacter::AArcherAICharacter()
 
     static UDataTable* LoadedDataTable =
         GameUtils::LoadAssetObject<UDataTable>("/Game/DynamicCombatSystem/DataTables/AIArcherMontages");
-    AIArcherMontages = LoadedDataTable;
+    Montages = LoadedDataTable;
 
     ArrowSpawnLocation = CreateDefaultSubobject<USceneComponent>("ArrowSpawnLocation");
     ArrowSpawnLocation->AttachToComponent(GetMesh(), FAttachmentTransformRules::KeepRelativeTransform);
@@ -203,11 +203,6 @@ FTransform AArcherAICharacter::GetSpawnArrowTransform() const
     {
         return FTransform();
     }
-}
-
-UDataTable* AArcherAICharacter::GetMontages(EMontageAction InAction) const
-{
-    return AIArcherMontages;
 }
 
 void AArcherAICharacter::OnActivityChanged(EActivity InActivity, bool bValue)

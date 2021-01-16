@@ -28,6 +28,7 @@ protected:
     virtual void NativeInit(UEquipmentComponent* InEquipmentComponent, EItemType InType, int InSlotIndex) override;
 
 public:
+
     virtual void SimulatePhysics() override;
 
     virtual bool Attach();

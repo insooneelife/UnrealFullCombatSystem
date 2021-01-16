@@ -20,6 +20,8 @@ ABuffAbilityEffect::ABuffAbilityEffect()
     Color = FLinearColor(1.0f, 20.0f, 50.0f, 0.0f);
     AttachmentSocket = TEXT("Spine_03");
     TimerInterval = 0.1f;
+
+    RootComponent = CreateDefaultSubobject<USceneComponent>("Scene");
 }
 
 void ABuffAbilityEffect::Init(float InDuration, EStat InStatType, float InValue, FLinearColor InColor)

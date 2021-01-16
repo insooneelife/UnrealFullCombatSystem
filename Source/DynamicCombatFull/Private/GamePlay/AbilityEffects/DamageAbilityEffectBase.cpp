@@ -20,16 +20,22 @@ ADamageAbilityEffectBase::ADamageAbilityEffectBase()
 
     Damage = 15.0f;
     Impulse = 20000.0f;
+
+    RootComponent = CreateDefaultSubobject<USceneComponent>("Scene");
 }
 
-void ADamageAbilityEffectBase::Init(float InDamageRadius, float InDamage, float InImpulse)
+void ADamageAbilityEffectBase::Init(float InDamageRadius, float InDamage, float InImpulse, bool bDirectDestroy)
 {
     DamageRadius = InDamageRadius;
     Damage = InDamage;
     Impulse = InImpulse;
 
     DamageToShapeArea();
-    Destroy();
+
+    if (bDirectDestroy)
+    {
+        Destroy();
+    }
 }
 
 void ADamageAbilityEffectBase::DamageToShapeArea()
@@ -67,6 +73,8 @@ void ADamageAbilityEffectBase::DamageToShapeArea()
                     bool bResult = CanBeAttacked->TakeDamage(HitData, AttackResult);
                     if (bResult)
                     {
+
+
                         UEffectsComponent* EffectsComponent =
                             Cast<UEffectsComponent>(HitActor->GetComponentByClass(UEffectsComponent::StaticClass()));
 

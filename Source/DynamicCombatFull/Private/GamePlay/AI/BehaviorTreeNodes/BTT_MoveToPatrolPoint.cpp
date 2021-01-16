@@ -31,33 +31,26 @@ void UBTT_MoveToPatrolPoint::SetOwner(AActor* InActorOwner)
     Super::SetOwner(InActorOwner);
 
     AIOwner->ReceiveMoveCompleted.AddDynamic(this, &UBTT_MoveToPatrolPoint::OnMoveCompleted);
+
+    PatrolComponent = Cast<UPatrolComponent>(
+        AIOwner->GetPawn()->GetComponentByClass(UPatrolComponent::StaticClass()));
 }
 
 void UBTT_MoveToPatrolPoint::ReceiveExecuteAI(AAIController* OwnerController, APawn* ControlledPawn)
 {
-    PatrolComponent = Cast<UPatrolComponent>(ControlledPawn->GetComponentByClass(UPatrolComponent::StaticClass()));
-    
-    if (GameUtils::IsValid(PatrolComponent))
+    APatrolPathActor* Path = PatrolComponent->GetPatrolPath();
+
+    if (GameUtils::IsValid(Path))
     {
-        APatrolPathActor* Path = PatrolComponent->GetPatrolPath();
+        int Index = PatrolComponent->GetPointIndex();
+        FVector Dest = PatrolComponent->GetSplinePointLocation(Index);
 
-        if (GameUtils::IsValid(Path))
-        {
-            int Index = PatrolComponent->GetPointIndex();
-            FVector Dest = PatrolComponent->GetSplinePointLocation(Index);
-
-            OwnerController->MoveToLocation(Dest, AcceptanceRadius, true);
-        }
-        else
-        {
-            FinishExecute(false);
-        }
+        OwnerController->MoveToLocation(Dest, AcceptanceRadius, true);
     }
     else
     {
         FinishExecute(false);
     }
-
 }
 
 void UBTT_MoveToPatrolPoint::ReceiveAbortAI(AAIController* OwnerController, APawn* ControlledPawn)

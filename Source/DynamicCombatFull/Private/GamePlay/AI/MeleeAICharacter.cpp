@@ -15,7 +15,7 @@ AMeleeAICharacter::AMeleeAICharacter()
 
     static UDataTable* LoadedDataTable =
         GameUtils::LoadAssetObject<UDataTable>("/Game/DynamicCombatSystem/DataTables/AIMeleeMontages");
-    AIMeleeMontages = LoadedDataTable;
+    Montages = LoadedDataTable;
 
 
     FString ObjectItemDir("/Game/DynamicCombatSystem/Blueprints/Items/ObjectItems/Instances/");
@@ -71,9 +71,4 @@ AMeleeAICharacter::AMeleeAICharacter()
             FEquipmentSlot(TArray<FStoredItem>{FStoredItem()}, 0, false)
         })
         });
-}
-
-UDataTable* AMeleeAICharacter::GetMontages(EMontageAction InAction) const
-{
-    return AIMeleeMontages;
 }

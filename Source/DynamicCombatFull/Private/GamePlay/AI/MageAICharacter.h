@@ -37,9 +37,6 @@ public:
 public:
     virtual void OnMovementModeChanged(EMovementMode PrevMovementMode, uint8 PreviousCustomMode) override;
 
-    // IMontageManagerInterface
-    virtual UDataTable* GetMontages(EMontageAction InAction) const override;
-
     // IRotatingInterface
     virtual FRotator GetDesiredRotation() const override;
 
@@ -81,9 +78,6 @@ private:
 
     UPROPERTY(EditAnywhere, Category = "Components")
         UExtendedStatComponent* ExtendedMana;
-
-    UPROPERTY(EditAnywhere, Category = "LoadedObject")
-        UDataTable* AIMageMontages;
 
     bool bIsTargetable;
     FTimerHandle RetriggerableDelayTimerHandle;

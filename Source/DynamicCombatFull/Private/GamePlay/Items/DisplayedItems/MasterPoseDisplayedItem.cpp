@@ -4,6 +4,14 @@
 #include "MasterPoseDisplayedItem.h"
 #include "GameFramework/Character.h"
 #include "GameCore/GameUtils.h"
+#include "Components/SkeletalMeshComponent.h"
+
+AMasterPoseDisplayedItem::AMasterPoseDisplayedItem()
+{
+    RootComponent = SkeletalMesh = CreateDefaultSubobject<USkeletalMeshComponent>("SkeletalMesh");
+    SkeletalMesh->ComponentTags.Add("Dissolve");
+    SkeletalMesh->SetCollisionEnabled(ECollisionEnabled::Type::NoCollision);
+}
 
 bool AMasterPoseDisplayedItem::Attach()
 {

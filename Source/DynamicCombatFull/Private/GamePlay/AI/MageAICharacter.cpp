@@ -26,7 +26,7 @@ AMageAICharacter::AMageAICharacter()
 
     static UDataTable* LoadedDataTable =
         GameUtils::LoadAssetObject<UDataTable>("/Game/DynamicCombatSystem/DataTables/AIMageMontages");
-    AIMageMontages = LoadedDataTable;
+    Montages = LoadedDataTable;
 
     ExtendedMana = CreateDefaultSubobject<UExtendedStatComponent>("ExtendedMana");
     AbilityComponent = CreateDefaultSubobject<UAbilityComponent>("AbilityComponent");
@@ -145,11 +145,6 @@ void AMageAICharacter::OnMovementModeChanged(EMovementMode PrevMovementMode, uin
     {
         AbilityComponent->EndAbility(EAbilityEndResult::Interrupted);
     }
-}
-
-UDataTable* AMageAICharacter::GetMontages(EMontageAction InAction) const
-{
-    return AIMageMontages;
 }
 
 FRotator AMageAICharacter::GetDesiredRotation() const

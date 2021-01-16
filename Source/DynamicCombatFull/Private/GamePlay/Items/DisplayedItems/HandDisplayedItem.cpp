@@ -2,7 +2,15 @@
 
 
 #include "HandDisplayedItem.h"
+#include "Components/StaticMeshComponent.h"
 #include "Components/EquipmentComponent.h"
+
+AHandDisplayedItem::AHandDisplayedItem()
+{
+    RootComponent = StaticMesh = CreateDefaultSubobject<UStaticMeshComponent>("StaticMesh");
+    StaticMesh->ComponentTags.Add("Dissolve");
+    StaticMesh->SetCollisionEnabled(ECollisionEnabled::Type::NoCollision);
+}
 
 void AHandDisplayedItem::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {

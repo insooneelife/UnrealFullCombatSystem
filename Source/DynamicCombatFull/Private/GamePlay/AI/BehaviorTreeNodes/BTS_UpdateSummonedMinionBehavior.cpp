@@ -89,7 +89,7 @@ void UBTS_UpdateSummonedMinionBehavior::UpdateBehavior()
                 EAIBehavior Behavior = ControlledCharacter->GetPatrol()->IsPatrolPathValid() ?
                     EAIBehavior::Patrol : EAIBehavior::Idle;
 
-                if (GameUtils::IsValid(Target))
+                if (Target != nullptr)
                 {
                     ICanBeAttacked* CanBeAttacked = Cast<ICanBeAttacked>(Target);
                     if (CanBeAttacked != nullptr)

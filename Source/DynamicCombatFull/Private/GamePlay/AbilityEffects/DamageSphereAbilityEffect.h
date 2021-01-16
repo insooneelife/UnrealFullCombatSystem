@@ -24,7 +24,7 @@ public:
     UFUNCTION(BlueprintCallable, meta = (DisplayName = "Init", ScriptName = "Init"))
     void K2_Init(float InDamageRadius, float InDamage, float InImpulse) 
     {
-        Super::Init(InDamageRadius, InDamage, InImpulse); 
+        Super::Init(InDamageRadius, InDamage, InImpulse, true); 
     }
 
 private:

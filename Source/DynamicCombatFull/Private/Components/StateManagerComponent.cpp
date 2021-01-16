@@ -19,7 +19,6 @@ void UStateManagerComponent::SetActivity(EActivity InActivity, bool bInValue)
     if (GetActivityValue(InActivity) != bInValue)
     {
         Activities.Add(InActivity, bInValue);
-
         OnActivityChanged.Broadcast(InActivity, bInValue);
     }
 }

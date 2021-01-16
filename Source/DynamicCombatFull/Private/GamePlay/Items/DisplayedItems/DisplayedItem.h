@@ -11,7 +11,7 @@ class USceneComponent;
 class UEquipmentComponent;
 class UPrimitiveComponent;
 
-UCLASS()
+UCLASS(abstract)
 class ADisplayedItem : public AActor
 {
 	GENERATED_BODY()

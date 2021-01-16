@@ -76,6 +76,7 @@ public:
     bool CanBlock() const;
     bool GetBlockValue(float& InValue) const;
     bool IsWeaponEquipped() const;
+    void SetCombat(bool bInValue);
 
     const TArray<FEquipmentSlots>& GetEquipmentSlots() const { return EquipmentSlots; }
     void SetEquipmentSlots(const TArray<FEquipmentSlots>& InEquipmentSlots) { EquipmentSlots = InEquipmentSlots; }
@@ -105,7 +106,7 @@ private:
     void UseActiveItemAtSlot(EItemType InType, int InSlotIndex);
     bool FindItem(FStoredItem InItem, EItemType& OutType, int& OutSlotIndex, int& OutItemIndex) const;
     void BuildEquipment(const TArray<FEquipmentSlots>& InEquipment);
-    void SetCombat(bool bInValue);
+    
     void UpdateCombatType();
     void SetItemInSlot(EItemType InType, int InSlotIndex, int InItemIndex, FStoredItem InItem);
     void AttachDisplayedItem(EItemType InType, int InSlotIndex);

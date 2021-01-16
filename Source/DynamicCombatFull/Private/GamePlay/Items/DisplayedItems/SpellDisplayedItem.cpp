@@ -15,6 +15,7 @@ ASpellDisplayedItem::ASpellDisplayedItem()
         GameUtils::LoadAssetObject<UParticleSystem>(TEXT("/Game/DynamicCombatSystem/VFX/P_ArcaneHand"));
 
     ParticleSystemComponent->SetTemplate(LoadedObject);
+    ParticleSystemComponent->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
 
     HandAttachmentSocket = FName("magic_right_hand");
     AttachmentSocket = FName("magic_right_hand");

@@ -21,7 +21,7 @@ protected:
 public:	
     virtual void GetTraceObjects(TArray<FHitResult>& OutHits) const {}
 
-    void Init(float InDamageRadius, float InDamage, float InImpulse);
+    void Init(float InDamageRadius, float InDamage, float InImpulse, bool bDirectDestroy);
 
     void DamageToShapeArea();
 
