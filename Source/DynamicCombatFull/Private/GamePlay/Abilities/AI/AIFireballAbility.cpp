@@ -37,6 +37,7 @@ AAIFireballAbility::AAIFireballAbility()
 void AAIFireballAbility::Released()
 {
     Super::Released();
+
     bool bStartAbility = AbilityComponent->StartAbility();
 
     if (bStartAbility)
@@ -110,9 +111,11 @@ void AAIFireballAbility::UpdateMontageCounter()
 {
     MontageCounter++;
 
-    if (MontageCounter >= GetAbilityMontages().Num())
+    int Num = GetAbilityMontages().Num();
+
+    if (MontageCounter >= Num)
     {
-        MontageCounter = 0;
+        MontageCounter = 1;
     }
 }
 

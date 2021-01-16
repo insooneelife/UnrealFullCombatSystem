@@ -15,7 +15,7 @@ class APlayerAbilityBase : public AAbilityBase
 {
 	GENERATED_BODY()
 public:
-    APlayerAbilityBase() {}
+    APlayerAbilityBase();
 
 protected:
     virtual void NativeInit(UAbilityComponent* InAbilityComponent) override;

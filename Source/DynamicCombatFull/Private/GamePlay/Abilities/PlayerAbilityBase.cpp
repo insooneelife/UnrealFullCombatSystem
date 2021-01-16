@@ -13,6 +13,11 @@
 
 #include "GamePlay/BaseCharacter.h"
 
+APlayerAbilityBase::APlayerAbilityBase()
+{
+    RootComponent = CreateDefaultSubobject<USceneComponent>("Scene");
+}
+
 void APlayerAbilityBase::NativeInit(UAbilityComponent* InAbilityComponent)
 {
     Super::NativeInit(InAbilityComponent);

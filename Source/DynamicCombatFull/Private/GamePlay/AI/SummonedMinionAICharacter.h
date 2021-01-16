@@ -26,13 +26,14 @@ protected:
     UFUNCTION()
     void OnOwnerStateChanged(EState InPrevState, EState InNewState);
 
-    UFUNCTION()
-    void OnCollisionActivatedOverride(ECollisionPart CollisionPart);
-
 public:
     // ICanGetEffects
     virtual bool CanEffectBeApplied(EEffectType Type, AActor* Applier) override;
 
+
+    // ICanMeleeAttack
+    UFUNCTION()
+    virtual void OnCollisionActivated(ECollisionPart CollisionPart) override;
 
 private:
     void Delayed_BeginPlay();

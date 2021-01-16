@@ -23,7 +23,8 @@ class UAnimMontage;
 AAbilityBase::AAbilityBase()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.bCanEverTick = false;
+    PrimaryActorTick.bStartWithTickEnabled = false;
 
     static UTexture2D* LoadedTextureObject = GameUtils::LoadAssetObject<UTexture2D>(
         TEXT("/Game/DynamicCombatSystem/Widgets/Textures/T_AbilityCrosshair"));

@@ -13,32 +13,49 @@ APlayerFireballAbility::APlayerFireballAbility()
 {
     FireballProjectileClass = GameUtils::LoadAssetClass<AFireballProjectileAbilityEffect>(
         "/Game/DynamicCombatSystem/Blueprints/AbilityEffects/FireballProjectileEffectBP");
+    
+    static UAnimMontage* AnimMontage1 = GameUtils::LoadAssetObject<UAnimMontage>(
+        "/Game/DynamicCombatSystem/Montages/Player/Magic/M_Magic_Fireball_01");
+    AbilityMontages.Add(AnimMontage1);
+
+    static UAnimMontage* AnimMontage2 = GameUtils::LoadAssetObject<UAnimMontage>(
+        "/Game/DynamicCombatSystem/Montages/Player/Magic/M_Magic_Fireball_02");
+    AbilityMontages.Add(AnimMontage2);
+
+    static UAnimMontage* AnimMontage3 = GameUtils::LoadAssetObject<UAnimMontage>(
+        "/Game/DynamicCombatSystem/Montages/Player/Magic/M_Magic_Fireball_03");
+    AbilityMontages.Add(AnimMontage3);
+
+
+    ManaCost = 15.0f;
+    bIsUsingCrosshair = true;
+    Damage = 10.0f;
+    OwnerDamageScalar = 0.5f;
+
+
 }
 
 void APlayerFireballAbility::Released()
 {
-    UAbilityComponent* AbilityComponent = GetAbilityComponent();
-    if (GameUtils::IsValid(AbilityComponent))
+    if (AbilityComponent->StartAbility())
     {
-        if (AbilityComponent->StartAbility())
+        UpdateSocket();
+        UAnimMontage* AnimMontage = GetAbilityMontage(MontageCounter);
+        if (GameUtils::IsValid(AnimMontage))
         {
-            UpdateSocket();
-            UAnimMontage* AnimMontage = GetAbilityMontage(MontageCounter);
-            if (GameUtils::IsValid(AnimMontage))
-            {
-                float Duration = PlayAbilityMontage(AnimMontage, NAME_None, true, 1.0f);
-                UpdateMontageCounter();
+            float Duration = PlayAbilityMontage(AnimMontage, NAME_None, true, 1.0f);
+            UpdateMontageCounter();
 
-                GameUtils::SetTimerRetriggerable(
-                    GetWorld()->GetTimerManager(),
-                    RetriggerableTimerHandle,
-                    FTimerDelegate::CreateUObject(this, &APlayerFireballAbility::Delayed_Released),
-                    Duration,
-                    false);
-            }
+            GameUtils::SetTimerRetriggerable(
+                GetWorld()->GetTimerManager(),
+                RetriggerableTimerHandle,
+                FTimerDelegate::CreateUObject(this, &APlayerFireballAbility::Delayed_Released),
+                Duration,
+                false);
         }
-
     }
+
+    
 }
 
 void APlayerFireballAbility::Effect()
@@ -72,7 +89,8 @@ void APlayerFireballAbility::ResetMontageCounter()
 void APlayerFireballAbility::UpdateMontageCounter()
 {
     MontageCounter++;
-    if (MontageCounter > GetAbilityMontages().Num())
+    int Num = GetAbilityMontages().Num();
+    if (MontageCounter >= Num)
     {
         MontageCounter = 1;
     }

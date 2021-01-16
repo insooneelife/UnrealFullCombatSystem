@@ -38,7 +38,7 @@ private:
     float InitialProjectileSpeed;
 
     UPROPERTY(EditAnywhere)
-    TSubclassOf<AFireballProjectileAbilityEffect*> FireballProjectileClass;
+    TSubclassOf<AFireballProjectileAbilityEffect> FireballProjectileClass;
 
     FTimerHandle RetriggerableTimerHandle;
 };

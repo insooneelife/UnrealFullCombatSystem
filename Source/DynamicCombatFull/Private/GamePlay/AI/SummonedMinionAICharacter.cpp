@@ -30,8 +30,8 @@ void ASummonedMinionAICharacter::BeginPlay()
 {
     Super::BeginPlay();
 
-    MeleeCollisionHandler->OnCollisionActivated.RemoveDynamic(this, &ASummonedMinionAICharacter::OnCollisionActivated);
-    MeleeCollisionHandler->OnCollisionActivated.AddDynamic(this, &ASummonedMinionAICharacter::OnCollisionActivatedOverride);
+    //MeleeCollisionHandler->OnCollisionActivated.RemoveDynamic(this, &ASummonedMinionAICharacter::OnCollisionActivated);
+    //MeleeCollisionHandler->OnCollisionActivated.AddDynamic(this, &ASummonedMinionAICharacter::OnCollisionActivatedOverride);
 
     Equipment->SetCombat(true);
     DissolveInCharacterMesh();
@@ -78,7 +78,7 @@ bool ASummonedMinionAICharacter::CanEffectBeApplied(EEffectType Type, AActor* Ap
     return false;
 }
 
-void ASummonedMinionAICharacter::OnCollisionActivatedOverride(ECollisionPart CollisionPart)
+void ASummonedMinionAICharacter::OnCollisionActivated(ECollisionPart CollisionPart)
 {
     MeleeCollisionHandler->SetCollisionMesh(GetMesh(), CollisionSockets);
 }
