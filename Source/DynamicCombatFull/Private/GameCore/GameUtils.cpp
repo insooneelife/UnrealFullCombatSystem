@@ -133,9 +133,9 @@ FString GameUtils::GetDebugName(const UObject* const InObject)
 }
 
 
-void GameUtils::DrawPoint(UWorld* InWorld, FVector InLocation)
+void GameUtils::DrawPoint(UWorld* InWorld, FVector InLocation, FColor Color)
 {
-    DrawDebugPoint(InWorld, InLocation, 20, FColor::Red, true);
+    DrawDebugPoint(InWorld, InLocation, 20, Color, true);
 }
 
 
