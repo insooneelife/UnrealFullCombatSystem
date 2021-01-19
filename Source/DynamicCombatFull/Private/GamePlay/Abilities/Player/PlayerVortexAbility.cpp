@@ -60,8 +60,6 @@ void APlayerVortexAbility::Tick(float DeltaTime)
 
         AbilityComponent->UpdateSpellIndicatorLocation(EffectTransform.GetLocation());
 
-        GameUtils::DrawPoint(GetWorld(), EffectTransform.GetLocation());
-
         if (bEffectEnabled)
         {
             UpdateVortex();

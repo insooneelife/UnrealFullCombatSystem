@@ -41,8 +41,15 @@ public:
 
     UFUNCTION(BlueprintNativeEvent, BlueprintCallable, meta = (DisplayName = "GetAimAlpha", ScriptName = "GetAimAlpha"))
         float K2_GetAimAlpha() const;
+    virtual float K2_GetAimAlpha_Implementation() const override { return GetAimAlpha(); }
 
-    virtual float K2_GetAimAlpha_Implementation() const { return GetAimAlpha(); }
+    UFUNCTION(BlueprintNativeEvent, BlueprintCallable, meta = (DisplayName = "DoesHoldBowString", ScriptName = "DoesHoldBowString"))
+        bool K2_DoesHoldBowString() const;
+    virtual bool K2_DoesHoldBowString_Implementation() const override { return DoesHoldBowString(); }
+
+    UFUNCTION(BlueprintNativeEvent, BlueprintCallable, meta = (DisplayName = "GetBowStringSocketName", ScriptName = "GetBowStringSocketName"))
+        FName K2_GetBowStringSocketName() const;
+    virtual FName K2_GetBowStringSocketName_Implementation() const override { return GetBowStringSocketName(); }
 
     virtual float GetAimAlpha() const override { return AimAlpha; }
     virtual float GetArrowInitialSpeed() const override { return ArrowInitialSpeed; }

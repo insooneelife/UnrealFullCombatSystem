@@ -111,11 +111,12 @@ FTransform APlayerAbilityBase::GetCrosshairTransform(FName SpawnSocket) const
     FRotator SpawnDirection;
     if (OutHit.bBlockingHit)
     {
-        SpawnDirection = UKismetMathLibrary::Conv_VectorToRotator(CrosshairDirection);
+        FVector Direction = UKismetMathLibrary::GetDirectionUnitVector(SpawnLocation, OutHit.ImpactPoint);
+        SpawnDirection = UKismetMathLibrary::Conv_VectorToRotator(Direction);
     }
     else
     {
-        SpawnDirection = UKismetMathLibrary::Conv_VectorToRotator(SpawnLocation);
+        SpawnDirection = UKismetMathLibrary::Conv_VectorToRotator(CrosshairDirection);
     }
 
     return FTransform(SpawnDirection, SpawnLocation);

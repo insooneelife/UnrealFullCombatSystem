@@ -14,7 +14,8 @@
 APlayerSummonItemAbilityBase::APlayerSummonItemAbilityBase()
 {
     static UAnimMontage* LoadedAnimMontageObject =
-        GameUtils::LoadAssetObject<UAnimMontage>(TEXT("/Game/DynamicCombatSystem/Montages/Player/Magic/M_MG_SummonItem"));
+        GameUtils::LoadAssetObject<UAnimMontage>(
+            TEXT("/Game/DynamicCombatSystem/Montages/Player/Magic/M_Magic_SummonItem"));
 
     AbilityMontages = { LoadedAnimMontageObject };
 

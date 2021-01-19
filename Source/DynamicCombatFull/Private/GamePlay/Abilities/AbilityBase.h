@@ -102,7 +102,7 @@ public:
     bool IsRotateOnPressed() const { return bRotateOnPressed; }
 
     UFUNCTION(BlueprintCallable)
-    UAbilityComponent* GetAbilityComponent() const { return AbilityComponent; }
+    UAbilityComponent* GetAbilityComponent() const { return AbilityComponent.Get(); }
 
     UFUNCTION(BlueprintCallable)
     FTransform GetEffectTransform() const { return EffectTransform; }
@@ -117,7 +117,7 @@ public:
     FName GetBeamSocket() const { return BeamSocket; }
 
     UFUNCTION(BlueprintCallable)
-    ACharacter* GetCharacter() const { return Character; }
+    ACharacter* GetCharacter() const { return Character.Get(); }
 
     UFUNCTION(BlueprintCallable)
     FName GetLeftHandSocket() const { return LeftHandSocket; }
@@ -132,13 +132,12 @@ public:
     float GetImpulsePower() const { return ImpulsePower; }
 
 protected:
-    UPROPERTY()
-    UAbilityComponent* AbilityComponent;
+
+    TWeakObjectPtr<UAbilityComponent> AbilityComponent;
     
     FTransform EffectTransform;
 
-    UPROPERTY()
-    ACharacter* Character;
+    TWeakObjectPtr<ACharacter> Character;
 
     UPROPERTY(EditAnywhere, Category = "Ability\|Crosshair")
     bool bIsUsingCrosshair;

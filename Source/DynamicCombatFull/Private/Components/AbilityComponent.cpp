@@ -35,12 +35,24 @@ void UAbilityComponent::BeginPlay()
 	Super::BeginPlay();
 
     Character = Cast<ACharacter>(GetOwner());
-    EquipmentComponent = Cast<UEquipmentComponent>(Character->GetComponentByClass(UEquipmentComponent::StaticClass()));
+    if (Character.IsValid())
+    {
+        EquipmentComponent = Cast<UEquipmentComponent>(
+            Character->GetComponentByClass(UEquipmentComponent::StaticClass()));
+    }
+    else
+    {
+        UE_LOG(LogTemp, Error, TEXT("Character is not valid!"));
+    }
 
-    if (GameUtils::IsValid(EquipmentComponent))
+    if (EquipmentComponent.IsValid())
     {
         EquipmentComponent->OnActiveItemChanged.AddDynamic(this, &UAbilityComponent::OnActiveItemChanged);
         EquipmentComponent->OnMainHandTypeChanged.AddDynamic(this, &UAbilityComponent::OnMainHandTypeChanged);
+    }
+    else
+    {
+        UE_LOG(LogTemp, Error, TEXT("EquipmentComponent is not valid!"));
     }
 
 }
@@ -55,7 +67,7 @@ void UAbilityComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
         }
     }
 
-    if (GameUtils::IsValid(EquipmentComponent))
+    if (EquipmentComponent.IsValid())
     {
         EquipmentComponent->OnActiveItemChanged.RemoveDynamic(this, &UAbilityComponent::OnActiveItemChanged);
         EquipmentComponent->OnMainHandTypeChanged.RemoveDynamic(this, &UAbilityComponent::OnMainHandTypeChanged);
@@ -77,7 +89,7 @@ void UAbilityComponent::AbilityEffect()
 
 void UAbilityComponent::UpdateSpellIndicatorLocation(FVector InNewLocation)
 {
-    if (SpellIndicator != nullptr)
+    if (SpellIndicator.IsValid())
     {
         SpellIndicator->SetActorLocation(InNewLocation);
     }
@@ -177,7 +189,8 @@ bool UAbilityComponent::CanAbilityBeCancelled() const
 void UAbilityComponent::OnActiveItemChanged(
     FStoredItem InOldItem, FStoredItem InNewItem, EItemType InType, int InSlotIndex, int InActiveIndex)
 {
-    if (InType == EItemType::None || EquipmentComponent->GetSelectedMainHandType() == InType)
+    if (InType == EItemType::None || 
+        (EquipmentComponent.IsValid() && EquipmentComponent->GetSelectedMainHandType() == InType))
     {
         UpdateAbilityFromEquipment();
     }
@@ -261,7 +274,7 @@ void UAbilityComponent::ConsumeMana(float InAmount)
 
 void UAbilityComponent::ShowSpellIndicator(FVector InLocation, float InRadius, UMaterialInterface* InMaterial)
 {
-    if (SpellIndicator != nullptr)
+    if (SpellIndicator.IsValid())
     {
         UpdateSpellIndicatorLocation(InLocation);
 
@@ -275,15 +288,15 @@ void UAbilityComponent::ShowSpellIndicator(FVector InLocation, float InRadius, U
         SpawnParameters.Owner = GetOwner();
         SpawnParameters.Instigator = GetOwner()->GetInstigator();
 
-        ASpellIndicatorActor* SpawnedActor =
+        TWeakObjectPtr<ASpellIndicatorActor> SpawnedActor =
             GetWorld()->SpawnActor<ASpellIndicatorActor>(
                 SpawnIndicatorClass, FTransform(FQuat::Identity, InLocation), SpawnParameters);
 
-        if (GameUtils::IsValid(SpawnedActor))
+        if (SpawnedActor.IsValid())
         {
             SpawnedActor->Init(InRadius, InMaterial);
-            SpellIndicator = SpawnedActor;
-            SpellIndicator->Show();
+            SpawnedActor->Show();
+            SpellIndicator = SpawnedActor.Get();
         }
     }
 }
@@ -298,8 +311,12 @@ void UAbilityComponent::HideSpellIndicator()
 
 float UAbilityComponent::PlayAbilityMontage(UAnimMontage* InMontage, float InPlayRate, FName InSection)
 {
-    float Duration = Character->PlayAnimMontage(InMontage, InPlayRate, InSection);
-    return Duration;
+    if (Character.IsValid())
+    {
+        float Duration = Character->PlayAnimMontage(InMontage, InPlayRate, InSection);
+        return Duration;
+    }
+    return 0.0f;    
 }
 
 bool UAbilityComponent::IsAbilityUsingCrosshair() const
@@ -342,7 +359,7 @@ float UAbilityComponent::GetManaCost() const
 
 bool UAbilityComponent::IsCurrentAbilityValid() const
 {
-    return CurrentAbility != nullptr;
+    return CurrentAbility.IsValid();
 }
 
 UTexture2D* UAbilityComponent::GetAbilityCrosshair() const
@@ -369,13 +386,23 @@ bool UAbilityComponent::ShouldRotateOnPressed() const
 
 bool UAbilityComponent::IsPlayingAbilityMontage() const
 {
-    UAnimMontage* Montage = Character->GetCurrentMontage();
-    return Montage == RecentlyPlayedMontage && GameUtils::IsValid(RecentlyPlayedMontage);
+    if (Character.IsValid())
+    {
+        UAnimMontage* Montage = Character->GetCurrentMontage();
+        return RecentlyPlayedMontage.IsValid() && Montage == RecentlyPlayedMontage;
+    }
+
+    return false;
 }
 
 
 void UAbilityComponent::UpdateAbilityFromEquipment()
 {
+    if (!EquipmentComponent.IsValid())
+    {
+        return;
+    }
+
     EItemType MainType = EquipmentComponent->GetSelectedMainHandType();
     TSubclassOf<UItemBase> ItemClass = EquipmentComponent->GetActiveItem(MainType, 0).ItemClass;
 
@@ -409,16 +436,19 @@ void UAbilityComponent::AbilityChanged()
         SetIsCasting(false);
         OnAbilityEnded.Broadcast(EAbilityEndResult::Canceled);
     }
-    OnAbilityChanged.Broadcast(CurrentAbility);
+    OnAbilityChanged.Broadcast(CurrentAbility.Get());
 }
 
 void UAbilityComponent::StopAbilityMontage()
 {
-    UAnimMontage* AnimMontage = Character->GetCurrentMontage();
-
-    if (AnimMontage == RecentlyPlayedMontage)
+    if (Character.IsValid())
     {
-        Character->StopAnimMontage(AnimMontage);
+        UAnimMontage* AnimMontage = Character->GetCurrentMontage();
+
+        if (RecentlyPlayedMontage.IsValid() && AnimMontage == RecentlyPlayedMontage)
+        {
+            Character->StopAnimMontage(AnimMontage);
+        }
     }
 }
 

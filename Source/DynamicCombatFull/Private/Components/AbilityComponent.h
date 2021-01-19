@@ -85,7 +85,7 @@ public:
     UTexture2D* GetAbilityCrosshair() const;
     bool ShouldRotateOnPressed() const;
     bool IsPlayingAbilityMontage() const;
-    ACharacter* GetCharacter() const { return Character; }
+    TWeakObjectPtr<ACharacter> GetCharacter() const { return Character; }
     void SetUpdateEquipmentAbility(bool bInValue) { bUpdateEquipmentAbility = bInValue; }
 
 private:
@@ -122,20 +122,15 @@ private:
     UPROPERTY(EditAnywhere, Category = "LoadedClass")
     TSubclassOf<ASpellIndicatorActor> SpawnIndicatorClass;
 
-    UPROPERTY()
-    UEquipmentComponent* EquipmentComponent;
+    TWeakObjectPtr<UEquipmentComponent> EquipmentComponent;
 
-    UPROPERTY()
-    ACharacter* Character;
+    TWeakObjectPtr<ACharacter> Character;
 
-    UPROPERTY()
-    AAbilityBase* CurrentAbility;
+    TWeakObjectPtr<AAbilityBase> CurrentAbility;
 
-    UPROPERTY()
-    ASpellIndicatorActor* SpellIndicator;
+    TWeakObjectPtr<ASpellIndicatorActor> SpellIndicator;
 
-    UPROPERTY()
-    UAnimMontage* RecentlyPlayedMontage;
+    TWeakObjectPtr<UAnimMontage> RecentlyPlayedMontage;
 
     UPROPERTY(EditAnywhere)
     bool bUpdateEquipmentAbility;

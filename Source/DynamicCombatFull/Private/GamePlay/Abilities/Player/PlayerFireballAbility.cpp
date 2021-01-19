@@ -54,8 +54,6 @@ void APlayerFireballAbility::Released()
                 false);
         }
     }
-
-    
 }
 
 void APlayerFireballAbility::Effect()

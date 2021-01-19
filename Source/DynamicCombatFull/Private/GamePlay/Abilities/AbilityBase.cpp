@@ -51,12 +51,18 @@ AAbilityBase::AAbilityBase()
 void AAbilityBase::NativeInit(UAbilityComponent* InAbilityComponent)
 {
     AbilityComponent = InAbilityComponent;
-    Character = AbilityComponent->GetCharacter();
+    if (AbilityComponent.IsValid())
+    {
+        Character = AbilityComponent->GetCharacter();
+    }
 }
 
 void AAbilityBase::ConsumeManaAmount(float Amount)
 {
-    AbilityComponent->ConsumeMana(Amount);
+    if (AbilityComponent.IsValid())
+    {
+        AbilityComponent->ConsumeMana(Amount);
+    }
 }
 
 void AAbilityBase::ConsumeMana()
@@ -66,23 +72,32 @@ void AAbilityBase::ConsumeMana()
 
 void AAbilityBase::ShowIndicator(FVector Location)
 {
-    AbilityComponent->ShowSpellIndicator(Location, IndicatorRadius, IndicatorMaterial);
+    if (AbilityComponent.IsValid())
+    {
+        AbilityComponent->ShowSpellIndicator(Location, IndicatorRadius, IndicatorMaterial);
+    }
 }
 
 void AAbilityBase::UpdateIndicator(FVector NewLocation)
 {
-    AbilityComponent->UpdateSpellIndicatorLocation(NewLocation);
+    if (AbilityComponent.IsValid())
+    {
+        AbilityComponent->UpdateSpellIndicatorLocation(NewLocation);
+    }
 }
 
 void AAbilityBase::HideIndicator()
 {
-    AbilityComponent->HideSpellIndicator();
+    if (AbilityComponent.IsValid())
+    {
+        AbilityComponent->HideSpellIndicator();
+    }
 }
 
 float AAbilityBase::PlayAbilityMontage(
     UAnimMontage* Montage, FName StartSectionName, bool bUseCastingSpeed, float PlayRate)
 {
-    if (GameUtils::IsValid(AbilityComponent))
+    if (AbilityComponent.IsValid())
     {
         return AbilityComponent->PlayAbilityMontage(
             Montage,
@@ -97,7 +112,7 @@ float AAbilityBase::PlayAbilityMontage(
 
 float AAbilityBase::GetDamage() const
 {
-    if (GameUtils::IsValid(AbilityComponent))
+    if (AbilityComponent.IsValid())
     {
         if (bIncludeOwnerDamage) 
         {
@@ -131,6 +146,11 @@ void AAbilityBase::ApplyImpulseToCharacter(AActor* Actor, FVector HitNormal, flo
 
 bool AAbilityBase::IsInHeightRange(FVector Location, float MaxHeightDeviation) const
 {
+    if (!Character.IsValid()) 
+    {
+        return false;
+    }
+
     FVector ActorPos = Character->GetActorLocation();
     float CapsuleHalfHeight = Character->GetCapsuleComponent()->GetScaledCapsuleHalfHeight();
 
