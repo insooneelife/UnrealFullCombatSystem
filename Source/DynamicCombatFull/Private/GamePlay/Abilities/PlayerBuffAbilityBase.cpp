@@ -41,9 +41,12 @@ APlayerBuffAbilityBase::APlayerBuffAbilityBase()
 
 void APlayerBuffAbilityBase::Released()
 {
-    if (AbilityComponent->StartAbility())
+    if (AbilityComponent.IsValid())
     {
-        PlayAbilityMontage(GetAbilityMontage(0), TEXT("None"), true, 1.0f);
+        if (AbilityComponent->StartAbility())
+        {
+            PlayAbilityMontage(GetAbilityMontage(0), TEXT("None"), true, 1.0f);
+        }
     }
 }
 
@@ -57,12 +60,18 @@ void APlayerBuffAbilityBase::Effect()
 
 void APlayerBuffAbilityBase::SpawnParticle()
 {
-    UGameplayStatics::SpawnEmitterAttached(BuffCastParticle, GetPlayerCharacter()->GetMesh());
+    if (PlayerCharacter.IsValid())
+    {
+        UGameplayStatics::SpawnEmitterAttached(BuffCastParticle, PlayerCharacter->GetMesh());
+    }
 }
 
 void APlayerBuffAbilityBase::PlaySound()
 {
-    UGameplayStatics::SpawnSoundAttached(Sound, GetPlayerCharacter()->GetMesh());
+    if (PlayerCharacter.IsValid())
+    {
+        UGameplayStatics::SpawnSoundAttached(Sound, PlayerCharacter->GetMesh());
+    }
 }
 
 void APlayerBuffAbilityBase::ApplyBuff()
@@ -76,19 +85,23 @@ void APlayerBuffAbilityBase::ApplyBuff()
 
         for (AActor* Actor : OutActors)
         {
-            ABuffAbilityEffect* Buff = Cast<ABuffAbilityEffect>(Actor);
+            ABuffAbilityEffect* AbilityActor = Cast<ABuffAbilityEffect>(Actor);
 
-            if (GameUtils::IsValid(Buff))
-                continue;
-
-            if (Actor->GetOwner() == GetOwner())
+            if (AbilityActor == nullptr)
             {
-                if (Buff->GetStatType() == StatType)
+                continue;
+            }
+
+            if (AbilityActor->GetOwner() == GetOwner())
+            {
+                if (AbilityActor->GetStatType() == StatType)
                 {
-                    Buff->AdjustBuff(BuffValue, BuffDuration);
+                    AbilityActor->AdjustBuff(BuffValue, BuffDuration);
+                    return;
                 }
             }
         }
+
         FActorSpawnParameters Params;
         Params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
         Params.Owner = GetOwner();

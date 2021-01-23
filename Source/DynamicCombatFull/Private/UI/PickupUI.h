@@ -45,7 +45,7 @@ public:
     void PickupItemClicked(UPickupItemUI* Item);
 
 private:
-    UPROPERTY()
+    UPROPERTY(EditAnywhere, Category = "LoadedClass")
         TSubclassOf<UPickupItemUI> PickupItemUIClass;
 
 

@@ -214,7 +214,7 @@ void AArrowProjectileBase::SpawnImpaledArrow(
 
     AImpaledArrowActor* SpawnedActor = GetWorld()->SpawnActor<AImpaledArrowActor>(
         ImpaledArrowClass, SpawnTransform, Params);
-    SpawnedActor->Init(StaticMesh->GetStaticMesh(), this); 
+    SpawnedActor->Init(StaticMesh->GetStaticMesh()); 
     SpawnedActor->AttachToComponent(InComponent, FAttachmentTransformRules::KeepWorldTransform, InSocketName);
 }
 

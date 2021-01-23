@@ -35,7 +35,7 @@ FVector AAIAbilityBase::GetTargetLoc() const
 
 AActor* AAIAbilityBase::GetTarget() const
 {
-    if (GameUtils::IsValid(AICharacter))
+    if (AICharacter.IsValid())
     {
         if (GameUtils::IsValid(AICharacter->GetAIController()))
         {

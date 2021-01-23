@@ -146,8 +146,7 @@ public:
 
 private:
 
-    UPROPERTY()
-    UInventoryComponent* Inventory;
+    TWeakObjectPtr<UInventoryComponent> Inventory;
 
     UPROPERTY(EditAnywhere)
     TArray<FEquipmentSlots> EquipmentSlots;

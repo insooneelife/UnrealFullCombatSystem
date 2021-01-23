@@ -69,7 +69,7 @@ void UMovementSpeedComponent::ToggleState()
 
 void UMovementSpeedComponent::SetMovementState(EMovementState InState)
 {
-    if (GameUtils::IsValid(Movement))
+    if (Movement.IsValid())
     {
         OnMovementStateEnd.Broadcast(MovementState);
         MovementState = InState;
@@ -101,7 +101,7 @@ void UMovementSpeedComponent::UpdateMaxSpeed()
 {
     if (bIsUpdatingSpeed)
     {
-        if (GameUtils::IsValid(Movement))
+        if (Movement.IsValid())
         {
             Movement->MaxWalkSpeed = UKismetMathLibrary::FInterpTo(
                 Movement->MaxWalkSpeed, 
@@ -121,7 +121,7 @@ void UMovementSpeedComponent::UpdateMaxSpeed()
 
 float UMovementSpeedComponent::GetMaxPossibleSpeed() const
 {
-    if (GameUtils::IsValid(Movement))
+    if (Movement.IsValid())
     {
         return Movement->MaxWalkSpeed;
     }

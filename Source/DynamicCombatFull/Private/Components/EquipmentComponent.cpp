@@ -93,7 +93,7 @@ void UEquipmentComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 
     DisplayedItems.Empty();
 
-    if (Inventory != nullptr)
+    if (Inventory.IsValid())
     {
         Inventory->OnItemRemoved.RemoveDynamic(this, &UEquipmentComponent::OnItemModified);
         Inventory->OnItemAdded.RemoveDynamic(this, &UEquipmentComponent::OnItemModified);
@@ -191,7 +191,7 @@ void UEquipmentComponent::Init()
     // inventory events
     Inventory = Cast <UInventoryComponent> (GetOwner()->GetComponentByClass(UInventoryComponent::StaticClass()));
 
-    if (Inventory != nullptr)
+    if (Inventory.IsValid())
     {
         Inventory->OnItemRemoved.AddDynamic(this, &UEquipmentComponent::OnItemModified);
         Inventory->OnItemAdded.AddDynamic(this, &UEquipmentComponent::OnItemModified);
@@ -684,7 +684,7 @@ void UEquipmentComponent::UseActiveItemAtSlot(EItemType InType, int InSlotIndex)
 
             if (IsItemValid(SlotItem))
             {
-                if (Inventory != nullptr)
+                if (Inventory.IsValid())
                 {
                     Inventory->UseItem(SlotItem.Id);
                 }
@@ -837,7 +837,7 @@ void UEquipmentComponent::BuildEquipment(const TArray<FEquipmentSlots>& InEquipm
                 int ItemIndex = k;
                 FStoredItem Item = Equipment[i].Slots[j].Items[k];
 
-                if (Inventory != nullptr)
+                if (Inventory.IsValid())
                 {
                     // If owner has inventory component, check only class, amount doesn't matter
                     if (UKismetSystemLibrary::IsValidClass(Item.ItemClass))

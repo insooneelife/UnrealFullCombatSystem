@@ -33,7 +33,7 @@ void UPatrolComponent::Init()
 
 void UPatrolComponent::UpdatePatrolIndex()
 {
-    if (GameUtils::IsValid(PatrolPath))
+    if (PatrolPath.IsValid())
     {
         if (bReverseDirection)
         {
@@ -78,7 +78,7 @@ void UPatrolComponent::UpdatePatrolIndex()
 
 FVector UPatrolComponent::GetSplinePointLocation(int InPointIndex) const
 {
-    if (GameUtils::IsValid(PatrolPath))
+    if (PatrolPath.IsValid())
     {
         return PatrolPath->GetPatrolSpline()->GetLocationAtSplinePoint(InPointIndex, ESplineCoordinateSpace::World);
     }
@@ -90,7 +90,7 @@ FVector UPatrolComponent::GetSplinePointLocation(int InPointIndex) const
 
 bool UPatrolComponent::IsPatrolPathValid() const
 {
-    return GameUtils::IsValid(PatrolPath);
+    return PatrolPath.IsValid();
 }
 
 

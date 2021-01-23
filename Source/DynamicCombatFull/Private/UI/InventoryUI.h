@@ -52,6 +52,7 @@ public:
 
 private:
 
+    UPROPERTY(EditAnywhere, Category = "LoadedClass")
     TSubclassOf<UItemActionsUI> ItemActionsUIClass;
 
     UPROPERTY()

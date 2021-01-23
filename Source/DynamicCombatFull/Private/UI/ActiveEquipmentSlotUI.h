@@ -54,7 +54,7 @@ private:
     UPROPERTY(EditAnywhere)
     FVector2D SlotSize;
 
-    UPROPERTY(EditAnywhere)
+    UPROPERTY(EditAnywhere, Category = "LoadedObject")
     UTexture2D* BackgroundTexture;
 
     UPROPERTY(meta = (BindWidget))

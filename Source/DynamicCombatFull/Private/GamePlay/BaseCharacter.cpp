@@ -46,7 +46,7 @@
 #include "GamePlay/Projectiles/ArrowProjectileBase.h"
 #include "GameCore/DCSGameMode.h"
 #include "GameCore/GameUtils.h"
-
+#include "TestActor.h"
 
 // Sets default values
 ABaseCharacter::ABaseCharacter()
@@ -219,6 +219,7 @@ void ABaseCharacter::BeginPlay()
     AbilityComponent->OnAbilityEnded.AddDynamic(this, &ABaseCharacter::OnAbilityEnded);
     AbilityComponent->OnAbilityChanged.AddDynamic(this, &ABaseCharacter::OnAbilityChanged);
     ExtendedMana->OnValueChanged.AddDynamic(this, &ABaseCharacter::OnValueChanged_ExtendedMana);
+
 }
 
 void ABaseCharacter::EndPlay(const EEndPlayReason::Type EndPlayResult)
@@ -270,6 +271,7 @@ void ABaseCharacter::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
     UpdateAimAlpha();
+
 }
 
 // Called to bind functionality to input

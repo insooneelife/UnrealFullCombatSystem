@@ -47,7 +47,7 @@ private:
     UPROPERTY(EditAnywhere)
     EItemType ItemType;
 
-    UPROPERTY(EditAnywhere)
+    UPROPERTY(EditAnywhere, Category = "LoadedObject")
         UTexture2D* CategoryTexture;
 
     float SlotSize;

@@ -43,7 +43,7 @@ public:
     FDissolveFinishedSignature OnDissolveFinished;
 
 private:
-    UPROPERTY(EditAnywhere)
+    UPROPERTY(EditAnywhere, Category = "LoadedObject")
     UMaterialInstance* DissolveMaterial;
 
     UPROPERTY(EditAnywhere)

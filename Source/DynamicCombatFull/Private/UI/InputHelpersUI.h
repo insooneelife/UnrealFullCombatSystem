@@ -29,5 +29,7 @@ private:
     UPROPERTY(meta = (BindWidget))
     UHorizontalBox* InputHelpersHorizontalBox;
 
+
+    UPROPERTY(EditAnywhere, Category = "LoadedClass")
     TSubclassOf<UInputHelperUI> InputHelperUIClass;
 };

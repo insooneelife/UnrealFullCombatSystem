@@ -19,7 +19,7 @@ public:
     void OnDestroyed(AActor* DestroyedActor);
 
 public:
-    void Init(UStaticMesh* InMesh, AActor* InOwner);
+    void Init(UStaticMesh* InMesh);
 
 private:
     UPROPERTY(EditAnywhere)

@@ -44,11 +44,10 @@ private:
 
 private:
     UPROPERTY(EditAnywhere)
-    TArray<FName> CollisionSockets;
+        float Duration;
 
     UPROPERTY(EditAnywhere)
-    float Duration;
-
+    TArray<FName> CollisionSockets;
 
     FTimerHandle DeathTimerHandle;
 };

@@ -31,8 +31,9 @@ APlayerSummonItemAbilityBase::APlayerSummonItemAbilityBase()
         GameUtils::LoadAssetObject<USoundBase>(TEXT("/Game/DynamicCombatSystem/SFX/CUE/CUE_SummonItem"));
     Sound = LoadedSoundObject;
 
-    static TSubclassOf<ASummonedItemAbilityEffect> LoadedClass = GameUtils::LoadAssetClass<ASummonedItemAbilityEffect>(
-        TEXT("/Game/DynamicCombatSystem/Blueprints/AbilityEffects/SummonedItemEffectBP"));
+    static TSubclassOf<ASummonedItemAbilityEffect> LoadedClass = 
+        GameUtils::LoadAssetClass<ASummonedItemAbilityEffect>(
+            TEXT("/Game/DynamicCombatSystem/Blueprints/AbilityEffects/SummonedItemEffectBP"));
     SpawnSummonedItemAbilityEffectClass = LoadedClass;
 }
 
@@ -46,15 +47,21 @@ void APlayerSummonItemAbilityBase::Effect()
 
 void APlayerSummonItemAbilityBase::Released()
 {
-    if (AbilityComponent->StartAbility())
+    if (AbilityComponent.IsValid())
     {
-        PlayAbilityMontage(GetAbilityMontage(0), TEXT("None"), true, 1.0f);
+        if (AbilityComponent->StartAbility())
+        {
+            PlayAbilityMontage(GetAbilityMontage(0), TEXT("None"), true, 1.0f);
+        }
     }
 }
 
 void APlayerSummonItemAbilityBase::SpawnParticle()
 {
-    UGameplayStatics::SpawnEmitterAttached(SummonCastParticle, GetPlayerCharacter()->GetMesh());
+    if (PlayerCharacter.IsValid())
+    {
+        UGameplayStatics::SpawnEmitterAttached(SummonCastParticle, PlayerCharacter->GetMesh());
+    }
 }
 
 void APlayerSummonItemAbilityBase::Summon()

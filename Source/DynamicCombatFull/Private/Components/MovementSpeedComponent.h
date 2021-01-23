@@ -62,8 +62,8 @@ public:
     FMovementStateEndSignature OnMovementStateEnd;
 
 private:
-    UPROPERTY()
-    UCharacterMovementComponent* Movement;
+
+    TWeakObjectPtr<UCharacterMovementComponent> Movement;
 
     UPROPERTY(EditAnywhere)
     EMovementState StartMovementState;

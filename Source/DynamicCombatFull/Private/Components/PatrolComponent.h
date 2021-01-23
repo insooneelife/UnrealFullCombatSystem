@@ -28,13 +28,12 @@ public:
     bool IsPatrolPathValid() const;
 
 public:
-    APatrolPathActor* GetPatrolPath() const { return PatrolPath; }
+    APatrolPathActor* GetPatrolPath() const { return PatrolPath.Get(); }
     int GetPointIndex() const { return PointIndex; }
     bool IsReverseDirection() const { return bReverseDirection; }
 
 private:
-    UPROPERTY(EditAnywhere)
-    APatrolPathActor* PatrolPath;
+    TWeakObjectPtr<APatrolPathActor> PatrolPath;
     int PointIndex;
     bool bReverseDirection;
 

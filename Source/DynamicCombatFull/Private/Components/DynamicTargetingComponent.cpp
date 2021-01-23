@@ -37,10 +37,14 @@ void UDynamicTargetingComponent::TickComponent(
 
 void UDynamicTargetingComponent::Init(UArrowComponent* InArrowComp)
 {
-    if (GameUtils::IsValid(InArrowComp))
+    ArrowComponent = InArrowComp;
+    if(ArrowComponent.IsValid())
     {
-        ArrowComponent = InArrowComp;
         ArrowComponent->SetUsingAbsoluteRotation(true);
+    }
+    else
+    {
+        UE_LOG(LogTemp, Error, TEXT("ArrowComponent is not valid!"));
     }
 
     SetDebugMode();
@@ -73,8 +77,8 @@ void UDynamicTargetingComponent::FindTargetWithAxisInput(float InAxisValue)
 {
     const float StartRotatingThreshold = 1.5f;
 
-    if (GameUtils::IsValid(ArrowComponent) &&
-        SelectedActor != nullptr &&
+    if (ArrowComponent.IsValid() &&
+        SelectedActor.IsValid() &&
         FMath::Abs(InAxisValue) > StartRotatingThreshold &&
         !bIsFreeCamera)
     {
@@ -112,18 +116,18 @@ void UDynamicTargetingComponent::FindTargetWithAxisInput(float InAxisValue)
 
             if (Hit.bBlockingHit && IsTargetable != nullptr)
             {
-                if (Hit.GetActor() != SelectedActor)
+                if (Hit.GetActor() != SelectedActor.Get())
                 {
                     if (!IsAnythingBlockingTrace(Hit.GetActor(), ActorsToIgnore))
                     {
                         if (IsTargetable->IsTargetable())
                         {
-                            Cast<IIsTargetable>(SelectedActor)->OnDeselected();
+                            Cast<IIsTargetable>(SelectedActor.Get())->OnDeselected();
                             SelectedActor = Hit.GetActor();
 
                             IsTargetable->OnSelected();
 
-                            OnTargetChanged.Broadcast(SelectedActor);
+                            OnTargetChanged.Broadcast(SelectedActor.Get());
                             break;
                         }
                     }
@@ -168,7 +172,14 @@ void UDynamicTargetingComponent::DisableCameraLock()
 
 FTransform UDynamicTargetingComponent::GetSelectedActorTransform() const
 {
-    return SelectedActor->GetTransform();
+    if (SelectedActor.IsValid())
+    {
+        return SelectedActor->GetTransform();
+    }
+    else
+    {
+        return FTransform::Identity;
+    }
 }
 
 bool UDynamicTargetingComponent::IsTargetingEnabled() const
@@ -178,9 +189,14 @@ bool UDynamicTargetingComponent::IsTargetingEnabled() const
 
 void UDynamicTargetingComponent::UpdateTarget()
 {
-    TArray<AActor*> ActorsToIgnore{ SelectedActor };
+    if (!SelectedActor.IsValid())
+    {
+        return;
+    }
 
-    if (IsAnythingBlockingTrace(SelectedActor, ActorsToIgnore))
+    TArray<AActor*> ActorsToIgnore{ SelectedActor.Get() };
+
+    if (IsAnythingBlockingTrace(SelectedActor.Get(), ActorsToIgnore))
     {
         if (!GetWorld()->GetTimerManager().IsTimerActive(DisableCameraLockTimerHandle))
         {
@@ -203,7 +219,7 @@ void UDynamicTargetingComponent::UpdateTarget()
     {
         GetWorld()->GetTimerManager().ClearTimer(DisableCameraLockTimerHandle);
 
-        IIsTargetable* IsTargetable = Cast<IIsTargetable>(SelectedActor);
+        IIsTargetable* IsTargetable = Cast<IIsTargetable>(SelectedActor.Get());
         if (IsTargetable != nullptr)
         {
             if (!IsTargetable->IsTargetable())
@@ -271,10 +287,10 @@ void UDynamicTargetingComponent::FindTarget()
         }
     }
 
-    if (SelectedActor != nullptr)
+    if (SelectedActor.IsValid())
     {
         EnableCameraLock();
-        OnTargetChanged.Broadcast(SelectedActor);
+        OnTargetChanged.Broadcast(SelectedActor.Get());
     }
 }
 
@@ -354,7 +370,7 @@ void UDynamicTargetingComponent::FindDirectionalTarget(bool bInOnLeft)
                 if (IsTargetable != nullptr)
                 {
                     IsTargetable->OnSelected();
-                    OnTargetChanged.Broadcast(SelectedActor);
+                    OnTargetChanged.Broadcast(SelectedActor.Get());
                 }
             }
         }
@@ -383,14 +399,14 @@ void UDynamicTargetingComponent::EnableCameraLock()
 
 void UDynamicTargetingComponent::UpdateCameraLock()
 {
-    if (IsTargetingEnabled())
+    if (IsTargetingEnabled() && SelectedActor.IsValid())
     {
-        float Distance = GetOwner()->GetDistanceTo(SelectedActor);
+        float Distance = GetOwner()->GetDistanceTo(SelectedActor.Get());
         if (Distance >= 50.0f && Distance <= TargetingMaxDistance)
         {
             float DeltaTime = GetWorld()->GetDeltaSeconds();
 
-            if (GameUtils::IsValid(ArrowComponent))
+            if (ArrowComponent.IsValid())
             {
                 FRotator Current = ArrowComponent->GetComponentRotation();
                 FRotator Target = GetOwner()->GetInstigator()->GetControlRotation();
@@ -408,7 +424,7 @@ void UDynamicTargetingComponent::UpdateCameraLock()
                 FRotator CurrentRot = GetOwner()->GetInstigator()->GetControlRotation();
                 FRotator TargetRot = UKismetMathLibrary::FindLookAtRotation(Start, End);
 
-                TargetRot.Pitch = GetOwner()->GetDistanceTo(SelectedActor) <= 300.0f ?
+                TargetRot.Pitch = GetOwner()->GetDistanceTo(SelectedActor.Get()) <= 300.0f ?
                     FMath::Clamp(TargetRot.Pitch, -25.0f, 25.0f) : TargetRot.Pitch;
 
                 FRotator NewRot = UKismetMathLibrary::RInterpTo_Constant(CurrentRot, TargetRot, DeltaTime, 300.0f);
@@ -549,6 +565,11 @@ float UDynamicTargetingComponent::GetDistanceToOwner(AActor* InOtherActor) const
 
 bool UDynamicTargetingComponent::IsTargetRightSide(AActor* InPotentialTarget) const
 {
+    if (!SelectedActor.IsValid())
+    {
+        return false;
+    }
+
     FVector A, B;
 
     {
@@ -577,6 +598,11 @@ bool UDynamicTargetingComponent::IsTargetRightSide(AActor* InPotentialTarget) co
 
 float UDynamicTargetingComponent::CalculateDotProductToTarget(AActor* InTarget) const
 {
+    if (!SelectedActor.IsValid())
+    {
+        return 0.0f;
+    }
+
     FVector A, B;
     {
         FVector From = GetOwner()->GetActorLocation();

@@ -71,8 +71,8 @@ public:
     FBaseValueChangedSignature OnBaseValueChanged;
 
 private:
-    UPROPERTY()
-    UEquipmentComponent* EquipmentComponent;
+
+    TWeakObjectPtr<UEquipmentComponent> EquipmentComponent;
 
     UPROPERTY(EditAnywhere)
     TArray<FStat> Stats;

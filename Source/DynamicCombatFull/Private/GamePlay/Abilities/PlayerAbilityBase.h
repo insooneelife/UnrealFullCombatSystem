@@ -32,10 +32,9 @@ public:
     FTransform GetBeamTransform(float Range, float Radius, FName SpawnSocket, bool bGoesThroughObjects)const;
 
     UFUNCTION(BlueprintCallable)
-    ABaseCharacter* GetPlayerCharacter() const { return PlayerCharacter; }
+    ABaseCharacter* GetPlayerCharacter() const { return PlayerCharacter.Get(); }
 
-private:
-    UPROPERTY()
-    ABaseCharacter* PlayerCharacter;
+protected:
+    TWeakObjectPtr<ABaseCharacter> PlayerCharacter;
 
 };

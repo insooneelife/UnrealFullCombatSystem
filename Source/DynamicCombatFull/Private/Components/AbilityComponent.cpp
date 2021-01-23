@@ -99,7 +99,8 @@ bool UAbilityComponent::StartAbility()
 {
     if (IsCurrentAbilityValid())
     {
-        IAbilityInterface* AbilityInterface = Cast<IAbilityInterface>(GetOwner());
+        TWeakObjectPtr<AActor> OwnerPtr(GetOwner());
+        IAbilityInterface* AbilityInterface = Cast<IAbilityInterface>(OwnerPtr.Get());
 
         if (AbilityInterface != nullptr)
         {
@@ -225,9 +226,11 @@ void UAbilityComponent::SpawnAbility(TSubclassOf<AAbilityBase> InAbilityClass)
 {
     if (UKismetSystemLibrary::IsValidClass(InAbilityClass))
     {
+        TWeakObjectPtr<AActor> OwnerPtr(GetOwner());
+
         FActorSpawnParameters Params;
         Params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
-        Params.Owner = GetOwner();
+        Params.Owner = OwnerPtr.Get();
         Params.Instigator = nullptr;
 
         AAbilityBase* Ability = GetWorld()->SpawnActor<AAbilityBase>(InAbilityClass, FTransform::Identity, Params);
@@ -284,26 +287,31 @@ void UAbilityComponent::ShowSpellIndicator(FVector InLocation, float InRadius, U
     }
     else
     {
-        FActorSpawnParameters SpawnParameters = FActorSpawnParameters();
-        SpawnParameters.Owner = GetOwner();
-        SpawnParameters.Instigator = GetOwner()->GetInstigator();
+        TWeakObjectPtr<AActor> OwnerPtr(GetOwner());
 
-        TWeakObjectPtr<ASpellIndicatorActor> SpawnedActor =
-            GetWorld()->SpawnActor<ASpellIndicatorActor>(
-                SpawnIndicatorClass, FTransform(FQuat::Identity, InLocation), SpawnParameters);
-
-        if (SpawnedActor.IsValid())
+        if (OwnerPtr.IsValid())
         {
-            SpawnedActor->Init(InRadius, InMaterial);
-            SpawnedActor->Show();
-            SpellIndicator = SpawnedActor.Get();
+            FActorSpawnParameters SpawnParameters = FActorSpawnParameters();
+            SpawnParameters.Owner = OwnerPtr.Get();
+            SpawnParameters.Instigator = TWeakObjectPtr<APawn>(OwnerPtr.Get()->GetInstigator()).Get();
+
+            TWeakObjectPtr<ASpellIndicatorActor> SpawnedActor =
+                GetWorld()->SpawnActor<ASpellIndicatorActor>(
+                    SpawnIndicatorClass, FTransform(FQuat::Identity, InLocation), SpawnParameters);
+
+            if (SpawnedActor.IsValid())
+            {
+                SpawnedActor->Init(InRadius, InMaterial);
+                SpawnedActor->Show();
+                SpellIndicator = SpawnedActor.Get();
+            }
         }
     }
 }
 
 void UAbilityComponent::HideSpellIndicator()
 {
-    if (SpellIndicator != nullptr)
+    if (SpellIndicator.IsValid())
     {
         SpellIndicator->Hide();
     }
@@ -408,11 +416,20 @@ void UAbilityComponent::UpdateAbilityFromEquipment()
 
     if (UKismetSystemLibrary::IsValidClass(ItemClass.Get()))
     {
-        UItemBase* ItemBase = NewObject<UItemBase>(GetOwner(), ItemClass);
-        IItemHasAbility* ItemHasAbility = Cast<IItemHasAbility>(ItemBase);
-        if (ItemHasAbility != nullptr)
+        TWeakObjectPtr<AActor> OwnerPtr(GetOwner());
+
+        if (OwnerPtr.IsValid())
         {
-            UpdateAbility(ItemHasAbility->GetAbility());
+            UItemBase* ItemBase = NewObject<UItemBase>(OwnerPtr.Get(), ItemClass);
+            IItemHasAbility* ItemHasAbility = Cast<IItemHasAbility>(ItemBase);
+            if (ItemHasAbility != nullptr)
+            {
+                UpdateAbility(ItemHasAbility->GetAbility());
+            }
+            else
+            {
+                UpdateAbility(nullptr);
+            }
         }
         else
         {

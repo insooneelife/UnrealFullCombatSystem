@@ -82,7 +82,7 @@ private:
     UPROPERTY(EditAnywhere)
     bool bShowActiveBorder;
 
-    UPROPERTY(EditAnywhere)
+    UPROPERTY(EditAnywhere, Category = "LoadedObject")
         UTexture2D* BackgroundTexture;
 
     UPROPERTY(meta = (BindWidget))

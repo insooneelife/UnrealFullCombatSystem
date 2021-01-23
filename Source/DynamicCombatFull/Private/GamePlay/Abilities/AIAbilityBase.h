@@ -36,9 +36,9 @@ public:
     FTransform GetSurfacePredictedTargetTransform(float InRange) const;
 
     UFUNCTION(BlueprintCallable)
-    AAICharacter* GetAICharacter() const { return AICharacter; }
+    AAICharacter* GetAICharacter() const { return AICharacter.Get(); }
 
 private:
-    UPROPERTY()
-        AAICharacter* AICharacter;
+
+    TWeakObjectPtr<AAICharacter> AICharacter;
 };

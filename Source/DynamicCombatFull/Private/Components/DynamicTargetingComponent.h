@@ -77,8 +77,9 @@ public:
     FTargetingToggledSignature OnTargetingToggled;
 
 private:
-    UPROPERTY()
-    UArrowComponent* ArrowComponent;
+    TWeakObjectPtr<UArrowComponent> ArrowComponent;
+
+    TWeakObjectPtr<AActor> SelectedActor;
 
     UPROPERTY(EditAnywhere)
     float AxisInputSensitivity;
@@ -103,9 +104,6 @@ private:
 
     UPROPERTY(EditAnywhere)
     float DisableOnBlockDelay;
-
-    UPROPERTY()
-    AActor* SelectedActor;
 
     UPROPERTY(EditAnywhere)
     bool bDebug;

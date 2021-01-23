@@ -21,11 +21,11 @@ AImpaledArrowActor::AImpaledArrowActor()
     StaticMeshComponent->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
 }
 
-void AImpaledArrowActor::Init(UStaticMesh* InMesh, AActor* InOwner)
+void AImpaledArrowActor::Init(UStaticMesh* InMesh)
 {
     StaticMeshComponent->SetStaticMesh(InMesh);
     SetLifeSpan(LifeTime);
-    InOwner->OnDestroyed.AddDynamic(this, &AImpaledArrowActor::OnDestroyed);
+    GetOwner()->OnDestroyed.AddDynamic(this, &AImpaledArrowActor::OnDestroyed);
 }
 
 

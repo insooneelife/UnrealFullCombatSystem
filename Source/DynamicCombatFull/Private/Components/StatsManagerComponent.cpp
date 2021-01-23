@@ -39,7 +39,7 @@ UStatsManagerComponent::UStatsManagerComponent()
 
 void UStatsManagerComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
-    if (GameUtils::IsValid(EquipmentComponent))
+    if (EquipmentComponent.IsValid())
     {
         EquipmentComponent->OnActiveItemChanged.RemoveDynamic(this, &UStatsManagerComponent::OnActiveItemChanged);
         EquipmentComponent->OnSlotHiddenChanged.RemoveDynamic(this, &UStatsManagerComponent::OnSlotHiddenChanged);
@@ -54,7 +54,7 @@ void UStatsManagerComponent::Init()
     InitialBlockValue = GetStatValue(EStat::Block, false);
     EquipmentComponent = Cast<UEquipmentComponent>(GetOwner()->GetComponentByClass(UEquipmentComponent::StaticClass()));
 
-    if (GameUtils::IsValid(EquipmentComponent))
+    if (EquipmentComponent.IsValid())
     {
         EquipmentComponent->OnActiveItemChanged.AddDynamic(this, &UStatsManagerComponent::OnActiveItemChanged);
         EquipmentComponent->OnSlotHiddenChanged.AddDynamic(this, &UStatsManagerComponent::OnSlotHiddenChanged);
@@ -181,10 +181,13 @@ void UStatsManagerComponent::OnActiveItemChanged(
 {
     UpdateBlockBaseValue();
     
-    if (!EquipmentComponent->IsSlotHidden(InSlotType, InSlotIndex))
+    if (EquipmentComponent.IsValid())
     {
-        IncludeItemModifiers(InOldItem.ItemClass);
-        IncludeItemModifiers(InNewItem.ItemClass);        
+        if (!EquipmentComponent->IsSlotHidden(InSlotType, InSlotIndex))
+        {
+            IncludeItemModifiers(InOldItem.ItemClass);
+            IncludeItemModifiers(InNewItem.ItemClass);
+        }
     }
 }
 
@@ -276,13 +279,13 @@ void UStatsManagerComponent::ResetRecentlyReceivedDamage()
 void UStatsManagerComponent::UpdateBlockBaseValue()
 {
     float Value = 0.0f;
-    if (EquipmentComponent->GetBlockValue(Value))
+    if (EquipmentComponent.IsValid())
     {
+        if (!EquipmentComponent->GetBlockValue(Value))
+        {
+            Value = InitialBlockValue;
+        }
     }
-    else
-    {
-        Value = InitialBlockValue;
-    }
-
+    
     ChangeStatBaseValue(EStat::Block, Value);
 }

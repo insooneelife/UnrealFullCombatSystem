@@ -26,6 +26,11 @@ void APlayerAbilityBase::NativeInit(UAbilityComponent* InAbilityComponent)
 
 FTransform APlayerAbilityBase::GetSurfaceTransform(float Range, float MaxSurfaceAngle, float MaxHeightDeviation) const
 {
+    if (!Character.IsValid())
+    {
+        return FTransform::Identity;
+    }
+
     FVector TraceStart = GetOwner()->GetActorLocation();
     FVector TraceEnd = TraceStart + UKismetMathLibrary::Conv_RotatorToVector(Character->GetControlRotation()) * Range;
 
@@ -86,7 +91,18 @@ FTransform APlayerAbilityBase::GetSurfaceTransform(float Range, float MaxSurface
 
 FTransform APlayerAbilityBase::GetCrosshairTransform(FName SpawnSocket) const
 {
+    if (!Character.IsValid())
+    {
+        return FTransform::Identity;
+    }
+
+    if (!PlayerCharacter.IsValid())
+    {
+        return FTransform::Identity;
+    }
+
     FVector SpawnLocation = Character->GetMesh()->GetSocketLocation(SpawnSocket);
+
     FVector CrosshairDirection = PlayerCharacter->GetFollowCamera()->GetForwardVector();
 
 
@@ -125,8 +141,19 @@ FTransform APlayerAbilityBase::GetCrosshairTransform(FName SpawnSocket) const
 FTransform APlayerAbilityBase::GetBeamTransform(
     float Range, float Radius, FName SpawnSocket, bool bGoesThroughObjects) const
 {
+    if (!Character.IsValid())
+    {
+        return FTransform::Identity;
+    }
+
     FVector StartTrace = Character->GetMesh()->GetSocketLocation(SpawnSocket);
-    AActor* Controller = GetOwner()->GetInstigator()->GetController();
+    AActor* Controller = GetOwner()->GetInstigatorController();
+
+    if (Controller == nullptr)
+    {
+        return FTransform::Identity;
+    }
+
     FVector Forward = Controller->GetActorForwardVector();
     FVector EndTrace = Character->GetActorLocation() + (Forward * Range);
 
