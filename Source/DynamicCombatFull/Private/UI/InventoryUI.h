@@ -36,7 +36,7 @@ protected:
     void FocusSelf();
 
     UFUNCTION()
-    void OnInventoryItemClicked(UInventoryItemUI* InItem);
+    void OnInventoryItemClicked(UInventoryItemUI* const InItem);
 
     UFUNCTION()
     void OnClicked_CloseButton();
@@ -45,8 +45,8 @@ public:
     void Open();
     void Close();
 
-    void CategoryButtonClicked(UCategoryButtonUI* Button);
-    void SetCategoryButton(UCategoryButtonUI* Button);
+    void CategoryButtonClicked(UCategoryButtonUI* const Button);
+    void SetCategoryButton(UCategoryButtonUI* const Button);
 
     EItemType GetDisplayedType() const;
 

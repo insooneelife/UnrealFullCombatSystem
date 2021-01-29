@@ -45,7 +45,7 @@ void UStatBarUI::OnValueChanged(float InNewValue, float InMaxValue)
     UpdateWidth(InMaxValue);
 }
 
-void UStatBarUI::Init(UExtendedStatComponent* InStatComp)
+void UStatBarUI::Init(UExtendedStatComponent* const InStatComp)
 {
     if (GameUtils::IsValid(InStatComp))
     {

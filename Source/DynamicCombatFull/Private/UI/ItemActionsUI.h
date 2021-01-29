@@ -41,7 +41,7 @@ protected:
 public:
     void SetPosition(FVector2D Position);
 
-    void Init(UInventoryComponent* InInventoryComponent, FVector2D InSpawnPosition, const FStoredItem& InItem);
+    void Init(UInventoryComponent* const InInventoryComponent, FVector2D InSpawnPosition, const FStoredItem& InItem);
 
 public:
     UPROPERTY(BlueprintAssignable)

@@ -106,7 +106,7 @@ void UEquipmentSlotUI::OnUnhovered_SlotButton()
     BackgroundImage->SetColorAndOpacity(GameUtils::Black);
 }
 
-void UEquipmentSlotUI::UpdateWidget(FStoredItem InItem)
+void UEquipmentSlotUI::UpdateWidget(const FStoredItem& InItem)
 {
     Item = InItem;
     UpdateImage();
@@ -160,7 +160,12 @@ void UEquipmentSlotUI::SetActiveWidget(bool bVisible)
     ActiveBorder->SetBrushColor(Color);
 }
 
-void UEquipmentSlotUI::OnItemInSlotChanged(FStoredItem InOldItem, FStoredItem InNewItem, EItemType InType, int InSlotIndex, int InItemIndex)
+void UEquipmentSlotUI::OnItemInSlotChanged(
+    const FStoredItem& InOldItem,
+    const FStoredItem& InNewItem, 
+    EItemType InType,
+    int InSlotIndex, 
+    int InItemIndex)
 {
     if (ItemType == InType && SlotIndex == InSlotIndex && ItemIndex == InItemIndex)
     {
@@ -168,7 +173,12 @@ void UEquipmentSlotUI::OnItemInSlotChanged(FStoredItem InOldItem, FStoredItem In
     }
 }
 
-void UEquipmentSlotUI::OnActiveItemChanged(FStoredItem InOldItem, FStoredItem InNewItem, EItemType InType, int InSlotIndex, int InItemIndex)
+void UEquipmentSlotUI::OnActiveItemChanged(
+    const FStoredItem& InOldItem,
+    const FStoredItem& InNewItem,
+    EItemType InType,
+    int InSlotIndex, 
+    int InItemIndex)
 {
     if (InType == ItemType && SlotIndex == InSlotIndex)
     {

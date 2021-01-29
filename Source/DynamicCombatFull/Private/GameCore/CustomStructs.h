@@ -35,7 +35,7 @@ struct FCollCompHitActors
 public:
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite)
-        UPrimitiveComponent* Component;
+        TWeakObjectPtr<UPrimitiveComponent> Component;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite)
         TArray<AActor*> HitActors;
@@ -50,7 +50,7 @@ struct FCollisionComponent
 public:
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite)
-        UPrimitiveComponent* Component;
+        TWeakObjectPtr<UPrimitiveComponent> Component;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite)
         TArray<FName> Sockets;

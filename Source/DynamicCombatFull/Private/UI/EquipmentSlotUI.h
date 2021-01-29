@@ -26,10 +26,12 @@ protected:
     virtual void NativeDestruct() override;
 
     UFUNCTION()
-    void OnItemInSlotChanged(FStoredItem OldItem, FStoredItem NewItem, EItemType InType, int InSlotIndex, int InItemIndex);
+    void OnItemInSlotChanged(
+        const FStoredItem& OldItem, const FStoredItem& NewItem, EItemType InType, int InSlotIndex, int InItemIndex);
 
     UFUNCTION()
-    void OnActiveItemChanged(FStoredItem OldItem, FStoredItem NewItem, EItemType InType, int InSlotIndex, int InItemIndex);
+    void OnActiveItemChanged(
+        const FStoredItem& OldItem, const FStoredItem& NewItem, EItemType InType, int InSlotIndex, int InItemIndex);
 
     UFUNCTION()
     void OnClicked_SlotButton();
@@ -41,7 +43,7 @@ protected:
     void OnUnhovered_SlotButton();
 
 public:
-    void UpdateWidget(FStoredItem InItem);
+    void UpdateWidget(const FStoredItem& InItem);
     void UpdateAmountText();
     void UpdateImage();
     void SetActiveWidget(bool bVisible);

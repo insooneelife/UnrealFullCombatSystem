@@ -18,12 +18,6 @@ UInventoryComponent::UInventoryComponent()
     // off to improve performance if you don't need them.
     PrimaryComponentTick.bCanEverTick = false;
     PrimaryComponentTick.bStartWithTickEnabled = false;
-
-    static TSubclassOf<APickupActor> LoadedClass =
-        GameUtils::LoadAssetClass<APickupActor>(TEXT("/Game/DynamicCombatSystem/Blueprints/PickupActorBP"));
-
-    SpawnPickupActorClass = LoadedClass;
-
 }
 
 
@@ -236,17 +230,22 @@ void UInventoryComponent::DropItem(FStoredItem InItem)
         FActorSpawnParameters SpawnParameters = FActorSpawnParameters();
         SpawnParameters.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 
-        APickupActor* SpawnedActor =
-            GetWorld()->SpawnActor<APickupActor>(
-                SpawnPickupActorClass, SpawnLoc, FRotator::ZeroRotator, SpawnParameters);
+        UDefaultGameInstance* DefaultGameInstance = GameUtils::GetDefaultGameInstance(GetWorld());
 
-        if (GameUtils::IsValid(SpawnedActor))
+        if (DefaultGameInstance != nullptr)
         {
-            SpawnedActor->Init(
-                FName(TEXT("Items")),
-                TMap<TSubclassOf<UItemBase>, int> { { InItem.ItemClass, InItem.Amount } }
-            );
-            SpawnedActor->AddItem(InItem.ItemClass, InItem.Amount);
+            APickupActor* SpawnedActor =
+                GetWorld()->SpawnActor<APickupActor>(
+                    DefaultGameInstance->SpawnPickupActorClass, SpawnLoc, FRotator::ZeroRotator, SpawnParameters);
+
+            if (GameUtils::IsValid(SpawnedActor))
+            {
+                SpawnedActor->Init(
+                    FName(TEXT("Items")),
+                    TMap<TSubclassOf<UItemBase>, int> { { InItem.ItemClass, InItem.Amount } }
+                );
+                SpawnedActor->AddItem(InItem.ItemClass, InItem.Amount);
+            }
         }
     }
 }

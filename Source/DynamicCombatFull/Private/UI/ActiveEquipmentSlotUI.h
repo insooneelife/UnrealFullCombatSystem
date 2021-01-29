@@ -24,13 +24,22 @@ protected:
     virtual void NativeDestruct() override;
 
     UFUNCTION()
-    void OnActiveItemChanged(FStoredItem InOldItem, FStoredItem InNewItem, EItemType InType, int InSlotIndex, int InItemIndex);
+    void OnActiveItemChanged(
+        const FStoredItem& InOldItem, 
+        const FStoredItem& InNewItem, 
+        EItemType InType, 
+        int InSlotIndex,
+        int InItemIndex);
 
     UFUNCTION()
-    void OnSlotHiddenChanged(EItemType InSlotType, int InSlotIndex, FStoredItem InActiveItem, bool bInIsHidden);
+    void OnSlotHiddenChanged(
+        EItemType InSlotType,
+        int InSlotIndex,
+        const FStoredItem& InActiveItem, 
+        bool bInIsHidden);
 
 public:
-    void UpdateWidget(FStoredItem InItem);
+    void UpdateWidget(const FStoredItem& InItem);
     UFUNCTION(BlueprintImplementableEvent, Category = "Blueprint")
         void PlayBlinkBorderAnimation();
     void UpdateAmountText();

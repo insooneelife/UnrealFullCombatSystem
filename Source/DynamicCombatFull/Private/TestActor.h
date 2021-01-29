@@ -4,11 +4,10 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "Interfaces/CanOpenUI.h"
 #include "TestActor.generated.h"
 
 UCLASS()
-class ATestActor : public AActor, public ICanOpenUI
+class ATestActor : public AActor
 {
 	GENERATED_BODY()
 	
@@ -19,14 +18,11 @@ public:
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+    virtual void EndPlay(const EEndPlayReason::Type EndPlayResult) override;
 
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
 public:
-    virtual void OpenedUI() override {}
-    virtual void ClosedUI() override {}
-public:
-    int Data;
 };

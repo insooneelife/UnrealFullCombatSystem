@@ -125,7 +125,10 @@ void UItemActionsUI::SetPosition(FVector2D Position)
     UWidgetLayoutLibrary::SlotAsCanvasSlot(ActionsSB)->SetPosition(FVector2D(FinalSpawnPositionX, FinalSpawnPositionY));
 }
 
-void UItemActionsUI::Init(UInventoryComponent* InInventoryComponent, FVector2D InSpawnPosition, const FStoredItem& InItem)
+void UItemActionsUI::Init(
+    UInventoryComponent* const InInventoryComponent,
+    FVector2D InSpawnPosition, 
+    const FStoredItem& InItem)
 {
     InventoryComponent = InInventoryComponent;
     SpawnPosition = InSpawnPosition;

@@ -76,13 +76,28 @@ void UDynamicTargetingComponent::FindTargetOnRight()
 void UDynamicTargetingComponent::FindTargetWithAxisInput(float InAxisValue)
 {
     const float StartRotatingThreshold = 1.5f;
+    
+    TWeakObjectPtr<AActor> OwnerPtr(GetOwner());
+
+    if (!OwnerPtr.IsValid())
+    {
+        return;
+    }
+
+    TWeakObjectPtr<APawn> InstigatorPtr(OwnerPtr.Get()->GetInstigator());
+
+    if (!InstigatorPtr.IsValid())
+    {
+        return;
+    }
+
 
     if (ArrowComponent.IsValid() &&
         SelectedActor.IsValid() &&
         FMath::Abs(InAxisValue) > StartRotatingThreshold &&
         !bIsFreeCamera)
     {
-        FRotator A = GetOwner()->GetInstigator()->GetControlRotation();
+        FRotator A = InstigatorPtr->GetControlRotation();
         FRotator B = ArrowComponent->GetComponentRotation();
         FRotator Delta = UKismetMathLibrary::NormalizedDeltaRotator(A, B);
 
@@ -99,7 +114,7 @@ void UDynamicTargetingComponent::FindTargetWithAxisInput(float InAxisValue)
         FVector Start = ArrowComponent->GetComponentLocation();
         FVector End = Start + ArrowComponent->GetForwardVector() * TargetingMaxDistance;
 
-        TArray<AActor*> ActorsToIgnore{ GetOwner() };
+        TArray<AActor*> ActorsToIgnore{ OwnerPtr.Get() };
 
         TArray<FHitResult> HitResults;
         UKismetSystemLibrary::CapsuleTraceMultiForObjects(
@@ -234,6 +249,8 @@ void UDynamicTargetingComponent::UpdateTarget()
 
 void UDynamicTargetingComponent::FindTarget()
 {
+    TWeakObjectPtr<AActor> OwnerPtr(GetOwner());
+
     TArray<AActor*> OutActors;
     TArray<AActor*> PotentialTargets;
     UGameplayStatics::GetAllActorsWithInterface(GetWorld(), UIsTargetable::StaticClass(), OutActors);
@@ -244,11 +261,11 @@ void UDynamicTargetingComponent::FindTarget()
 
         bool bIsTargetableActor = IsTargetable != nullptr;
         bool bIstargetable = IsTargetable->IsTargetable();
-        bool bIsNotOwner = GetOwner() != Actor;
+        bool bIsNotOwner = OwnerPtr.Get() != Actor;
 
         if (bIsTargetableActor &&
             IsTargetable->IsTargetable() && 
-            GetOwner() != SelectedActor &&
+            OwnerPtr.Get() != SelectedActor &&
             bIsNotOwner)
         {
             FVector2D OutScreenPos;
@@ -296,6 +313,8 @@ void UDynamicTargetingComponent::FindTarget()
 
 void UDynamicTargetingComponent::FindDirectionalTarget(bool bInOnLeft)
 {
+    TWeakObjectPtr<AActor> OwnerPtr(GetOwner());
+
     TArray<AActor*> PotentialTargetsRight;
     TArray<AActor*> PotentialTargetsLeft;
     if (IsTargetingEnabled())
@@ -310,8 +329,8 @@ void UDynamicTargetingComponent::FindDirectionalTarget(bool bInOnLeft)
             {
                 if (IsTargetable->IsTargetable() && 
                     Actor != SelectedActor && 
-                    GetOwner() != SelectedActor &&
-                    GetOwner() != Actor)
+                    OwnerPtr.Get() != SelectedActor &&
+                    OwnerPtr.Get() != Actor)
                 {
                     if (GetDistanceToOwner(Actor) <= TargetingMaxDistance)
                     {
@@ -399,9 +418,21 @@ void UDynamicTargetingComponent::EnableCameraLock()
 
 void UDynamicTargetingComponent::UpdateCameraLock()
 {
+    TWeakObjectPtr<AActor> OwnerPtr(GetOwner());
+    if (!OwnerPtr.IsValid())
+    {
+        return;
+    }
+
+    TWeakObjectPtr<APawn> InstigatorPtr(OwnerPtr.Get()->GetInstigator());
+    if (!InstigatorPtr.IsValid())
+    {
+        return;
+    }
+
     if (IsTargetingEnabled() && SelectedActor.IsValid())
     {
-        float Distance = GetOwner()->GetDistanceTo(SelectedActor.Get());
+        float Distance = OwnerPtr.Get()->GetDistanceTo(SelectedActor.Get());
         if (Distance >= 50.0f && Distance <= TargetingMaxDistance)
         {
             float DeltaTime = GetWorld()->GetDeltaSeconds();
@@ -409,7 +440,7 @@ void UDynamicTargetingComponent::UpdateCameraLock()
             if (ArrowComponent.IsValid())
             {
                 FRotator Current = ArrowComponent->GetComponentRotation();
-                FRotator Target = GetOwner()->GetInstigator()->GetControlRotation();
+                FRotator Target = OwnerPtr.Get()->GetInstigator()->GetControlRotation();
                 
                 float Yaw = UKismetMathLibrary::RInterpTo_Constant(Current, Target, DeltaTime, 250.0f).Yaw;
                 ArrowComponent->SetWorldRotation(FRotator(0, Yaw, 0));
@@ -417,19 +448,19 @@ void UDynamicTargetingComponent::UpdateCameraLock()
 
             if (!bIsFreeCamera)
             {
-                FVector Start = GetOwner()->GetActorLocation();
+                FVector Start = OwnerPtr.Get()->GetActorLocation();
                 Start.Z += TraceHeightOffset;
                 FVector End = SelectedActor->GetActorLocation();
 
-                FRotator CurrentRot = GetOwner()->GetInstigator()->GetControlRotation();
+                FRotator CurrentRot = InstigatorPtr.Get()->GetControlRotation();
                 FRotator TargetRot = UKismetMathLibrary::FindLookAtRotation(Start, End);
 
-                TargetRot.Pitch = GetOwner()->GetDistanceTo(SelectedActor.Get()) <= 300.0f ?
+                TargetRot.Pitch = OwnerPtr.Get()->GetDistanceTo(SelectedActor.Get()) <= 300.0f ?
                     FMath::Clamp(TargetRot.Pitch, -25.0f, 25.0f) : TargetRot.Pitch;
 
                 FRotator NewRot = UKismetMathLibrary::RInterpTo_Constant(CurrentRot, TargetRot, DeltaTime, 300.0f);
 
-                GetOwner()->GetInstigator()->GetController()->SetControlRotation(NewRot);
+                InstigatorPtr.Get()->GetController()->SetControlRotation(NewRot);
             }
         }
         else
@@ -453,7 +484,19 @@ void UDynamicTargetingComponent::SetDebugMode()
 
 void UDynamicTargetingComponent::UpdateIgnoreLookInput()
 {
-    AController* Controller = GetOwner()->GetInstigator()->GetController();
+    TWeakObjectPtr<AActor> OwnerPtr(GetOwner());
+    if (!OwnerPtr.IsValid())
+    {
+        return;
+    }
+
+    TWeakObjectPtr<APawn> InstigatorPtr(OwnerPtr.Get()->GetInstigator());
+    if (!InstigatorPtr.IsValid())
+    {
+        return;
+    }
+
+    AController* Controller = InstigatorPtr.Get()->GetController();
 
     if (GameUtils::IsValid(Controller))
     {
@@ -488,9 +531,15 @@ bool UDynamicTargetingComponent::IsInViewport(FVector2D InScreenPosition) const
 
 FVector UDynamicTargetingComponent::GetLineTraceStartLocation() const
 {
-    return GetOwner()->GetActorLocation() +
-        GetOwner()->GetActorForwardVector() * TraceDepthOffset +
-        GetOwner()->GetActorUpVector() * TraceHeightOffset;
+    TWeakObjectPtr<AActor> OwnerPtr(GetOwner());
+    if (!OwnerPtr.IsValid())
+    {
+        return FVector::ZeroVector;
+    }
+
+    return OwnerPtr.Get()->GetActorLocation() +
+        OwnerPtr.Get()->GetActorForwardVector() * TraceDepthOffset +
+        OwnerPtr.Get()->GetActorUpVector() * TraceHeightOffset;
 }
 
 
@@ -524,7 +573,7 @@ AActor* UDynamicTargetingComponent::GetTargetByDotProduct(const TArray<AActor*>&
     return LocalPotentialTarget;
 }
 
-bool UDynamicTargetingComponent::IsAnythingBlockingTrace(AActor* InTarget, const TArray<AActor*>& InActorsToIgnore) const
+bool UDynamicTargetingComponent::IsAnythingBlockingTrace(const AActor* const InTarget, const TArray<AActor*>& InActorsToIgnore) const
 {
     if (BlockingCollisionTypes.Num() > 0)
     {
@@ -551,19 +600,28 @@ bool UDynamicTargetingComponent::IsAnythingBlockingTrace(AActor* InTarget, const
     return true;
 }
 
-bool UDynamicTargetingComponent::GetActorScreenPosition(AActor* InActor, FVector2D& OutScreenPos) const
+bool UDynamicTargetingComponent::GetActorScreenPosition(const AActor* const InActor, FVector2D& OutScreenPos) const
 {
     APlayerController* PlayerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
     
     return UGameplayStatics::ProjectWorldToScreen(PlayerController, InActor->GetActorLocation(), OutScreenPos);
 }
 
-float UDynamicTargetingComponent::GetDistanceToOwner(AActor* InOtherActor) const
+float UDynamicTargetingComponent::GetDistanceToOwner(const AActor* const InOtherActor) const
 {
-    return GetOwner()->GetDistanceTo(InOtherActor);
+    TWeakObjectPtr<AActor> OwnerPtr(GetOwner());
+
+    if (OwnerPtr.IsValid())
+    {
+        return GetOwner()->GetDistanceTo(InOtherActor);
+    }
+    else
+    {
+        return 0.0f;
+    }
 }
 
-bool UDynamicTargetingComponent::IsTargetRightSide(AActor* InPotentialTarget) const
+bool UDynamicTargetingComponent::IsTargetRightSide(const AActor* const InPotentialTarget) const
 {
     if (!SelectedActor.IsValid())
     {
@@ -596,22 +654,29 @@ bool UDynamicTargetingComponent::IsTargetRightSide(AActor* InPotentialTarget) co
     }
 }
 
-float UDynamicTargetingComponent::CalculateDotProductToTarget(AActor* InTarget) const
+float UDynamicTargetingComponent::CalculateDotProductToTarget(const AActor* const InTarget) const
 {
     if (!SelectedActor.IsValid())
     {
         return 0.0f;
     }
 
+    TWeakObjectPtr<AActor> OwnerPtr(GetOwner());
+
+    if (!OwnerPtr.IsValid())
+    {
+        return 0.0f;
+    }
+
     FVector A, B;
     {
-        FVector From = GetOwner()->GetActorLocation();
+        FVector From = OwnerPtr.Get()->GetActorLocation();
         FVector To = SelectedActor->GetActorLocation();
         A = UKismetMathLibrary::GetDirectionUnitVector(From, To);
     }
     
     {
-        FVector From = GetOwner()->GetActorLocation();
+        FVector From = OwnerPtr.Get()->GetActorLocation();
         FVector To = InTarget->GetActorLocation();
         B = UKismetMathLibrary::GetDirectionUnitVector(From, To);
     }

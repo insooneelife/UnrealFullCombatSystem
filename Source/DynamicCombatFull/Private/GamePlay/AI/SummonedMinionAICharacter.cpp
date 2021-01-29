@@ -64,7 +64,7 @@ void ASummonedMinionAICharacter::OnOwnerStateChanged(EState InPrevState, EState 
     }
 }
 
-bool ASummonedMinionAICharacter::CanEffectBeApplied(EEffectType Type, AActor* Applier)
+bool ASummonedMinionAICharacter::CanEffectBeApplied(EEffectType Type, const AActor* const Applier) const
 {
     if (Type == EEffectType::Stun)
     {

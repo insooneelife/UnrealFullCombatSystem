@@ -26,13 +26,23 @@ protected:
     virtual void NativeDestruct() override;
 
     UFUNCTION()
-    void OnItemInSlotChanged(FStoredItem InOldItem, FStoredItem InNewItem, EItemType InType, int InSlotIndex, int InItemIndex);
+    void OnItemInSlotChanged(
+        const FStoredItem& InOldItem, 
+        const FStoredItem& InNewItem, 
+        EItemType InType, 
+        int InSlotIndex, 
+        int InItemIndex);
 
     UFUNCTION()
-    void OnActiveItemChanged(FStoredItem InOldItem, FStoredItem InNewItem, EItemType InType, int InSlotIndex, int InItemIndex);
+    void OnActiveItemChanged(
+        const FStoredItem& InOldItem,
+        const FStoredItem& InNewItem, 
+        EItemType InType,
+        int InSlotIndex,
+        int InItemIndex);
 
 public:
-    void UpdateWidget(FStoredItem InItem);
+    void UpdateWidget(const FStoredItem& InItem);
     void UpdateAmountText();
     void UpdateImage();
     void SetActiveWidget(bool bInVisible);

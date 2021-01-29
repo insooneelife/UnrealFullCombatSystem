@@ -85,6 +85,7 @@ public:
     virtual void OnMovementModeChanged(EMovementMode PrevMovementMode, uint8 PreviousCustomMode) override;
 
 public:
+
     UFUNCTION(BlueprintCallable)
     EItemType GetSelectedMainHandType() const;
 
@@ -280,7 +281,12 @@ protected:
 
     // equipment events
     UFUNCTION()
-    void OnActiveItemChanged(FStoredItem OldItem, FStoredItem NewItem, EItemType Type, int SlotIndex, int ActiveIndex);
+    void OnActiveItemChanged(
+        const FStoredItem& OldItem, 
+        const FStoredItem& NewItem,
+        EItemType Type, 
+        int SlotIndex,
+        int ActiveIndex);
     
     UFUNCTION()
     void OnCombatTypeChanged(ECombatType CombatType);
@@ -445,7 +451,7 @@ protected:
     void OnMouseReleased_Thumb();
 
     UFUNCTION()
-    void OnAbilityChanged(AAbilityBase* NewAbility);
+    void OnAbilityChanged(AAbilityBase* const NewAbility);
 
 
     UFUNCTION()
@@ -502,7 +508,7 @@ private:
 
     void AbilityPressed();
     void AbilityReleased();
-    void UpdateSpellActiveIndexKey(int NewActiveIndex);
+    void UpdateSpellActiveIndexKey(int InNewActiveIndex);
     void UpdateAbilityCrosshair();
     void UpdateAbilityPressed();
 
@@ -540,7 +546,7 @@ private:
 
     void ResetAimingMode();
 
-    void ShowCrosshair(UTexture2D* InTexture);
+    void ShowCrosshair(UTexture2D* const InTexture);
     void HideCrosshair();
 
     void UpdateAimAlpha();
@@ -650,11 +656,24 @@ private:
     UPROPERTY()
     UKeybindingsUI* KeybindingsWidget;
 
-    UPROPERTY()
-    AActor* BackstabbedActor;
+    UPROPERTY(EditAnywhere, Category = "LoadedObject")
+        UDataTable* PlayerOneHandMeleeMontages;
 
-    UPROPERTY()
-    AActor* InteractionActor;
+    UPROPERTY(EditAnywhere, Category = "LoadedObject")
+        UDataTable* PlayerArcherMontages;
+
+    UPROPERTY(EditAnywhere, Category = "LoadedObject")
+        UDataTable* PlayerCommonMontages;
+
+    UPROPERTY(EditAnywhere, Category = "LoadedObject")
+        UDataTable* PlayerMagicMontages;
+
+    UPROPERTY(EditAnywhere, Category = "LoadedObject")
+        UDataTable* PlayerUnarmedMontages;
+
+    TWeakObjectPtr<AActor> BackstabbedActor;
+
+    TWeakObjectPtr<AActor> InteractionActor;
 
     int MeleeAttackCounter;
     EMeleeAttackType MeleeAttackType;
@@ -674,34 +693,6 @@ private:
 
     UPROPERTY(EditAnywhere, Category = "Combat")
     TArray<FName> LeftFootCollisionSockets;
-    
-
-    UPROPERTY(EditAnywhere, Category = "LoadedClass")
-    TSubclassOf<UUserWidget> InGameUIClass;
-
-    UPROPERTY(EditAnywhere, Category = "LoadedClass")
-    TSubclassOf<UKeybindingsUI> KeybindingsUIClass;
-
-    UPROPERTY(EditAnywhere, Category = "LoadedObject")
-    UTexture2D* CrosshairTexture;
-
-    UPROPERTY(EditAnywhere, Category = "LoadedObject")
-    UTexture2D* DefaultCrosshairTextureObject;
-
-    UPROPERTY(EditAnywhere, Category = "LoadedObject")
-    UDataTable* PlayerOneHandMeleeMontages;
-
-    UPROPERTY(EditAnywhere, Category = "LoadedObject")
-    UDataTable* PlayerArcherMontages;
-
-    UPROPERTY(EditAnywhere, Category = "LoadedObject")
-    UDataTable* PlayerCommonMontages;
-
-    UPROPERTY(EditAnywhere, Category = "LoadedObject")
-    UDataTable* PlayerMagicMontages;
-
-    UPROPERTY(EditAnywhere, Category = "LoadedObject")
-    UDataTable* PlayerUnarmedMontages;
 
     UPROPERTY(EditAnywhere, Category = "Crosshair")
     bool IsCrosshairVisible;
@@ -765,5 +756,4 @@ private:
     FTimerHandle ResetMeleeAttackCounterTimerHandle;
     FTimerHandle LoopSlowMotionTimerHandle;
     FTimerHandle UpdateCameraLagTimerHandle;
-
 };

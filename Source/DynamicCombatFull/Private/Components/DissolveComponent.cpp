@@ -19,17 +19,13 @@ UDissolveComponent::UDissolveComponent()
     PrimaryComponentTick.bCanEverTick = false;
     PrimaryComponentTick.bStartWithTickEnabled = false;
     
-    static UMaterialInstance* LoadedObject = GameUtils::LoadAssetObject<UMaterialInstance>(
-        TEXT("/Game/DynamicCombatSystem/Meshes/Materials/MI_DissolveEffect"));
-
-    DissolveMaterial = LoadedObject;
     DissolveValueName = TEXT("amount");
     DissolveColorName = TEXT("color");
     DissolveInterpSpeed = 1.0f;
     DissolveColor = FLinearColor(5.0f, 0.0f, 0.0f, 0.0f);
 }
 
-void UDissolveComponent::StartDissolve(UPrimitiveComponent* InComponent, bool bInReversed)
+void UDissolveComponent::StartDissolve(UPrimitiveComponent* const InComponent, bool bInReversed)
 {
     if (GameUtils::IsValid(InComponent))
     {
@@ -48,12 +44,19 @@ void UDissolveComponent::StartDissolve(UPrimitiveComponent* InComponent, bool bI
             for (int i = 0; i < InComponent->GetNumMaterials(); ++i)
             {
                 LMaterials.Add(InComponent->GetMaterial(i));
+                
+                UDefaultGameInstance* DefaultGameInstance =
+                    Cast<UDefaultGameInstance>(GameUtils::GetDefaultGameInstance(GetWorld()));
 
-                UMaterialInstanceDynamic* MatInstD = 
-                    InComponent->CreateDynamicMaterialInstance(i, DissolveMaterial);
+                if (DefaultGameInstance != nullptr)
+                {
+                    UMaterialInstanceDynamic* MatInstD =
+                        InComponent->CreateDynamicMaterialInstance(i, DefaultGameInstance->DissolveMaterial);
 
-                MatInstD->SetVectorParameterValue(DissolveColorName, DissolveColor);
-                LDissolveMaterials.Add(MatInstD);
+                    MatInstD->SetVectorParameterValue(DissolveColorName, DissolveColor);
+                    LDissolveMaterials.Add(MatInstD);
+                }
+                
             }
 
             // add to dissolve components
@@ -72,7 +75,7 @@ void UDissolveComponent::StartDissolve(UPrimitiveComponent* InComponent, bool bI
     }
 }
 
-void UDissolveComponent::StopDissolve(UPrimitiveComponent* InComponent)
+void UDissolveComponent::StopDissolve(UPrimitiveComponent* const InComponent)
 {
     int LIndex = FindComponent(InComponent);
 

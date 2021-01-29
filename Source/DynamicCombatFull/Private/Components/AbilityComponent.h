@@ -11,7 +11,7 @@
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FAbilityStartedSignature);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FAbilityEndedSignature, EAbilityEndResult, InResult);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FManaConsumedSignature, float, InAmount);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FAbilityChangedSignature, AAbilityBase*, InNewAbility);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FAbilityChangedSignature, AAbilityBase* const, InNewAbility);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FCastingChangedSignature, bool, bInIsCasting);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FPressedChangedSignature, bool, bInIsPressed);
 
@@ -64,7 +64,7 @@ public:
 protected:
     UFUNCTION()
     void OnActiveItemChanged(
-        FStoredItem InOldItem, FStoredItem InNewItem, EItemType InType, int InSlotIndex, int InActiveIndex);
+        const FStoredItem& InOldItem, const FStoredItem& InNewItem, EItemType InType, int InSlotIndex, int InActiveIndex);
 
     UFUNCTION()
     void OnMainHandTypeChanged(EItemType InType);
@@ -75,9 +75,9 @@ public:
     void AbilityPressed();
     void AbilityReleased();
     void ConsumeMana(float InAmount);
-    void ShowSpellIndicator(FVector InLocation, float InRadius, UMaterialInterface* InMaterial);
+    void ShowSpellIndicator(FVector InLocation, float InRadius, UMaterialInterface* const InMaterial);
     void HideSpellIndicator();
-    float PlayAbilityMontage(UAnimMontage* InMontage, float InPlayRate, FName InSection);
+    float PlayAbilityMontage(UAnimMontage* const InMontage, float InPlayRate, FName InSection);
     bool IsAbilityUsingCrosshair() const;
     FTransform GetEffectTransform() const;
     float GetManaCost() const;
@@ -118,9 +118,6 @@ public:
     FPressedChangedSignature OnPressedChanged;
 
 private:
-
-    UPROPERTY(EditAnywhere, Category = "LoadedClass")
-    TSubclassOf<ASpellIndicatorActor> SpawnIndicatorClass;
 
     TWeakObjectPtr<UEquipmentComponent> EquipmentComponent;
 

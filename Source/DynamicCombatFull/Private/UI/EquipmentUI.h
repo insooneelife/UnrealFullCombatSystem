@@ -25,7 +25,7 @@ protected:
     virtual FReply NativeOnKeyDown(const FGeometry& InGeometry, const FKeyEvent& InKeyEvent) override;
 
     UFUNCTION()
-    void OnInventoryItemClicked(UInventoryItemUI* InItem);
+    void OnInventoryItemClicked(UInventoryItemUI* const InItem);
 
     UFUNCTION()
     void OnClicked_CloseButton();
@@ -34,7 +34,7 @@ public:
     void Open();
     void Close();
 
-    void EquipmentSlotClicked(UEquipmentSlotUI* InSlot);
+    void EquipmentSlotClicked(UEquipmentSlotUI* const InSlot);
     void SetActiveWidget(int WidgetIndex);
 
 private:

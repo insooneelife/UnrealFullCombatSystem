@@ -26,7 +26,7 @@ protected:
 
 public:
     UFUNCTION(BlueprintCallable)
-    bool ApplyEffect(EEffectType InType, float InDuration, EApplyEffectMethod InMethod, AActor* InApplier);
+    bool ApplyEffect(EEffectType InType, float InDuration, EApplyEffectMethod InMethod, AActor* const InApplier);
 
     UFUNCTION(BlueprintCallable)
     bool IsEffectApplied(EEffectType InType) const;
@@ -38,8 +38,8 @@ public:
     float GetBackstabDamage() const { return BackstabDamage; }
 
 public:
-    bool ApplyBackstabEffect(float InDuration, EApplyEffectMethod InMethod, AActor* InApplier, float InDamage);
-    bool ApplyBurningEffect(float InDuration, EApplyEffectMethod InMethod, AActor* InApplier, float InDamage);
+    bool ApplyBackstabEffect(float InDuration, EApplyEffectMethod InMethod, AActor* const InApplier, float InDamage);
+    bool ApplyBurningEffect(float InDuration, EApplyEffectMethod InMethod, AActor* const InApplier, float InDamage);
     void AdjustEffectTime(EEffectType InType, float InNewDuration);
 
     bool IsAnyEffectApplied(TArray<EEffectType> InTypes) const;
@@ -49,7 +49,7 @@ private:
     void RemoveEffect(EEffectType InType);
     void UpdateEffectsDuration();
     void RemoveEffects(TArray<EEffectType> InTypes);
-    void UpdateEffect(EEffectType InType, float InDuration, EApplyEffectMethod InMethod, AActor* InApplier);
+    void UpdateEffect(EEffectType InType, float InDuration, EApplyEffectMethod InMethod, AActor* const InApplier);
     FEffect GetEffect(EEffectType InType) const;
     int GetEffectIndex(EEffectType InType) const;
 

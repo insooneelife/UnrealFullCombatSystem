@@ -112,7 +112,7 @@ void UInventoryUI::FocusSelf()
     UWidgetBlueprintLibrary::SetInputMode_UIOnlyEx(GetOwningPlayer(), this, EMouseLockMode::LockAlways);
 }
 
-void UInventoryUI::OnInventoryItemClicked(UInventoryItemUI* InItem)
+void UInventoryUI::OnInventoryItemClicked(UInventoryItemUI* const InItem)
 {
     FVector2D SpawnPosition = UWidgetLayoutLibrary::GetMousePositionOnViewport(GetWorld());
     UItemActionsUI* CreatedUI = Cast<UItemActionsUI>(CreateWidget(GetOwningPlayer(), ItemActionsUIClass));
@@ -156,7 +156,7 @@ void UInventoryUI::Close()
 }
 
 
-void UInventoryUI::CategoryButtonClicked(UCategoryButtonUI* Button)
+void UInventoryUI::CategoryButtonClicked(UCategoryButtonUI* const Button)
 {
     if (Button != SelectedCategoryButton)
     {
@@ -166,7 +166,7 @@ void UInventoryUI::CategoryButtonClicked(UCategoryButtonUI* Button)
     }
 }
 
-void UInventoryUI::SetCategoryButton(UCategoryButtonUI* Button)
+void UInventoryUI::SetCategoryButton(UCategoryButtonUI* const Button)
 {
     if (Button != SelectedCategoryButton)
     {

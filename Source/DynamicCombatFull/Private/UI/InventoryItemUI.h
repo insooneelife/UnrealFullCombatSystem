@@ -39,18 +39,28 @@ protected:
     void OnUnhovered_SlotButton();
 
     UFUNCTION()
-    void OnItemInSlotChanged(FStoredItem OldItem, FStoredItem NewItem, EItemType Type, int SlotIndex, int ItemIndex);
+    void OnItemInSlotChanged(
+        const FStoredItem& OldItem,
+        const FStoredItem& NewItem,
+        EItemType Type,
+        int SlotIndex, 
+        int ItemIndex);
 
     UFUNCTION()
-    void OnActiveItemChanged(FStoredItem OldItem, FStoredItem NewItem, EItemType Type, int SlotIndex, int ItemIndex);
+    void OnActiveItemChanged(
+        const FStoredItem& OldItem,
+        const FStoredItem& NewItem,
+        EItemType Type,
+        int SlotIndex,
+        int ItemIndex);
 
 public:
     void Init(
-        UInventoryComponent* InInventoryComponent,
-        UEquipmentComponent* InEquipmentComponent,
-        UItemsGridUI* InItemsGridUI);
+        UInventoryComponent* const InInventoryComponent,
+        UEquipmentComponent* const InEquipmentComponent,
+        UItemsGridUI* const InItemsGridUI);
 
-    void UpdateWidget(FStoredItem InItem);
+    void UpdateWidget(const FStoredItem& InItem);
     void UpdateAmountText();
     void UpdateIsEquippedImage();
     void SetFocusedImage(bool bVisible);

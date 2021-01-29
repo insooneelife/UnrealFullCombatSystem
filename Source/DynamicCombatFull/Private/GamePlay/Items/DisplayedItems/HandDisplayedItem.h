@@ -28,8 +28,11 @@ public:
     virtual FName GetAttachmentSocket() const override;
 
     UFUNCTION()
-    void OnSlotHiddenChanged(EItemType InSlotType, int InSlotIndex, FStoredItem InActiveItem, bool bInIsHidden);
-
+    void OnSlotHiddenChanged(
+        EItemType InSlotType,
+        int InSlotIndex,
+        const FStoredItem& InActiveItem, 
+        bool bInIsHidden);
 
 protected:
     UPROPERTY(EditAnywhere, Category = "Sockets")

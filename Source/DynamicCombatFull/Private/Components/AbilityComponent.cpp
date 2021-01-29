@@ -21,12 +21,7 @@ UAbilityComponent::UAbilityComponent()
 	PrimaryComponentTick.bCanEverTick = false;
     PrimaryComponentTick.bStartWithTickEnabled = false;
 
-    bUpdateEquipmentAbility = true;
-
-    TSubclassOf<ASpellIndicatorActor> LoadedClass = GameUtils::LoadAssetClass<ASpellIndicatorActor>(
-        TEXT("/Game/DynamicCombatSystem/Blueprints/SpellIndicatorActorBP"));
-    SpawnIndicatorClass = LoadedClass;
-        
+    bUpdateEquipmentAbility = true;        
 }
 
 // Called when the game starts
@@ -54,7 +49,6 @@ void UAbilityComponent::BeginPlay()
     {
         UE_LOG(LogTemp, Error, TEXT("EquipmentComponent is not valid!"));
     }
-
 }
 
 void UAbilityComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
@@ -188,7 +182,7 @@ bool UAbilityComponent::CanAbilityBeCancelled() const
 }
 
 void UAbilityComponent::OnActiveItemChanged(
-    FStoredItem InOldItem, FStoredItem InNewItem, EItemType InType, int InSlotIndex, int InActiveIndex)
+    const FStoredItem& InOldItem, const FStoredItem& InNewItem, EItemType InType, int InSlotIndex, int InActiveIndex)
 {
     if (InType == EItemType::None || 
         (EquipmentComponent.IsValid() && EquipmentComponent->GetSelectedMainHandType() == InType))
@@ -275,7 +269,7 @@ void UAbilityComponent::ConsumeMana(float InAmount)
 }
 
 
-void UAbilityComponent::ShowSpellIndicator(FVector InLocation, float InRadius, UMaterialInterface* InMaterial)
+void UAbilityComponent::ShowSpellIndicator(FVector InLocation, float InRadius, UMaterialInterface* const InMaterial)
 {
     if (SpellIndicator.IsValid())
     {
@@ -295,15 +289,22 @@ void UAbilityComponent::ShowSpellIndicator(FVector InLocation, float InRadius, U
             SpawnParameters.Owner = OwnerPtr.Get();
             SpawnParameters.Instigator = TWeakObjectPtr<APawn>(OwnerPtr.Get()->GetInstigator()).Get();
 
-            TWeakObjectPtr<ASpellIndicatorActor> SpawnedActor =
-                GetWorld()->SpawnActor<ASpellIndicatorActor>(
-                    SpawnIndicatorClass, FTransform(FQuat::Identity, InLocation), SpawnParameters);
+            UDefaultGameInstance* DefaultGameInstance = GameUtils::GetDefaultGameInstance(GetWorld());
 
-            if (SpawnedActor.IsValid())
+            if (DefaultGameInstance != nullptr)
             {
-                SpawnedActor->Init(InRadius, InMaterial);
-                SpawnedActor->Show();
-                SpellIndicator = SpawnedActor.Get();
+                TWeakObjectPtr<ASpellIndicatorActor> SpawnedActor =
+                    GetWorld()->SpawnActor<ASpellIndicatorActor>(
+                        DefaultGameInstance->SpellIndicatorClass,
+                        FTransform(FQuat::Identity, InLocation),
+                        SpawnParameters);
+
+                if (SpawnedActor.IsValid())
+                {
+                    SpawnedActor->Init(InRadius, InMaterial);
+                    SpawnedActor->Show();
+                    SpellIndicator = SpawnedActor.Get();
+                }
             }
         }
     }
@@ -317,7 +318,7 @@ void UAbilityComponent::HideSpellIndicator()
     }
 }
 
-float UAbilityComponent::PlayAbilityMontage(UAnimMontage* InMontage, float InPlayRate, FName InSection)
+float UAbilityComponent::PlayAbilityMontage(UAnimMontage* const InMontage, float InPlayRate, FName InSection)
 {
     if (Character.IsValid())
     {

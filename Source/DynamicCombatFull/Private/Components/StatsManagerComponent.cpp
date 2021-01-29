@@ -177,7 +177,11 @@ float UStatsManagerComponent::GetDamage() const
 }
 
 void UStatsManagerComponent::OnActiveItemChanged(
-    FStoredItem InOldItem, FStoredItem InNewItem, EItemType InSlotType, int InSlotIndex, int InActiveIndex)
+    const FStoredItem& InOldItem,
+    const FStoredItem& InNewItem,
+    EItemType InSlotType,
+    int InSlotIndex,
+    int InActiveIndex)
 {
     UpdateBlockBaseValue();
     
@@ -192,7 +196,7 @@ void UStatsManagerComponent::OnActiveItemChanged(
 }
 
 void UStatsManagerComponent::OnSlotHiddenChanged(
-    EItemType InSlotType, int InSlotIndex, FStoredItem InActiveItem, bool bInIsHidden)
+    EItemType InSlotType, int InSlotIndex, const FStoredItem& InActiveItem, bool bInIsHidden)
 {
     if (bInIsHidden)
     {

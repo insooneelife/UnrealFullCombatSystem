@@ -42,7 +42,7 @@ protected:
 
 public:
     void CreateItemWidgets();
-    void PickupItemClicked(UPickupItemUI* Item);
+    void PickupItemClicked(UPickupItemUI* const InItem);
 
 private:
     UPROPERTY(EditAnywhere, Category = "LoadedClass")

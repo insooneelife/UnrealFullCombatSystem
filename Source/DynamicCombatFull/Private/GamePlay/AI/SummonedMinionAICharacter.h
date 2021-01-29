@@ -28,7 +28,7 @@ protected:
 
 public:
     // ICanGetEffects
-    virtual bool CanEffectBeApplied(EEffectType Type, AActor* Applier) override;
+    virtual bool CanEffectBeApplied(EEffectType Type, const AActor* const Applier) const override;
 
 
     // ICanMeleeAttack

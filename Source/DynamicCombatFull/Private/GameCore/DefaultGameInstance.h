@@ -12,6 +12,9 @@
 class UExtendedStatComponent;
 class UParticleSystem;
 class USoundBase;
+class UMaterialInstance;
+class APickupActor;
+class UKeybindingsUI;
 /**
  *
  */
@@ -36,11 +39,18 @@ public:
 public:
     UDefaultGameInstance(const FObjectInitializer& ObjectInitializer);
 
+    virtual void Shutdown() override;
+
+public:
     void PlayHitSound(AActor* Applier, AActor* Receiver, FVector Location);
 
     void PlayParrySound(AActor* Applier, AActor* Receiver, FVector Location);
 
     void PlayBlockSound(AActor* Applier, AActor* Receiver, FVector Location);
+
+public:
+
+
 
     static EMontageAction ConvertMeleeAttackTypeToAction(EMeleeAttackType Type);
 
@@ -61,20 +71,41 @@ public:
 
 public:
     UPROPERTY()
-        USoundBase* DefaultHitSound;
+    USoundBase* DefaultHitSound;
 
     UPROPERTY()
-        USoundBase* SwordHitSound;
+    USoundBase* SwordHitSound;
 
     UPROPERTY()
-        USoundBase* AxeHitSound;
+    USoundBase* AxeHitSound;
 
     UPROPERTY()
-        USoundBase* BlockShieldSound;
+    USoundBase* BlockShieldSound;
 
     UPROPERTY()
     UParticleSystem* ExplosionParticle;
 
     UPROPERTY()
     USoundBase* GroundExplosionSound;
+
+    UPROPERTY()
+    TSubclassOf<class ASpellIndicatorActor> SpellIndicatorClass;
+
+    UPROPERTY()
+    UMaterialInstance* DissolveMaterial;
+
+    UPROPERTY()
+    TSubclassOf<AActor> SpawnPickupActorClass;
+
+    UPROPERTY()
+    UTexture2D* DefaultCrosshairTextureObject;
+
+    UPROPERTY()
+    UTexture2D* CrosshairTexture;
+
+    UPROPERTY()
+    TSubclassOf<UUserWidget> InGameUIClass;
+
+    UPROPERTY()
+    TSubclassOf<UKeybindingsUI> KeybindingsUIClass;
 };

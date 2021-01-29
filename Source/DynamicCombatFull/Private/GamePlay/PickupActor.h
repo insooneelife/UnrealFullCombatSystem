@@ -24,7 +24,8 @@ public:
     // Sets default values for this actor's properties
     APickupActor();
 
-protected:
+public:
+    virtual void EndPlay(const EEndPlayReason::Type EndPlayResult) override;
 
 public:
     void Init(FName InName, const TMap<TSubclassOf<UItemBase>, int>& InItems);
@@ -52,19 +53,16 @@ private:
 
 private:
 
+    UPROPERTY()
     TSubclassOf<UUserWidget> CreateUserWidgetClass;
 
-    UPROPERTY()
-    UInventoryComponent* InventoryComponent;
+    TWeakObjectPtr<UInventoryComponent> InventoryComponent;
 
     UPROPERTY(EditAnywhere, Category = "Default")
     FName Name;
 
     UPROPERTY(EditAnywhere, Category = "Default")
     TMap<TSubclassOf<UItemBase>, int> Items;
-
-    UPROPERTY()
-    AActor* Caller;
 
     UPROPERTY(EditAnywhere)
     UBoxComponent* Box;

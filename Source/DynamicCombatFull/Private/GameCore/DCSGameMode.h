@@ -21,6 +21,7 @@ class ADCSGameMode : public AGameModeBase
 protected:
     // Called when the game starts
     virtual void BeginPlay() override;
+    virtual void EndPlay(const EEndPlayReason::Type EndPlayResult) override;
 
 public:
     void UpdateInventoryValues();

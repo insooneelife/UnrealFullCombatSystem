@@ -11,9 +11,9 @@
 #include "EquipmentComponent.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FInCombatChangedSignature, bool, bInIsInCombat);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_FiveParams(FItemInSlotChangedSignature, FStoredItem, InOldItem, FStoredItem, InNewItem, EItemType, InType, int, InSlotIndex, int, InActiveIndex);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_FiveParams(FActiveItemChangedSignature, FStoredItem, InOldItem, FStoredItem, InNewItem, EItemType, InType, int, InSlotIndex, int, InActiveIndex);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_FourParams(FSlotHiddenChangedSignature, EItemType, InSlotType, int, InSlotIndex, FStoredItem, InActiveItem, bool, bInIsHidden);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_FiveParams(FItemInSlotChangedSignature, const FStoredItem&, InOldItem, const FStoredItem&, InNewItem, EItemType, InType, int, InSlotIndex, int, InActiveIndex);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_FiveParams(FActiveItemChangedSignature, const FStoredItem&, InOldItem, const FStoredItem&, InNewItem, EItemType, InType, int, InSlotIndex, int, InActiveIndex);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_FourParams(FSlotHiddenChangedSignature, EItemType, InSlotType, int, InSlotIndex, const FStoredItem&, InActiveItem, bool, bInIsHidden);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FMainHandTypeChangedSignature, EItemType, InType);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FCombatTypeChangedSignature, ECombatType, InCombatType);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FWeaponTypeChangedSignature, EWeaponType, InWeaponType);
@@ -65,7 +65,7 @@ public:
         EItemType InType, 
         int InSlotIndex, 
         int InItemIndex, 
-        FStoredItem InItem, 
+        const FStoredItem& InItem, 
         EHandleSameItemMethod InHandleSameItemMethod);
 
     int GetEqSlotsIndex(EItemType InType) const;
@@ -86,7 +86,7 @@ public:
 
 protected:
     UFUNCTION()
-    void OnItemModified(FStoredItem InItem);
+    void OnItemModified(const FStoredItem& InItem);
 
     UFUNCTION()
     void OnGameLoaded();
@@ -98,29 +98,29 @@ private:
     void SetSlotHidden(EItemType InType, int InSlotIndex, bool bInIsHidden);
 
     void BroadcastOnItemInSlotChanged(
-        FStoredItem InOldItem, FStoredItem InNewItem, EItemType InType, int InSlotIndex, int InItemIndex);
+        const FStoredItem& InOldItem, const FStoredItem& InNewItem, EItemType InType, int InSlotIndex, int InItemIndex);
 
     void ActiveItemChanged(
-        FStoredItem InOldItem, FStoredItem InNewItem, EItemType InType, int InSlotIndex, int InActiveIndex);
+        const FStoredItem& InOldItem, const FStoredItem& InNewItem, EItemType InType, int InSlotIndex, int InActiveIndex);
     
     void UseActiveItemAtSlot(EItemType InType, int InSlotIndex);
-    bool FindItem(FStoredItem InItem, EItemType& OutType, int& OutSlotIndex, int& OutItemIndex) const;
+    bool FindItem(const FStoredItem& InItem, EItemType& OutType, int& OutSlotIndex, int& OutItemIndex) const;
     void BuildEquipment(const TArray<FEquipmentSlots>& InEquipment);
     
     void UpdateCombatType();
-    void SetItemInSlot(EItemType InType, int InSlotIndex, int InItemIndex, FStoredItem InItem);
+    void SetItemInSlot(EItemType InType, int InSlotIndex, int InItemIndex, const FStoredItem& InItem);
     void AttachDisplayedItem(EItemType InType, int InSlotIndex);
 
     FStoredItem GetWeapon() const;
-    EItemType GetItemType(FStoredItem InItem) const;
-    bool IsItemValid(FStoredItem InItem) const;
+    EItemType GetItemType(const FStoredItem& InItem) const;
+    bool IsItemValid(const FStoredItem& InItem) const;
     bool IsItemIndexValid(EItemType InType, int InSlotIndex, int InItemIndex) const;
 
     int GetActiveItemIndex(EItemType InType, int InSlotIndex) const;
     bool IsSlotIndexValid(EItemType InType, int InSlotIndex) const;
     template <typename ElementType>
     int GetNextArrayIndex(TArray<ElementType> InArray, int InIndex, bool bInForward) const;
-    bool IsItemTwoHanded(FStoredItem InItem) const;
+    bool IsItemTwoHanded(const FStoredItem& InItem) const;
 
 public:
     UPROPERTY(BlueprintAssignable)

@@ -21,6 +21,8 @@ public:
 
 public:
 
+    virtual void EndPlay(const EEndPlayReason::Type EndPlayResult) override;
+
     virtual void OnConstruction(const FTransform& Transform) override;
 
     USplineComponent* GetPatrolSpline() const { return PatrolSpline; }

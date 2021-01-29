@@ -67,7 +67,7 @@ void UCategoryButtonUI::OnUnhovered_SlotButton()
 }
 
 // called after NativeConstruct
-void UCategoryButtonUI::Init(UInventoryUI* InInventoryUI)
+void UCategoryButtonUI::Init(UInventoryUI* const InInventoryUI)
 {
     InventoryUI = InInventoryUI;
     if (GameUtils::IsValid(InventoryUI))
@@ -79,8 +79,8 @@ void UCategoryButtonUI::Init(UInventoryUI* InInventoryUI)
     }
 }
 
-void UCategoryButtonUI::SetActiveBorder(bool bVisible)
+void UCategoryButtonUI::SetActiveBorder(bool bInVisible)
 {
-    FLinearColor Color = bVisible ? GameUtils::Brown : GameUtils::Gray;
+    FLinearColor Color = bInVisible ? GameUtils::Brown : GameUtils::Gray;
     ActiveBorder->SetBrushColor(Color);
 }

@@ -31,6 +31,12 @@ APatrolPathActor::APatrolPathActor()
     PatrolSpline->EditorSelectedSplineSegmentColor = FLinearColor(0.728f, 0.364f, 0.003f);
 }
 
+void APatrolPathActor::EndPlay(const EEndPlayReason::Type EndPlayResult)
+{
+    Billboard = nullptr;
+    PatrolSpline = nullptr;
+    Super::EndPlay(EndPlayResult);
+}
 
 void APatrolPathActor::OnConstruction(const FTransform& Transform)
 {

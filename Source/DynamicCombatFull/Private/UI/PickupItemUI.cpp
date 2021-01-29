@@ -53,7 +53,7 @@ void UPickupItemUI::UpdateWidget()
 }
 
 void UPickupItemUI::Init(
-    UPickupUI* InPickupUI, TSubclassOf<UItemBase> InItemClass, int InItemAmount, APickupActor* InPickup)
+    UPickupUI* const InPickupUI, TSubclassOf<UItemBase> InItemClass, int InItemAmount, APickupActor* const InPickup)
 {
     PickupUI = InPickupUI;
     ItemClass = InItemClass;

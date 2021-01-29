@@ -18,7 +18,8 @@ public:
 	// Sets default values for this actor's properties
 	ASpellIndicatorActor();
 
-protected:
+public:
+    virtual void EndPlay(const EEndPlayReason::Type EndPlayResult) override;
 	
 public:	
     void Init(float InRadius, UMaterialInterface* InMaterial);

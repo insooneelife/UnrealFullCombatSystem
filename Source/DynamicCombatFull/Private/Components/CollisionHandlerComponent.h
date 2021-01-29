@@ -25,7 +25,8 @@ public:
 
 public:
     // Called every frame
-    virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+    virtual void TickComponent(
+        float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 public:
     UFUNCTION(BlueprintCallable)
@@ -36,7 +37,7 @@ public:
 
 public:
     void SetCollisionMeshes(const TArray<FCollisionComponent>& InCollComps);
-    void SetCollisionMesh(UPrimitiveComponent* InWeaponMesh, const TArray<FName>& InSockets);
+    void SetCollisionMesh(UPrimitiveComponent* const InWeaponMesh, const TArray<FName>& InSockets);
     void AddIgnoredClass(TSubclassOf<AActor> IgnoredClass);
     void AddIgnoredCollisionProfileNames(FName InProfileName);
     void AddObjectTypesToCollideWith(TEnumAsByte<EObjectTypeQuery> InObjectType);
@@ -50,14 +51,14 @@ private:
 
     bool IsCollisionActive() const;
 
-    FName GetUniqueSocketName(UPrimitiveComponent* InComponent, FName InSocketName) const;
+    FName GetUniqueSocketName(UPrimitiveComponent* const InComponent, FName InSocketName) const;
 
-    int GetHitActorsIndex(UPrimitiveComponent* InComponent) const;
+    int GetHitActorsIndex(UPrimitiveComponent* const InComponent) const;
 
     // #fix architecture
-    TArray<AActor*> GetHitActorsOrAddOwner(UPrimitiveComponent* InComponent);
+    TArray<AActor*> GetHitActorsOrAddOwner(UPrimitiveComponent* const InComponent);
 
-    void AddHitActor(UPrimitiveComponent* InComponent, AActor* InHitActor);
+    void AddHitActor(UPrimitiveComponent* const InComponent, AActor* const InHitActor);
 
 public:
     UPROPERTY(BlueprintAssignable)

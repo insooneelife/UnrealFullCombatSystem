@@ -27,7 +27,7 @@ class IIsItemsContainer
 public:
 
     virtual bool IsOpen() const = 0;
-    virtual bool ItemClicked(UInventoryItemUI* Widget) const = 0;
-    virtual bool UpdateItemsSlots(EItemType Type) = 0;
+    virtual bool ItemClicked(UInventoryItemUI* const InWidget) const = 0;
+    virtual bool UpdateItemsSlots(EItemType InType) = 0;
     virtual bool CreateItemsSlots() = 0;
 };

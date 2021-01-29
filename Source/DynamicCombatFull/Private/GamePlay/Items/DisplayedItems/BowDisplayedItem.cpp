@@ -71,7 +71,10 @@ UPrimitiveComponent* ABowDisplayedItem::GetPrimaryComponent() const
 }
 
 void ABowDisplayedItem::OnActiveItemChanged(
-    FStoredItem InOldItem, FStoredItem InNewItem, EItemType InType, int InSlotIndex, int InActiveIndex)
+    const FStoredItem& InOldItem, 
+    const FStoredItem& InNewItem,
+    EItemType InType,
+    int InSlotIndex, int InActiveIndex)
 {
     if (InType == EItemType::Arrows && 
         InNewItem.Id != LastUpdatedArrow.Id)

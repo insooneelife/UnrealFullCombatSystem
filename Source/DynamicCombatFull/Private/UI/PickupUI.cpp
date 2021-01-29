@@ -142,11 +142,11 @@ void UPickupUI::CreateItemWidgets()
     }
 }
 
-void UPickupUI::PickupItemClicked(UPickupItemUI* Item)
+void UPickupUI::PickupItemClicked(UPickupItemUI* const InItem)
 {
-    Pickup->TakeItem(Item->GetItemClass());
+    Pickup->TakeItem(InItem->GetItemClass());
 
-    PickupScrollBox->RemoveChild(Item);
+    PickupScrollBox->RemoveChild(InItem);
 
     if (PickupScrollBox->HasAnyChildren())
     {

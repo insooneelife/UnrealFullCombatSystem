@@ -37,7 +37,11 @@ public:
 
     UFUNCTION()
     void OnActiveItemChanged(
-        FStoredItem InOldItem, FStoredItem InNewItem, EItemType InType, int InSlotIndex, int InActiveIndex);
+        const FStoredItem& InOldItem, 
+        const FStoredItem& InNewItem, 
+        EItemType InType,
+        int InSlotIndex,
+        int InActiveIndex);
     
     UFUNCTION(BlueprintCallable)
     void UpdateArrowAttachment(bool bAttachToOwner);

@@ -32,10 +32,10 @@ public:
     void UpdateWidget();
 
     void Init(
-        UPickupUI* InPickupUI,
+        UPickupUI* const InPickupUI,
         TSubclassOf<UItemBase> InItemClass,
         int InItemAmount,
-        APickupActor* InPickup);
+        APickupActor* const InPickup);
 
 public:
 

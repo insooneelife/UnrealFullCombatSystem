@@ -34,9 +34,11 @@ void UEffectsComponent::BeginPlay()
 }
 
 
-bool UEffectsComponent::ApplyEffect(EEffectType InType, float InDuration, EApplyEffectMethod InMethod, AActor* InApplier)
+bool UEffectsComponent::ApplyEffect(
+    EEffectType InType, float InDuration, EApplyEffectMethod InMethod, AActor* const InApplier)
 {
-    ICanGetEffects* IEffect = Cast<ICanGetEffects>(GetOwner());
+    TWeakObjectPtr<AActor> OwnerPtr(GetOwner());
+    ICanGetEffects* IEffect = Cast<ICanGetEffects>(OwnerPtr.Get());
 
     if (IEffect != nullptr)
     {
@@ -63,9 +65,10 @@ AActor* UEffectsComponent::GetEffectApplier(EEffectType InType) const
 }
 
 bool UEffectsComponent::ApplyBackstabEffect(
-    float InDuration, EApplyEffectMethod InMethod, AActor* InApplier, float InDamage)
+    float InDuration, EApplyEffectMethod InMethod, AActor* const InApplier, float InDamage)
 {
-    ICanGetEffects* IEffect = Cast<ICanGetEffects>(GetOwner());
+    TWeakObjectPtr<AActor> OwnerPtr(GetOwner());
+    ICanGetEffects* IEffect = Cast<ICanGetEffects>(OwnerPtr.Get());
 
     if (IEffect != nullptr)
     {
@@ -83,9 +86,10 @@ bool UEffectsComponent::ApplyBackstabEffect(
 }
 
 bool UEffectsComponent::ApplyBurningEffect(
-    float InDuration, EApplyEffectMethod InMethod, AActor* InApplier, float InDamage)
+    float InDuration, EApplyEffectMethod InMethod, AActor* const InApplier, float InDamage)
 {
-    ICanGetEffects* IEffect = Cast<ICanGetEffects>(GetOwner());
+    TWeakObjectPtr<AActor> OwnerPtr(GetOwner());
+    ICanGetEffects* IEffect = Cast<ICanGetEffects>(OwnerPtr.Get());
 
     if (IEffect != nullptr)
     {
@@ -126,8 +130,12 @@ bool UEffectsComponent::IsAnyEffectApplied(TArray<EEffectType> InTypes) const
 
 void UEffectsComponent::PrintEffects() const
 {
-    FString DisplayName = UKismetSystemLibrary::GetDisplayName(GetOwner());
-    GameUtils::PrintEffects(GetWorld(), DisplayName, AppliedEffects);
+    TWeakObjectPtr<AActor> OwnerPtr(GetOwner());
+    if (OwnerPtr.IsValid())
+    {
+        FString DisplayName = UKismetSystemLibrary::GetDisplayName(OwnerPtr.Get());
+        GameUtils::PrintEffects(GetWorld(), DisplayName, AppliedEffects);
+    }
 }
 
 
@@ -176,7 +184,7 @@ void UEffectsComponent::RemoveEffects(TArray<EEffectType> InTypes)
 
 
 void UEffectsComponent::UpdateEffect(
-    EEffectType InType, float InDuration, EApplyEffectMethod InMethod, AActor* InApplier)
+    EEffectType InType, float InDuration, EApplyEffectMethod InMethod, AActor* const InApplier)
 {
     int LIndex = GetEffectIndex(InType);
 

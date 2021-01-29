@@ -99,15 +99,21 @@ void UEquipmentComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
         Inventory->OnItemAdded.RemoveDynamic(this, &UEquipmentComponent::OnItemModified);
     }
 
-    if (GetOwner() == UGameplayStatics::GetPlayerCharacter(GetWorld(), 0))
-    {
-        ADCSGameMode* GameMode = Cast<ADCSGameMode>(UGameplayStatics::GetGameMode(GetWorld()));
+    TWeakObjectPtr<AActor> OwnerPtr(GetOwner());
+    TWeakObjectPtr<AActor> PlayerCharacterPtr(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
 
-        if (GameUtils::IsValid(GameMode))
+    if (OwnerPtr.IsValid() && PlayerCharacterPtr.IsValid())
+    {
+        if (OwnerPtr.Get() == PlayerCharacterPtr.Get())
         {
-            GameMode->OnGameLoaded.RemoveDynamic(this, &UEquipmentComponent::OnGameLoaded);
+            ADCSGameMode* GameMode = Cast<ADCSGameMode>(UGameplayStatics::GetGameMode(GetWorld()));
+
+            if (GameUtils::IsValid(GameMode))
+            {
+                GameMode->OnGameLoaded.RemoveDynamic(this, &UEquipmentComponent::OnGameLoaded);
+            }
         }
-    }
+    }    
 
     Super::EndPlay(EndPlayReason);
 }
@@ -334,7 +340,7 @@ void UEquipmentComponent::UpdateItemInSlot(
     EItemType InType, 
     int InSlotIndex, 
     int InItemIndex, 
-    FStoredItem InItem, 
+    const FStoredItem& InItem, 
     EHandleSameItemMethod InHandleSameItemMethod)
 {
     if (IsItemIndexValid(InType, InSlotIndex, InItemIndex))
@@ -539,7 +545,7 @@ void UEquipmentComponent::SetCombat(bool bInValue)
     }
 }
 
-void UEquipmentComponent::OnItemModified(FStoredItem InItem)
+void UEquipmentComponent::OnItemModified(const FStoredItem& InItem)
 {
     EItemType ItemType;
     int SlotIndex;
@@ -626,7 +632,7 @@ void UEquipmentComponent::SetSlotHidden(EItemType InType, int InSlotIndex, bool 
 
 
 void UEquipmentComponent::BroadcastOnItemInSlotChanged(
-    FStoredItem InOldItem, FStoredItem InNewItem, EItemType InType, int InSlotIndex, int InItemIndex)
+    const FStoredItem& InOldItem, const FStoredItem& InNewItem, EItemType InType, int InSlotIndex, int InItemIndex)
 {
     OnItemInSlotChanged.Broadcast(InOldItem, InNewItem, InType, InSlotIndex, InItemIndex);
 
@@ -639,7 +645,7 @@ void UEquipmentComponent::BroadcastOnItemInSlotChanged(
 
 
 void UEquipmentComponent::ActiveItemChanged(
-    FStoredItem InOldItem, FStoredItem InNewItem, EItemType InType, int InSlotIndex, int InActiveIndex)
+    const FStoredItem& InOldItem, const FStoredItem& InNewItem, EItemType InType, int InSlotIndex, int InActiveIndex)
 {
     if (InType == SelectedMainHandType)
     {
@@ -706,7 +712,7 @@ void UEquipmentComponent::UseActiveItemAtSlot(EItemType InType, int InSlotIndex)
     }
 }
 
-bool UEquipmentComponent::FindItem(FStoredItem InItem, EItemType& OutType, int& OutSlotIndex, int& OutItemIndex) const
+bool UEquipmentComponent::FindItem(const FStoredItem& InItem, EItemType& OutType, int& OutSlotIndex, int& OutItemIndex) const
 {
     EItemType ItemType = GetItemType(InItem);
     int EqSlotsIndex = GetEqSlotsIndex(ItemType);
@@ -916,7 +922,7 @@ void UEquipmentComponent::UpdateCombatType()
     }
 }
 
-void UEquipmentComponent::SetItemInSlot(EItemType InType, int InSlotIndex, int InItemIndex, FStoredItem InItem)
+void UEquipmentComponent::SetItemInSlot(EItemType InType, int InSlotIndex, int InItemIndex, const FStoredItem& InItem)
 {
     int EqSlotsIndex = GetEqSlotsIndex(InType);
     EquipmentSlots[EqSlotsIndex].Slots[InSlotIndex].Items[InItemIndex] = InItem;
@@ -938,13 +944,13 @@ FStoredItem UEquipmentComponent::GetWeapon() const
     return GetItemInSlot(SelectedMainHandType, 0, GetActiveItemIndex(SelectedMainHandType, 0));
 }
 
-EItemType UEquipmentComponent::GetItemType(FStoredItem InItem) const
+EItemType UEquipmentComponent::GetItemType(const FStoredItem& InItem) const
 {
     UItemBase* ItemBase = Cast<UItemBase>(InItem.ItemClass->GetDefaultObject());
     return ItemBase->GetItem().Type;
 }
 
-bool UEquipmentComponent::IsItemValid(FStoredItem InItem) const
+bool UEquipmentComponent::IsItemValid(const FStoredItem& InItem) const
 {
     return UKismetSystemLibrary::IsValidClass(InItem.ItemClass) && InItem.Amount > 0;
 }
@@ -1013,7 +1019,7 @@ int UEquipmentComponent::GetNextArrayIndex(TArray<ElementType> InArray, int InIn
     }
 }
 
-bool UEquipmentComponent::IsItemTwoHanded(FStoredItem InItem) const
+bool UEquipmentComponent::IsItemTwoHanded(const FStoredItem& InItem) const
 {
     if (UKismetSystemLibrary::IsValidClass(InItem.ItemClass))
     {

@@ -43,12 +43,12 @@ public:
     virtual const TArray<FName>& GetRightFootCollisionSockets() const = 0;
     virtual const TArray<FName>& GetLeftFootCollisionSockets() const = 0;
 
-    FHitData MakeMeleeHitData(AActor* HitActor);
+    FHitData MakeMeleeHitData(const AActor* const InHitActor);
 
-    void ApplyHitImpulseToCharacter(AActor* HitActor, FVector HitNormal, float ImpulsePower);
+    void ApplyHitImpulseToCharacter(AActor* const InHitActor, FVector InHitNormal, float InImpulsePower);
 
     UAnimMontage* GetNextMeleeAttackMontage(
-        UMontageManagerComponent* MontageManager, EMeleeAttackType AttackType);
+        UMontageManagerComponent* const InMontageManager, EMeleeAttackType AttackType);
 
     void ResetMeleeAttackCounter() { SetMeleeAttackCounter(0); }
 

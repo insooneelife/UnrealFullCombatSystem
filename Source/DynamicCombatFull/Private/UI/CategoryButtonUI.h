@@ -35,8 +35,8 @@ protected:
     void OnUnhovered_SlotButton();
 
 public:
-    void Init(UInventoryUI* InInventoryUI);
-    void SetActiveBorder(bool bVisible);
+    void Init(UInventoryUI* const InInventoryUI);
+    void SetActiveBorder(bool bInVisible);
 
     EItemType GetItemType() const { return  ItemType; }
 

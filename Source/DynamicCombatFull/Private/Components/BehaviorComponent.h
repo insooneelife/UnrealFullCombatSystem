@@ -18,12 +18,12 @@ public:
 
 public:
     UFUNCTION(BlueprintCallable)
-    bool IsEnemy(AActor* InActor) const;
+    bool IsEnemy(const AActor* const InActor) const;
 
     void AddEnemy(TSubclassOf<AActor> Enemy);
 
 private:
-    bool CheckClass(AActor* InActor, const TArray<TSubclassOf<AActor>>& InEnemies) const;
+    bool CheckClass(const AActor* const InActor, const TArray<TSubclassOf<AActor>>& InEnemies) const;
 
 private:
     UPROPERTY(EditAnywhere)

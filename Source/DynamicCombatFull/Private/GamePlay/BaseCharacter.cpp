@@ -94,20 +94,7 @@ ABaseCharacter::ABaseCharacter()
     SprintStaminaCost = 0.5f;
     ArrowInitialSpeed = 7000.0f;
 
-    static UTexture2D* LoadedObject =
-        GameUtils::LoadAssetObject<UTexture2D>("/Game/DynamicCombatSystem/Widgets/Textures/T_Crosshair");
-    DefaultCrosshairTextureObject = LoadedObject;
-
-    InGameUIClass = GameUtils::LoadAssetClass<UUserWidget>("/Game/DynamicCombatSystem/Widgets/InGameWB");
-
-    KeybindingsUIClass = GameUtils::LoadAssetClass<UKeybindingsUI>("/Game/DynamicCombatSystem/Widgets/KeybindingsWB");
-
-    CrosshairTexture = 
-        GameUtils::LoadAssetObject<UTexture2D>("/Game/DynamicCombatSystem/Widgets/Textures/T_AbilityCrosshair");
-
-    DefaultCrosshairTextureObject = 
-        GameUtils::LoadAssetObject<UTexture2D>("/Game/DynamicCombatSystem/Widgets/Textures/T_Crosshair");
-
+    
     PlayerOneHandMeleeMontages =
         GameUtils::LoadAssetObject<UDataTable>("/Game/DynamicCombatSystem/DataTables/PlayerOneHandMeleeMontages");
 
@@ -175,7 +162,9 @@ void ABaseCharacter::BeginPlay()
 
     APlayerController* PlayerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
     
-    InGameWidget = Cast<UInGameUI>(CreateWidget(PlayerController, InGameUIClass));
+
+    InGameWidget = Cast<UInGameUI>(
+        CreateWidget(PlayerController, GameUtils::GetDefaultGameInstance(GetWorld())->InGameUIClass));
     InGameWidget->AddToViewport();
 
     InGameWidget->GetHealthBar()->Init(ExtendedHealth);
@@ -256,6 +245,38 @@ void ABaseCharacter::EndPlay(const EEndPlayReason::Type EndPlayResult)
     AbilityComponent->OnAbilityEnded.RemoveDynamic(this, &ABaseCharacter::OnAbilityEnded);
     AbilityComponent->OnAbilityChanged.RemoveDynamic(this, &ABaseCharacter::OnAbilityChanged);
     ExtendedMana->OnValueChanged.RemoveDynamic(this, &ABaseCharacter::OnValueChanged_ExtendedMana);
+
+    
+    StateManager = nullptr;
+    StatsManager = nullptr;
+    InputBuffer = nullptr;
+    MeleeCollisionHandler = nullptr;
+    MontageManager = nullptr;
+    ExtendedHealth = nullptr;
+    ExtendedStamina = nullptr;
+    ExtendedMana = nullptr;
+    DynamicTargeting = nullptr;
+    Effects = nullptr;
+    MovementSpeed = nullptr;
+    Rotating = nullptr;
+    Dissolve = nullptr;
+    Equipment = nullptr;
+    Inventory = nullptr;
+    AbilityComponent = nullptr;
+    FollowCamera = nullptr;
+    CameraBoom = nullptr;
+    EffectsAudio = nullptr;
+    ArrowSpawnLocation = nullptr;
+    TargetingArrow = nullptr;
+    TargetWidget = nullptr;
+    InGameWidget = nullptr;
+    KeybindingsWidget = nullptr;
+    PlayerOneHandMeleeMontages = nullptr;
+    PlayerArcherMontages = nullptr;
+    PlayerCommonMontages = nullptr;
+    PlayerMagicMontages = nullptr;
+    PlayerUnarmedMontages = nullptr;
+    
 
     Super::EndPlay(EndPlayResult);
 }
@@ -449,10 +470,12 @@ FRotator ABaseCharacter::GetDesiredRotation() const
 {
     if (IsStateEqual(EState::Backstabbing))
     {
-        if (GameUtils::IsValid(BackstabbedActor))
+        if (BackstabbedActor.IsValid())
         {
-            float Yaw =
-                UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), BackstabbedActor->GetActorLocation()).Yaw;
+            FRotator LookAtRot = 
+                UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), BackstabbedActor->GetActorLocation());
+
+            float Yaw = LookAtRot.Yaw;
             return FRotator(GetActorRotation().Pitch, Yaw, GetActorRotation().Roll);
         }
     }
@@ -1010,7 +1033,12 @@ void ABaseCharacter::OnTargetingToggled(bool bInEnabled)
     UpdateRotationSettings();
 }
 
-void ABaseCharacter::OnActiveItemChanged(FStoredItem OldItem, FStoredItem NewItem, EItemType Type, int SlotIndex, int ActiveIndex)
+void ABaseCharacter::OnActiveItemChanged(
+    const FStoredItem& OldItem, 
+    const FStoredItem& NewItem,
+    EItemType Type,
+    int SlotIndex,
+    int ActiveIndex)
 {
     PlayMainHandTypeChangedMontage(Type);
     if (Type == EItemType::Arrows)
@@ -1199,9 +1227,9 @@ void ABaseCharacter::OnActionPressed_Interact()
 {
     if (CanOpenUI())
     {
-        if (GameUtils::IsValid(InteractionActor))
+        if (InteractionActor.IsValid())
         {
-            IIsInteractable* IsInteractable = Cast<IIsInteractable>(InteractionActor);
+            IIsInteractable* IsInteractable = Cast<IIsInteractable>(InteractionActor.Get());
 
             if (IsInteractable != nullptr)
             {
@@ -1233,11 +1261,11 @@ void ABaseCharacter::CheckForInteractable()
         Start,
         End, Radius, HalfRadius, ObjectTypes, false, ActorsToIgnore, EDrawDebugTrace::Type::None, HitResult, true))
     {
-        if (InteractionActor != HitResult.GetActor())
+        if (InteractionActor.Get() != HitResult.GetActor())
         {
             InteractionActor = HitResult.GetActor();
 
-            IIsInteractable* IsInteractable = Cast<IIsInteractable>(InteractionActor);
+            IIsInteractable* IsInteractable = Cast<IIsInteractable>(InteractionActor.Get());
             if (IsInteractable != nullptr)
             {
                 FName Message = IsInteractable->GetInteractionMessage();
@@ -1247,7 +1275,7 @@ void ABaseCharacter::CheckForInteractable()
     }
     else
     {
-        if (InteractionActor != nullptr)
+        if (InteractionActor.IsValid())
         {
             InteractionActor = nullptr;
             InGameWidget->GetInteractionMessage()->UpdateWidget(TEXT(""));
@@ -1360,7 +1388,7 @@ void ABaseCharacter::OnActionPressed_BowAttack()
             StartAiming();
             StartLookingForward();
             UpdateZoom();
-            ShowCrosshair(CrosshairTexture);
+            ShowCrosshair(GameUtils::GetDefaultGameInstance(GetWorld())->CrosshairTexture);
             AttemptPlayBowDrawSound();
         }
     }
@@ -1479,7 +1507,7 @@ void ABaseCharacter::OnMouseReleased_Thumb()
     }
 }
 
-void ABaseCharacter::OnAbilityChanged(AAbilityBase* NewAbility)
+void ABaseCharacter::OnAbilityChanged(AAbilityBase* const NewAbility)
 {
     UpdateAbilityCrosshair();
 
@@ -1541,7 +1569,8 @@ void ABaseCharacter::OnKeyPressed_O()
 void ABaseCharacter::CreateKeybindings()
 {
     APlayerController* PlayerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
-    KeybindingsWidget = Cast<UKeybindingsUI>(CreateWidget(PlayerController, KeybindingsUIClass));
+    KeybindingsWidget = Cast<UKeybindingsUI>(
+        CreateWidget(PlayerController, GameUtils::GetDefaultGameInstance(GetWorld())->KeybindingsUIClass));
     KeybindingsWidget->AddToViewport(1);
 }
 
@@ -1569,9 +1598,9 @@ void ABaseCharacter::AbilityReleased()
     }
 }
 
-void ABaseCharacter::UpdateSpellActiveIndexKey(int NewActiveIndex)
+void ABaseCharacter::UpdateSpellActiveIndexKey(int InNewActiveIndex)
 {
-    SelectedSpellIndex = NewActiveIndex;
+    SelectedSpellIndex = InNewActiveIndex;
     InputBuffer->UpdateKey(EInputBufferKey::SetSpellActiveIndex);
 }
 
@@ -2033,14 +2062,17 @@ void ABaseCharacter::ResetAimingMode()
     HideCrosshair();
 }
 
-void ABaseCharacter::ShowCrosshair(UTexture2D* InTexture)
+void ABaseCharacter::ShowCrosshair(UTexture2D* const InTexture)
 {
     GetWorld()->GetTimerManager().ClearTimer(HideCrosshairTimerHandle);
 
     if (GameUtils::IsValid(InGameWidget))
     {
         InGameWidget->GetCrosshair()->SetVisibility(ESlateVisibility::Visible);
-        UTexture2D* FinalTexture = UKismetSystemLibrary::IsValid(InTexture) ? InTexture : DefaultCrosshairTextureObject;
+
+        UTexture2D* FinalTexture = 
+            UKismetSystemLibrary::IsValid(InTexture) ? 
+            InTexture : GameUtils::GetDefaultGameInstance(GetWorld())->DefaultCrosshairTextureObject;
         InGameWidget->GetCrosshair()->SetBrushFromTexture(FinalTexture, true);
     }
 }

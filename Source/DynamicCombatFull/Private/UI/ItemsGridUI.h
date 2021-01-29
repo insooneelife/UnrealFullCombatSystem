@@ -12,7 +12,7 @@ class UInventoryItemUI;
 class UUniformGridPanel;
 class UScrollBox;
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FInventoryItemClickedSignature, UInventoryItemUI*, Item);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FInventoryItemClickedSignature, UInventoryItemUI* const, Item);
 
 
 /**
@@ -30,13 +30,13 @@ protected:
     virtual void NativeDestruct() override;
 
     UFUNCTION()
-    void OnItemAdded(FStoredItem InItem);
+    void OnItemAdded(const FStoredItem& InItem);
 
     UFUNCTION()
-    void OnItemRemoved(FStoredItem InItem);
+    void OnItemRemoved(const FStoredItem& InItem);
 
 public:
-    void InventoryItemClicked(UInventoryItemUI* InItem);
+    void InventoryItemClicked(UInventoryItemUI* const InItem);
     void CreateItemWidgets();
     void UpdateItemWidgets(EItemType InType);
     bool IsOpen() const;

@@ -21,6 +21,13 @@ AImpaledArrowActor::AImpaledArrowActor()
     StaticMeshComponent->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
 }
 
+void AImpaledArrowActor::EndPlay(const EEndPlayReason::Type EndPlayResult)
+{
+    StaticMeshComponent = nullptr;
+
+    Super::EndPlay(EndPlayResult);
+}
+
 void AImpaledArrowActor::Init(UStaticMesh* InMesh)
 {
     StaticMeshComponent->SetStaticMesh(InMesh);

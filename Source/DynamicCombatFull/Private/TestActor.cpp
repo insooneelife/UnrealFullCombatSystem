@@ -18,6 +18,11 @@ void ATestActor::BeginPlay()
 	
 }
 
+void ATestActor::EndPlay(const EEndPlayReason::Type EndPlayResult)
+{
+    Super::EndPlay(EndPlayResult);
+}
+
 // Called every frame
 void ATestActor::Tick(float DeltaTime)
 {

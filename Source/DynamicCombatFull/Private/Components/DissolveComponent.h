@@ -8,7 +8,7 @@
 #include "GameCore/CustomStructs.h"
 #include "DissolveComponent.generated.h"
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FDissolveFinishedSignature, UPrimitiveComponent*, InComponent, bool, bInReversed);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FDissolveFinishedSignature, UPrimitiveComponent* const, InComponent, bool, bInReversed);
 
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
 class UDissolveComponent : public UActorComponent
@@ -23,10 +23,10 @@ protected:
 
 public:
     UFUNCTION(BlueprintCallable)
-    void StartDissolve(UPrimitiveComponent* InComponent, bool bInReversed);
+    void StartDissolve(UPrimitiveComponent* const InComponent, bool bInReversed);
     
     UFUNCTION(BlueprintCallable)
-    void StopDissolve(UPrimitiveComponent* InComponent);
+    void StopDissolve(UPrimitiveComponent* const InComponent);
 
     void SetDissolveInterpSpeed(float InDissolveInterpSpeed) { DissolveInterpSpeed  = InDissolveInterpSpeed; }
 
@@ -35,7 +35,7 @@ private:
     void DissolveComponents();
     void RestoreComponentMaterials(int InIndex);
     void RemoveComponent(int InIndex);
-    int FindComponent(UPrimitiveComponent* InComponent) const;
+    int FindComponent(UPrimitiveComponent* const InComponent) const;
 
 
 public:
@@ -43,8 +43,6 @@ public:
     FDissolveFinishedSignature OnDissolveFinished;
 
 private:
-    UPROPERTY(EditAnywhere, Category = "LoadedObject")
-    UMaterialInstance* DissolveMaterial;
 
     UPROPERTY(EditAnywhere)
     FName DissolveValueName;

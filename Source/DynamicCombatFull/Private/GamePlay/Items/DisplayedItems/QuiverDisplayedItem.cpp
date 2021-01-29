@@ -81,7 +81,11 @@ void AQuiverDisplayedItem::NativeInit(UEquipmentComponent* InEquipmentComponent,
 }
 
 void AQuiverDisplayedItem::OnActiveItemChanged(
-    FStoredItem InOldItem, FStoredItem InNewItem, EItemType InType, int InSlotIndex, int InActiveIndex)
+    const FStoredItem& InOldItem, 
+    const FStoredItem& InNewItem,
+    EItemType InType, 
+    int InSlotIndex,
+    int InActiveIndex)
 {
     if (InType == EItemType::Arrows && InNewItem.Amount > LastUpdatedArrow.Amount)
     {

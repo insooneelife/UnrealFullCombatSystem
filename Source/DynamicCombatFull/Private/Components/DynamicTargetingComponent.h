@@ -9,7 +9,7 @@
 #include "GameCore/CustomStructs.h"
 #include "DynamicTargetingComponent.generated.h"
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FTargetChangedSignature, AActor*, InNewTarget);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FTargetChangedSignature, AActor* const, InNewTarget);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FTargetingToggledSignature, bool, bInEnabled);
 
 class ACharacter;
@@ -28,9 +28,10 @@ protected:
 
 public:	
 	// Called every frame
-	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+	virtual void TickComponent(
+        float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
-    void Init(UArrowComponent* InArrowComp);
+    void Init(UArrowComponent* const InArrowComp);
 
     void ToggleCameraLock();
     void FindTargetOnLeft();
@@ -61,12 +62,12 @@ private:
     FVector GetLineTraceStartLocation()const;
 
     AActor* GetTargetByDotProduct(const TArray<AActor*>& InActors, bool bInBest) const;
-    bool IsAnythingBlockingTrace(AActor* InTarget, const TArray<AActor*>& InActorsToIgnore) const;
+    bool IsAnythingBlockingTrace(const AActor* const InTarget, const TArray<AActor*>& InActorsToIgnore) const;
 
-    bool GetActorScreenPosition(AActor* InActor, FVector2D& OutScreenPos) const;
-    float GetDistanceToOwner(AActor* InOtherActor) const;
-    bool IsTargetRightSide(AActor* InPotentialTarget) const;
-    float CalculateDotProductToTarget(AActor* InTarget) const;
+    bool GetActorScreenPosition(const AActor* const InActor, FVector2D& OutScreenPos) const;
+    float GetDistanceToOwner(const AActor* const InOtherActor) const;
+    bool IsTargetRightSide(const AActor* const InPotentialTarget) const;
+    float CalculateDotProductToTarget(const AActor* const InTarget) const;
     bool HasArrayAnyElem(const TArray<AActor*>& InActors) const;
 
 public:

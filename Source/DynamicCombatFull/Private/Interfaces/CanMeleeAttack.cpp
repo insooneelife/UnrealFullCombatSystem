@@ -14,14 +14,14 @@
 #include "GamePlay/Items/DisplayedItems/DisplayedItem.h"
 
 // Add default functionality here for any ICanMeleeAttack functions that are not pure virtual.
-FHitData ICanMeleeAttack::MakeMeleeHitData(AActor* HitActor)
+FHitData ICanMeleeAttack::MakeMeleeHitData(const AActor* const InHitActor)
 {
     float Damage = GetMeleeDamage();
     EMeleeAttackType MeleeAttackType = GetMeleeAttackType();
     float ScaledDamage = UDefaultGameInstance::ScaleMeleeDamageByType(Damage, MeleeAttackType);
 
     FVector HitFromDirection = UKismetMathLibrary::GetDirectionUnitVector(
-            GetThisCharacter()->GetActorLocation(), HitActor->GetActorLocation());
+            GetThisCharacter()->GetActorLocation(), InHitActor->GetActorLocation());
 
     bool CanBeParried = MeleeAttackType == EMeleeAttackType::Light;
     FHitData HitData(ScaledDamage, GetThisCharacter(), HitFromDirection, CanBeParried, true, true);
@@ -30,15 +30,18 @@ FHitData ICanMeleeAttack::MakeMeleeHitData(AActor* HitActor)
 }
 
 
-void ICanMeleeAttack::ApplyHitImpulseToCharacter(AActor* HitActor, FVector HitNormal, float ImpulsePower)
+void ICanMeleeAttack::ApplyHitImpulseToCharacter(
+    AActor* const InHitActor,
+    FVector InHitNormal,
+    float InImpulsePower)
 {
-    ACharacter* Character = Cast<ACharacter>(HitActor);
+    ACharacter* Character = Cast<ACharacter>(InHitActor);
 
     if (GameUtils::IsValid(Character))
     {
         if (Character->GetMesh()->IsAnySimulatingPhysics())
         {
-            FVector Impulse = HitNormal * -1.0f * ImpulsePower;
+            FVector Impulse = InHitNormal * -1.0f * InImpulsePower;
             Character->GetMesh()->AddImpulse(Impulse);
         }
     }
@@ -83,13 +86,13 @@ void ICanMeleeAttack::OnHit(const FHitResult& InHit)
 }
 
 UAnimMontage* ICanMeleeAttack::GetNextMeleeAttackMontage(
-    UMontageManagerComponent* MontageManager, EMeleeAttackType AttackType)
+    UMontageManagerComponent* const InMontageManager, EMeleeAttackType AttackType)
 {
     int MeleeAttackCounter = GetMeleeAttackCounter();
     EMontageAction Action = UDefaultGameInstance::ConvertMeleeAttackTypeToAction(AttackType);
-    int LastIndex = MontageManager->GetMontageActionLastIndex(Action);
+    int LastIndex = InMontageManager->GetMontageActionLastIndex(Action);
     int Index = MeleeAttackCounter > LastIndex ? LastIndex : MeleeAttackCounter;
-    UAnimMontage* AnimMontage = MontageManager->GetMontageForAction(Action, Index);
+    UAnimMontage* AnimMontage = InMontageManager->GetMontageForAction(Action, Index);
 
     MeleeAttackCounter++;
     if (MeleeAttackCounter > LastIndex)

@@ -42,10 +42,18 @@ public:
 protected:
     UFUNCTION()
     void OnActiveItemChanged(
-        FStoredItem InOldItem, FStoredItem InNewItem, EItemType InSlotType, int InSlotIndex, int InActiveIndex);
+        const FStoredItem& InOldItem, 
+        const FStoredItem& InNewItem,
+        EItemType InSlotType, 
+        int InSlotIndex,
+        int InActiveIndex);
 
     UFUNCTION()
-    void OnSlotHiddenChanged(EItemType InSlotType, int InSlotIndex, FStoredItem InActiveItem, bool bInIsHidden);
+    void OnSlotHiddenChanged(
+        EItemType InSlotType,
+        int InSlotIndex,
+        const FStoredItem& InActiveItem,
+        bool bInIsHidden);
 
     UFUNCTION()
     void OnMainHandTypeSwitched(EItemType InSlotType);
@@ -72,10 +80,10 @@ public:
 
 private:
 
-    TWeakObjectPtr<UEquipmentComponent> EquipmentComponent;
-
     UPROPERTY(EditAnywhere)
     TArray<FStat> Stats;
+
+    TWeakObjectPtr<UEquipmentComponent> EquipmentComponent;
 
     float InitialBlockValue;
     float RecentlyReceivedDamage;

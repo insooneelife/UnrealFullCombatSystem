@@ -8,10 +8,9 @@
 #include "InventoryComponent.generated.h"
 
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FItemAddedSignature, FStoredItem, InAddedItem);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FItemRemovedSignature, FStoredItem, InRemainedItem);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FItemAddedSignature, const FStoredItem&, InAddedItem);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FItemRemovedSignature, const FStoredItem&, InRemainedItem);
 
-class APickupActor;
 class UItemBase;
 
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
@@ -67,9 +66,6 @@ public:
     FItemRemovedSignature OnItemRemoved;
 
 private:
-
-    UPROPERTY(EditAnywhere, Category = "LoadedClass")
-    TSubclassOf<APickupActor> SpawnPickupActorClass;
 
     UPROPERTY(EditAnywhere)
     TArray<FStoredItem> Inventory;

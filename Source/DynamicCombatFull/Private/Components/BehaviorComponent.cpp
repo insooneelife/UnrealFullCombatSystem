@@ -13,7 +13,7 @@ UBehaviorComponent::UBehaviorComponent()
     PrimaryComponentTick.bStartWithTickEnabled = false;
 }
 
-bool UBehaviorComponent::IsEnemy(AActor* InActor) const
+bool UBehaviorComponent::IsEnemy(const AActor* const InActor) const
 {
     return CheckClass(InActor, Enemies);
 }
@@ -23,7 +23,7 @@ void UBehaviorComponent::AddEnemy(TSubclassOf<AActor> Enemy)
     Enemies.Add(Enemy);
 }
 
-bool UBehaviorComponent::CheckClass(AActor* InActor, const TArray<TSubclassOf<AActor>>& InEnemies) const
+bool UBehaviorComponent::CheckClass(const AActor* const InActor, const TArray<TSubclassOf<AActor>>& InEnemies) const
 {
     for (TSubclassOf<AActor> ActorClass : InEnemies)
     {

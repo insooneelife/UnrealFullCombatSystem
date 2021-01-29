@@ -6,7 +6,7 @@
 // Add default functionality here for any ICanGetEffects functions that are not pure virtual.
 
 
-bool ICanGetEffects::CanEffectBeApplied(EEffectType Type, AActor* Applier)
+bool ICanGetEffects::CanEffectBeApplied(EEffectType Type, const AActor* const Applier) const
 {
     if (CanBeAttacked())
     {

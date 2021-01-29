@@ -62,7 +62,8 @@ void UEquipmentSlotOnlyDisplayUI::NativeDestruct()
     Super::NativeDestruct();
 }
 
-void UEquipmentSlotOnlyDisplayUI::OnItemInSlotChanged(FStoredItem InOldItem, FStoredItem InNewItem, EItemType InType, int InSlotIndex, int InItemIndex)
+void UEquipmentSlotOnlyDisplayUI::OnItemInSlotChanged(
+    const FStoredItem& InOldItem, const FStoredItem& InNewItem, EItemType InType, int InSlotIndex, int InItemIndex)
 {
     if (InType == ItemType && InSlotIndex == SlotIndex && ItemIndex == InItemIndex)
     {
@@ -70,7 +71,8 @@ void UEquipmentSlotOnlyDisplayUI::OnItemInSlotChanged(FStoredItem InOldItem, FSt
     }
 }
 
-void UEquipmentSlotOnlyDisplayUI::OnActiveItemChanged(FStoredItem InOldItem, FStoredItem InNewItem, EItemType InType, int InSlotIndex, int InItemIndex)
+void UEquipmentSlotOnlyDisplayUI::OnActiveItemChanged(
+    const FStoredItem& InOldItem, const FStoredItem& InNewItem, EItemType InType, int InSlotIndex, int InItemIndex)
 {
     if (InType == ItemType && InSlotIndex == SlotIndex)
     {
@@ -79,7 +81,7 @@ void UEquipmentSlotOnlyDisplayUI::OnActiveItemChanged(FStoredItem InOldItem, FSt
 }
 
 
-void UEquipmentSlotOnlyDisplayUI::UpdateWidget(FStoredItem InItem)
+void UEquipmentSlotOnlyDisplayUI::UpdateWidget(const FStoredItem& InItem)
 {
     Item = InItem;
     UpdateImage();

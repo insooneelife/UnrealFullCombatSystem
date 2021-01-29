@@ -28,7 +28,7 @@ protected:
     void OnValueChanged(float InNewValue, float InMaxValue);
     
 public:
-    void Init(UExtendedStatComponent* InStatComp);
+    void Init(UExtendedStatComponent* const InStatComp);
     void UpdatePercent(float InPercent);
     void SetFillColor(FLinearColor InColor);
     void UpdateWidth(float InMaxValue);

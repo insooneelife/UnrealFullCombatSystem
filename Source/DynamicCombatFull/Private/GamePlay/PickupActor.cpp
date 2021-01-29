@@ -39,6 +39,15 @@ APickupActor::APickupActor()
     ParticleSystem->SetTemplate(LoadedParticleObject);
 }
 
+void APickupActor::EndPlay(const EEndPlayReason::Type EndPlayResult)
+{
+    Box = nullptr;
+    ParticleSystem = nullptr;
+    CreateUserWidgetClass = nullptr;
+
+    Super::EndPlay(EndPlayResult);
+}
+
 void APickupActor::Init(FName InName, const TMap<TSubclassOf<UItemBase>, int>& InItems)
 {
     Name = InName;

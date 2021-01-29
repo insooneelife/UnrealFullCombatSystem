@@ -69,7 +69,11 @@ void UActiveEquipmentSlotUI::NativeDestruct()
 }
 
 void UActiveEquipmentSlotUI::OnActiveItemChanged(
-    FStoredItem InOldItem, FStoredItem InNewItem, EItemType InType, int InSlotIndex, int InItemIndex)
+    const FStoredItem& InOldItem, 
+    const FStoredItem& InNewItem, 
+    EItemType InType,
+    int InSlotIndex, 
+    int InItemIndex)
 {
     if (InType == SlotType)
     {
@@ -78,7 +82,10 @@ void UActiveEquipmentSlotUI::OnActiveItemChanged(
 }
 
 void UActiveEquipmentSlotUI::OnSlotHiddenChanged(
-    EItemType InSlotType, int InSlotIndex, FStoredItem InActiveItem, bool bInIsHidden)
+    EItemType InSlotType, 
+    int InSlotIndex,
+    const FStoredItem& InActiveItem,
+    bool bInIsHidden)
 {
     if (InSlotType == SlotType)
     {
@@ -86,7 +93,7 @@ void UActiveEquipmentSlotUI::OnSlotHiddenChanged(
     }
 }
 
-void UActiveEquipmentSlotUI::UpdateWidget(FStoredItem InItem)
+void UActiveEquipmentSlotUI::UpdateWidget(const FStoredItem& InItem)
 {
     Item = InItem;
     UpdateItemImage();

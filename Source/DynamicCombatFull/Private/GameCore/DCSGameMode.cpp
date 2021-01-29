@@ -18,7 +18,13 @@ void ADCSGameMode::BeginPlay()
     UpdateInventoryValues();
     UpdateEquipmentValues();
     UpdateStatValues();
+}
 
+void ADCSGameMode::EndPlay(const EEndPlayReason::Type EndPlayResult)
+{
+    Super::EndPlay(EndPlayResult);
+
+    SavedGame = nullptr;
 }
 
 void ADCSGameMode::UpdateInventoryValues()
@@ -79,8 +85,6 @@ void ADCSGameMode::UpdateStatValues()
 
 void ADCSGameMode::LoadGame()
 {
-    SaveGameName;
-
     USaveGame* LoadedGame = UGameplayStatics::LoadGameFromSlot(SaveGameName, 0);
 
     SavedGame = Cast<UDCSSaveGame>(LoadedGame);

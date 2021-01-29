@@ -44,7 +44,8 @@ FName AHandDisplayedItem::GetAttachmentSocket() const
     }
 }
 
-void AHandDisplayedItem::OnSlotHiddenChanged(EItemType InSlotType, int InSlotIndex, FStoredItem InActiveItem, bool bInIsHidden)
+void AHandDisplayedItem::OnSlotHiddenChanged(
+    EItemType InSlotType, int InSlotIndex, const FStoredItem& InActiveItem, bool bInIsHidden)
 {
     if (EquipmentComponent->IsInCombat())
     {

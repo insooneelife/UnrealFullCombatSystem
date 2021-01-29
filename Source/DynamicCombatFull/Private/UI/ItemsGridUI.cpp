@@ -62,7 +62,7 @@ void UItemsGridUI::NativeDestruct()
     Super::NativeDestruct();
 }
 
-void UItemsGridUI::InventoryItemClicked(UInventoryItemUI* InItem)
+void UItemsGridUI::InventoryItemClicked(UInventoryItemUI* const InItem)
 {
     OnInventoryItemClicked.Broadcast(InItem);
 }
@@ -115,7 +115,7 @@ void UItemsGridUI::UpdateItemWidgets(EItemType InType)
 
 }
 
-void UItemsGridUI::OnItemAdded(FStoredItem InItem)
+void UItemsGridUI::OnItemAdded(const FStoredItem& InItem)
 {
     if (!IsOpen())
     {
@@ -154,7 +154,7 @@ void UItemsGridUI::OnItemAdded(FStoredItem InItem)
     }
 }
 
-void UItemsGridUI::OnItemRemoved(FStoredItem InItem)
+void UItemsGridUI::OnItemRemoved(const FStoredItem& InItem)
 {
     bool bIsOpen = IsOpen();
 

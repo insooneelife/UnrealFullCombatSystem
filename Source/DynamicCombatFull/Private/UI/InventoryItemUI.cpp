@@ -73,7 +73,12 @@ void UInventoryItemUI::OnUnhovered_SlotButton()
     SetFocusedImage(false);
 }
 
-void UInventoryItemUI::OnItemInSlotChanged(FStoredItem OldItem, FStoredItem NewItem, EItemType Type, int SlotIndex, int ItemIndex)
+void UInventoryItemUI::OnItemInSlotChanged(
+    const FStoredItem& OldItem,
+    const FStoredItem& NewItem, 
+    EItemType Type,
+    int SlotIndex,
+    int ItemIndex)
 {
     if (IsOpen())
     {
@@ -84,7 +89,12 @@ void UInventoryItemUI::OnItemInSlotChanged(FStoredItem OldItem, FStoredItem NewI
     }
 }
 
-void UInventoryItemUI::OnActiveItemChanged(FStoredItem OldItem, FStoredItem NewItem, EItemType Type, int SlotIndex, int ItemIndex)
+void UInventoryItemUI::OnActiveItemChanged(
+    const FStoredItem& OldItem,
+    const FStoredItem& NewItem, 
+    EItemType Type,
+    int SlotIndex,
+    int ItemIndex)
 {
     if (IsOpen())
     {
@@ -96,16 +106,16 @@ void UInventoryItemUI::OnActiveItemChanged(FStoredItem OldItem, FStoredItem NewI
 }
 
 void UInventoryItemUI::Init(
-    UInventoryComponent* InInventoryComponent,
-    UEquipmentComponent* InEquipmentComponent,
-    UItemsGridUI* InItemsGridUI)
+    UInventoryComponent* const InInventoryComponent,
+    UEquipmentComponent* const InEquipmentComponent,
+    UItemsGridUI* const InItemsGridUI)
 {
     InventoryComponent = InInventoryComponent;
     EquipmentComponent = InEquipmentComponent;
     ItemsGridUI = InItemsGridUI;
 }
 
-void UInventoryItemUI::UpdateWidget(FStoredItem InItem)
+void UInventoryItemUI::UpdateWidget(const FStoredItem& InItem)
 {
     Item = InItem;
     if (IsOpen())

@@ -15,6 +15,9 @@ public:
 	// Sets default values for this actor's properties
 	AImpaledArrowActor();
 
+public:
+    virtual void EndPlay(const EEndPlayReason::Type EndPlayResult) override;
+
     UFUNCTION()
     void OnDestroyed(AActor* DestroyedActor);
 

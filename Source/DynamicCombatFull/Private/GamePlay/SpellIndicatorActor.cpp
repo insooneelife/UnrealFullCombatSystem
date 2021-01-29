@@ -26,6 +26,13 @@ ASpellIndicatorActor::ASpellIndicatorActor()
     Radius = 256.0f;
 }
 
+void ASpellIndicatorActor::EndPlay(const EEndPlayReason::Type EndPlayResult)
+{
+    Decal = nullptr;
+
+    Super::EndPlay(EndPlayResult);
+}
+
 void ASpellIndicatorActor::Init(float InRadius, UMaterialInterface* InMaterial)
 {
     Radius = InRadius;

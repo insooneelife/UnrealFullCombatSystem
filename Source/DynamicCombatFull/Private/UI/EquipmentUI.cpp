@@ -95,7 +95,7 @@ FReply UEquipmentUI::NativeOnKeyDown(const FGeometry& InGeometry, const FKeyEven
 }
 
 
-void UEquipmentUI::OnInventoryItemClicked(UInventoryItemUI* InItem)
+void UEquipmentUI::OnInventoryItemClicked(UInventoryItemUI* const InItem)
 {
     if (GameUtils::IsValid(ClickedSlot))
     {
@@ -141,7 +141,7 @@ void UEquipmentUI::Close()
     }
 }
 
-void UEquipmentUI::EquipmentSlotClicked(UEquipmentSlotUI* InSlot)
+void UEquipmentUI::EquipmentSlotClicked(UEquipmentSlotUI* const InSlot)
 {
     ClickedSlot = InSlot;
     SetActiveWidget(1);
