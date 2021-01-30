@@ -16,6 +16,9 @@ class UItemBase : public UObject
 	GENERATED_BODY()
 	
 public:
+    UItemBase();
+
+public:
     virtual void UseItem(AActor* InActor) {}
 
     const FItem& GetItem() const { return Item; }

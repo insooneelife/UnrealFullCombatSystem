@@ -30,6 +30,8 @@ const FName UDefaultGameInstance::Back = FName("Back");
 
 UDefaultGameInstance::UDefaultGameInstance(const FObjectInitializer& ObjectInitializer)
 {
+    UE_LOG(LogTemp, Error, TEXT("UDefaultGameInstance UDefaultGameInstance"));
+
     DefaultHitSound = GameUtils::LoadAssetObject<USoundBase>("/Game/DynamicCombatSystem/SFX/CUE/CUE_HitHands");
     SwordHitSound = GameUtils::LoadAssetObject<USoundBase>("/Game/DynamicCombatSystem/SFX/CUE/CUE_HitSword");
     AxeHitSound = SwordHitSound;

@@ -2443,6 +2443,8 @@ void ABaseCharacter::LineTraceForInteractable()
 
 void ABaseCharacter::SetData()
 {
+    UE_LOG(LogTemp, Error, TEXT("ABaseCharacter SetData"));
+
     GetCharacterMovement()->JumpZVelocity = 600.0f;
     GetCharacterMovement()->AirControl = 0.2f;
     GetCharacterMovement()->RotationRate = FRotator(0.0f, 540.0f, 0.0f);
@@ -2460,6 +2462,7 @@ void ABaseCharacter::SetData()
         { UEngineTypes::ConvertToObjectType(ECollisionChannel::ECC_WorldStatic) }
     );
 
+    /*
     FString ObjectItemDir("/Game/DynamicCombatSystem/Blueprints/Items/ObjectItems/Instances/");
     auto SteelSwordBPClass = GameUtils::LoadAssetClass<UItemBase>(ObjectItemDir + FString("SteelSwordBP"));
     auto SteelShieldBPClass = GameUtils::LoadAssetClass<UItemBase>(ObjectItemDir + FString("SteelShieldBP"));
@@ -2586,7 +2589,7 @@ void ABaseCharacter::SetData()
             FEquipmentSlot(TArray<FStoredItem>{FStoredItem()}, 0, false)
         }),
     });
-    
+    */
 
     ExtendedMana->SetStatType(EStat::Mana);
     ExtendedMana->SetDoesRegenerates(true);

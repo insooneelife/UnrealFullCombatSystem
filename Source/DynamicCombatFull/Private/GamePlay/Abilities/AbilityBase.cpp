@@ -22,6 +22,8 @@ class UAnimMontage;
 // Sets default values
 AAbilityBase::AAbilityBase()
 {
+    UE_LOG(LogTemp, Error, TEXT("AAbilityBase AAbilityBase  %s"), *GetName());
+
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = false;
     PrimaryActorTick.bStartWithTickEnabled = false;
