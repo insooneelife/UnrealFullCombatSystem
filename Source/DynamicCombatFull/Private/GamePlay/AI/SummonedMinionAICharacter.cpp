@@ -30,9 +30,6 @@ void ASummonedMinionAICharacter::BeginPlay()
 {
     Super::BeginPlay();
 
-    //MeleeCollisionHandler->OnCollisionActivated.RemoveDynamic(this, &ASummonedMinionAICharacter::OnCollisionActivated);
-    //MeleeCollisionHandler->OnCollisionActivated.AddDynamic(this, &ASummonedMinionAICharacter::OnCollisionActivatedOverride);
-
     Equipment->SetCombat(true);
     DissolveInCharacterMesh();
 

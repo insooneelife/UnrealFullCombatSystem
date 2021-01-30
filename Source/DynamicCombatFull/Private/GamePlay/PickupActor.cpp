@@ -20,10 +20,10 @@ APickupActor::APickupActor()
     PrimaryActorTick.bCanEverTick = false;
     PrimaryActorTick.bStartWithTickEnabled = false;
 
-    TSubclassOf<UUserWidget> LoadedClass = 
-        GameUtils::LoadAssetClass<UUserWidget>(TEXT("/Game/DynamicCombatSystem/Widgets/PickupWB"));
+    //TSubclassOf<UUserWidget> LoadedClass = 
+    //    GameUtils::LoadAssetClass<UUserWidget>(TEXT("/Game/DynamicCombatSystem/Widgets/PickupWB"));
 
-    CreateUserWidgetClass = LoadedClass;
+    //CreateUserWidgetClass = LoadedClass;
 
     RootComponent = CreateDefaultSubobject<USceneComponent>("Scene");
     Box = CreateDefaultSubobject<UBoxComponent>("Box");

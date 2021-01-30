@@ -34,7 +34,7 @@ private:
     int MontageCounter;
     bool bUseLeftHandSocket;
 
-    UPROPERTY()
+    UPROPERTY(EditAnywhere)
     float InitialProjectileSpeed;
 
     UPROPERTY(EditAnywhere)

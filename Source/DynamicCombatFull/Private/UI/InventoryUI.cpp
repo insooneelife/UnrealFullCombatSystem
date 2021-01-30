@@ -24,10 +24,10 @@
 UInventoryUI::UInventoryUI(const FObjectInitializer& ObjectInitializer)
     :Super(ObjectInitializer)
 {
-    static TSubclassOf<UItemActionsUI> LoadedClass =
-        GameUtils::LoadAssetClass<UItemActionsUI>("/Game/DynamicCombatSystem/Widgets/ItemActionsWB");
+    //static TSubclassOf<UItemActionsUI> LoadedClass =
+    //    GameUtils::LoadAssetClass<UItemActionsUI>("/Game/DynamicCombatSystem/Widgets/ItemActionsWB");
 
-    ItemActionsUIClass = LoadedClass;
+    //ItemActionsUIClass = LoadedClass;
 }
 
 void UInventoryUI::NativeConstruct()

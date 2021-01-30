@@ -89,23 +89,11 @@ public:
     USoundBase* GroundExplosionSound;
 
     UPROPERTY()
-    TSubclassOf<class ASpellIndicatorActor> SpellIndicatorClass;
-
-    UPROPERTY()
     UMaterialInstance* DissolveMaterial;
-
-    UPROPERTY()
-    TSubclassOf<AActor> SpawnPickupActorClass;
 
     UPROPERTY()
     UTexture2D* DefaultCrosshairTextureObject;
 
     UPROPERTY()
     UTexture2D* CrosshairTexture;
-
-    UPROPERTY()
-    TSubclassOf<UUserWidget> InGameUIClass;
-
-    UPROPERTY()
-    TSubclassOf<UKeybindingsUI> KeybindingsUIClass;
 };

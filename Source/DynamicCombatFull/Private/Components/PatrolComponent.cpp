@@ -33,15 +33,16 @@ void UPatrolComponent::Init()
 
 void UPatrolComponent::UpdatePatrolIndex()
 {
-    if (PatrolPath.IsValid())
+    if (PatrolPath.IsValid() && PatrolPath->GetPatrolSpline() != nullptr)
     {
+        USplineComponent* SplineComp = PatrolPath->GetPatrolSpline();
         if (bReverseDirection)
         {
             if (PointIndex <= 0)
             {
-                if (PatrolPath->GetPatrolSpline()->IsClosedLoop())
+                if (SplineComp->IsClosedLoop())
                 {
-                    PointIndex = PatrolPath->GetPatrolSpline()->GetNumberOfSplinePoints() - 1;
+                    PointIndex = SplineComp->GetNumberOfSplinePoints() - 1;
                 }
                 else
                 {
@@ -56,16 +57,16 @@ void UPatrolComponent::UpdatePatrolIndex()
         }
         else
         {
-            if(PointIndex >= PatrolPath->GetPatrolSpline()->GetNumberOfSplinePoints() - 1)
+            if(PointIndex >= SplineComp->GetNumberOfSplinePoints() - 1)
             {
-                if (PatrolPath->GetPatrolSpline()->IsClosedLoop())
+                if (SplineComp->IsClosedLoop())
                 {
                     PointIndex = 0;
                 }
                 else
                 {
                     bReverseDirection = true;
-                    PointIndex = PatrolPath->GetPatrolSpline()->GetNumberOfSplinePoints() - 2;
+                    PointIndex = SplineComp->GetNumberOfSplinePoints() - 2;
                 }
             }
             else
@@ -78,7 +79,7 @@ void UPatrolComponent::UpdatePatrolIndex()
 
 FVector UPatrolComponent::GetSplinePointLocation(int InPointIndex) const
 {
-    if (PatrolPath.IsValid())
+    if (PatrolPath.IsValid() && PatrolPath->GetPatrolSpline() != nullptr)
     {
         return PatrolPath->GetPatrolSpline()->GetLocationAtSplinePoint(InPointIndex, ESplineCoordinateSpace::World);
     }

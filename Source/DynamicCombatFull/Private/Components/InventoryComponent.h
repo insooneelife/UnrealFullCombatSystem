@@ -70,4 +70,6 @@ private:
     UPROPERTY(EditAnywhere)
     TArray<FStoredItem> Inventory;
 
+    UPROPERTY(EditAnywhere)
+    TSubclassOf<AActor> SpawnPickupActorClass;
 };

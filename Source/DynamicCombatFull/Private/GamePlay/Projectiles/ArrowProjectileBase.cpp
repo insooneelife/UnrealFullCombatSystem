@@ -29,10 +29,6 @@ AArrowProjectileBase::AArrowProjectileBase()
     LifeTime = 15.0f;
     ImpulsePower = 20000.0f;
 
-    TSubclassOf<AImpaledArrowActor> LoadedClass = GameUtils::LoadAssetClass<AImpaledArrowActor>(
-        "/Game/DynamicCombatSystem/Blueprints/Projectiles/ImpaledArrowBP");
-    ImpaledArrowClass = LoadedClass;
-
     StaticMesh = CreateDefaultSubobject<UStaticMeshComponent>("StaticMesh");
     RootComponent = StaticMesh;
     ParticleSystem = CreateDefaultSubobject<UParticleSystemComponent>("Particle");

@@ -32,11 +32,6 @@ APlayerBuffAbilityBase::APlayerBuffAbilityBase()
     static USoundBase* LoadedSoundObject =
         GameUtils::LoadAssetObject<USoundBase>(TEXT("/Game/DynamicCombatSystem/SFX/CUE/CUE_Buff"));
     Sound = LoadedSoundObject;
-
-    static TSubclassOf<ABuffAbilityEffect> LoadedClass = GameUtils::LoadAssetClass<ABuffAbilityEffect>(
-        TEXT("/Game/DynamicCombatSystem/Blueprints/AbilityEffects/BuffAbilityEffectBP"));
-
-    SpawnBuffAbilityEffectClass = LoadedClass;
 }
 
 void APlayerBuffAbilityBase::Released()

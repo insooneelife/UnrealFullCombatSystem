@@ -30,11 +30,6 @@ APlayerSummonItemAbilityBase::APlayerSummonItemAbilityBase()
     static USoundBase* LoadedSoundObject = 
         GameUtils::LoadAssetObject<USoundBase>(TEXT("/Game/DynamicCombatSystem/SFX/CUE/CUE_SummonItem"));
     Sound = LoadedSoundObject;
-
-    static TSubclassOf<ASummonedItemAbilityEffect> LoadedClass = 
-        GameUtils::LoadAssetClass<ASummonedItemAbilityEffect>(
-            TEXT("/Game/DynamicCombatSystem/Blueprints/AbilityEffects/SummonedItemEffectBP"));
-    SpawnSummonedItemAbilityEffectClass = LoadedClass;
 }
 
 void APlayerSummonItemAbilityBase::Effect()

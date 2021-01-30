@@ -65,7 +65,7 @@ private:
     UPROPERTY()
         UStateManagerComponent* StateManager;
 
-    UPROPERTY(EditAnywhere)
+    UPROPERTY()
     TSubclassOf<UItemBase> ItemClass;
 
     UPROPERTY(EditAnywhere)
@@ -74,7 +74,6 @@ private:
     UPROPERTY(EditAnywhere)
     int Amount;
 
-    UPROPERTY(EditAnywhere)
     FStoredItem SummonedItem;
 
     UPROPERTY(EditAnywhere)
@@ -89,6 +88,5 @@ private:
     UPROPERTY(EditAnywhere)
     bool bAutoSwap;
 
-    UPROPERTY(EditAnywhere)
     FStoredItem ItemBeforeSummon;
 };

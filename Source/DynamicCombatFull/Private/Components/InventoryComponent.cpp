@@ -236,7 +236,7 @@ void UInventoryComponent::DropItem(FStoredItem InItem)
         {
             APickupActor* SpawnedActor =
                 GetWorld()->SpawnActor<APickupActor>(
-                    DefaultGameInstance->SpawnPickupActorClass, SpawnLoc, FRotator::ZeroRotator, SpawnParameters);
+                    SpawnPickupActorClass, SpawnLoc, FRotator::ZeroRotator, SpawnParameters);
 
             if (GameUtils::IsValid(SpawnedActor))
             {

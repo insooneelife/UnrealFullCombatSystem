@@ -33,69 +33,6 @@ AArcherAICharacter::AArcherAICharacter()
 
     ArrowSpawnLocation = CreateDefaultSubobject<USceneComponent>("ArrowSpawnLocation");
     ArrowSpawnLocation->AttachToComponent(GetMesh(), FAttachmentTransformRules::KeepRelativeTransform);
-
-    FString ObjectItemDir("/Game/DynamicCombatSystem/Blueprints/Items/ObjectItems/Instances/");
-    auto SteelHelmetBPClass = GameUtils::LoadAssetClass<UItemBase>(ObjectItemDir + FString("SteelHelmetBP"));
-    auto ElvenBowBPClass = GameUtils::LoadAssetClass<UItemBase>(ObjectItemDir + FString("ElvenBowBP"));
-    auto ElvenArrowBPClass = GameUtils::LoadAssetClass<UItemBase>(ObjectItemDir + FString("ElvenArrowBP"));
-
-
-    // for archer
-    Equipment->SetEquipmentSlots({
-        FEquipmentSlots(EItemType::Spell, TArray<FEquipmentSlot> {
-            FEquipmentSlot(TArray<FStoredItem>{
-                FStoredItem(),
-                FStoredItem(),
-                FStoredItem()
-            },
-            0, false)
-        }),
-
-        FEquipmentSlots(EItemType::Shield, TArray<FEquipmentSlot> {
-            FEquipmentSlot(TArray<FStoredItem>{FStoredItem()}, 0, false)
-        }),
-
-        FEquipmentSlots(EItemType::Head, TArray<FEquipmentSlot> {
-            FEquipmentSlot(TArray<FStoredItem>{FStoredItem(FGuid::NewGuid(), SteelHelmetBPClass, 1)}, 0, false)
-        }),
-        FEquipmentSlots(EItemType::Top, TArray<FEquipmentSlot> {
-            FEquipmentSlot(TArray<FStoredItem>{FStoredItem()}, 0, false)
-        }),
-        FEquipmentSlots(EItemType::Legs, TArray<FEquipmentSlot> {
-            FEquipmentSlot(TArray<FStoredItem>{FStoredItem()}, 0, false)
-        }),
-        FEquipmentSlots(EItemType::Hands, TArray<FEquipmentSlot> {
-            FEquipmentSlot(TArray<FStoredItem>{FStoredItem()}, 0, false)
-        }),
-        FEquipmentSlots(EItemType::Feet, TArray<FEquipmentSlot> {
-            FEquipmentSlot(TArray<FStoredItem>{FStoredItem()}, 0, false)
-        }),
-        FEquipmentSlots(EItemType::Arrows, TArray<FEquipmentSlot> {
-            FEquipmentSlot(TArray<FStoredItem>{
-                FStoredItem(FGuid::NewGuid(), ElvenArrowBPClass, 999)
-            },
-            0, false)
-        }),
-        FEquipmentSlots(EItemType::Tool, TArray<FEquipmentSlot> {
-            FEquipmentSlot(TArray<FStoredItem>{
-                FStoredItem(),
-                FStoredItem()
-            },
-            0, false)
-        }),
-        FEquipmentSlots(EItemType::MeleeWeapon, TArray<FEquipmentSlot> {
-            FEquipmentSlot(TArray<FStoredItem>{
-                FStoredItem()
-            },
-            0, false)
-        }),
-        FEquipmentSlots(EItemType::RangeWeapon, TArray<FEquipmentSlot> {
-            FEquipmentSlot(TArray<FStoredItem>{
-                FStoredItem(FGuid::NewGuid(), ElvenBowBPClass, 1)
-            },
-            0, false)
-        })
-        });
 }
 
 

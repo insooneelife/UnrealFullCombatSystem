@@ -34,10 +34,6 @@ AAISummonMinionAbility::AAISummonMinionAbility()
     static USoundBase* Sound = GameUtils::LoadAssetObject<USoundBase>(
         "/Game/DynamicCombatSystem/SFX/CUE/CUE_MinionSpawn");
     SoundObject = Sound;
-
-    static TSubclassOf<APawn> LoadedClass = GameUtils::LoadAssetClass<APawn>(
-        "/Game/DynamicCombatSystem/Blueprints/AI/SummonedMinion/SummonedMinionAICharacterBP");
-    SpawnedMinionClass = LoadedClass;
 }
 
 void AAISummonMinionAbility::Released()

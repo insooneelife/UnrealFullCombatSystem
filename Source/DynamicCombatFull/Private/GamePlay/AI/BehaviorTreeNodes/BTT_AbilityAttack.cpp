@@ -12,12 +12,7 @@ UBTT_AbilityAttack::UBTT_AbilityAttack(const FObjectInitializer& ObjectInitializ
     :
     Super(ObjectInitializer),
     bActivateCallback(false)
-{
-    TSubclassOf<AAIAbilityBase> LoadedClass = GameUtils::LoadAssetClass<AAIAbilityBase>(
-        "/Game/DynamicCombatSystem/Blueprints/Abilities/AI/AITeleportAbilityBP");
-
-    AbilityClass = LoadedClass;
-}
+{}
 
 void UBTT_AbilityAttack::OnInstanceCreated(UBehaviorTreeComponent& OwnerComp)
 {

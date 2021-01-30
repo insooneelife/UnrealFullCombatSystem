@@ -164,7 +164,7 @@ void ABaseCharacter::BeginPlay()
     
 
     InGameWidget = Cast<UInGameUI>(
-        CreateWidget(PlayerController, GameUtils::GetDefaultGameInstance(GetWorld())->InGameUIClass));
+        CreateWidget(PlayerController, InGameUIClass));
     InGameWidget->AddToViewport();
 
     InGameWidget->GetHealthBar()->Init(ExtendedHealth);
@@ -1570,7 +1570,7 @@ void ABaseCharacter::CreateKeybindings()
 {
     APlayerController* PlayerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
     KeybindingsWidget = Cast<UKeybindingsUI>(
-        CreateWidget(PlayerController, GameUtils::GetDefaultGameInstance(GetWorld())->KeybindingsUIClass));
+        CreateWidget(PlayerController, KeybindingsUIClass));
     KeybindingsWidget->AddToViewport(1);
 }
 
@@ -2460,148 +2460,13 @@ void ABaseCharacter::SetData()
         { UEngineTypes::ConvertToObjectType(ECollisionChannel::ECC_WorldStatic) }
     );
 
-    /*
-    FString ObjectItemDir("/Game/DynamicCombatSystem/Blueprints/Items/ObjectItems/Instances/");
-    auto SteelSwordBPClass = GameUtils::LoadAssetClass<UItemBase>(ObjectItemDir + FString("SteelSwordBP"));
-    auto SteelShieldBPClass = GameUtils::LoadAssetClass<UItemBase>(ObjectItemDir + FString("SteelShieldBP"));
-    auto HealthPotionBPClass = GameUtils::LoadAssetClass<UItemBase>(ObjectItemDir + FString("HealthPotionBP"));
-    auto GreatSwordBPClass = GameUtils::LoadAssetClass<UItemBase>(ObjectItemDir + FString("GreatSwordBP"));
-    auto ElvenBowBPClass = GameUtils::LoadAssetClass<UItemBase>(ObjectItemDir + FString("ElvenBowBP"));
-    auto ExplosiveArrowBPClass = GameUtils::LoadAssetClass<UItemBase>(ObjectItemDir + FString("ExplosiveArrowBP"));
-    auto ElvenArrowBPClass = GameUtils::LoadAssetClass<UItemBase>(ObjectItemDir + FString("ElvenArrowBP"));
-    auto SummonBowBPClass = GameUtils::LoadAssetClass<UItemBase>(ObjectItemDir + FString("SummonBowBP"));
-    auto SummonSwordBPClass = GameUtils::LoadAssetClass<UItemBase>(ObjectItemDir + FString("SummonSwordBP"));
-    auto DamageBuffBPClass = GameUtils::LoadAssetClass<UItemBase>(ObjectItemDir + FString("DamageBuffBP"));
-    auto HealthBuffBPClass = GameUtils::LoadAssetClass<UItemBase>(ObjectItemDir + FString("HealthBuffBP"));
-    auto DrainHealthBPClass = GameUtils::LoadAssetClass<UItemBase>(ObjectItemDir + FString("DrainHealthBP"));
-    auto FireballBPClass = GameUtils::LoadAssetClass<UItemBase>(ObjectItemDir + FString("FireballBP"));
-    auto HealingBPClass = GameUtils::LoadAssetClass<UItemBase>(ObjectItemDir + FString("HealingBP"));
-    auto InfernoBPClass = GameUtils::LoadAssetClass<UItemBase>(ObjectItemDir + FString("InfernoBP"));
-    auto InstantHealBPClass = GameUtils::LoadAssetClass<UItemBase>(ObjectItemDir + FString("InstantHealBP"));
-    auto LightingBeamBPClass = GameUtils::LoadAssetClass<UItemBase>(ObjectItemDir + FString("LightingBeamBP"));
-    auto VortexBPClass = GameUtils::LoadAssetClass<UItemBase>(ObjectItemDir + FString("VortexBP"));
-    auto TrapBPClass = GameUtils::LoadAssetClass<UItemBase>(ObjectItemDir + FString("TrapBP"));
-    auto TeleportBPClass = GameUtils::LoadAssetClass<UItemBase>(ObjectItemDir + FString("TeleportBP"));
-    auto MagicWandBPClass = GameUtils::LoadAssetClass<UItemBase>(ObjectItemDir + FString("MagicWandBP"));
-
-    Inventory->SetInventory(TArray<FStoredItem>{
-        FStoredItem(FGuid::NewGuid(), SteelSwordBPClass, 1),
-        FStoredItem(FGuid::NewGuid(), SteelShieldBPClass, 1),
-        FStoredItem(FGuid::NewGuid(), HealthPotionBPClass, 5),
-        FStoredItem(FGuid::NewGuid(), GreatSwordBPClass, 1),
-        FStoredItem(FGuid::NewGuid(), ElvenBowBPClass, 1),
-        FStoredItem(FGuid::NewGuid(), ExplosiveArrowBPClass, 10),
-        FStoredItem(FGuid::NewGuid(), ElvenArrowBPClass, 50),
-        FStoredItem(FGuid::NewGuid(), SummonBowBPClass, 1),
-        FStoredItem(FGuid::NewGuid(), SummonSwordBPClass, 1),
-        FStoredItem(FGuid::NewGuid(), DamageBuffBPClass, 1),
-        FStoredItem(FGuid::NewGuid(), HealthBuffBPClass, 1),
-        FStoredItem(FGuid::NewGuid(), DrainHealthBPClass, 1),
-        FStoredItem(FGuid::NewGuid(), FireballBPClass, 1),
-        FStoredItem(FGuid::NewGuid(), HealingBPClass, 1),
-        FStoredItem(FGuid::NewGuid(), InfernoBPClass, 1),
-        FStoredItem(FGuid::NewGuid(), InstantHealBPClass, 1),
-        FStoredItem(FGuid::NewGuid(), LightingBeamBPClass, 1),
-        FStoredItem(FGuid::NewGuid(), VortexBPClass, 1),
-        FStoredItem(FGuid::NewGuid(), TrapBPClass, 1),
-        FStoredItem(FGuid::NewGuid(), TeleportBPClass, 1),
-        FStoredItem(FGuid::NewGuid(), MagicWandBPClass, 1)
-    });
-
-    
-    Equipment->SetEquipmentSlots({
-        FEquipmentSlots(EItemType::Spell, TArray<FEquipmentSlot> {
-            FEquipmentSlot(TArray<FStoredItem>{
-                FStoredItem(FireballBPClass), 
-                FStoredItem(InfernoBPClass), 
-                FStoredItem(VortexBPClass), 
-                FStoredItem(TeleportBPClass), 
-                FStoredItem(InstantHealBPClass)
-            }, 
-            0, false)
-        }),
-        
-        FEquipmentSlots(EItemType::Shield, TArray<FEquipmentSlot> {
-            FEquipmentSlot(TArray<FStoredItem>{FStoredItem(SteelShieldBPClass)}, 0, false)
-        }),
-        
-        FEquipmentSlots(EItemType::Head, TArray<FEquipmentSlot> {
-            FEquipmentSlot(TArray<FStoredItem>{FStoredItem()}, 0, false)
-        }),
-        FEquipmentSlots(EItemType::Top, TArray<FEquipmentSlot> {
-            FEquipmentSlot(TArray<FStoredItem>{FStoredItem()}, 0, false)
-        }),
-        FEquipmentSlots(EItemType::Legs, TArray<FEquipmentSlot> {
-            FEquipmentSlot(TArray<FStoredItem>{FStoredItem()}, 0, false)
-        }),
-        FEquipmentSlots(EItemType::Hands, TArray<FEquipmentSlot> {
-            FEquipmentSlot(TArray<FStoredItem>{FStoredItem()}, 0, false)
-        }),
-        FEquipmentSlots(EItemType::Feet, TArray<FEquipmentSlot> {
-            FEquipmentSlot(TArray<FStoredItem>{FStoredItem()}, 0, false)
-        }),
-        FEquipmentSlots(EItemType::Arrows, TArray<FEquipmentSlot> {
-            FEquipmentSlot(TArray<FStoredItem>{
-                FStoredItem(ElvenArrowBPClass), FStoredItem(ExplosiveArrowBPClass)
-            }, 
-            0, false)
-        }),
-        FEquipmentSlots(EItemType::Tool, TArray<FEquipmentSlot> {
-            FEquipmentSlot(TArray<FStoredItem>{
-                FStoredItem(HealthPotionBPClass), 
-                FStoredItem(), 
-                FStoredItem(), 
-                FStoredItem(), 
-                FStoredItem(), 
-                FStoredItem(), 
-                FStoredItem(), 
-                FStoredItem(), 
-                FStoredItem(), 
-                FStoredItem()
-            }, 
-            0, false)
-        }),
-        FEquipmentSlots(EItemType::Ring, TArray<FEquipmentSlot> {
-            FEquipmentSlot(TArray<FStoredItem>{FStoredItem()}, 0, false),
-            FEquipmentSlot(TArray<FStoredItem>{FStoredItem()}, 0, false),
-            FEquipmentSlot(TArray<FStoredItem>{FStoredItem()}, 0, false),
-            FEquipmentSlot(TArray<FStoredItem>{FStoredItem()}, 0, false)
-        }),
-        FEquipmentSlots(EItemType::MeleeWeapon, TArray<FEquipmentSlot> {
-            FEquipmentSlot(TArray<FStoredItem>{
-                FStoredItem(SteelSwordBPClass), 
-                FStoredItem(GreatSwordBPClass), 
-                FStoredItem()
-            }, 
-            0, false)
-        }),
-        FEquipmentSlots(EItemType::RangeWeapon, TArray<FEquipmentSlot> {
-            FEquipmentSlot(TArray<FStoredItem>{
-                FStoredItem(ElvenBowBPClass), 
-                FStoredItem(), 
-                FStoredItem()
-            }, 
-            0, false)
-        }),
-        FEquipmentSlots(EItemType::Necklace, TArray<FEquipmentSlot> {
-            FEquipmentSlot(TArray<FStoredItem>{FStoredItem()}, 0, false)
-        }),
-    });
-    */
-
     ExtendedMana->SetStatType(EStat::Mana);
     ExtendedMana->SetDoesRegenerates(true);
     ExtendedMana->SetRegenValue(1.75f);
     ExtendedMana->SetReenableRegenTime(1.5f);
 
-
     TargetWidget->SetRelativeLocation(FVector(0.0f, 0.0f, 18.0f));
     TargetWidget->SetWidgetSpace(EWidgetSpace::Screen);
-
-    static TSubclassOf<ULockIconUI> LoadedLockIconWBClass =
-        GameUtils::LoadAssetClass<ULockIconUI>("/Game/DynamicCombatSystem/Widgets/LockIconWB");
-
-    TargetWidget->SetWidgetClass(LoadedLockIconWBClass);
     TargetWidget->SetDrawSize(FVector2D(35.0f, 35.0f));
     TargetWidget->SetHiddenInGame(true);
 

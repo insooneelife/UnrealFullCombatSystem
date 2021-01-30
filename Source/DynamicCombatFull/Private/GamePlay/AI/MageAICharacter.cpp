@@ -38,62 +38,6 @@ AMageAICharacter::AMageAICharacter()
     ExtendedMana->SetRegenValue(2.0f);
     ExtendedMana->SetReenableRegenTime(1.5f);
 
-    FString ObjectItemDir("/Game/DynamicCombatSystem/Blueprints/Items/ObjectItems/Instances/");
-    auto MagicWandBPClass = GameUtils::LoadAssetClass<UItemBase>(ObjectItemDir + FString("MagicWandBP"));
-    auto FireballBPClass = GameUtils::LoadAssetClass<UItemBase>(ObjectItemDir + FString("FireballBP"));
-
-    Equipment->SetEquipmentSlots({
-        FEquipmentSlots(EItemType::Spell, TArray<FEquipmentSlot> {
-            FEquipmentSlot(TArray<FStoredItem>{
-                FStoredItem(FGuid::NewGuid(), FireballBPClass, 1),
-                FStoredItem(),
-                FStoredItem()
-            },
-            0, false)
-        }),
-
-        FEquipmentSlots(EItemType::Shield, TArray<FEquipmentSlot> {
-            FEquipmentSlot(TArray<FStoredItem>{FStoredItem(FGuid::NewGuid(), MagicWandBPClass, 1)}, 0, false)
-        }),
-
-        FEquipmentSlots(EItemType::Head, TArray<FEquipmentSlot> {
-            FEquipmentSlot(TArray<FStoredItem>{FStoredItem()}, 0, false)
-        }),
-        FEquipmentSlots(EItemType::Top, TArray<FEquipmentSlot> {
-            FEquipmentSlot(TArray<FStoredItem>{FStoredItem()}, 0, false)
-        }),
-        FEquipmentSlots(EItemType::Legs, TArray<FEquipmentSlot> {
-            FEquipmentSlot(TArray<FStoredItem>{FStoredItem()}, 0, false)
-        }),
-        FEquipmentSlots(EItemType::Hands, TArray<FEquipmentSlot> {
-            FEquipmentSlot(TArray<FStoredItem>{FStoredItem()}, 0, false)
-        }),
-        FEquipmentSlots(EItemType::Feet, TArray<FEquipmentSlot> {
-            FEquipmentSlot(TArray<FStoredItem>{FStoredItem()}, 0, false)
-        }),
-        FEquipmentSlots(EItemType::Arrows, TArray<FEquipmentSlot> {
-            FEquipmentSlot(TArray<FStoredItem>{FStoredItem()}, 0, false)
-        }),
-        FEquipmentSlots(EItemType::Tool, TArray<FEquipmentSlot> {
-            FEquipmentSlot(TArray<FStoredItem>{
-                FStoredItem(),
-                FStoredItem()
-            },
-            0, false)
-        }),
-        FEquipmentSlots(EItemType::MeleeWeapon, TArray<FEquipmentSlot> {
-            FEquipmentSlot(TArray<FStoredItem>{
-                FStoredItem()
-            },
-            0, false)
-        }),
-        FEquipmentSlots(EItemType::RangeWeapon, TArray<FEquipmentSlot> {
-            FEquipmentSlot(TArray<FStoredItem>{
-                FStoredItem()
-            },
-            0, false)
-        })
-        });
 }
 
 void AMageAICharacter::BeginPlay()

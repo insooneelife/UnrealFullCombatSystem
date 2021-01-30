@@ -38,26 +38,14 @@ UDefaultGameInstance::UDefaultGameInstance(const FObjectInitializer& ObjectIniti
     ExplosionParticle = GameUtils::LoadAssetObject<UParticleSystem>("/Game/DynamicCombatSystem/VFX/P_Explosion");
     GroundExplosionSound = GameUtils::LoadAssetObject<USoundBase>("/Game/DynamicCombatSystem/SFX/CUE/CUE_GroundExplosion");
 
-    SpellIndicatorClass = GameUtils::LoadAssetClass<ASpellIndicatorActor>(
-        TEXT("/Game/DynamicCombatSystem/Blueprints/SpellIndicatorActorBP"));
-
     DissolveMaterial = GameUtils::LoadAssetObject<UMaterialInstance>(
         TEXT("/Game/DynamicCombatSystem/Meshes/Materials/MI_DissolveEffect"));
-
-
-    SpawnPickupActorClass =
-        GameUtils::LoadAssetClass<AActor>("/Game/DynamicCombatSystem/Blueprints/PickupActorBP");
 
     DefaultCrosshairTextureObject =
         GameUtils::LoadAssetObject<UTexture2D>("/Game/DynamicCombatSystem/Widgets/Textures/T_Crosshair");
 
     CrosshairTexture =
         GameUtils::LoadAssetObject<UTexture2D>("/Game/DynamicCombatSystem/Widgets/Textures/T_AbilityCrosshair");
-
-    InGameUIClass = GameUtils::LoadAssetClass<UUserWidget>("/Game/DynamicCombatSystem/Widgets/InGameWB");
-
-    KeybindingsUIClass = GameUtils::LoadAssetClass<UKeybindingsUI>("/Game/DynamicCombatSystem/Widgets/KeybindingsWB");
-
 }
 
 void UDefaultGameInstance::Shutdown()
@@ -71,13 +59,9 @@ void UDefaultGameInstance::Shutdown()
     ExplosionParticle = nullptr;
     GroundExplosionSound = nullptr;
 
-    SpellIndicatorClass = nullptr;
     DissolveMaterial = nullptr;
-    SpawnPickupActorClass = nullptr;
     DefaultCrosshairTextureObject = nullptr;
     CrosshairTexture = nullptr;
-    InGameUIClass = nullptr;
-    KeybindingsUIClass = nullptr;
 }
 
 void UDefaultGameInstance::PlayHitSound(AActor* Applier, AActor* Receiver, FVector Location)

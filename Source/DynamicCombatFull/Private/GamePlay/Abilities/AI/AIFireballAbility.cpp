@@ -11,12 +11,6 @@
 
 AAIFireballAbility::AAIFireballAbility()
 {
-    static TSubclassOf<AFireballProjectileAbilityEffect> LoadedFireballClass = 
-        GameUtils::LoadAssetClass<AFireballProjectileAbilityEffect>(
-        "/Game/DynamicCombatSystem/Blueprints/AbilityEffects/FireballProjectileEffectBP");
-
-    FireballProjectileClass = LoadedFireballClass;
-
     ManaCost = 15.0f;
     Damage = 20.0f;
 

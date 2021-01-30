@@ -27,10 +27,10 @@ UPickupUI::UPickupUI(const FObjectInitializer& ObjectInitializer)
     Super(ObjectInitializer), 
     TakeAllKey(EKeys::SpaceBar)
 {
-    static TSubclassOf<UPickupItemUI> LoadedClass =
-        GameUtils::LoadAssetClass<UPickupItemUI>("/Game/DynamicCombatSystem/Widgets/PickupItemWB");
+    //static TSubclassOf<UPickupItemUI> LoadedClass =
+    //    GameUtils::LoadAssetClass<UPickupItemUI>("/Game/DynamicCombatSystem/Widgets/PickupItemWB");
 
-    PickupItemUIClass = LoadedClass;
+    //PickupItemUIClass = LoadedClass;
 }
 
 void UPickupUI::NativeConstruct()

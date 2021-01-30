@@ -130,6 +130,9 @@ private:
     TWeakObjectPtr<UAnimMontage> RecentlyPlayedMontage;
 
     UPROPERTY(EditAnywhere)
+    TSubclassOf<class ASpellIndicatorActor> SpellIndicatorClass;
+
+    UPROPERTY(EditAnywhere)
     bool bUpdateEquipmentAbility;
 
     bool bIsPressed;

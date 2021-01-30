@@ -289,23 +289,19 @@ void UAbilityComponent::ShowSpellIndicator(FVector InLocation, float InRadius, U
             SpawnParameters.Owner = OwnerPtr.Get();
             SpawnParameters.Instigator = TWeakObjectPtr<APawn>(OwnerPtr.Get()->GetInstigator()).Get();
 
-            UDefaultGameInstance* DefaultGameInstance = GameUtils::GetDefaultGameInstance(GetWorld());
+            TWeakObjectPtr<ASpellIndicatorActor> SpawnedActor =
+                GetWorld()->SpawnActor<ASpellIndicatorActor>(
+                    SpellIndicatorClass,
+                    FTransform(FQuat::Identity, InLocation),
+                    SpawnParameters);
 
-            if (DefaultGameInstance != nullptr)
+            if (SpawnedActor.IsValid())
             {
-                TWeakObjectPtr<ASpellIndicatorActor> SpawnedActor =
-                    GetWorld()->SpawnActor<ASpellIndicatorActor>(
-                        DefaultGameInstance->SpellIndicatorClass,
-                        FTransform(FQuat::Identity, InLocation),
-                        SpawnParameters);
-
-                if (SpawnedActor.IsValid())
-                {
-                    SpawnedActor->Init(InRadius, InMaterial);
-                    SpawnedActor->Show();
-                    SpellIndicator = SpawnedActor.Get();
-                }
+                SpawnedActor->Init(InRadius, InMaterial);
+                SpawnedActor->Show();
+                SpellIndicator = SpawnedActor.Get();
             }
+            
         }
     }
 }

@@ -71,12 +71,6 @@ AAICharacter::AAICharacter()
         FName(TEXT("left_foot_2")),
     };
 
-
-
-    static TSubclassOf<ABaseAIController> LoadedClass =
-        GameUtils::LoadAssetClass<ABaseAIController>("/Game/DynamicCombatSystem/Blueprints/AI/BaseAIControllerBP");
-    AIControllerClass = LoadedClass;
-
     MovementSpeed = CreateDefaultSubobject<UMovementSpeedComponent>("MovementSpeed");
     Patrol = CreateDefaultSubobject<UPatrolComponent>("Patrol");
     StateManager = CreateDefaultSubobject<UStateManagerComponent>("StateManager");
@@ -246,7 +240,6 @@ void AAICharacter::Delayed_HandleMeshOnDeath()
             for (UActorComponent* DissolveComp : DissolveComponents)
             {
                 Dissolve->StartDissolve(Cast<UPrimitiveComponent>(DissolveComp), false);
-
             }
         }
     }
@@ -597,26 +590,13 @@ void AAICharacter::SetData()
     MovementSpeed->SetJogSpeed(375.0f);
     MovementSpeed->SetSprintSpeed(500.0f);
 
-
     TargetWidget->SetRelativeLocation(FVector(0.0f, 0.0f, 18.0f));
     TargetWidget->SetWidgetSpace(EWidgetSpace::Screen);
-
-    static TSubclassOf<ULockIconUI> LoadedLockIconWBClass =
-        GameUtils::LoadAssetClass<ULockIconUI>("/Game/DynamicCombatSystem/Widgets/LockIconWB");
-
-    TargetWidget->SetWidgetClass(LoadedLockIconWBClass);
     TargetWidget->SetDrawSize(FVector2D(150.0f, 10.0f));
     TargetWidget->SetHiddenInGame(true);
 
-
     StatBarsWidget->SetRelativeLocation(FVector(0.0f, 0.0f, 200.0f));
     StatBarsWidget->SetWidgetSpace(EWidgetSpace::Screen);
-
-    static TSubclassOf<UAIStatBarsUI> LoadedAIStatBarsUIClass =
-        GameUtils::LoadAssetClass<UAIStatBarsUI>("/Game/DynamicCombatSystem/Widgets/AIStatBarsWB");
-
-    StatBarsWidget->SetWidgetClass(LoadedAIStatBarsUIClass);
     StatBarsWidget->SetDrawSize(FVector2D(150.0f, 10.0f));
     StatBarsWidget->SetHiddenInGame(true);
-
 }

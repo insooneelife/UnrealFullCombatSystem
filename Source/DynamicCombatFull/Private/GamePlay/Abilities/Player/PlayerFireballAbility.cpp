@@ -10,10 +10,7 @@
 APlayerFireballAbility::APlayerFireballAbility()
     :
     InitialProjectileSpeed(3500.0f)
-{
-    FireballProjectileClass = GameUtils::LoadAssetClass<AFireballProjectileAbilityEffect>(
-        "/Game/DynamicCombatSystem/Blueprints/AbilityEffects/FireballProjectileEffectBP");
-    
+{    
     static UAnimMontage* AnimMontage1 = GameUtils::LoadAssetObject<UAnimMontage>(
         "/Game/DynamicCombatSystem/Montages/Player/Magic/M_Magic_Fireball_01");
     AbilityMontages.Add(AnimMontage1);
@@ -31,8 +28,6 @@ APlayerFireballAbility::APlayerFireballAbility()
     bIsUsingCrosshair = true;
     Damage = 10.0f;
     OwnerDamageScalar = 0.5f;
-
-
 }
 
 void APlayerFireballAbility::Released()

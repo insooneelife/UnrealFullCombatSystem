@@ -27,10 +27,10 @@ UItemsGridUI::UItemsGridUI(const FObjectInitializer& ObjectInitializer)
     GridColumns(5), 
     DisplayedType(EItemType::MeleeWeapon)
 {
-    static TSubclassOf<UInventoryItemUI> LoadedClass =
-        GameUtils::LoadAssetClass<UInventoryItemUI>("/Game/DynamicCombatSystem/Widgets/InventoryItemWB");
+    //static TSubclassOf<UInventoryItemUI> LoadedClass =
+    //    GameUtils::LoadAssetClass<UInventoryItemUI>("/Game/DynamicCombatSystem/Widgets/InventoryItemWB");
 
-    InventoryItemUIClass = LoadedClass;
+    //InventoryItemUIClass = LoadedClass;
 }
 
 

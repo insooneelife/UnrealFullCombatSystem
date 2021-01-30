@@ -14,9 +14,6 @@ UCLASS(Blueprintable)
 class UItemBase : public UObject
 {
 	GENERATED_BODY()
-	
-public:
-    UItemBase();
 
 public:
     virtual void UseItem(AActor* InActor) {}

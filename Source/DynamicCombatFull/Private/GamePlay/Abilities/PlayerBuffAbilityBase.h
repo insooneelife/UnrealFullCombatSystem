@@ -28,7 +28,7 @@ public:
     void ApplyBuff();
 
 private:
-    UPROPERTY()
+    UPROPERTY(EditAnywhere, Category = "Ability\|Custom")
     TSubclassOf<ABuffAbilityEffect> SpawnBuffAbilityEffectClass;
 
     UPROPERTY(EditAnywhere, Category = "Ability\|Custom")

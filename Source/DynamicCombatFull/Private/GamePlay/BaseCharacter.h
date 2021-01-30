@@ -656,6 +656,12 @@ private:
     UPROPERTY()
     UKeybindingsUI* KeybindingsWidget;
 
+    UPROPERTY(EditAnywhere)
+        TSubclassOf<UUserWidget> InGameUIClass;
+
+    UPROPERTY(EditAnywhere)
+        TSubclassOf<UKeybindingsUI> KeybindingsUIClass;
+
     UPROPERTY(EditAnywhere, Category = "LoadedObject")
         UDataTable* PlayerOneHandMeleeMontages;
 

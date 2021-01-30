@@ -53,7 +53,7 @@ private:
 
 private:
 
-    UPROPERTY()
+    UPROPERTY(EditAnywhere)
     TSubclassOf<UUserWidget> CreateUserWidgetClass;
 
     TWeakObjectPtr<UInventoryComponent> InventoryComponent;

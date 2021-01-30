@@ -67,9 +67,6 @@ public:
 private:
 
     UPROPERTY(EditAnywhere)
-    USceneComponent* SceneComponent;
-
-    UPROPERTY(EditAnywhere)
     USphereComponent* SphereComponent;
     
     UPROPERTY(EditAnywhere)

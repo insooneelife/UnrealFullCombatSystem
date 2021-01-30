@@ -31,7 +31,7 @@ public:
 
 private:
 
-    UPROPERTY()
+    UPROPERTY(EditAnywhere, Category = "Ability\|Custom")
     TSubclassOf<ASummonedItemAbilityEffect> SpawnSummonedItemAbilityEffectClass;
 
     UPROPERTY(EditAnywhere, Category = "Ability\|Custom")

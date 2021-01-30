@@ -35,9 +35,6 @@ APlayerInfernoAbility::APlayerInfernoAbility()
     static USoundBase* LoadedSound =
         GameUtils::LoadAssetObject<USoundBase>("/Game/DynamicCombatSystem/SFX/CUE/CUE_GroundExplosion");
     Sound = LoadedSound;
-
-    DamageSphereEffectClass = GameUtils::LoadAssetClass<ADamageSphereAbilityEffect>(
-        "/Game/DynamicCombatSystem/Blueprints/AbilityEffects/DamageSphereEffectBP");
 }
 
 void APlayerInfernoAbility::Tick(float DeltaTime)

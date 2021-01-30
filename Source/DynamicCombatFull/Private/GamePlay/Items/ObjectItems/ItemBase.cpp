@@ -2,7 +2,3 @@
 
 
 #include "ItemBase.h"
-
-UItemBase::UItemBase()
-{
-}

@@ -17,7 +17,4 @@ UArrowItem::UArrowItem(const FObjectInitializer& ObjectInitializer)
     {
         FModifier(EStat::Damage, 10.0f)
     };
-
-    Projectile = GameUtils::LoadAssetClass<AArrowProjectileBase>(
-        "/Game/DynamicCombatSystem/Blueprints/Projectiles/BasicArrowProjectileBP");
 }

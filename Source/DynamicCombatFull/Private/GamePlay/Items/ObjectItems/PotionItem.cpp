@@ -21,9 +21,6 @@ UPotionItem::UPotionItem(const FObjectInitializer& ObjectInitializer)
 
     UseMontage = GameUtils::LoadAssetObject<UAnimMontage>(
         "/Game/DynamicCombatSystem/Montages/Player/Common/M_Common_DrinkPotion");
-
-    DisplayedItemClass = GameUtils::LoadAssetClass<ADisplayedItem>(
-        "/Game/DynamicCombatSystem/Blueprints/Items/DisplayedItems/Instances/PotionDisplayedItemBP");
 }
 
 void UPotionItem::UseItem(AActor* Caller)
