@@ -397,13 +397,16 @@ bool AAICharacter::IsTargetable() const
 
 void AAICharacter::ReportDamage(const FHitData& InHitData)
 {
-    UAISense_Damage::ReportDamageEvent(
-        GetWorld(), 
-        this,
-        InHitData.DamageCauser, 
-        InHitData.Damage,
-        InHitData.DamageCauser->GetActorLocation(),
-        GetActorLocation());
+    if (InHitData.DamageCauser.IsValid())
+    {
+        UAISense_Damage::ReportDamageEvent(
+            GetWorld(),
+            this,
+            InHitData.DamageCauser.Get(),
+            InHitData.Damage,
+            InHitData.DamageCauser->GetActorLocation(),
+            GetActorLocation());
+    }
 }
 
 bool AAICharacter::IsAlive() const

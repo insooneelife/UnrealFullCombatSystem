@@ -28,7 +28,7 @@ void AImpaledArrowActor::EndPlay(const EEndPlayReason::Type EndPlayResult)
     Super::EndPlay(EndPlayResult);
 }
 
-void AImpaledArrowActor::Init(UStaticMesh* InMesh)
+void AImpaledArrowActor::Init(UStaticMesh* const InMesh)
 {
     StaticMeshComponent->SetStaticMesh(InMesh);
     SetLifeSpan(LifeTime);

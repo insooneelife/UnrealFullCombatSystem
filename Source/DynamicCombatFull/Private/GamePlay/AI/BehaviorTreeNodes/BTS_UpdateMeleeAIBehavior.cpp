@@ -106,7 +106,7 @@ void UBTS_UpdateMeleeAIBehavior::Update()
 
 void UBTS_UpdateMeleeAIBehavior::UpdateBehavior()
 {
-    if (GameUtils::IsValid(AIOwner))
+    if (AIOwner.IsValid())
     {
         if (GameUtils::IsValid(ControlledCharacter))
         {
@@ -261,7 +261,7 @@ void UBTS_UpdateMeleeAIBehavior::UpdateBehavior()
 
 void UBTS_UpdateMeleeAIBehavior::UpdateActivities()
 {
-    if (GameUtils::IsValid(AIOwner))
+    if (AIOwner.IsValid())
     {
         if (GameUtils::IsValid(ControlledCharacter))
         {

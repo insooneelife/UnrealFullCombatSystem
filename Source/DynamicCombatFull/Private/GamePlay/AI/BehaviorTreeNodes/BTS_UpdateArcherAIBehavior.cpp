@@ -102,7 +102,7 @@ void UBTS_UpdateArcherAIBehavior::Delayed_Flee()
 
 void UBTS_UpdateArcherAIBehavior::UpdateBehavior()
 {
-    if (GameUtils::IsValid(AIOwner))
+    if (AIOwner.IsValid())
     {
         if (GameUtils::IsValid(ControlledCharacter))
         {
@@ -197,7 +197,7 @@ void UBTS_UpdateArcherAIBehavior::UpdateBehavior()
 
 void UBTS_UpdateArcherAIBehavior::UpdateActivities()
 {
-    if (GameUtils::IsValid(AIOwner))
+    if (AIOwner.IsValid())
     {
         if (GameUtils::IsValid(ControlledCharacter))
         {

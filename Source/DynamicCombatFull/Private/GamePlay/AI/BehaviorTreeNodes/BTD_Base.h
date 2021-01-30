@@ -30,11 +30,6 @@ protected:
         APawn* InControlledPawn) const { return true; }
 
 protected:
-    /** Cached AIController owner of BehaviorTreeComponent. */
-    UPROPERTY(Transient)
-        AAIController* AIOwner;
-
-    /** Cached AIController owner of BehaviorTreeComponent. */
-    UPROPERTY(Transient)
-        AActor* ActorOwner;
+    TWeakObjectPtr<AAIController> AIOwner;
+    TWeakObjectPtr<AActor> ActorOwner;
 };

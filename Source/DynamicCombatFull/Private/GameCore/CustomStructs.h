@@ -65,10 +65,10 @@ struct FDisplayedItems
 public:
     FDisplayedItems() {}
 
-    FDisplayedItems(const TArray<ADisplayedItem*>& DisplayedItems) : DisplayedItems(DisplayedItems) {}
+    FDisplayedItems(const TArray<TWeakObjectPtr<ADisplayedItem>>& DisplayedItems) : DisplayedItems(DisplayedItems) {}
 
-    UPROPERTY(EditAnywhere, BlueprintReadWrite)
-        TArray<ADisplayedItem*> DisplayedItems;
+    UPROPERTY(EditAnywhere)
+        TArray<TWeakObjectPtr<ADisplayedItem>> DisplayedItems;
 };
 
 
@@ -79,16 +79,16 @@ struct FDissolvedComponent
 
 public:
     UPROPERTY(EditAnywhere, BlueprintReadWrite)
-        UPrimitiveComponent* Component;
+        TWeakObjectPtr<UPrimitiveComponent> Component;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite)
         float Value;
 
-    UPROPERTY(EditAnywhere, BlueprintReadWrite)
-        TArray<UMaterialInterface*> Materials;
+    UPROPERTY(EditAnywhere)
+        TArray<TWeakObjectPtr<UMaterialInterface>> Materials;
 
-    UPROPERTY(EditAnywhere, BlueprintReadWrite)
-        TArray<UMaterialInstanceDynamic*> DissolveMaterials;
+    UPROPERTY(EditAnywhere)
+        TArray<TWeakObjectPtr<UMaterialInstanceDynamic>> DissolveMaterials;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite)
         bool bReverse;
@@ -110,7 +110,7 @@ public:
         float Duration;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite)
-        AActor* Applier;
+        TWeakObjectPtr<AActor> Applier;
 };
 
 USTRUCT(BlueprintType)
@@ -121,8 +121,8 @@ struct FStoredItem
 public:
     FStoredItem() : Amount(0) { }
     FStoredItem(TSubclassOf<UItemBase> ItemClass) : ItemClass(ItemClass), Amount(0) {}
-    FStoredItem(const FGuid& Id, TSubclassOf<UItemBase> ItemClass, int Amount)
-        :Id(Id), ItemClass(ItemClass), Amount(Amount) {}
+    FStoredItem(const FGuid& InId, TSubclassOf<UItemBase> InItemClass, int InAmount)
+        :Id(InId), ItemClass(InItemClass), Amount(InAmount) {}
 
     FORCEINLINE FStoredItem& operator=(const FStoredItem& Other)
     {
@@ -152,8 +152,8 @@ struct FEquipmentSlot
 public:
 
     FEquipmentSlot() : ActiveItemIndex(0), bIsHidden(false){}
-    FEquipmentSlot(const TArray<FStoredItem>& Items, int ActiveItemIndex, bool bIsHidden)
-        :Items(Items), ActiveItemIndex(ActiveItemIndex), bIsHidden(bIsHidden) {}
+    FEquipmentSlot(const TArray<FStoredItem>& InItems, int InActiveItemIndex, bool bInIsHidden)
+        :Items(InItems), ActiveItemIndex(InActiveItemIndex), bIsHidden(bInIsHidden) {}
 
     FORCEINLINE FEquipmentSlot& operator=(const FEquipmentSlot& Other)
     {
@@ -184,7 +184,7 @@ struct FEquipmentSlots
 public:
     FEquipmentSlots() : Type(EItemType::None) {}
 
-    FEquipmentSlots(EItemType Type, const TArray<FEquipmentSlot>& Slots) : Type(Type), Slots(Slots) {}
+    FEquipmentSlots(EItemType InType, const TArray<FEquipmentSlot>& InSlots) : Type(InType), Slots(InSlots) {}
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite)
         EItemType Type;
@@ -204,32 +204,33 @@ public:
     FHitData() 
         :
         Damage(0),
+        HitFromDirection(FVector::ZeroVector),
         bCanBeParried(false),
         bCanBeBlocked(true),
         bCanReceiveImpact(true)
     {}
 
     FHitData(
-        float Damage,
-        AActor* DamageCauser,
-        FVector HitFromDirection,
-        bool bCanBeParried, 
-        bool bCanBeBlocked, 
-        bool bCanReceiveImpact) 
+        float InDamage,
+        AActor* InDamageCauser,
+        FVector InHitFromDirection,
+        bool bInCanBeParried, 
+        bool bInCanBeBlocked, 
+        bool bInCanReceiveImpact) 
         : 
-        Damage(Damage),
-        DamageCauser(DamageCauser),
-        HitFromDirection(HitFromDirection), 
-        bCanBeParried(bCanBeParried), 
-        bCanBeBlocked(bCanBeBlocked), 
-        bCanReceiveImpact(bCanReceiveImpact) 
+        Damage(InDamage),
+        DamageCauser(InDamageCauser),
+        HitFromDirection(InHitFromDirection),
+        bCanBeParried(bInCanBeParried),
+        bCanBeBlocked(bInCanBeBlocked),
+        bCanReceiveImpact(bInCanReceiveImpact)
     {}
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite)
         float Damage;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite)
-        AActor* DamageCauser;
+        TWeakObjectPtr<AActor> DamageCauser;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite)
         FVector HitFromDirection;
@@ -253,11 +254,11 @@ struct FItem
 public:
     FItem() 
         :
-        Type(EItemType::None), bIsStackable(false), bIsDroppable(true), bIsConsumable(false)
+        Name(NAME_None), Description(), Type(EItemType::None), bIsStackable(false), bIsDroppable(true), bIsConsumable(false), Image(nullptr)
     {}
-    FItem(const FName& Name, const FText& Description, EItemType Type, bool bIsStackable, bool bIsDroppable, bool bIsConsumable, UTexture2D* Image)
+    FItem(const FName& InName, const FText& InDescription, EItemType InType, bool bInIsStackable, bool bInIsDroppable, bool bInIsConsumable, UTexture2D* InImage)
         :
-        Name(Name), Description(Description), Type(Type), bIsStackable(bIsStackable), bIsDroppable(bIsDroppable), bIsConsumable(bIsConsumable), Image(Image)
+        Name(InName), Description(InDescription), Type(InType), bIsStackable(bInIsStackable), bIsDroppable(bInIsDroppable), bIsConsumable(bInIsConsumable), Image(InImage)
     {}
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite)
@@ -290,7 +291,7 @@ struct FModifier
 
 public:
     FModifier() : Type(EStat::None), Value(0.0f) {}
-    FModifier(EStat Type, float Value) : Type(Type), Value(Value){}
+    FModifier(EStat InType, float InValue) : Type(InType), Value(InValue){}
 
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite)
@@ -322,8 +323,8 @@ struct FStat
 public:
     FStat() : Type(EStat::None), BaseValue(0.0f), ModifiersValue(0.0f) {}
 
-    FStat(EStat Type, float BaseValue, float ModifiersValue)
-        :Type(Type), BaseValue(BaseValue), ModifiersValue(ModifiersValue)
+    FStat(EStat InType, float InBaseValue, float InModifiersValue)
+        :Type(InType), BaseValue(InBaseValue), ModifiersValue(InModifiersValue)
     {}
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite)

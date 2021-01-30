@@ -38,8 +38,8 @@ void UDissolveComponent::StartDissolve(UPrimitiveComponent* const InComponent, b
         else
         {
             // store component materials and replace them with dissolve material
-            TArray<UMaterialInterface*> LMaterials;
-            TArray<UMaterialInstanceDynamic*> LDissolveMaterials;
+            TArray<TWeakObjectPtr<UMaterialInterface>> LMaterials;
+            TArray<TWeakObjectPtr<UMaterialInstanceDynamic>> LDissolveMaterials;
 
             for (int i = 0; i < InComponent->GetNumMaterials(); ++i)
             {
@@ -93,7 +93,7 @@ void UDissolveComponent::DissolveComponents()
         int LIndex = i;
         FDissolvedComponent DissComp = DissolvedComponents[i];
 
-        if (GameUtils::IsValid(DissComp.Component))
+        if (DissComp.Component.IsValid())
         {
             if (DissComp.bIsRunning)
             {
@@ -114,7 +114,7 @@ void UDissolveComponent::DissolveComponents()
                     if (DissComp.bReverse)
                     {
                         RestoreComponentMaterials(LIndex);
-                        OnDissolveFinished.Broadcast(DissComp.Component, DissComp.bReverse);
+                        OnDissolveFinished.Broadcast(DissComp.Component.Get(), DissComp.bReverse);
 
                         RemoveComponent(LIndex);
                         bLKeepDissolving = true;
@@ -128,7 +128,7 @@ void UDissolveComponent::DissolveComponents()
                 {
                     bLKeepDissolving = true;
 
-                    for (UMaterialInstanceDynamic* Mat : DissComp.DissolveMaterials)
+                    for (TWeakObjectPtr<UMaterialInstanceDynamic> Mat : DissComp.DissolveMaterials)
                     {
                         Mat->SetScalarParameterValue(DissolveValueName, LNewValue);
                     }
@@ -149,11 +149,11 @@ void UDissolveComponent::DissolveComponents()
 
 void UDissolveComponent::RestoreComponentMaterials(int InIndex)
 {
-    UPrimitiveComponent* Component = DissolvedComponents[InIndex].Component;
+    TWeakObjectPtr<UPrimitiveComponent> Component = DissolvedComponents[InIndex].Component;
 
     for (int i = 0; i < Component->GetNumMaterials(); ++i)
     {
-        Component->SetMaterial(i, DissolvedComponents[InIndex].Materials[i]);
+        Component->SetMaterial(i, DissolvedComponents[InIndex].Materials[i].Get());
     }
 }
 

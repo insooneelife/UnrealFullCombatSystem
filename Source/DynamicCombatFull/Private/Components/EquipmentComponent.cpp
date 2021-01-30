@@ -69,7 +69,9 @@ UEquipmentComponent::UEquipmentComponent()
 	PrimaryComponentTick.bCanEverTick = false;
     PrimaryComponentTick.bStartWithTickEnabled = false;
     
-    DisplayedItems = { {EItemType::Ring, FDisplayedItems(TArray<ADisplayedItem*>{nullptr, nullptr, nullptr})} };
+    DisplayedItems = { 
+        {EItemType::Ring, FDisplayedItems(TArray<TWeakObjectPtr<ADisplayedItem>>{nullptr, nullptr, nullptr})} 
+    };
 
     MainHandTypes = { EItemType::MeleeWeapon, EItemType::Spell, EItemType::RangeWeapon };
 
@@ -82,9 +84,9 @@ void UEquipmentComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
     {
         const FDisplayedItems& Item = E.Value;
 
-        for (ADisplayedItem* DisplayedItem : Item.DisplayedItems)
+        for (TWeakObjectPtr<ADisplayedItem> DisplayedItem : Item.DisplayedItems)
         {
-            if (DisplayedItem != nullptr)
+            if (DisplayedItem.IsValid())
             {
                 DisplayedItem->Destroy();
             }
@@ -122,7 +124,7 @@ ADisplayedItem* UEquipmentComponent::GetDisplayedItem(EItemType InType, int InSl
 {
     if (DisplayedItems.Contains(InType))
     {
-        return DisplayedItems[InType].DisplayedItems[InSlotIndex];
+        return DisplayedItems[InType].DisplayedItems[InSlotIndex].Get();
     }
     return nullptr;
 }
@@ -576,7 +578,7 @@ void UEquipmentComponent::UpdateDisplayedItem(EItemType InType, int InSlotIndex)
 
     if (ItemsValue != nullptr)
     {
-        ADisplayedItem* DisplayedItem = ItemsValue->DisplayedItems[InSlotIndex];
+        ADisplayedItem* DisplayedItem = ItemsValue->DisplayedItems[InSlotIndex].Get();
         if (DisplayedItem != nullptr)
         {
             DisplayedItem->Destroy();
@@ -750,9 +752,9 @@ void UEquipmentComponent::BuildEquipment(const TArray<FEquipmentSlots>& InEquipm
     // clear and rebuild displayed items array
     for (auto E : DisplayedItems)
     {
-        const TArray<ADisplayedItem*>& DisplayedItemActors = E.Value.DisplayedItems;
+        const TArray<TWeakObjectPtr<ADisplayedItem>>& DisplayedItemActors = E.Value.DisplayedItems;
 
-        for (ADisplayedItem* DisplayedItem : DisplayedItemActors)
+        for (TWeakObjectPtr<ADisplayedItem> DisplayedItem : DisplayedItemActors)
         {
             if (DisplayedItem != nullptr)
             {

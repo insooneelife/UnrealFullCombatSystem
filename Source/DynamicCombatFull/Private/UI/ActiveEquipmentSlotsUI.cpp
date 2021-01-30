@@ -2,3 +2,11 @@
 
 
 #include "ActiveEquipmentSlotsUI.h"
+
+
+void UActiveEquipmentSlotsUI::NativeDestruct()
+{
+    Super::NativeDestruct();
+}
+
+

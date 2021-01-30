@@ -62,8 +62,7 @@ void UBTS_UpdateSummonedMinionBehavior::OnStateChanged(EState InPrevState, EStat
 
 void UBTS_UpdateSummonedMinionBehavior::UpdateBehavior()
 {
-
-    if (GameUtils::IsValid(AIOwner))
+    if (AIOwner.IsValid())
     {
         if (GameUtils::IsValid(ControlledCharacter))
         {

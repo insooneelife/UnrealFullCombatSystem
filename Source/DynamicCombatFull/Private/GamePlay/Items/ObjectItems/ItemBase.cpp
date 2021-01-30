@@ -5,5 +5,4 @@
 
 UItemBase::UItemBase()
 {
-    UE_LOG(LogTemp, Error, TEXT("UItemBase Ctor  : %s"), *GetName());
 }

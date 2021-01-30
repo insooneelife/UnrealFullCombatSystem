@@ -2443,8 +2443,6 @@ void ABaseCharacter::LineTraceForInteractable()
 
 void ABaseCharacter::SetData()
 {
-    UE_LOG(LogTemp, Error, TEXT("ABaseCharacter SetData"));
-
     GetCharacterMovement()->JumpZVelocity = 600.0f;
     GetCharacterMovement()->AirControl = 0.2f;
     GetCharacterMovement()->RotationRate = FRotator(0.0f, 540.0f, 0.0f);

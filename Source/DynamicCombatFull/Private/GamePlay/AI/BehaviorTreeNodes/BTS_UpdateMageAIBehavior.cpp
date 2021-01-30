@@ -81,7 +81,7 @@ void UBTS_UpdateMageAIBehavior::Update()
 
 void UBTS_UpdateMageAIBehavior::UpdateBehavior()
 {
-    if (GameUtils::IsValid(AIOwner))
+    if (AIOwner.IsValid())
     {
         if (GameUtils::IsValid(ControlledCharacter))
         {

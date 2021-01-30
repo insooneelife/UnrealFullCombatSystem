@@ -52,7 +52,7 @@ bool ICanBeAttacked::TakeDamage(const FHitData& HitData, EAttackResult& OutResul
 
                     if (bApplied)
                     {
-                        DefaultGameInstance->PlayParrySound(ThisCharacter, HitData.DamageCauser, ActorLocation);
+                        DefaultGameInstance->PlayParrySound(ThisCharacter, HitData.DamageCauser.Get(), ActorLocation);
                     }
                 }
 
@@ -71,7 +71,7 @@ bool ICanBeAttacked::TakeDamage(const FHitData& HitData, EAttackResult& OutResul
 
             if (IsAlive() && bBlocked)
             {
-                DefaultGameInstance->PlayBlockSound(ThisCharacter, HitData.DamageCauser, ActorLocation);
+                DefaultGameInstance->PlayBlockSound(ThisCharacter, HitData.DamageCauser.Get(), ActorLocation);
                 Block();
 
                 UEquipmentComponent* Equipment = GetEquipment();

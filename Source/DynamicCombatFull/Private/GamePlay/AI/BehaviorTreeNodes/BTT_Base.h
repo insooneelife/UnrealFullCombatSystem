@@ -37,13 +37,9 @@ protected:
 
 
 protected:
-    /** Cached AIController owner of BehaviorTreeComponent. */
-    UPROPERTY(Transient)
-        AAIController* AIOwner;
+    TWeakObjectPtr<AAIController> AIOwner;
 
-    /** Cached actor owner of BehaviorTreeComponent. */
-    UPROPERTY(Transient)
-        AActor* ActorOwner;
+    TWeakObjectPtr<AActor> ActorOwner;
 
     /** If any of the Tick functions is implemented, how ofter should they be ticked.
      *	Values < 0 mean 'every tick'. */

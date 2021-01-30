@@ -61,7 +61,7 @@ bool UEffectsComponent::IsEffectApplied(EEffectType InType) const
 
 AActor* UEffectsComponent::GetEffectApplier(EEffectType InType) const
 {
-    return GetEffect(InType).Applier;
+    return GetEffect(InType).Applier.Get();
 }
 
 bool UEffectsComponent::ApplyBackstabEffect(

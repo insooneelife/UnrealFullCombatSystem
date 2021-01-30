@@ -78,7 +78,7 @@ void GameUtils::PrintHitData(const FHitData& InHitData)
     bool bCanBeParried = InHitData.bCanBeParried;
     bool bCanBeBlocked = InHitData.bCanBeBlocked;
     bool bCanReceiveImpact = InHitData.bCanReceiveImpact;
-    AActor* DamageCauser = InHitData.DamageCauser;
+    AActor* DamageCauser = InHitData.DamageCauser.Get();
 
     UE_LOG(LogTemp, Error, TEXT("Print HitData  Damage : %f  HitFromDirection : %s   bCanBeParried : %d   bCanBeBlocked : %d   bCanReceiveImpact : %d   DamageCauser : %s"),
         Damage,

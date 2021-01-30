@@ -31,25 +31,37 @@ void UBTS_Base::OnInstanceDestroyed(UBehaviorTreeComponent& OwnerComp)
 void UBTS_Base::OnBecomeRelevant(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
 {
     Super::OnBecomeRelevant(OwnerComp, NodeMemory);
-    ReceiveActivationAI(OwnerComp, AIOwner, AIOwner->GetPawn());
+    if (AIOwner.IsValid())
+    {
+        ReceiveActivationAI(OwnerComp, AIOwner.Get(), AIOwner->GetPawn());
+    }
 }
 
 void UBTS_Base::OnCeaseRelevant(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
 {
     Super::OnCeaseRelevant(OwnerComp, NodeMemory);
-    ReceiveDeactivationAI(OwnerComp, AIOwner, AIOwner->GetPawn());
+    if (AIOwner.IsValid())
+    {
+        ReceiveDeactivationAI(OwnerComp, AIOwner.Get(), AIOwner->GetPawn());
+    }
 }
 
 void UBTS_Base::OnSearchStart(FBehaviorTreeSearchData& SearchData)
 {
     Super::OnSearchStart(SearchData);
-    ReceiveSearchStartAI(SearchData.OwnerComp, AIOwner, AIOwner->GetPawn());
+    if (AIOwner.IsValid())
+    {
+        ReceiveSearchStartAI(SearchData.OwnerComp, AIOwner.Get(), AIOwner->GetPawn());
+    }
 }
 
 void UBTS_Base::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds)
 {
     Super::TickNode(OwnerComp, NodeMemory, DeltaSeconds);
-    ReceiveTickAI(OwnerComp, AIOwner, AIOwner->GetPawn(), DeltaSeconds);
+    if (AIOwner.IsValid())
+    {
+        ReceiveTickAI(OwnerComp, AIOwner.Get(), AIOwner->GetPawn(), DeltaSeconds);
+    }
 }
 
 

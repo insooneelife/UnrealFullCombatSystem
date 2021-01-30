@@ -17,8 +17,8 @@ class UActiveEquipmentSlotsUI : public UUserWidget
 {
 	GENERATED_BODY()
 	
-public:
-       
+protected:
+    virtual void NativeDestruct() override;
 
 private:
 

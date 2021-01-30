@@ -15,9 +15,9 @@ UBTT_Base::UBTT_Base(const FObjectInitializer& ObjectInitializer)
 
 EBTNodeResult::Type UBTT_Base::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
 {
-    if (AIOwner != nullptr)
+    if (AIOwner.IsValid())
     {
-        ReceiveExecuteAI(AIOwner, AIOwner->GetPawn());
+        ReceiveExecuteAI(AIOwner.Get(), AIOwner->GetPawn());
     }
 
     return EBTNodeResult::InProgress;
@@ -25,9 +25,9 @@ EBTNodeResult::Type UBTT_Base::ExecuteTask(UBehaviorTreeComponent& OwnerComp, ui
 
 EBTNodeResult::Type UBTT_Base::AbortTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
 {
-    if (AIOwner != nullptr)
+    if (AIOwner.IsValid())
     {
-        ReceiveAbortAI(AIOwner, AIOwner->GetPawn());
+        ReceiveAbortAI(AIOwner.Get(), AIOwner->GetPawn());
     }
 
     return EBTNodeResult::Aborted;
@@ -55,9 +55,9 @@ void UBTT_Base::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, f
     {
         DeltaSeconds = TickInterval.GetElapsedTimeWithFallback(DeltaSeconds);
 
-        if (AIOwner != nullptr)
+        if (AIOwner.IsValid())
         {
-            ReceiveTickAI(AIOwner, AIOwner->GetPawn(), DeltaSeconds);
+            ReceiveTickAI(AIOwner.Get(), AIOwner->GetPawn(), DeltaSeconds);
         }
         TickInterval.Reset();
     }

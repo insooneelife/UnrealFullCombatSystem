@@ -12,8 +12,12 @@ UBTD_Base::UBTD_Base(const FObjectInitializer& ObjectInitializer)
 
 bool UBTD_Base::CalculateRawConditionValue(UBehaviorTreeComponent& InOwnerComp, uint8* InNodeMemory) const
 {
-    bool CurrentCallResult = PerformConditionCheckAI(InOwnerComp, AIOwner, AIOwner->GetPawn());
-    return CurrentCallResult;
+    if (AIOwner.IsValid())
+    {
+        bool CurrentCallResult = PerformConditionCheckAI(InOwnerComp, AIOwner.Get(), AIOwner->GetPawn());
+        return CurrentCallResult;
+    }
+    return false;
 }
 
 void UBTD_Base::SetOwner(AActor* InActorOwner)

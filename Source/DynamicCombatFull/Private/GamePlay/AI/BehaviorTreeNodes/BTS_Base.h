@@ -26,13 +26,9 @@ class UBTS_Base : public UBTService
     virtual void OnInstanceDestroyed(UBehaviorTreeComponent& OwnerComp) override;
 
 protected:
-    /** Cached AIController owner of BehaviorTreeComponent. */
-    UPROPERTY(Transient)
-        AAIController* AIOwner;
 
-    /** Cached actor owner of BehaviorTreeComponent. */
-    UPROPERTY(Transient)
-        AActor* ActorOwner;
+    TWeakObjectPtr<AAIController> AIOwner;
+    TWeakObjectPtr<AActor> ActorOwner;
 
     virtual void OnBecomeRelevant(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) override;
     virtual void OnCeaseRelevant(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) override;

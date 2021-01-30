@@ -22,7 +22,7 @@ public:
     void OnDestroyed(AActor* DestroyedActor);
 
 public:
-    void Init(UStaticMesh* InMesh);
+    void Init(UStaticMesh* const InMesh);
 
 private:
     UPROPERTY(EditAnywhere)
