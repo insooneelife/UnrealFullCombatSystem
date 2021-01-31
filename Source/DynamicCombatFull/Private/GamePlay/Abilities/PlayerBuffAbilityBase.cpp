@@ -34,6 +34,14 @@ APlayerBuffAbilityBase::APlayerBuffAbilityBase()
     Sound = LoadedSoundObject;
 }
 
+void APlayerBuffAbilityBase::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+    Super::EndPlay(EndPlayReason);
+
+    BuffCastParticle = nullptr;
+    Sound = nullptr;
+}
+
 void APlayerBuffAbilityBase::Released()
 {
     if (AbilityComponent.IsValid())

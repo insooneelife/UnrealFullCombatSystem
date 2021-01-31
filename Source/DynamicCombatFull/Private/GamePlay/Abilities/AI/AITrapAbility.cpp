@@ -36,6 +36,12 @@ AAITrapAbility::AAITrapAbility()
     Sound = SoundObject;
 }
 
+void AAITrapAbility::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+    Super::EndPlay(EndPlayReason);
+    Sound = nullptr;
+}
+
 void AAITrapAbility::Released()
 {
     if (AbilityComponent->StartAbility())

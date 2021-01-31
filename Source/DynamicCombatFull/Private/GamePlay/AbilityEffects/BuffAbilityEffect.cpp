@@ -22,6 +22,14 @@ ABuffAbilityEffect::ABuffAbilityEffect()
     TimerInterval = 0.1f;
 
     RootComponent = CreateDefaultSubobject<USceneComponent>("Scene");
+    ParticleSystemComponent = CreateDefaultSubobject<UParticleSystemComponent>("ParticleSystem");
+}
+
+void ABuffAbilityEffect::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+    Super::EndPlay(EndPlayReason);
+
+    ParticleSystemComponent = nullptr;
 }
 
 void ABuffAbilityEffect::Init(float InDuration, EStat InStatType, float InValue, FLinearColor InColor)
@@ -42,7 +50,7 @@ void ABuffAbilityEffect::Init(float InDuration, EStat InStatType, float InValue,
 
 void ABuffAbilityEffect::ApplyBuff()
 {
-    if (GameUtils::IsValid(StatsManagerComponent))
+    if (StatsManagerComponent.IsValid())
     {
         StatsManagerComponent->AddModifier(StatType, Value);
     }
@@ -98,7 +106,7 @@ void ABuffAbilityEffect::Deactivate()
 
 void ABuffAbilityEffect::RemoveBuff()
 {
-    if (GameUtils::IsValid(StatsManagerComponent))
+    if (StatsManagerComponent.IsValid())
     {
         StatsManagerComponent->RemoveModifier(StatType, Value);
         Value = 0.0f;
@@ -117,14 +125,14 @@ void ABuffAbilityEffect::AdjustBuff(float NewValue, float NewDuration)
 
     if (ValueDifference > 0.0f)
     {
-        if (GameUtils::IsValid(StatsManagerComponent))
+        if (StatsManagerComponent.IsValid())
         {
             StatsManagerComponent->AddModifier(StatType, ValueDifference);
         }
     }
     else if (ValueDifference < 0.0f)
     {
-        if (GameUtils::IsValid(StatsManagerComponent))
+        if (StatsManagerComponent.IsValid())
         {
             StatsManagerComponent->RemoveModifier(StatType, ValueDifference);
         }

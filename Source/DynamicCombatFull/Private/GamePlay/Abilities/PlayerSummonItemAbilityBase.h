@@ -21,6 +21,10 @@ class APlayerSummonItemAbilityBase : public APlayerAbilityBase
 public:
     APlayerSummonItemAbilityBase();
 
+protected:
+    virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
+
+public:
     virtual void Effect() override;
     virtual void Released() override;
     void SpawnParticle();
@@ -44,11 +48,9 @@ private:
     bool bAutoSwap;
 
     UPROPERTY(EditAnywhere, Category = "Ability\|Custom")
-        UParticleSystem* SummonCastParticle;
-
+    UParticleSystem* SummonCastParticle;
 
     UPROPERTY(EditAnywhere, Category = "Ability\|Custom")
-        USoundBase* Sound;
-
+    USoundBase* Sound;
 
 };

@@ -32,6 +32,14 @@ APlayerSummonItemAbilityBase::APlayerSummonItemAbilityBase()
     Sound = LoadedSoundObject;
 }
 
+void APlayerSummonItemAbilityBase::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+    Super::EndPlay(EndPlayReason);
+
+    SummonCastParticle = nullptr;
+    Sound = nullptr;
+}
+
 void APlayerSummonItemAbilityBase::Effect()
 {
     Summon();

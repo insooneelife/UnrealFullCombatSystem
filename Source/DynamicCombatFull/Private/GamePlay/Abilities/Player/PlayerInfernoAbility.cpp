@@ -37,6 +37,14 @@ APlayerInfernoAbility::APlayerInfernoAbility()
     Sound = LoadedSound;
 }
 
+void APlayerInfernoAbility::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+    Super::EndPlay(EndPlayReason);
+
+    HitParticle = nullptr;
+    Sound = nullptr;
+}
+
 void APlayerInfernoAbility::Tick(float DeltaTime)
 {
     if (AbilityComponent->IsPressed() &&

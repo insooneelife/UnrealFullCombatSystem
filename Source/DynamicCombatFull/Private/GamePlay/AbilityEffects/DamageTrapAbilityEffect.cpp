@@ -50,10 +50,14 @@ void ADamageTrapAbilityEffect::BeginPlay()
 
 void ADamageTrapAbilityEffect::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
+    Super::EndPlay(EndPlayReason);
     this->SphereComponent->OnComponentBeginOverlap.RemoveDynamic(
         this, &ADamageTrapAbilityEffect::OnSphereBeginOverlap);
 
-    Super::EndPlay(EndPlayReason);
+    SphereComponent = nullptr;
+    DecalComponent = nullptr;
+    HitParticle = nullptr;
+    ExplosionSound = nullptr;
 }
 
 void ADamageTrapAbilityEffect::GetTraceObjects(TArray<FHitResult>& OutHits) const

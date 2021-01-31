@@ -31,6 +31,14 @@ AAIInstantHealAbility::AAIInstantHealAbility()
     Sound = LoadedSound;
 }
 
+void AAIInstantHealAbility::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+    Super::EndPlay(EndPlayReason);
+
+    HealParticle = nullptr;
+    Sound = nullptr;
+}
+
 void AAIInstantHealAbility::Released()
 {
     if (AbilityComponent->StartAbility())

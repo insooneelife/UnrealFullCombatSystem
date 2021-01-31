@@ -17,6 +17,10 @@ class AAITrapAbility : public AAIAbilityBase
 public:
     AAITrapAbility();
 
+protected:
+    virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
+
+public:
     virtual void Released() override;
     virtual void Effect() override;
 

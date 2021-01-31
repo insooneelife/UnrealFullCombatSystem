@@ -20,9 +20,12 @@ class AAISummonMinionAbility : public AAIAbilityBase
 	GENERATED_BODY()
 	
 public:
-
     AAISummonMinionAbility();
 
+protected:
+    virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
+
+public:
     virtual void Released() override;
     virtual void Effect() override;
 

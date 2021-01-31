@@ -36,6 +36,14 @@ AAIInfernoAbility::AAIInfernoAbility()
     AbilityMontages.Add(LoadedMontage);
 }
 
+void AAIInfernoAbility::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+    Super::EndPlay(EndPlayReason);
+
+    HitParticle = nullptr;
+    Sound = nullptr;
+}
+
 void AAIInfernoAbility::Released()
 {
     if (AbilityComponent->StartAbility())

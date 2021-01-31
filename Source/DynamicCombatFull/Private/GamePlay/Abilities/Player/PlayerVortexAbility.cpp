@@ -52,6 +52,16 @@ APlayerVortexAbility::APlayerVortexAbility()
     IndicatorRadius = 100.0f;
 }
 
+void APlayerVortexAbility::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+    Super::EndPlay(EndPlayReason);
+
+    VortexParticle = nullptr;
+    Sound = nullptr;
+    ParticleComponent = nullptr;
+    SoundComponent = nullptr;
+}
+
 void APlayerVortexAbility::Tick(float DeltaTime)
 {
     if (AbilityComponent->IsUsingAbility())

@@ -20,9 +20,12 @@ class AAITeleportAbility : public AAIAbilityBase
 	GENERATED_BODY()
 	
 public:
-
     AAITeleportAbility();
 
+protected:
+    virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
+
+public:
     virtual void Released() override;
     virtual void Effect() override;
 

@@ -37,6 +37,14 @@ APlayerInstantHealAbility::APlayerInstantHealAbility()
 
 }
 
+void APlayerInstantHealAbility::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+    Super::EndPlay(EndPlayReason);
+
+    HealCastParticle = nullptr;
+    Sound = nullptr;
+}
+
 void APlayerInstantHealAbility::NativeInit(UAbilityComponent* InAbilityComponent)
 {
     Super::NativeInit(InAbilityComponent);
@@ -76,7 +84,7 @@ void APlayerInstantHealAbility::PlaySound()
 
 void APlayerInstantHealAbility::Heal()
 {
-    if (GameUtils::IsValid(HealthComponent))
+    if (HealthComponent.IsValid())
     {
         HealthComponent->ModifyStat(HealAmount, true);
     }

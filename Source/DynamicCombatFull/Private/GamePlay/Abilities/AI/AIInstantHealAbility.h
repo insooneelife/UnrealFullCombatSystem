@@ -19,6 +19,10 @@ class AAIInstantHealAbility : public AAIAbilityBase
 public:
     AAIInstantHealAbility();
 
+protected:
+    virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
+
+public:
     virtual void Released() override;
     virtual void Effect() override;
 

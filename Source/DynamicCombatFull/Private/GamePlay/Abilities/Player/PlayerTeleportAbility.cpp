@@ -41,6 +41,14 @@ APlayerTeleportAbility::APlayerTeleportAbility()
     IndicatorRadius = 150.0f;
 }
 
+void APlayerTeleportAbility::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+    Super::EndPlay(EndPlayReason);
+
+    TeleportParticle = nullptr;
+    Sound = nullptr;
+}
+
 void APlayerTeleportAbility::Tick(float DeltaTime)
 {
     if (AbilityComponent->IsPressed() && 

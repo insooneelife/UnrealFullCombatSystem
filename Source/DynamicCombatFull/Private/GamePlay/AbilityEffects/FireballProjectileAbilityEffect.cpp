@@ -40,11 +40,6 @@ AFireballProjectileAbilityEffect::AFireballProjectileAbilityEffect()
         GameUtils::LoadAssetObject<USoundBase>(TEXT("/Game/DynamicCombatSystem/SFX/CUE/CUE_FireballHit"));
     HitSound = LoadedSoundObject;
 
-    static UParticleSystem* LoadedFireballParticleObject =
-        GameUtils::LoadAssetObject<UParticleSystem>(TEXT("/Game/DynamicCombatSystem/VFX/P_FireballHit"));
-    FireballHitParticle = LoadedFireballParticleObject;
-
-
     CollisionHandler = CreateDefaultSubobject<UCollisionHandlerComponent>("CollisionHandler");
     ProjectileMovement = CreateDefaultSubobject<UProjectileMovementComponent>("Projectile");
 
@@ -85,8 +80,15 @@ AFireballProjectileAbilityEffect::AFireballProjectileAbilityEffect()
 
 void AFireballProjectileAbilityEffect::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
-    CollisionHandler->OnHit.RemoveDynamic(this, &AFireballProjectileAbilityEffect::OnHit);
     Super::EndPlay(EndPlayReason);
+    CollisionHandler->OnHit.RemoveDynamic(this, &AFireballProjectileAbilityEffect::OnHit);
+
+    HitParticle = nullptr;
+    HitSound = nullptr;
+    CollisionSphere = nullptr;
+    ParticleSystem = nullptr;
+    CollisionHandler = nullptr;
+    ProjectileMovement = nullptr;
 }
 
 void AFireballProjectileAbilityEffect::Init(
@@ -110,7 +112,7 @@ void AFireballProjectileAbilityEffect::Init(
 
 void AFireballProjectileAbilityEffect::EnableHomingProjectile()
 {
-    if (HomingTarget != nullptr)
+    if (HomingTarget.IsValid())
     {
         GetWorld()->GetTimerManager().SetTimer(
             UpdateHomingProjectileTimerHandle,
@@ -193,7 +195,7 @@ void AFireballProjectileAbilityEffect::OnHit(const FHitResult& Hit)
         }
 
         UGameplayStatics::PlaySoundAtLocation(GetWorld(), HitSound, HitLoc);
-        UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), FireballHitParticle, FTransform(FQuat::Identity, HitLoc));
+        UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), HitParticle, FTransform(FQuat::Identity, HitLoc));
         ApplyHitImpulse(HitComp, HitNormal, HitBoneName);
         Destroy();
     }
@@ -217,7 +219,7 @@ bool AFireballProjectileAbilityEffect::IsEnemy(AActor* Target) const
 
 void AFireballProjectileAbilityEffect::UpdateHomingProjectile()
 {
-    if (GameUtils::IsValid(HomingTarget))
+    if (HomingTarget.IsValid())
     {
         float Distance = (HomingTarget->GetActorLocation() - GetActorLocation()).Size();
 
@@ -233,8 +235,8 @@ void AFireballProjectileAbilityEffect::UpdateHomingProjectile()
             FRotator Current = GetActorRotation();
             FRotator Target = UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), HomingLoc + Vel);
 
-            FRotator Rot = 
-                UKismetMathLibrary::RInterpTo_Constant(Current, Target, GetWorld()->GetDeltaSeconds(), HomingInterpSpeed);
+            FRotator Rot = UKismetMathLibrary::RInterpTo_Constant(
+                Current, Target, GetWorld()->GetDeltaSeconds(), HomingInterpSpeed);
 
             ProjectileMovement->Velocity = UKismetMathLibrary::Conv_RotatorToVector(Rot) * InitialSpeed;
 

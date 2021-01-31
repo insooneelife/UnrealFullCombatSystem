@@ -44,7 +44,7 @@ void ASummonedItemAbilityEffect::Init(
     EquipmentComponent =
         Cast<UEquipmentComponent>(GetOwner()->GetComponentByClass(UEquipmentComponent::StaticClass()));
 
-    if (GameUtils::IsValid(EquipmentComponent))
+    if (EquipmentComponent.IsValid())
     {
         SummonWeapon();
     }
@@ -56,11 +56,14 @@ void ASummonedItemAbilityEffect::Init(
 
 void ASummonedItemAbilityEffect::UnsummonWeapon()
 {
-    FStoredItem Item = EquipmentComponent->GetItemInSlot(GetCreatedItemType(), SlotIndex, ItemIndex);
-
-    if (Item.Id == SummonedItem.Id)
+    if (EquipmentComponent.IsValid())
     {
-        EquipOldItem();
+        FStoredItem Item = EquipmentComponent->GetItemInSlot(GetCreatedItemType(), SlotIndex, ItemIndex);
+
+        if (Item.Id == SummonedItem.Id)
+        {
+            EquipOldItem();
+        }
     }
     Destroy();
 }
@@ -73,13 +76,16 @@ void ASummonedItemAbilityEffect::SummonWeapon()
     ItemIndex = GetActiveIndex();
     StoreItemBeforeSummon();
 
-    EItemType CreatedItemType = GetCreatedItemType();
-    EquipmentComponent->UpdateItemInSlot(
-        CreatedItemType, SlotIndex, ItemIndex, SummonedItem, EHandleSameItemMethod::Update);
-
-    if (bAutoSwap)
+    if (EquipmentComponent.IsValid())
     {
-        EquipmentComponent->SetMainHandType(CreatedItemType);
+        EItemType CreatedItemType = GetCreatedItemType();
+        EquipmentComponent->UpdateItemInSlot(
+            CreatedItemType, SlotIndex, ItemIndex, SummonedItem, EHandleSameItemMethod::Update);
+
+        if (bAutoSwap)
+        {
+            EquipmentComponent->SetMainHandType(CreatedItemType);
+        }
     }
 
     FTimerHandle AttemptToUnsummonTimerHandle;
@@ -93,7 +99,7 @@ void ASummonedItemAbilityEffect::SummonWeapon()
 
 void ASummonedItemAbilityEffect::AttemptToUnsummon()
 {
-    if (GameUtils::IsValid(StateManager))
+    if (StateManager.IsValid())
     {
         if (StateManager->GetState() == EState::Idle || StateManager->GetState() == EState::Dead)
         {
@@ -114,32 +120,42 @@ void ASummonedItemAbilityEffect::AttemptToUnsummon()
 
 void ASummonedItemAbilityEffect::StoreItemBeforeSummon()
 {
-    ItemBeforeSummon = EquipmentComponent->GetItemInSlot(GetCreatedItemType(), SlotIndex, ItemIndex);
+    if (EquipmentComponent.IsValid())
+    {
+        ItemBeforeSummon = EquipmentComponent->GetItemInSlot(GetCreatedItemType(), SlotIndex, ItemIndex);
+    }
 }
 
 void ASummonedItemAbilityEffect::EquipOldItem()
 {
-    EItemType CreatedItemType = GetCreatedItemType();
-    if (IsItemInInventory(ItemBeforeSummon))
+    if (EquipmentComponent.IsValid())
     {
-        EquipmentComponent->UpdateItemInSlot(
-            CreatedItemType, SlotIndex, ItemIndex, SummonedItem, EHandleSameItemMethod::Update);
-    }
-    else
-    {
-        EquipmentComponent->UpdateItemInSlot(
-            CreatedItemType, SlotIndex, ItemIndex, FStoredItem(), EHandleSameItemMethod::Update);
+        EItemType CreatedItemType = GetCreatedItemType();
+        if (IsItemInInventory(ItemBeforeSummon))
+        {
+            EquipmentComponent->UpdateItemInSlot(
+                CreatedItemType, SlotIndex, ItemIndex, SummonedItem, EHandleSameItemMethod::Update);
+        }
+        else
+        {
+            EquipmentComponent->UpdateItemInSlot(
+                CreatedItemType, SlotIndex, ItemIndex, FStoredItem(), EHandleSameItemMethod::Update);
+        }
     }
 }
 
 int ASummonedItemAbilityEffect::GetActiveIndex() const
 {
-    const TArray<FEquipmentSlots>& EquipmentSlots = EquipmentComponent->GetEquipmentSlots();
+    if (EquipmentComponent.IsValid())
+    {
+        const TArray<FEquipmentSlots>& EquipmentSlots = EquipmentComponent->GetEquipmentSlots();
 
-    EItemType CreatedItemType = GetCreatedItemType();
-    int Index = EquipmentComponent->GetEqSlotsIndex(CreatedItemType);
+        EItemType CreatedItemType = GetCreatedItemType();
+        int Index = EquipmentComponent->GetEqSlotsIndex(CreatedItemType);
 
-    return EquipmentSlots[Index].Slots[SlotIndex].ActiveItemIndex;
+        return EquipmentSlots[Index].Slots[SlotIndex].ActiveItemIndex;
+    }
+    return -1;
 }
 
 EItemType ASummonedItemAbilityEffect::GetCreatedItemType() const

@@ -46,8 +46,8 @@ public:
 
 public:
 
-    UEquipmentComponent* GetEquipmentComponent() const { return EquipmentComponent; }
-    UStateManagerComponent* GetStateManager() const { return StateManager; }
+    UEquipmentComponent* GetEquipmentComponent() const { return EquipmentComponent.Get(); }
+    UStateManagerComponent* GetStateManager() const { return StateManager.Get(); }
     TSubclassOf<UItemBase> GetItemClass() const { return ItemClass; }
     float GetDuration()const { return Duration; }
     int GetAmount() const { return Amount; }
@@ -59,13 +59,10 @@ public:
     const FStoredItem& GetItemBeforeSummon() const { return ItemBeforeSummon; }
 
 private:
-    UPROPERTY()
-        UEquipmentComponent* EquipmentComponent;
+    TWeakObjectPtr<UEquipmentComponent> EquipmentComponent;
 
-    UPROPERTY()
-        UStateManagerComponent* StateManager;
+    TWeakObjectPtr<UStateManagerComponent> StateManager;
 
-    UPROPERTY()
     TSubclassOf<UItemBase> ItemClass;
 
     UPROPERTY(EditAnywhere)

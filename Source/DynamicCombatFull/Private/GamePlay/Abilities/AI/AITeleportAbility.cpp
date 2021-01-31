@@ -34,6 +34,15 @@ AAITeleportAbility::AAITeleportAbility()
     TeleportParticle = ParticleObject;
 }
 
+void AAITeleportAbility::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+    Super::EndPlay(EndPlayReason);
+
+    TeleportParticle = nullptr;
+    Sound = nullptr;
+    Query = nullptr;
+}
+
 void AAITeleportAbility::Released()
 {
     if (AbilityComponent->StartAbility())

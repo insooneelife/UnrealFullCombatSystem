@@ -20,6 +20,7 @@ public:
 	ABuffAbilityEffect();
 
 protected:
+    virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 public:
     void Init(float InDuration, EStat InStatType, float InValue, FLinearColor InColor);
@@ -44,10 +45,9 @@ public:
 
 public:	
 
-    UPROPERTY()
-    UStatsManagerComponent* StatsManagerComponent;
+    TWeakObjectPtr<UStatsManagerComponent> StatsManagerComponent;
 
-    UPROPERTY()
+    UPROPERTY(EditAnywhere)
     UParticleSystemComponent* ParticleSystemComponent;
 
     UPROPERTY(EditAnywhere)

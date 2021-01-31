@@ -43,7 +43,7 @@ public:
     float GetDamage() const { return Damage; }
     float GetInitialSpeed() const { return InitialSpeed; }
     float GetLifeTime() const { return LifeTime; }
-    AActor* GetHomingTarget() const { return HomingTarget; }
+    AActor* GetHomingTarget() const { return HomingTarget.Get(); }
     bool ShouldApplyStun() const { return bApplyStun; }
 
     float GetHeadShotDamageMultiplier() const { return HeadShotDamageMultiplier; }
@@ -59,6 +59,8 @@ public:
 
 private:
 
+    TWeakObjectPtr<AActor> HomingTarget;
+
     UPROPERTY(EditAnywhere)
     float Damage;
 
@@ -67,9 +69,6 @@ private:
 
     UPROPERTY(EditAnywhere)
     float LifeTime;
-
-    UPROPERTY()
-    AActor* HomingTarget;
 
     UPROPERTY(EditAnywhere)
     bool bApplyStun;
@@ -88,9 +87,6 @@ private:
 
     UPROPERTY(EditAnywhere)
     UParticleSystem* HitParticle;
-
-    UPROPERTY()
-    UParticleSystem* FireballHitParticle;
 
     UPROPERTY(EditAnywhere)
     USoundBase* HitSound;

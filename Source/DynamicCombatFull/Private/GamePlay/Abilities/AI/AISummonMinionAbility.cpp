@@ -36,6 +36,14 @@ AAISummonMinionAbility::AAISummonMinionAbility()
     SoundObject = Sound;
 }
 
+void AAISummonMinionAbility::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+    Super::EndPlay(EndPlayReason);
+
+    SoundObject = nullptr;
+    QueryObject = nullptr;
+}
+
 void AAISummonMinionAbility::Released()
 {
     if (AbilityComponent->StartAbility())

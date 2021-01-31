@@ -20,6 +20,9 @@ class APlayerInstantHealAbility : public APlayerAbilityBase
 public:
     APlayerInstantHealAbility();
 
+protected:
+    virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
+
 public:
     virtual void NativeInit(UAbilityComponent* InAbilityComponent) override;
     virtual void Released() override;
@@ -32,15 +35,14 @@ private:
 
 
 private:
-    UPROPERTY()
-    UExtendedStatComponent* HealthComponent;
-
-    UPROPERTY(EditAnywhere)
-    float HealAmount;
+    TWeakObjectPtr<UExtendedStatComponent> HealthComponent;
 
     UPROPERTY(EditAnywhere)
     UParticleSystem* HealCastParticle;
 
     UPROPERTY(EditAnywhere)
     USoundBase* Sound;
+
+    UPROPERTY(EditAnywhere)
+    float HealAmount;
 };

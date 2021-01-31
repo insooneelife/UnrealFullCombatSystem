@@ -48,6 +48,15 @@ AAbilityBase::AAbilityBase()
     bRotateOnPressed = true;
 }
 
+void AAbilityBase::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+    Super::EndPlay(EndPlayReason);
+
+    CrosshairTexture = nullptr;
+    IndicatorMaterial = nullptr;
+    AbilityMontages.Empty();
+}
+
 void AAbilityBase::NativeInit(UAbilityComponent* InAbilityComponent)
 {
     AbilityComponent = InAbilityComponent;

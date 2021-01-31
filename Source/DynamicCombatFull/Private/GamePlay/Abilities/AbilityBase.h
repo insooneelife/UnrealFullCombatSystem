@@ -23,6 +23,8 @@ public:
 	AAbilityBase();
 
 protected:
+    virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
+
     virtual void NativeInit(UAbilityComponent* InAbilityComponent);
 
 public:
@@ -140,11 +142,16 @@ protected:
     TWeakObjectPtr<ACharacter> Character;
 
     UPROPERTY(EditAnywhere, Category = "Ability\|Crosshair")
-    bool bIsUsingCrosshair;
-
-    UPROPERTY(EditAnywhere, Category = "Ability\|Crosshair")
     UTexture2D* CrosshairTexture;
 
+    UPROPERTY(EditAnywhere, Category = "Ability\|Indicator")
+    UMaterialInterface* IndicatorMaterial;
+
+    UPROPERTY(EditAnywhere, Category = "Ability")
+    TArray<UAnimMontage*> AbilityMontages;
+
+    UPROPERTY(EditAnywhere, Category = "Ability\|Crosshair")
+    bool bIsUsingCrosshair;
 
     UPROPERTY(EditAnywhere, Category = "Ability\|Damage")
     float Damage;
@@ -171,13 +178,6 @@ protected:
 
     UPROPERTY(EditAnywhere, Category = "Ability\|Indicator")
     float IndicatorRadius;
-
-    UPROPERTY(EditAnywhere, Category = "Ability\|Indicator")
-    UMaterialInterface* IndicatorMaterial;
-
-
-    UPROPERTY(EditAnywhere, Category = "Ability")
-    TArray<UAnimMontage*> AbilityMontages;
 
     UPROPERTY(EditAnywhere, Category = "Ability")
     bool bCanBeCancelled;
