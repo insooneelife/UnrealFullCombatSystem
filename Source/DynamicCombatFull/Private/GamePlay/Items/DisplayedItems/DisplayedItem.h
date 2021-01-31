@@ -41,22 +41,19 @@ public:
 
 public:
     UFUNCTION(BlueprintCallable)
-    UEquipmentComponent* GetEquipmentComponent() const { return EquipmentComponent; }
+    UEquipmentComponent* GetEquipmentComponent() const { return EquipmentComponent.Get(); }
     EItemType GetType() const { return Type; }
     int GetSlotIndex() const { return SlotIndex; }
 
 protected:
 
     UPROPERTY(EditAnywhere, Category = "Sockets")
-        FName AttachmentSocket;
+    FName AttachmentSocket;
 
-    UPROPERTY()
-        UEquipmentComponent* EquipmentComponent;
+    TWeakObjectPtr<UEquipmentComponent> EquipmentComponent;
 
-    UPROPERTY()
-        EItemType Type;
+    EItemType Type;
 
-    UPROPERTY()
-        int SlotIndex;
+    int SlotIndex;
 
 };

@@ -34,16 +34,14 @@ public:
     void UpdateWidth(float InMaxValue);
 
 private:
+    float CurrentValue;
+    float MaxValue;
+
     UPROPERTY(EditAnywhere)
     EStat ExtendedStatType;
 
     UPROPERTY(EditAnywhere)
     FLinearColor FillColor;
-
-    float CurrentValue;
-
-    float MaxValue;
-
 
     UPROPERTY(meta = (BindWidget))
     class UProgressBar* StatProgressBar;

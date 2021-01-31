@@ -24,10 +24,6 @@
 UInventoryUI::UInventoryUI(const FObjectInitializer& ObjectInitializer)
     :Super(ObjectInitializer)
 {
-    //static TSubclassOf<UItemActionsUI> LoadedClass =
-    //    GameUtils::LoadAssetClass<UItemActionsUI>("/Game/DynamicCombatSystem/Widgets/ItemActionsWB");
-
-    //ItemActionsUIClass = LoadedClass;
 }
 
 void UInventoryUI::NativeConstruct()
@@ -75,10 +71,11 @@ void UInventoryUI::NativeConstruct()
 
 void UInventoryUI::NativeDestruct()
 {
+    Super::NativeDestruct();
+
     CloseButton->OnClicked.RemoveDynamic(this, &UInventoryUI::OnClicked_CloseButton);
     InventoryItemsGrid->OnInventoryItemClicked.RemoveDynamic(this, &UInventoryUI::OnInventoryItemClicked);
 
-    Super::NativeDestruct();
 }
 
 FReply UInventoryUI::NativeOnKeyDown(const FGeometry& InGeometry, const FKeyEvent& InKeyEvent)
@@ -114,9 +111,12 @@ void UInventoryUI::FocusSelf()
 
 void UInventoryUI::OnInventoryItemClicked(UInventoryItemUI* const InItem)
 {
+    if (!InventoryComponent.IsValid())
+        return;
+
     FVector2D SpawnPosition = UWidgetLayoutLibrary::GetMousePositionOnViewport(GetWorld());
     UItemActionsUI* CreatedUI = Cast<UItemActionsUI>(CreateWidget(GetOwningPlayer(), ItemActionsUIClass));
-    CreatedUI->Init(InventoryComponent, SpawnPosition, InItem->GetItem());
+    CreatedUI->Init(InventoryComponent.Get(), SpawnPosition, InItem->GetItem());
 
     CreatedUI->OnWidgetRemoved.AddDynamic(this, &UInventoryUI::OnWidgetRemoved);
     CreatedUI->AddToViewport();
@@ -158,7 +158,7 @@ void UInventoryUI::Close()
 
 void UInventoryUI::CategoryButtonClicked(UCategoryButtonUI* const Button)
 {
-    if (Button != SelectedCategoryButton)
+    if (Button != SelectedCategoryButton.Get())
     {
         SetCategoryButton(Button);
         InventoryItemsGrid->CreateItemWidgets();
@@ -168,9 +168,9 @@ void UInventoryUI::CategoryButtonClicked(UCategoryButtonUI* const Button)
 
 void UInventoryUI::SetCategoryButton(UCategoryButtonUI* const Button)
 {
-    if (Button != SelectedCategoryButton)
+    if (Button != SelectedCategoryButton.Get())
     {
-        if (SelectedCategoryButton != nullptr)
+        if (SelectedCategoryButton.IsValid())
         {
             SelectedCategoryButton->SetActiveBorder(false);   
         }
@@ -185,6 +185,6 @@ void UInventoryUI::SetCategoryButton(UCategoryButtonUI* const Button)
 
 EItemType UInventoryUI::GetDisplayedType() const
 {
-    return UKismetSystemLibrary::IsValid(SelectedCategoryButton) ? 
+    return SelectedCategoryButton.IsValid() ?
         SelectedCategoryButton->GetItemType() : EItemType::None;
 }

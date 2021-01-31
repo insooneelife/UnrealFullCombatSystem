@@ -39,14 +39,14 @@ UStatsManagerComponent::UStatsManagerComponent()
 
 void UStatsManagerComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
+    Super::EndPlay(EndPlayReason);
+
     if (EquipmentComponent.IsValid())
     {
         EquipmentComponent->OnActiveItemChanged.RemoveDynamic(this, &UStatsManagerComponent::OnActiveItemChanged);
         EquipmentComponent->OnSlotHiddenChanged.RemoveDynamic(this, &UStatsManagerComponent::OnSlotHiddenChanged);
         EquipmentComponent->OnMainHandTypeChanged.RemoveDynamic(this, &UStatsManagerComponent::OnMainHandTypeSwitched);
     }
-
-    Super::EndPlay(EndPlayReason);
 }
 
 void UStatsManagerComponent::Init()

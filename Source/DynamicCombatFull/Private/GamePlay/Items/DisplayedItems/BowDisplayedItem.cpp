@@ -26,9 +26,12 @@ ABowDisplayedItem::ABowDisplayedItem()
 
 void ABowDisplayedItem::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
+    Super::EndPlay(EndPlayReason);
+
     EquipmentComponent->OnActiveItemChanged.RemoveDynamic(this, &ABowDisplayedItem::OnActiveItemChanged);
 
-    Super::EndPlay(EndPlayReason);
+    ArrowMesh = nullptr;
+    BowMesh = nullptr;
 }
 
 void ABowDisplayedItem::NativeInit(UEquipmentComponent* InEquipmentComponent, EItemType InType, int InSlotIndex)

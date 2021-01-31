@@ -18,3 +18,10 @@ UArrowItem::UArrowItem(const FObjectInitializer& ObjectInitializer)
         FModifier(EStat::Damage, 10.0f)
     };
 }
+
+void UArrowItem::BeginDestroy()
+{
+    Super::BeginDestroy();
+
+    ArrowMesh = nullptr;
+}

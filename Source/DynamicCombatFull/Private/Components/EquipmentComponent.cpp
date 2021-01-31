@@ -80,6 +80,8 @@ UEquipmentComponent::UEquipmentComponent()
 
 void UEquipmentComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
+    Super::EndPlay(EndPlayReason);
+
     for (auto E : DisplayedItems)
     {
         const FDisplayedItems& Item = E.Value;
@@ -116,8 +118,6 @@ void UEquipmentComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
             }
         }
     }    
-
-    Super::EndPlay(EndPlayReason);
 }
 
 ADisplayedItem* UEquipmentComponent::GetDisplayedItem(EItemType InType, int InSlotIndex) const

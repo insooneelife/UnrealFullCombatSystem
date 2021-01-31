@@ -22,5 +22,5 @@ public:
 
 private:
     UPROPERTY(EditAnywhere)
-        EMovementState MovementState;
+    EMovementState MovementState;
 };

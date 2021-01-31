@@ -24,6 +24,8 @@ public:
 
     UArrowItem(const FObjectInitializer& ObjectInitializer);
 
+    virtual void BeginDestroy() override;
+
     void Init(UStaticMesh* InArrowMesh) { ArrowMesh = InArrowMesh; }
 
     virtual const TArray<FModifier>& GetModifiers() const override { return Modifiers; }

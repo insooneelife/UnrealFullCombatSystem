@@ -47,19 +47,16 @@ public:
 
 private:
 
-    UPROPERTY(EditAnywhere, Category = "LoadedClass")
-    TSubclassOf<UInventoryItemUI> InventoryItemUIClass;
+    TWeakObjectPtr<class UInventoryComponent> InventoryComponent;
 
-    UPROPERTY()
-        class UInventoryComponent* InventoryComponent;
-
-    UPROPERTY()
-        class UEquipmentComponent* EquipmentComponent;
-
+    TWeakObjectPtr<class UEquipmentComponent> EquipmentComponent;
 
     TArray<UInventoryItemUI*> ItemWidgets;
     int GridColumns;
     EItemType DisplayedType;
+
+    UPROPERTY(EditAnywhere, Category = "LoadedClass")
+    TSubclassOf<UInventoryItemUI> InventoryItemUIClass;
 
     UPROPERTY(meta = (BindWidget))
     UUniformGridPanel* ItemsGrid;

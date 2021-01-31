@@ -38,6 +38,12 @@ void UBTT_MoveToPatrolPoint::SetOwner(AActor* InActorOwner)
 
 void UBTT_MoveToPatrolPoint::ReceiveExecuteAI(AAIController* OwnerController, APawn* ControlledPawn)
 {
+    if (!PatrolComponent.IsValid())
+    {
+        FinishExecute(false);
+        return;
+    }
+
     APatrolPathActor* Path = PatrolComponent->GetPatrolPath();
 
     if (GameUtils::IsValid(Path))
@@ -61,6 +67,9 @@ void UBTT_MoveToPatrolPoint::ReceiveAbortAI(AAIController* OwnerController, APaw
 
 void UBTT_MoveToPatrolPoint::OnMoveCompleted(FAIRequestID RequestID, EPathFollowingResult::Type Result)
 {
-    PatrolComponent->UpdatePatrolIndex();
+    if (PatrolComponent.IsValid())
+    {
+        PatrolComponent->UpdatePatrolIndex();
+    }
     FinishExecute(true);
 }

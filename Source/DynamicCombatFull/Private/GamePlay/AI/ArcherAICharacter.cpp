@@ -47,8 +47,11 @@ void AArcherAICharacter::BeginPlay()
 
 void AArcherAICharacter::EndPlay(const EEndPlayReason::Type EndPlayResult)
 {
-    Super::EndPlay(EndPlayResult);
     StateManager->OnActivityChanged.RemoveDynamic(this, &AArcherAICharacter::OnActivityChanged);
+    Super::EndPlay(EndPlayResult);
+
+    ArrowSpawnLocation = nullptr;
+    DefaultDrawBowSoundObject = nullptr;
 }
 
 void AArcherAICharacter::Tick(float DeltaTime)
@@ -114,7 +117,7 @@ float AArcherAICharacter::BowAttack()
 
 FTransform AArcherAICharacter::GetSpawnArrowTransform() const
 {
-    if (GameUtils::IsValid(AIController))
+    if (AIController.IsValid())
     {
         FVector ArrowSpawnLoc = ArrowSpawnLocation->GetComponentLocation();
         FVector ActorLoc = AIController->GetTarget()->GetActorLocation();

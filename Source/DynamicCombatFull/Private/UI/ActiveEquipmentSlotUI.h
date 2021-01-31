@@ -49,16 +49,14 @@ public:
 
 private:
 
-    UPROPERTY()
-        class UInventoryComponent* InventoryComponent;
+    TWeakObjectPtr<class UInventoryComponent> InventoryComponent;
 
-    UPROPERTY()
-        class UEquipmentComponent* EquipmentComponent;
+    TWeakObjectPtr<class UEquipmentComponent> EquipmentComponent;
+
+    FStoredItem Item;
 
     UPROPERTY(EditAnywhere)
     EItemType SlotType;
-
-    FStoredItem Item;
 
     UPROPERTY(EditAnywhere)
     FVector2D SlotSize;
@@ -67,21 +65,21 @@ private:
     UTexture2D* BackgroundTexture;
 
     UPROPERTY(meta = (BindWidget))
-        class UTextBlock* AmountText;
+    class UTextBlock* AmountText;
 
     UPROPERTY(meta = (BindWidget))
-        class UImage* BackgroundImage;
+    class UImage* BackgroundImage;
 
     UPROPERTY(meta = (BindWidget))
-        class UBorder* BorderCenter;
+    class UBorder* BorderCenter;
 
     UPROPERTY(meta = (BindWidget))
-        class UImage* IsHiddenImage;
+    class UImage* IsHiddenImage;
 
     UPROPERTY(meta = (BindWidget))
-        class UImage* ItemImage;
+    class UImage* ItemImage;
 
     UPROPERTY(meta = (BindWidget))
-        class USizeBox* SlotSizeBox;
+    class USizeBox* SlotSizeBox;
 
 };

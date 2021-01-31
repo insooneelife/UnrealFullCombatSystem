@@ -27,10 +27,6 @@ UItemsGridUI::UItemsGridUI(const FObjectInitializer& ObjectInitializer)
     GridColumns(5), 
     DisplayedType(EItemType::MeleeWeapon)
 {
-    //static TSubclassOf<UInventoryItemUI> LoadedClass =
-    //    GameUtils::LoadAssetClass<UInventoryItemUI>("/Game/DynamicCombatSystem/Widgets/InventoryItemWB");
-
-    //InventoryItemUIClass = LoadedClass;
 }
 
 
@@ -44,7 +40,7 @@ void UItemsGridUI::NativeConstruct()
     EquipmentComponent =
         Cast<UEquipmentComponent>(GetOwningPlayerPawn()->GetComponentByClass(UEquipmentComponent::StaticClass()));
 
-    if (GameUtils::IsValid(InventoryComponent))
+    if (InventoryComponent.IsValid())
     {
         InventoryComponent->OnItemAdded.AddDynamic(this, &UItemsGridUI::OnItemAdded);
         InventoryComponent->OnItemRemoved.AddDynamic(this, &UItemsGridUI::OnItemRemoved);
@@ -53,13 +49,15 @@ void UItemsGridUI::NativeConstruct()
 
 void UItemsGridUI::NativeDestruct()
 {
-    if (GameUtils::IsValid(InventoryComponent))
+    Super::NativeDestruct();
+
+    if (InventoryComponent.IsValid())
     {
         InventoryComponent->OnItemAdded.RemoveDynamic(this, &UItemsGridUI::OnItemAdded);
         InventoryComponent->OnItemRemoved.RemoveDynamic(this, &UItemsGridUI::OnItemRemoved);
     }
 
-    Super::NativeDestruct();
+    ItemWidgets.Empty();
 }
 
 void UItemsGridUI::InventoryItemClicked(UInventoryItemUI* const InItem)
@@ -69,15 +67,18 @@ void UItemsGridUI::InventoryItemClicked(UInventoryItemUI* const InItem)
 
 void UItemsGridUI::CreateItemWidgets()
 {
-    int NeededSlots = InventoryComponent->GetInventory().Num() - ItemWidgets.Num();
-
-    if (NeededSlots > 0)
+    if(InventoryComponent.IsValid())
     {
-        for (int i = 0; i < NeededSlots; ++i)
+        int NeededSlots = InventoryComponent->GetInventory().Num() - ItemWidgets.Num();
+
+        if (NeededSlots > 0)
         {
-            UInventoryItemUI* CreatedUI = Cast<UInventoryItemUI> (CreateWidget(GetOwningPlayer(), InventoryItemUIClass));
-            CreatedUI->Init(InventoryComponent, EquipmentComponent, this);
-            ItemWidgets.Add(CreatedUI);
+            for (int i = 0; i < NeededSlots; ++i)
+            {
+                UInventoryItemUI* CreatedUI = Cast<UInventoryItemUI>(CreateWidget(GetOwningPlayer(), InventoryItemUIClass));
+                CreatedUI->Init(InventoryComponent.Get(), EquipmentComponent.Get(), this);
+                ItemWidgets.Add(CreatedUI);
+            }
         }
     }
 }
@@ -87,23 +88,25 @@ void UItemsGridUI::UpdateItemWidgets(EItemType InType)
     DisplayedType = InType;
     ItemsGrid->ClearChildren();
 
-    const TArray<FStoredItem>& Inventory = InventoryComponent->GetInventory();
-
     int ValidSlots = 0;
-    for (const FStoredItem& Item : Inventory)
+    if (InventoryComponent.IsValid())
     {
-        FItem DefaultItem = GameUtils::GetDefaultItemFromStoredItem(Item);
-
-        if ((DefaultItem.Type == InType || InType == EItemType::None) && Item.Amount > 0)
+        const TArray<FStoredItem>& Inventory = InventoryComponent->GetInventory();
+        for (const FStoredItem& Item : Inventory)
         {
-            ItemWidgets[ValidSlots]->UpdateWidget(Item);
-            UUniformGridSlot* UniformGrid = ItemsGrid->AddChildToUniformGrid(ItemWidgets[ValidSlots]);
-            UniformGrid->SetColumn(ValidSlots % GridColumns);
-            UniformGrid->SetRow(ValidSlots / GridColumns);
+            FItem DefaultItem = GameUtils::GetDefaultItemFromStoredItem(Item);
 
-            ValidSlots++;
+            if ((DefaultItem.Type == InType || InType == EItemType::None) && Item.Amount > 0)
+            {
+                ItemWidgets[ValidSlots]->UpdateWidget(Item);
+                UUniformGridSlot* UniformGrid = ItemsGrid->AddChildToUniformGrid(ItemWidgets[ValidSlots]);
+                UniformGrid->SetColumn(ValidSlots % GridColumns);
+                UniformGrid->SetRow(ValidSlots / GridColumns);
+
+                ValidSlots++;
+            }
         }
-    }
+    }    
 
     if (ItemWidgets.Num() - ValidSlots > 0)
     {

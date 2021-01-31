@@ -31,8 +31,7 @@ public:
     void OnMoveCompleted(FAIRequestID RequestID, EPathFollowingResult::Type Result);
 
 private:
-    UPROPERTY()
-    UPatrolComponent* PatrolComponent;
+    TWeakObjectPtr<UPatrolComponent> PatrolComponent;
 
     UPROPERTY(EditAnywhere)
     float AcceptanceRadius;

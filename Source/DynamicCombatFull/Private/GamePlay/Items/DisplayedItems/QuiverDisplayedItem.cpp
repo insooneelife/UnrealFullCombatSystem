@@ -59,6 +59,13 @@ AQuiverDisplayedItem::AQuiverDisplayedItem()
     }
 }
 
+void AQuiverDisplayedItem::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+    Super::EndPlay(EndPlayReason);
+    StaticMesh = nullptr;
+    InstancedArrowsMesh = nullptr;
+    ArrowSpawns.Empty();
+}
 
 void AQuiverDisplayedItem::UpdateQuiver()
 {

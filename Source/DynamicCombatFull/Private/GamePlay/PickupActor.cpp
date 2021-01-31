@@ -20,11 +20,6 @@ APickupActor::APickupActor()
     PrimaryActorTick.bCanEverTick = false;
     PrimaryActorTick.bStartWithTickEnabled = false;
 
-    //TSubclassOf<UUserWidget> LoadedClass = 
-    //    GameUtils::LoadAssetClass<UUserWidget>(TEXT("/Game/DynamicCombatSystem/Widgets/PickupWB"));
-
-    //CreateUserWidgetClass = LoadedClass;
-
     RootComponent = CreateDefaultSubobject<USceneComponent>("Scene");
     Box = CreateDefaultSubobject<UBoxComponent>("Box");
     Box->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
@@ -41,11 +36,9 @@ APickupActor::APickupActor()
 
 void APickupActor::EndPlay(const EEndPlayReason::Type EndPlayResult)
 {
+    Super::EndPlay(EndPlayResult);
     Box = nullptr;
     ParticleSystem = nullptr;
-    CreateUserWidgetClass = nullptr;
-
-    Super::EndPlay(EndPlayResult);
 }
 
 void APickupActor::Init(FName InName, const TMap<TSubclassOf<UItemBase>, int>& InItems)
@@ -82,6 +75,9 @@ void APickupActor::RemoveInvalidItems()
 
 void APickupActor::TakeItem(TSubclassOf<UItemBase> ItemClass)
 {
+    if (!InventoryComponent.IsValid())
+        return;
+
     if (Items.Contains(ItemClass))
     {
         int Amount = Items[ItemClass];
@@ -106,14 +102,13 @@ void APickupActor::TakeItem(TSubclassOf<UItemBase> ItemClass)
         Items.Remove(ItemClass);
         DestroyActorIfEmpty();
     }
-    else
-    {
-
-    }
 }
 
 void APickupActor::TakeAllItems()
 {
+    if (!InventoryComponent.IsValid())
+        return;
+
     for (auto e : Items)
     {
         TSubclassOf<UItemBase> ItemClass = e.Key;

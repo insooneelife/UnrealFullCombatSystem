@@ -25,6 +25,14 @@ UBTS_Strafe::UBTS_Strafe(const FObjectInitializer& ObjectInitializer)
     EQS_StrafeRightObject = EQS_StrafeRight;
 }
 
+void UBTS_Strafe::OnInstanceDestroyed(UBehaviorTreeComponent& OwnerComp)
+{
+    Super::OnInstanceDestroyed(OwnerComp);
+
+    EQS_StrafeLeftObject = nullptr;
+    EQS_StrafeRightObject = nullptr;
+}
+
 void UBTS_Strafe::ReceiveTickAI(UBehaviorTreeComponent& OwnerBTree, AAIController* InOwnerController, APawn* InControlledPawn, float InDeltaSeconds)
 {
     Strafe(OwnerBTree);
@@ -50,25 +58,31 @@ void UBTS_Strafe::ReceiveActivationAI(UBehaviorTreeComponent& OwnerBTree, AAICon
 
 void UBTS_Strafe::ReceiveDeactivationAI(UBehaviorTreeComponent& OwnerBTree, AAIController* InOwnerController, APawn* InControlledPawn)
 {
-    OwnerController->ClearFocus(EAIFocusPriority::Gameplay);
-    OwnerController->StopMovement();
-
-    URotatingComponent* Rotating =
-        Cast<URotatingComponent>(ControlledPawn->GetComponentByClass(URotatingComponent::StaticClass()));
-
-    if (GameUtils::IsValid(Rotating))
+    if (OwnerController.IsValid())
     {
-        Rotating->SetRotationMode(ERotationMode::OrientToMovement);
+        OwnerController->ClearFocus(EAIFocusPriority::Gameplay);
+        OwnerController->StopMovement();
+    }
+
+    if (ControlledPawn.IsValid())
+    {
+        URotatingComponent* Rotating =
+            Cast<URotatingComponent>(ControlledPawn->GetComponentByClass(URotatingComponent::StaticClass()));
+
+        if (GameUtils::IsValid(Rotating))
+        {
+            Rotating->SetRotationMode(ERotationMode::OrientToMovement);
+        }
     }
 }
 
 void UBTS_Strafe::Strafe(const UBehaviorTreeComponent& OwnerBTree)
 {
     UEnvQuery* Query = GetStrafeQuery(OwnerBTree);
-    if (Query != nullptr)
+    if (Query != nullptr && ControlledPawn.IsValid())
     {
         UEnvQueryInstanceBlueprintWrapper* QueryInstance =
-            UEnvQueryManager::RunEQSQuery(GetWorld(), Query, ControlledPawn, EEnvQueryRunMode::RandomBest5Pct, nullptr);
+            UEnvQueryManager::RunEQSQuery(GetWorld(), Query, ControlledPawn.Get(), EEnvQueryRunMode::RandomBest5Pct, nullptr);
 
         if (GameUtils::IsValid(QueryInstance))
         {
@@ -81,15 +95,18 @@ void UBTS_Strafe::Strafe(const UBehaviorTreeComponent& OwnerBTree)
 void UBTS_Strafe::OnQueryFinished(
     UEnvQueryInstanceBlueprintWrapper* QueryInstance, EEnvQueryStatus::Type QueryStatus)
 {
-    TArray<FVector> ResultLocations;
+    if (OwnerController.IsValid())
+    {
+        TArray<FVector> ResultLocations;
 
-    if (QueryInstance->GetQueryResultsAsLocations(ResultLocations))
-    {
-        OwnerController->MoveToLocation(ResultLocations[0], 20.0f, false);
-    }
-    else
-    {
-        OwnerController->StopMovement();
+        if (QueryInstance->GetQueryResultsAsLocations(ResultLocations))
+        {
+            OwnerController->MoveToLocation(ResultLocations[0], 20.0f, false);
+        }
+        else
+        {
+            OwnerController->StopMovement();
+        }
     }
 }
 
@@ -100,7 +117,7 @@ UEnvQuery* UBTS_Strafe::GetStrafeQuery(const UBehaviorTreeComponent& OwnerBTree)
 
     if (Target != nullptr)
     {
-        if (GameUtils::IsValid(ControlledPawn))
+        if (ControlledPawn.IsValid())
         {
             FVector A = Target->GetActorRightVector();
             FVector B = UKismetMathLibrary::GetDirectionUnitVector(

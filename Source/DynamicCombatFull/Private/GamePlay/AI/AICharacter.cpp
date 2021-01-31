@@ -128,13 +128,31 @@ void AAICharacter::BeginPlay()
 
 void AAICharacter::EndPlay(const EEndPlayReason::Type EndPlayResult)
 {
+    Super::EndPlay(EndPlayResult);
+
     Effects->OnEffectApplied.RemoveDynamic(this, &AAICharacter::OnEffectApplied);
     Effects->OnEffectRemoved.RemoveDynamic(this, &AAICharacter::OnEffectRemoved);
     MeleeCollisionHandler->OnHit.RemoveDynamic(this, &AAICharacter::OnHit);
     MeleeCollisionHandler->OnCollisionActivated.RemoveDynamic(this, &AAICharacter::OnCollisionActivated);
     ExtendedHealth->OnValueChanged.RemoveDynamic(this, &AAICharacter::OnValueChanged_ExtendedHealth);
 
-    Super::EndPlay(EndPlayResult);
+    MovementSpeed = nullptr;
+    Patrol = nullptr;
+    StateManager = nullptr;
+    StatsManager = nullptr;
+    Rotating = nullptr;
+    ExtendedStamina = nullptr;
+    Equipment = nullptr;
+    Dissolve = nullptr;
+    Effects = nullptr;
+    Behavior = nullptr;
+    MontageManager = nullptr;
+    ExtendedHealth = nullptr;
+    MeleeCollisionHandler = nullptr;
+    TargetWidget = nullptr;
+    StatBarsWidget = nullptr;
+    BTree = nullptr;
+    Montages = nullptr;
 }
 
 void AAICharacter::OnConstruction(const FTransform& Transform)
@@ -196,7 +214,13 @@ void AAICharacter::OnEffectRemoved(EEffectType InType)
 
 void AAICharacter::HandleMeshOnDeath()
 {
-    GetAttachedActors(AttachedActors);
+    TArray<AActor*> Actors;
+    GetAttachedActors(Actors);
+
+    for (AActor* Actor : Actors)
+    {
+        AttachedActors.Add(Actor);
+    }
 
     GetMesh()->SetCollisionProfileName(FName("Ragdoll"));
     GetMesh()->SetSimulatePhysics(true);
@@ -230,9 +254,9 @@ void AAICharacter::HandleMeshOnDeath()
 
 void AAICharacter::Delayed_HandleMeshOnDeath()
 {
-    for (AActor* Actor : AttachedActors)
+    for (TWeakObjectPtr<AActor> Actor : AttachedActors)
     {
-        if (GameUtils::IsValid(Actor))
+        if (Actor.IsValid())
         {
             TArray<UActorComponent*> DissolveComponents =
                 Actor->GetComponentsByTag(UPrimitiveComponent::StaticClass(), "Dissolve");
@@ -476,7 +500,7 @@ FRotator AAICharacter::GetDesiredRotation() const
 
     if (GameUtils::IsValid(Blackboard))
     {
-        if (GameUtils::IsValid(AIController))
+        if (AIController.IsValid())
         {
             AActor* Target = AIController->GetTarget();
             if (Target != nullptr)

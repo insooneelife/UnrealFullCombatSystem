@@ -16,6 +16,8 @@ class UItemBase : public UObject
 	GENERATED_BODY()
 
 public:
+    virtual void BeginDestroy() override;
+
     virtual void UseItem(AActor* InActor) {}
 
     const FItem& GetItem() const { return Item; }

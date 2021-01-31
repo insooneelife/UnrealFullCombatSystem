@@ -20,6 +20,9 @@ class AQuiverDisplayedItem : public ADisplayedItem
 public:
     AQuiverDisplayedItem();
 
+protected:
+    virtual void EndPlay(const EEndPlayReason::Type EndPlayReason);
+
 public:
     void UpdateQuiver();
 

@@ -32,8 +32,11 @@ void UBTS_UpdateArcherAIBehavior::OnInstanceDestroyed(UBehaviorTreeComponent& Ow
 {
     Super::OnInstanceDestroyed(OwnerComp);
 
-    ControlledCharacter->GetStateManager()->OnStateChanged.RemoveDynamic(
-        this, &UBTS_UpdateArcherAIBehavior::OnStateChanged);
+    if (ControlledCharacter.IsValid())
+    {
+        ControlledCharacter->GetStateManager()->OnStateChanged.RemoveDynamic(
+            this, &UBTS_UpdateArcherAIBehavior::OnStateChanged);
+    }
 }
 
 void UBTS_UpdateArcherAIBehavior::SetOwner(AActor* InActorOwner)
@@ -104,7 +107,7 @@ void UBTS_UpdateArcherAIBehavior::UpdateBehavior()
 {
     if (AIOwner.IsValid())
     {
-        if (GameUtils::IsValid(ControlledCharacter))
+        if (ControlledCharacter.IsValid())
         {
             UStateManagerComponent* StateManager = ControlledCharacter->GetStateManager();
             UStatsManagerComponent* StatsManager = ControlledCharacter->GetStatsManager();
@@ -135,8 +138,8 @@ void UBTS_UpdateArcherAIBehavior::UpdateBehavior()
                     {
                         if (CanBeAttacked->IsAlive())
                         {
-                            float DistanceToTarget = Target->GetDistanceTo(ControlledCharacter);
-                            float DotProductToTarget = Target->GetDotProductTo(ControlledCharacter);
+                            float DistanceToTarget = Target->GetDistanceTo(ControlledCharacter.Get());
+                            float DotProductToTarget = Target->GetDotProductTo(ControlledCharacter.Get());
                             int ReceivedHitsCount = StatsManager->GetRecentlyReceivedHitsCount();
                             float Value = ControlledCharacter->GetExtendedStamina()->GetCurrentValue();
                             float MaxValue = ControlledCharacter->GetExtendedStamina()->GetMaxValue();
@@ -199,7 +202,7 @@ void UBTS_UpdateArcherAIBehavior::UpdateActivities()
 {
     if (AIOwner.IsValid())
     {
-        if (GameUtils::IsValid(ControlledCharacter))
+        if (ControlledCharacter.IsValid())
         {
             UBlackboardComponent* BlackboardComp = AIOwner->GetBlackboardComponent();
             

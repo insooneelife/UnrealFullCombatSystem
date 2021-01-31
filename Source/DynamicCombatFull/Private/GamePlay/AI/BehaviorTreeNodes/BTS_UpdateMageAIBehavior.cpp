@@ -31,8 +31,11 @@ void UBTS_UpdateMageAIBehavior::OnInstanceDestroyed(UBehaviorTreeComponent& Owne
 {
     Super::OnInstanceDestroyed(OwnerComp);
 
-    ControlledCharacter->GetStateManager()->OnStateChanged.RemoveDynamic(
-        this, &UBTS_UpdateMageAIBehavior::OnStateChanged);
+    if (ControlledCharacter.IsValid())
+    {
+        ControlledCharacter->GetStateManager()->OnStateChanged.RemoveDynamic(
+            this, &UBTS_UpdateMageAIBehavior::OnStateChanged);
+    }
 }
 
 void UBTS_UpdateMageAIBehavior::SetOwner(AActor* InActorOwner)
@@ -83,7 +86,7 @@ void UBTS_UpdateMageAIBehavior::UpdateBehavior()
 {
     if (AIOwner.IsValid())
     {
-        if (GameUtils::IsValid(ControlledCharacter))
+        if (ControlledCharacter.IsValid())
         {
             UStateManagerComponent* StateManager = ControlledCharacter->GetStateManager();
             UStatsManagerComponent* StatsManager = ControlledCharacter->GetStatsManager();
@@ -113,8 +116,8 @@ void UBTS_UpdateMageAIBehavior::UpdateBehavior()
                     {
                         if (CanBeAttacked->IsAlive())
                         {
-                            float DistanceToTarget = Target->GetDistanceTo(ControlledCharacter);
-                            float DotProductToTarget = Target->GetDotProductTo(ControlledCharacter);
+                            float DistanceToTarget = Target->GetDistanceTo(ControlledCharacter.Get());
+                            float DotProductToTarget = Target->GetDotProductTo(ControlledCharacter.Get());
                             
                             if (DistanceToTarget <= MeleeAttackBehaviorRange)
                             {

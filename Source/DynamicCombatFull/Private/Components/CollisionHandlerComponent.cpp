@@ -112,7 +112,16 @@ void UCollisionHandlerComponent::PerformTrace()
                 FName UniqueName = GetUniqueSocketName(CollComp.Component.Get(), Name);
                 FVector Start = LastSocketLocations[UniqueName];
 
-                TArray<AActor*> IgnoreActors = GetHitActorsOrAddOwner(CollComp.Component.Get());
+                TArray<AActor*> IgnoreActors;
+                TArray<TWeakObjectPtr<AActor>> LHitActors = GetHitActorsOrAddOwner(CollComp.Component.Get());
+
+                for (TWeakObjectPtr<AActor> Ptr : LHitActors)
+                {
+                    if (Ptr.IsValid())
+                    {
+                        IgnoreActors.Add(Ptr.Get());
+                    }
+                }
 
                 FVector End = CollComp.Component->GetSocketLocation(Name);
 
@@ -181,7 +190,7 @@ int UCollisionHandlerComponent::GetHitActorsIndex(UPrimitiveComponent* const InC
     return -1;
 }
 
-TArray<AActor*> UCollisionHandlerComponent::GetHitActorsOrAddOwner(
+TArray<TWeakObjectPtr<AActor>> UCollisionHandlerComponent::GetHitActorsOrAddOwner(
     UPrimitiveComponent* const InComponent)
 {
     int Index = GetHitActorsIndex(InComponent);
@@ -192,7 +201,7 @@ TArray<AActor*> UCollisionHandlerComponent::GetHitActorsOrAddOwner(
     else
     {
         TWeakObjectPtr<AActor> OwnerPtr(GetOwner());
-        TArray<AActor*> Actors{ OwnerPtr.Get() };
+        TArray<TWeakObjectPtr<AActor>> Actors{ OwnerPtr.Get() };
 
         FCollCompHitActors CollCompHitActors;
         CollCompHitActors.Component = InComponent;

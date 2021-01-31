@@ -21,6 +21,12 @@ ASpellDisplayedItem::ASpellDisplayedItem()
     AttachmentSocket = FName("magic_right_hand");
 }
 
+void ASpellDisplayedItem::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+    Super::EndPlay(EndPlayReason);
+    ParticleSystemComponent = nullptr;
+}
+
 bool ASpellDisplayedItem::Attach()
 {
     if (EquipmentComponent->IsSlotHidden(Type, SlotIndex))

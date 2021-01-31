@@ -19,6 +19,8 @@ public:
     AExplosiveArrowProjectile();
 
 protected:
+    virtual void EndPlay(const EEndPlayReason::Type EndPlayResult) override;
+
     virtual void OnArrowHit(const FHitResult& InHit) override;
 
 

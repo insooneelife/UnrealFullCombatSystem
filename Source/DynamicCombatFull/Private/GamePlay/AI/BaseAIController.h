@@ -23,6 +23,8 @@ public:
     ABaseAIController();
 
 protected:
+    virtual void EndPlay(const EEndPlayReason::Type EndPlayResult) override;
+
     virtual void OnPossess(APawn* InPawn) override;
 
 public:        
@@ -33,7 +35,7 @@ public:
     void SetTarget(AActor* InNewTarget);
 
     UFUNCTION(BlueprintCallable)
-    AActor* GetTarget() const { return Target; }
+    AActor* GetTarget() const { return Target.Get(); }
 public:
 
     void SetIsInCombat(bool bInValue);
@@ -63,11 +65,9 @@ private:
     UPROPERTY(EditAnywhere, Category = "Components")
     UAIPerceptionComponent* AIPerception;
     
-    UPROPERTY()
-    AActor* Target;
+    TWeakObjectPtr<AActor> Target;
 
-    UPROPERTY()
-    AAICharacter* PossesedAICharacter;
+    TWeakObjectPtr<AAICharacter> PossesedAICharacter;
 
     bool bIsInCombat;
 };

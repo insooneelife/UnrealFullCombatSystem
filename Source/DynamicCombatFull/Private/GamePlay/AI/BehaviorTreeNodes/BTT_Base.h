@@ -17,7 +17,6 @@ class UBTT_Base : public UBTTaskNode
 public:
     UBTT_Base(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 
-//private:
     virtual EBTNodeResult::Type ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) override;
     virtual EBTNodeResult::Type AbortTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) override;
     virtual void OnInstanceCreated(UBehaviorTreeComponent& OwnerComp) override;
@@ -44,5 +43,5 @@ protected:
     /** If any of the Tick functions is implemented, how ofter should they be ticked.
      *	Values < 0 mean 'every tick'. */
     UPROPERTY(EditAnywhere, Category = Task)
-        FIntervalCountdown TickInterval;
+    FIntervalCountdown TickInterval;
 };

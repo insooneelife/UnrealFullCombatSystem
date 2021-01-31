@@ -20,6 +20,8 @@ public:
 
 protected:
 
+    virtual void EndPlay(const EEndPlayReason::Type EndPlayReason);
+
 public:
     virtual void NotifyActorBeginOverlap(AActor* OtherActor) override { Super::NotifyActorBeginOverlap(OtherActor); }
 

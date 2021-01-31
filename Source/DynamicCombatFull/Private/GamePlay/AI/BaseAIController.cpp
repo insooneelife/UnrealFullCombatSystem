@@ -24,13 +24,19 @@ ABaseAIController::ABaseAIController()
     AIPerception = CreateDefaultSubobject<UAIPerceptionComponent>("AIPerception");
 }
 
+void ABaseAIController::EndPlay(const EEndPlayReason::Type EndPlayResult)
+{
+    Super::EndPlay(EndPlayResult);
+    AIPerception = nullptr;
+}
+
 void ABaseAIController::OnPossess(APawn* InPawn)
 {
     Super::OnPossess(InPawn);
 
     PossesedAICharacter = Cast<AAICharacter>(InPawn);
 
-    if (GameUtils::IsValid(PossesedAICharacter))
+    if (PossesedAICharacter.IsValid())
     {
         RunBehaviorTree(PossesedAICharacter->GetBTree());
 
@@ -94,7 +100,7 @@ void ABaseAIController::UpdateTarget()
 
 void ABaseAIController::SetTarget(AActor* InNewTarget)
 {
-    if (InNewTarget != Target)
+    if (InNewTarget != Target.Get())
     {
         Target = InNewTarget;
 
@@ -123,8 +129,11 @@ void ABaseAIController::UpdateSenseTarget()
     // e.g if AI is running away from the target, when he is turned back to it for some time, 
     // it will lose it, to prevent it this method can be called to keep it up
 
-    FVector ActorLocation = GetPawn()->GetActorLocation();
-    UAISense_Damage::ReportDamageEvent(GetWorld(), GetPawn(), Target, 1.0f, ActorLocation, ActorLocation);
+    if (Target.IsValid())
+    {
+        FVector ActorLocation = GetPawn()->GetActorLocation();
+        UAISense_Damage::ReportDamageEvent(GetWorld(), GetPawn(), Target.Get(), 1.0f, ActorLocation, ActorLocation);
+    }
 }
 
 bool ABaseAIController::IsEnemy(const FAIStimulus& InAIStimulus, AActor* InActor) const

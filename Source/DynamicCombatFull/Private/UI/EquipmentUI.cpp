@@ -49,10 +49,10 @@ void UEquipmentUI::NativeConstruct()
 
 void UEquipmentUI::NativeDestruct()
 {
+    Super::NativeDestruct();
+
     InventoryItemsGrid->OnInventoryItemClicked.RemoveDynamic(this, &UEquipmentUI::OnInventoryItemClicked);
     CloseButton->OnClicked.RemoveDynamic(this, &UEquipmentUI::OnClicked_CloseButton);
-
-    Super::NativeDestruct();
 }
 
 FReply UEquipmentUI::NativeOnKeyDown(const FGeometry& InGeometry, const FKeyEvent& InKeyEvent)
@@ -97,7 +97,7 @@ FReply UEquipmentUI::NativeOnKeyDown(const FGeometry& InGeometry, const FKeyEven
 
 void UEquipmentUI::OnInventoryItemClicked(UInventoryItemUI* const InItem)
 {
-    if (GameUtils::IsValid(ClickedSlot))
+    if (ClickedSlot.IsValid() && EquipmentComponent.IsValid())
     {
         EquipmentComponent->UpdateItemInSlot(
             ClickedSlot->GetItemType(),
@@ -160,7 +160,10 @@ void UEquipmentUI::SetActiveWidget(int WidgetIndex)
             EquipmentWidgetSwitcher->SetActiveWidgetIndex(1);
 
             InventoryItemsGrid->CreateItemWidgets();
-            InventoryItemsGrid->UpdateItemWidgets(ClickedSlot->GetItemType());
+            if (ClickedSlot.IsValid())
+            {
+                InventoryItemsGrid->UpdateItemWidgets(ClickedSlot->GetItemType());
+            }
         }
     }
 }

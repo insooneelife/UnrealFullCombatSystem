@@ -41,29 +41,28 @@ public:
     EItemType GetItemType() const { return  ItemType; }
 
 private:
+    float SlotSize;
+
+    TWeakObjectPtr<UInventoryUI> InventoryUI;
+
     UPROPERTY(EditAnywhere)
-        TSubclassOf<UInventoryUI> InventoryUIClass;
+    TSubclassOf<UInventoryUI> InventoryUIClass;
 
     UPROPERTY(EditAnywhere)
     EItemType ItemType;
 
     UPROPERTY(EditAnywhere, Category = "LoadedObject")
-        UTexture2D* CategoryTexture;
-
-    float SlotSize;
-
-    UPROPERTY()
-    UInventoryUI* InventoryUI;
+    UTexture2D* CategoryTexture;
 
     UPROPERTY(meta = (BindWidget))
-        class UBorder* ActiveBorder;
+    class UBorder* ActiveBorder;
 
     UPROPERTY(meta = (BindWidget))
-        class UImage* CategoryImage;
+    class UImage* CategoryImage;
 
     UPROPERTY(meta = (BindWidget))
-        class UButton* SlotButton;
+    class UButton* SlotButton;
 
     UPROPERTY(meta = (BindWidget))
-        class USizeBox* SlotSizeBox;
+    class USizeBox* SlotSizeBox;
 };

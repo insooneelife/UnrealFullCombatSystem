@@ -33,9 +33,9 @@ APatrolPathActor::APatrolPathActor()
 
 void APatrolPathActor::EndPlay(const EEndPlayReason::Type EndPlayResult)
 {
+    Super::EndPlay(EndPlayResult);
     Billboard = nullptr;
     PatrolSpline = nullptr;
-    Super::EndPlay(EndPlayResult);
 }
 
 void APatrolPathActor::OnConstruction(const FTransform& Transform)

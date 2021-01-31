@@ -71,18 +71,15 @@ public:
 
 
 private:
-    UPROPERTY()
-    class UInventoryComponent* InventoryComponent;
+    TWeakObjectPtr<class UInventoryComponent> InventoryComponent;
 
-    UPROPERTY()
-    class UEquipmentComponent* EquipmentComponent;
+    TWeakObjectPtr<class UEquipmentComponent> EquipmentComponent;
+
+    TWeakObjectPtr<class UItemsGridUI> ItemsGridUI;
 
     float SlotSize;
 
     FStoredItem Item;
-
-    UPROPERTY()
-    class UItemsGridUI* ItemsGridUI;
 
     UPROPERTY(meta = (BindWidget))
     class USizeBox* SlotSizeBox;

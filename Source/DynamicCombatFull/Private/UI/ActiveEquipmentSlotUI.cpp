@@ -45,7 +45,7 @@ void UActiveEquipmentSlotUI::NativeConstruct()
     EquipmentComponent =
         Cast<UEquipmentComponent>(GetOwningPlayerPawn()->GetComponentByClass(UEquipmentComponent::StaticClass()));
 
-    if (GameUtils::IsValid(EquipmentComponent))
+    if (EquipmentComponent.IsValid())
     {
         FStoredItem ActiveItem = EquipmentComponent->GetActiveItem(SlotType, 0);
         UpdateWidget(ActiveItem);
@@ -59,13 +59,15 @@ void UActiveEquipmentSlotUI::NativeConstruct()
 
 void UActiveEquipmentSlotUI::NativeDestruct()
 {
-    if (GameUtils::IsValid(EquipmentComponent))
+    Super::NativeDestruct();
+
+    if (EquipmentComponent.IsValid())
     {
         EquipmentComponent->OnActiveItemChanged.RemoveDynamic(this, &UActiveEquipmentSlotUI::OnActiveItemChanged);
         EquipmentComponent->OnSlotHiddenChanged.RemoveDynamic(this, &UActiveEquipmentSlotUI::OnSlotHiddenChanged);
     }
 
-    Super::NativeDestruct();
+    BackgroundTexture = nullptr;
 }
 
 void UActiveEquipmentSlotUI::OnActiveItemChanged(

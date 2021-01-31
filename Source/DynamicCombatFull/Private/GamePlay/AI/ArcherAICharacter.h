@@ -40,15 +40,15 @@ public:
     virtual UStatsManagerComponent* GetStatsManager() const override { return StatsManager; }
 
     UFUNCTION(BlueprintNativeEvent, BlueprintCallable, meta = (DisplayName = "GetAimAlpha", ScriptName = "GetAimAlpha"))
-        float K2_GetAimAlpha() const;
+    float K2_GetAimAlpha() const;
     virtual float K2_GetAimAlpha_Implementation() const override { return GetAimAlpha(); }
 
     UFUNCTION(BlueprintNativeEvent, BlueprintCallable, meta = (DisplayName = "DoesHoldBowString", ScriptName = "DoesHoldBowString"))
-        bool K2_DoesHoldBowString() const;
+    bool K2_DoesHoldBowString() const;
     virtual bool K2_DoesHoldBowString_Implementation() const override { return DoesHoldBowString(); }
 
     UFUNCTION(BlueprintNativeEvent, BlueprintCallable, meta = (DisplayName = "GetBowStringSocketName", ScriptName = "GetBowStringSocketName"))
-        FName K2_GetBowStringSocketName() const;
+    FName K2_GetBowStringSocketName() const;
     virtual FName K2_GetBowStringSocketName_Implementation() const override { return GetBowStringSocketName(); }
 
     virtual float GetAimAlpha() const override { return AimAlpha; }

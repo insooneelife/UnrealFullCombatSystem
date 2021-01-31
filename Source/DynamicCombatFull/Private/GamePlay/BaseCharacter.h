@@ -657,25 +657,25 @@ private:
     UKeybindingsUI* KeybindingsWidget;
 
     UPROPERTY(EditAnywhere)
-        TSubclassOf<UUserWidget> InGameUIClass;
+    TSubclassOf<UUserWidget> InGameUIClass;
 
     UPROPERTY(EditAnywhere)
-        TSubclassOf<UKeybindingsUI> KeybindingsUIClass;
+    TSubclassOf<UKeybindingsUI> KeybindingsUIClass;
 
     UPROPERTY(EditAnywhere, Category = "LoadedObject")
-        UDataTable* PlayerOneHandMeleeMontages;
+    UDataTable* PlayerOneHandMeleeMontages;
 
     UPROPERTY(EditAnywhere, Category = "LoadedObject")
-        UDataTable* PlayerArcherMontages;
+    UDataTable* PlayerArcherMontages;
 
     UPROPERTY(EditAnywhere, Category = "LoadedObject")
-        UDataTable* PlayerCommonMontages;
+    UDataTable* PlayerCommonMontages;
 
     UPROPERTY(EditAnywhere, Category = "LoadedObject")
-        UDataTable* PlayerMagicMontages;
+    UDataTable* PlayerMagicMontages;
 
     UPROPERTY(EditAnywhere, Category = "LoadedObject")
-        UDataTable* PlayerUnarmedMontages;
+    UDataTable* PlayerUnarmedMontages;
 
     TWeakObjectPtr<AActor> BackstabbedActor;
 

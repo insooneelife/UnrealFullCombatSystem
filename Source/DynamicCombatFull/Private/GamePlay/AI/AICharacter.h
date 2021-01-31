@@ -62,10 +62,10 @@ public:
     virtual void OnConstruction(const FTransform& Transform) override;
 
     UFUNCTION(BlueprintCallable)
-        ABaseAIController* GetAIController() const { return AIController; }
+    ABaseAIController* GetAIController() const { return AIController.Get(); }
 
     UFUNCTION(BlueprintCallable)
-        EState GetState() const;
+    EState GetState() const;
 
 public:
     UBehaviorTree* GetBTree() const { return BTree; }
@@ -87,7 +87,7 @@ protected:
     void Delayed_HandleMeshOnDeath();
 
     UFUNCTION(BlueprintCallable)
-        void OnValueChanged_ExtendedHealth(float InNewValue, float InMaxValue);
+    void OnValueChanged_ExtendedHealth(float InNewValue, float InMaxValue);
 
     void InitializeStatsWidget();
 
@@ -225,13 +225,15 @@ protected:
     UPROPERTY(EditAnywhere, Category = "Primitive Components")
     UWidgetComponent* StatBarsWidget;
 
-    // find in beginplay
-    UPROPERTY()
-    ABaseAIController* AIController;
+    UPROPERTY(EditAnywhere, Category = "AI")
+    UBehaviorTree* BTree;
 
+    UPROPERTY(EditAnywhere, Category = "LoadedObject")
+    UDataTable* Montages;
 
-    UPROPERTY()
-    TArray<AActor*> AttachedActors;
+    TWeakObjectPtr<ABaseAIController> AIController;
+
+    TArray<TWeakObjectPtr<AActor>> AttachedActors;
 
     UPROPERTY(EditAnywhere, Category = "Combat")
     EDirection ReceivedHitDirection;
@@ -259,12 +261,6 @@ protected:
 
     UPROPERTY(EditAnywhere, Category = "Combat")
     int RecentlyReceivedHitsCountStunLimit;
-
-    UPROPERTY(EditAnywhere, Category = "AI")
-    UBehaviorTree* BTree;
-
-    UPROPERTY(EditAnywhere, Category = "LoadedObject")
-    UDataTable* Montages;
 
     FTimerHandle ResetMeleeAttackCounterTimerHandle;
 };

@@ -42,7 +42,7 @@ void UEquipmentSlotOnlyDisplayUI::NativeConstruct()
     EquipmentComponent = 
         Cast<UEquipmentComponent>(GetOwningPlayerPawn()->GetComponentByClass(UEquipmentComponent::StaticClass()));
 
-    if (GameUtils::IsValid(EquipmentComponent))
+    if (EquipmentComponent.IsValid())
     {
         EquipmentComponent->OnItemInSlotChanged.AddDynamic(this, &UEquipmentSlotOnlyDisplayUI::OnItemInSlotChanged);
         EquipmentComponent->OnActiveItemChanged.AddDynamic(this, &UEquipmentSlotOnlyDisplayUI::OnActiveItemChanged);
@@ -53,13 +53,15 @@ void UEquipmentSlotOnlyDisplayUI::NativeConstruct()
 
 void UEquipmentSlotOnlyDisplayUI::NativeDestruct()
 {
-    if (GameUtils::IsValid(EquipmentComponent))
+    Super::NativeDestruct();
+
+    if (EquipmentComponent.IsValid())
     {
         EquipmentComponent->OnItemInSlotChanged.RemoveDynamic(this, &UEquipmentSlotOnlyDisplayUI::OnItemInSlotChanged);
         EquipmentComponent->OnActiveItemChanged.RemoveDynamic(this, &UEquipmentSlotOnlyDisplayUI::OnActiveItemChanged);
     }
 
-    Super::NativeDestruct();
+    BackgroundTexture = nullptr;
 }
 
 void UEquipmentSlotOnlyDisplayUI::OnItemInSlotChanged(

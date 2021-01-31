@@ -23,5 +23,5 @@ public:
 
 private:
     UPROPERTY(EditAnywhere)
-        EDirection Direction;
+    EDirection Direction;
 };

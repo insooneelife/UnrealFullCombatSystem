@@ -37,10 +37,10 @@ void UItemActionsUI::NativeConstruct()
 
 void UItemActionsUI::NativeDestruct()
 {
+    Super::NativeDestruct();
+
     UseButton->OnClicked.RemoveDynamic(this, &UItemActionsUI::OnClicked_UseButton);
     DropButton->OnClicked.RemoveDynamic(this, &UItemActionsUI::OnClicked_DropButton);
-
-    Super::NativeDestruct();
 }
 
 void UItemActionsUI::Close()
@@ -51,7 +51,7 @@ void UItemActionsUI::Close()
 
 void UItemActionsUI::OnClicked_UseButton()
 {
-    if (GameUtils::IsValid(InventoryComponent))
+    if (InventoryComponent.IsValid())
     {
         InventoryComponent->UseItem(Item.Id);
         Close();
@@ -60,7 +60,7 @@ void UItemActionsUI::OnClicked_UseButton()
 
 void UItemActionsUI::OnClicked_DropButton()
 {
-    if (GameUtils::IsValid(InventoryComponent))
+    if (InventoryComponent.IsValid())
     {
         InventoryComponent->DropItem(Item);
         Close();

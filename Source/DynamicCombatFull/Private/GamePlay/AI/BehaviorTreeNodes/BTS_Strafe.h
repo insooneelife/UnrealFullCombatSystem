@@ -21,6 +21,8 @@ class UBTS_Strafe : public UBTS_Base
 public:
     UBTS_Strafe(const FObjectInitializer& ObjectInitializer);
 
+    virtual void OnInstanceDestroyed(UBehaviorTreeComponent& OwnerComp) override;
+
 protected:
     virtual void ReceiveTickAI(
         UBehaviorTreeComponent& OwnerBTree,
@@ -47,11 +49,9 @@ protected:
 
 private:
 
-    UPROPERTY()
-    APawn* ControlledPawn;
+    TWeakObjectPtr<APawn> ControlledPawn;
 
-    UPROPERTY()
-    AAIController* OwnerController;
+    TWeakObjectPtr<AAIController> OwnerController;
 
     UPROPERTY(EditAnywhere, Category = "LoadedObject")
     UEnvQuery* EQS_StrafeLeftObject;

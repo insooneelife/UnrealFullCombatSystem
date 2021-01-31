@@ -41,16 +41,18 @@ void UCategoryButtonUI::NativeConstruct()
 
 void UCategoryButtonUI::NativeDestruct()
 {
+    Super::NativeDestruct();
+
     SlotButton->OnClicked.RemoveDynamic(this, &UCategoryButtonUI::OnClicked_SlotButton);
     SlotButton->OnHovered.RemoveDynamic(this, &UCategoryButtonUI::OnHovered_SlotButton);
     SlotButton->OnUnhovered.RemoveDynamic(this, &UCategoryButtonUI::OnUnhovered_SlotButton);
 
-    Super::NativeDestruct();
+    CategoryTexture = nullptr;
 }
 
 void UCategoryButtonUI::OnClicked_SlotButton()
 {
-    if (GameUtils::IsValid(InventoryUI))
+    if (InventoryUI.IsValid())
     {
         InventoryUI->CategoryButtonClicked(this);
     }
@@ -70,7 +72,7 @@ void UCategoryButtonUI::OnUnhovered_SlotButton()
 void UCategoryButtonUI::Init(UInventoryUI* const InInventoryUI)
 {
     InventoryUI = InInventoryUI;
-    if (GameUtils::IsValid(InventoryUI))
+    if (InventoryUI.IsValid())
     {
         if (ItemType == InventoryUI->GetDisplayedType())
         {

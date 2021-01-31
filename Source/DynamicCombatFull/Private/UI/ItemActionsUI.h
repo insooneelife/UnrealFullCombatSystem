@@ -48,19 +48,18 @@ public:
         FWidgetRemovedSignature OnWidgetRemoved;
 
 private:
-    UPROPERTY()
-    UInventoryComponent* InventoryComponent;
+    TWeakObjectPtr<UInventoryComponent> InventoryComponent;
 
     FKey BackKey;
 
     UPROPERTY(meta = (BindWidget))
-        class USizeBox* ActionsSB;
+    class USizeBox* ActionsSB;
 
     UPROPERTY(meta = (BindWidget))
-        class UButton* DropButton;
+    class UButton* DropButton;
 
     UPROPERTY(meta = (BindWidget))
-        class UButton* UseButton;
+    class UButton* UseButton;
 
 
     UPROPERTY(EditAnywhere)

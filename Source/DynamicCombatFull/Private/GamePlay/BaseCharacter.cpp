@@ -213,6 +213,8 @@ void ABaseCharacter::BeginPlay()
 
 void ABaseCharacter::EndPlay(const EEndPlayReason::Type EndPlayResult)
 {
+    Super::EndPlay(EndPlayResult);
+
     Effects->OnEffectApplied.RemoveDynamic(this, &ABaseCharacter::OnEffectApplied);
     Effects->OnEffectRemoved.RemoveDynamic(this, &ABaseCharacter::OnEffectRemoved);
 
@@ -246,7 +248,7 @@ void ABaseCharacter::EndPlay(const EEndPlayReason::Type EndPlayResult)
     AbilityComponent->OnAbilityChanged.RemoveDynamic(this, &ABaseCharacter::OnAbilityChanged);
     ExtendedMana->OnValueChanged.RemoveDynamic(this, &ABaseCharacter::OnValueChanged_ExtendedMana);
 
-    
+
     StateManager = nullptr;
     StatsManager = nullptr;
     InputBuffer = nullptr;
@@ -276,9 +278,6 @@ void ABaseCharacter::EndPlay(const EEndPlayReason::Type EndPlayResult)
     PlayerCommonMontages = nullptr;
     PlayerMagicMontages = nullptr;
     PlayerUnarmedMontages = nullptr;
-    
-
-    Super::EndPlay(EndPlayResult);
 }
 
 void ABaseCharacter::OnConstruction(const FTransform& Transform)

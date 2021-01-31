@@ -38,12 +38,11 @@ public:
     void SetActiveWidget(int WidgetIndex);
 
 private:
-    UPROPERTY()
-        class UInventoryComponent* InventoryComponent;
+    TWeakObjectPtr<class UInventoryComponent> InventoryComponent;
 
-    UPROPERTY()
-        class UEquipmentComponent* EquipmentComponent;
+    TWeakObjectPtr<class UEquipmentComponent> EquipmentComponent;
 
+    TWeakObjectPtr<class UEquipmentSlotUI> ClickedSlot;
 
     FKey EquipmentKey;
     FKey BackKey;
@@ -58,7 +57,7 @@ private:
     class UVerticalBox* EquipmentVerticalBox;
 
     UPROPERTY(meta = (BindWidget))
-        class UWidgetSwitcher* EquipmentWidgetSwitcher;
+    class UWidgetSwitcher* EquipmentWidgetSwitcher;
 
     UPROPERTY(meta = (BindWidget))
     class UInputHelpersUI* InputHelpers;
@@ -66,7 +65,6 @@ private:
     UPROPERTY(meta = (BindWidget))
     class UItemsGridUI* InventoryItemsGrid;
 
-    UPROPERTY()
-    class UEquipmentSlotUI* ClickedSlot;
+
 
 };

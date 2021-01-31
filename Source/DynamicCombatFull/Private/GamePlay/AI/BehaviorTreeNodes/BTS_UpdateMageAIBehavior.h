@@ -33,8 +33,6 @@ public:
         AAIController* InOwnerController,
         APawn* InControlledPawn) override;
 
-    
-
     UFUNCTION()
     void OnStateChanged(EState InPrevState, EState InNewState);
 
@@ -45,16 +43,15 @@ public:
     void SetBehavior(EAIBehavior InBehavior);
 
 private:
-    UPROPERTY()
-        AAICharacter* ControlledCharacter;
+    TWeakObjectPtr<AAICharacter> ControlledCharacter;
 
     UPROPERTY(EditAnywhere)
-        FBlackboardKeySelector BehaviorKey;
+    FBlackboardKeySelector BehaviorKey;
 
     UPROPERTY(EditAnywhere)
-        FBlackboardKeySelector TargetKey;
+    FBlackboardKeySelector TargetKey;
 
     UPROPERTY(EditAnywhere)
-        float MeleeAttackBehaviorRange;
+    float MeleeAttackBehaviorRange;
 
 };

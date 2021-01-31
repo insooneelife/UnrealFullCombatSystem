@@ -20,6 +20,9 @@ class ASpellDisplayedItem : public AHandDisplayedItem
 public:
     ASpellDisplayedItem();
 
+protected:
+    virtual void EndPlay(const EEndPlayReason::Type EndPlayReason);
+
 public:
     virtual bool Attach() override;
 

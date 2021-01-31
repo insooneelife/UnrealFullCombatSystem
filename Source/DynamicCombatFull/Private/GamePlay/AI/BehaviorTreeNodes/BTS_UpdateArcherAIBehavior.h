@@ -48,14 +48,14 @@ protected:
     void SetBehavior(EAIBehavior InBehavior);
 
 private:
-    UPROPERTY()
-        AAICharacter* ControlledCharacter;
+
+    TWeakObjectPtr<AAICharacter> ControlledCharacter;
 
     UPROPERTY(EditAnywhere)
-        FBlackboardKeySelector BehaviorKey;
+    FBlackboardKeySelector BehaviorKey;
 
     UPROPERTY(EditAnywhere)
-        FBlackboardKeySelector TargetKey;
+    FBlackboardKeySelector TargetKey;
 
     UPROPERTY(EditAnywhere)
     float FleeBehaviorRange;

@@ -53,6 +53,8 @@ void UAbilityComponent::BeginPlay()
 
 void UAbilityComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
+    Super::EndPlay(EndPlayReason);
+
     if (EndPlayReason == EEndPlayReason::Destroyed)
     {
         if (IsCurrentAbilityValid())
@@ -66,8 +68,6 @@ void UAbilityComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
         EquipmentComponent->OnActiveItemChanged.RemoveDynamic(this, &UAbilityComponent::OnActiveItemChanged);
         EquipmentComponent->OnMainHandTypeChanged.RemoveDynamic(this, &UAbilityComponent::OnMainHandTypeChanged);
     }
-
-    Super::EndPlay(EndPlayReason);
 }
 
 void UAbilityComponent::AbilityEffect()

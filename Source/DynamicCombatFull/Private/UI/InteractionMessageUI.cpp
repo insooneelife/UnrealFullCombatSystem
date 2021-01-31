@@ -8,20 +8,18 @@
 #include "InputHelpersUI.h"
 #include "GameCore/DefaultGameInstance.h"
 
-const FName UInteractionMessageUI::None = FName(TEXT("None"));
-
 void UInteractionMessageUI::NativeConstruct()
 {
     Super::NativeConstruct();
     InteractInputHelper = InputHelpers->AddInputHelper(FText(), FText());
 
-    UpdateWidget(None);
+    UpdateWidget(NAME_None);
     InputHelpers->SetHorizontalAlignment(EHorizontalAlignment::HAlign_Center);
 }
 
 void UInteractionMessageUI::UpdateWidget(FName InMessage)
 {
-    if (InMessage == None)
+    if (InMessage == NAME_None)
     {
         SetVisibility(ESlateVisibility::Hidden);
     }
@@ -33,6 +31,9 @@ void UInteractionMessageUI::UpdateWidget(FName InMessage)
         FText KeyDisplayName = UKismetInputLibrary::Key_GetDisplayName(Key);
         FText MessageText = UKismetTextLibrary::Conv_NameToText(InMessage);
 
-        InteractInputHelper->UpdateInputHelper(KeyDisplayName, MessageText);
+        if (InteractInputHelper.IsValid())
+        {
+            InteractInputHelper->UpdateInputHelper(KeyDisplayName, MessageText);
+        }
     }
 }

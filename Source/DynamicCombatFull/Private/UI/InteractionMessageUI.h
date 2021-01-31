@@ -24,11 +24,8 @@ public:
 
 private:
 
-    const static FName None;
-
     UPROPERTY(meta = (BindWidget))
     UInputHelpersUI* InputHelpers;
 
-    UPROPERTY()
-    UInputHelperUI* InteractInputHelper;
+    TWeakObjectPtr<UInputHelperUI> InteractInputHelper;
 };

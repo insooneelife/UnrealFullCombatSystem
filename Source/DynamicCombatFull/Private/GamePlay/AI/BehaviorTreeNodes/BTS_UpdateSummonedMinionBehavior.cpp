@@ -26,8 +26,11 @@ void UBTS_UpdateSummonedMinionBehavior::OnInstanceDestroyed(UBehaviorTreeCompone
 {
     Super::OnInstanceDestroyed(OwnerComp);
 
-    ControlledCharacter->GetStateManager()->OnStateChanged.RemoveDynamic(
-        this, &UBTS_UpdateSummonedMinionBehavior::OnStateChanged);
+    if (ControlledCharacter.IsValid())
+    {
+        ControlledCharacter->GetStateManager()->OnStateChanged.RemoveDynamic(
+            this, &UBTS_UpdateSummonedMinionBehavior::OnStateChanged);
+    }
 }
 
 void UBTS_UpdateSummonedMinionBehavior::SetOwner(AActor* InActorOwner)
@@ -64,7 +67,7 @@ void UBTS_UpdateSummonedMinionBehavior::UpdateBehavior()
 {
     if (AIOwner.IsValid())
     {
-        if (GameUtils::IsValid(ControlledCharacter))
+        if (ControlledCharacter.IsValid())
         {
             UStateManagerComponent* StateManager = ControlledCharacter->GetStateManager();
             UStatsManagerComponent* StatsManager = ControlledCharacter->GetStatsManager();
@@ -95,7 +98,7 @@ void UBTS_UpdateSummonedMinionBehavior::UpdateBehavior()
                     {
                         if (CanBeAttacked->IsAlive())
                         {
-                            float DistanceToTarget = Target->GetDistanceTo(ControlledCharacter);
+                            float DistanceToTarget = Target->GetDistanceTo(ControlledCharacter.Get());
 
                             if (DistanceToTarget <= AttackBehaviorRange)
                             {

@@ -62,9 +62,15 @@ void AArrowProjectileBase::BeginPlay()
 
 void AArrowProjectileBase::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
+    Super::EndPlay(EndPlayReason);
+
     CollisionHandler->OnHit.RemoveDynamic(this, &AArrowProjectileBase::OnHit);
 
-    Super::EndPlay(EndPlayReason);
+    CollisionHandler = nullptr;
+    ParticleSystem = nullptr;
+    ImpaledArrowClass = nullptr;
+    StaticMesh = nullptr;
+    ProjectileMovement = nullptr;
 }
 
 void AArrowProjectileBase::BeginPlayDelayed()

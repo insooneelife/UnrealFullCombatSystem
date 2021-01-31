@@ -13,6 +13,14 @@ AMasterPoseDisplayedItem::AMasterPoseDisplayedItem()
     SkeletalMesh->SetCollisionEnabled(ECollisionEnabled::Type::NoCollision);
 }
 
+void AMasterPoseDisplayedItem::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+    Super::EndPlay(EndPlayReason);
+
+    SkeletalMesh = nullptr;
+
+}
+
 bool AMasterPoseDisplayedItem::Attach()
 {
     bool bResult = Super::Attach();

@@ -37,8 +37,8 @@ public:
     UPROPERTY(EditAnywhere, BlueprintReadWrite)
         TWeakObjectPtr<UPrimitiveComponent> Component;
 
-    UPROPERTY(EditAnywhere, BlueprintReadWrite)
-        TArray<AActor*> HitActors;
+    UPROPERTY(EditAnywhere)
+        TArray<TWeakObjectPtr<AActor>> HitActors;
 };
 
 

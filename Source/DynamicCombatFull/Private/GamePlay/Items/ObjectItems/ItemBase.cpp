@@ -2,3 +2,11 @@
 
 
 #include "ItemBase.h"
+
+
+void UItemBase::BeginDestroy()
+{
+    Super::BeginDestroy();
+
+    Item.Image = nullptr;
+}

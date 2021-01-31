@@ -27,10 +27,6 @@ UPickupUI::UPickupUI(const FObjectInitializer& ObjectInitializer)
     Super(ObjectInitializer), 
     TakeAllKey(EKeys::SpaceBar)
 {
-    //static TSubclassOf<UPickupItemUI> LoadedClass =
-    //    GameUtils::LoadAssetClass<UPickupItemUI>("/Game/DynamicCombatSystem/Widgets/PickupItemWB");
-
-    //PickupItemUIClass = LoadedClass;
 }
 
 void UPickupUI::NativeConstruct()
@@ -68,10 +64,10 @@ void UPickupUI::NativeConstruct()
 
 void UPickupUI::NativeDestruct()
 {
+    Super::NativeDestruct();
+
     TakeAllButton->OnClicked.RemoveDynamic(this, &UPickupUI::OnClicked_TakeAllButton);
     CloseButton->OnClicked.RemoveDynamic(this, &UPickupUI::OnClicked_CloseButton);
-
-    Super::NativeDestruct();
 }
 
 FReply UPickupUI::NativeOnKeyDown(const FGeometry& InGeometry, const FKeyEvent& InKeyEvent)
@@ -135,7 +131,7 @@ void UPickupUI::CreateItemWidgets()
         int ItemAmount = E.Value;
 
         UPickupItemUI* CreatedUI = Cast<UPickupItemUI> (CreateWidget(GetOwningPlayer(), PickupItemUIClass));
-        CreatedUI->Init(this, ItemClass, ItemAmount, Pickup);
+        CreatedUI->Init(this, ItemClass, ItemAmount, Pickup.Get());
 
         PickupScrollBox->AddChild(CreatedUI);
         CreatedUI->SetPadding(FMargin(2.0f, 2.0f, 2.0f, 2.0f));

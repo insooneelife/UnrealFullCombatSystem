@@ -49,10 +49,11 @@ public:
 
 private:
 
-    UPROPERTY()
-    UEquipmentComponent* EquipmentComponent;
+    TWeakObjectPtr<UEquipmentComponent> EquipmentComponent;
 
     float SlotSize;
+
+    FStoredItem Item;
 
     UPROPERTY(EditAnywhere)
     EItemType ItemType;
@@ -63,16 +64,14 @@ private:
     UPROPERTY(EditAnywhere)
     int ItemIndex;
 
-    FStoredItem Item;
-
     UPROPERTY(EditAnywhere)
-        bool bShowActiveBorder;
+    bool bShowActiveBorder;
 
     UPROPERTY(EditAnywhere, Category = "LoadedObject")
-        UTexture2D* BackgroundTexture;
+    UTexture2D* BackgroundTexture;
 
     UPROPERTY(meta = (BindWidget))
-        class UBorder* ActiveBorder;
+    class UBorder* ActiveBorder;
 
     UPROPERTY(meta = (BindWidget))
         class UTextBlock* AmountText;

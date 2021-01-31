@@ -56,7 +56,7 @@ private:
     int GetHitActorsIndex(UPrimitiveComponent* const InComponent) const;
 
     // #fix architecture
-    TArray<AActor*> GetHitActorsOrAddOwner(UPrimitiveComponent* const InComponent);
+    TArray<TWeakObjectPtr<AActor>> GetHitActorsOrAddOwner(UPrimitiveComponent* const InComponent);
 
     void AddHitActor(UPrimitiveComponent* const InComponent, AActor* const InHitActor);
 

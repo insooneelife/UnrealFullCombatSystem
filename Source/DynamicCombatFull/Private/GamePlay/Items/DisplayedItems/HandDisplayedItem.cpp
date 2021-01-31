@@ -14,9 +14,10 @@ AHandDisplayedItem::AHandDisplayedItem()
 
 void AHandDisplayedItem::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
-    EquipmentComponent->OnSlotHiddenChanged.RemoveDynamic(this, &AHandDisplayedItem::OnSlotHiddenChanged);
-
     Super::EndPlay(EndPlayReason);
+
+    EquipmentComponent->OnSlotHiddenChanged.RemoveDynamic(this, &AHandDisplayedItem::OnSlotHiddenChanged);
+    StaticMesh = nullptr;
 }
 
 void AHandDisplayedItem::NativeInit(UEquipmentComponent* InEquipmentComponent, EItemType InType, int InSlotIndex)

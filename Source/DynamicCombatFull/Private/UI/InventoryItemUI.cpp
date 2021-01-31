@@ -34,7 +34,7 @@ void UInventoryItemUI::NativeConstruct()
     Super::NativeConstruct();
 
     SetFocusedImage(false);
-    if (GameUtils::IsValid(EquipmentComponent))
+    if (EquipmentComponent.IsValid())
     {
         EquipmentComponent->OnItemInSlotChanged.AddDynamic(this, &UInventoryItemUI::OnItemInSlotChanged);
         EquipmentComponent->OnActiveItemChanged.AddDynamic(this, &UInventoryItemUI::OnActiveItemChanged);
@@ -47,19 +47,24 @@ void UInventoryItemUI::NativeConstruct()
 
 void UInventoryItemUI::NativeDestruct()
 {
-    EquipmentComponent->OnItemInSlotChanged.RemoveDynamic(this, &UInventoryItemUI::OnItemInSlotChanged);
-    EquipmentComponent->OnActiveItemChanged.RemoveDynamic(this, &UInventoryItemUI::OnActiveItemChanged);
+    Super::NativeDestruct();
+    if (EquipmentComponent.IsValid())
+    {
+        EquipmentComponent->OnItemInSlotChanged.RemoveDynamic(this, &UInventoryItemUI::OnItemInSlotChanged);
+        EquipmentComponent->OnActiveItemChanged.RemoveDynamic(this, &UInventoryItemUI::OnActiveItemChanged);
+    }
 
     SlotButton->OnClicked.RemoveDynamic(this, &UInventoryItemUI::OnClicked_SlotButton);
     SlotButton->OnHovered.RemoveDynamic(this, &UInventoryItemUI::OnHovered_SlotButton);
     SlotButton->OnUnhovered.RemoveDynamic(this, &UInventoryItemUI::OnUnhovered_SlotButton);
-
-    Super::NativeDestruct();
 }
 
 void UInventoryItemUI::OnClicked_SlotButton()
 {
-    ItemsGridUI->InventoryItemClicked(this);
+    if (ItemsGridUI.IsValid())
+    {
+        ItemsGridUI->InventoryItemClicked(this);
+    }
 }
 
 
@@ -168,10 +173,14 @@ void UInventoryItemUI::SetFocusedImage(bool bVisible)
 
 bool UInventoryItemUI::IsOpen() const
 {
-    if (ItemsGridUI->IsOpen())
+    if (ItemsGridUI.IsValid())
     {
-        return true;
+        if (ItemsGridUI->IsOpen())
+        {
+            return true;
+        }
     }
+    
     
     return false;
 }

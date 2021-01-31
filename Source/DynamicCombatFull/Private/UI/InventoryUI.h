@@ -52,40 +52,38 @@ public:
 
 private:
 
-    UPROPERTY(EditAnywhere, Category = "LoadedClass")
-    TSubclassOf<UItemActionsUI> ItemActionsUIClass;
+    TWeakObjectPtr<class UInventoryComponent> InventoryComponent;
 
-    UPROPERTY()
-        class UInventoryComponent* InventoryComponent;
+    TWeakObjectPtr<class UEquipmentComponent> EquipmentComponent;
 
-    UPROPERTY()
-        class UEquipmentComponent* EquipmentComponent;
-
+    TWeakObjectPtr<UCategoryButtonUI> SelectedCategoryButton;
 
     FKey InventoryKey;
     FKey BackKey;
 
-    UPROPERTY(meta = (BindWidget))
-        UCategoryButtonUI* AllItemsCategoryButton;
+    UPROPERTY(EditAnywhere, Category = "LoadedClass")
+    TSubclassOf<UItemActionsUI> ItemActionsUIClass;
 
     UPROPERTY(meta = (BindWidget))
-        UCategoryButtonUI* ArrowsCategoryButton;
+    UCategoryButtonUI* AllItemsCategoryButton;
 
     UPROPERTY(meta = (BindWidget))
-        class UButton* CloseButton;
+    UCategoryButtonUI* ArrowsCategoryButton;
 
     UPROPERTY(meta = (BindWidget))
-        class UVerticalBox* EquipmentVerticalBox;
-
-
-    UPROPERTY(meta = (BindWidget))
-        UCategoryButtonUI* FeetCategoryButton;
+    class UButton* CloseButton;
 
     UPROPERTY(meta = (BindWidget))
-        UCategoryButtonUI* HandsCategoryButton;
+    class UVerticalBox* EquipmentVerticalBox;
 
     UPROPERTY(meta = (BindWidget))
-        UCategoryButtonUI* HeadCategoryButton;
+    UCategoryButtonUI* FeetCategoryButton;
+
+    UPROPERTY(meta = (BindWidget))
+    UCategoryButtonUI* HandsCategoryButton;
+
+    UPROPERTY(meta = (BindWidget))
+    UCategoryButtonUI* HeadCategoryButton;
 
     UPROPERTY(meta = (BindWidget))
     UInputHelpersUI* InputHelpers;
@@ -94,40 +92,36 @@ private:
     UItemsGridUI* InventoryItemsGrid;
 
     UPROPERTY(meta = (BindWidget))
-        class USizeBox* InventorySizeBox;
-
-
-    UPROPERTY(meta = (BindWidget))
-        UCategoryButtonUI* LegsCategoryButton;
+    class USizeBox* InventorySizeBox;
 
     UPROPERTY(meta = (BindWidget))
-        UCategoryButtonUI* MaterialCategoryButton;
+    UCategoryButtonUI* LegsCategoryButton;
 
     UPROPERTY(meta = (BindWidget))
-        UCategoryButtonUI* MeleeWeaponCategoryButton;
+    UCategoryButtonUI* MaterialCategoryButton;
 
     UPROPERTY(meta = (BindWidget))
-        UCategoryButtonUI* NecklaceCategoryButton;
+    UCategoryButtonUI* MeleeWeaponCategoryButton;
 
     UPROPERTY(meta = (BindWidget))
-        UCategoryButtonUI* RangeWeaponCategoryButton;
+    UCategoryButtonUI* NecklaceCategoryButton;
 
     UPROPERTY(meta = (BindWidget))
-        UCategoryButtonUI* RingCategoryButton;
+    UCategoryButtonUI* RangeWeaponCategoryButton;
 
     UPROPERTY(meta = (BindWidget))
-        UCategoryButtonUI* ShieldCategoryButton;
+    UCategoryButtonUI* RingCategoryButton;
 
     UPROPERTY(meta = (BindWidget))
-        UCategoryButtonUI* SpellCategoryButton;
+    UCategoryButtonUI* ShieldCategoryButton;
 
     UPROPERTY(meta = (BindWidget))
-        UCategoryButtonUI* ToolCategoryButton;
+    UCategoryButtonUI* SpellCategoryButton;
 
     UPROPERTY(meta = (BindWidget))
-        UCategoryButtonUI* TopCategoryButton;
+    UCategoryButtonUI* ToolCategoryButton;
 
-    UPROPERTY()
-    UCategoryButtonUI* SelectedCategoryButton;
+    UPROPERTY(meta = (BindWidget))
+    UCategoryButtonUI* TopCategoryButton;
 
 };

@@ -55,16 +55,16 @@ public:
     float GetDamage() const { return Damage; }
 
     UFUNCTION(BlueprintCallable)
-        float GetHeadShotDamageMultiplier() const { return HeadShotDamageMultiplier; }
+    float GetHeadShotDamageMultiplier() const { return HeadShotDamageMultiplier; }
 
     UFUNCTION(BlueprintCallable)
-        float GetInitialSpeed() const { return InitialSpeed; }
+    float GetInitialSpeed() const { return InitialSpeed; }
 
     UFUNCTION(BlueprintCallable)
-        float GetLifeTime() const { return LifeTime; }
+    float GetLifeTime() const { return LifeTime; }
 
     UFUNCTION(BlueprintCallable)
-        float GetImpulsePower() const { return ImpulsePower; }
+    float GetImpulsePower() const { return ImpulsePower; }
 
 protected:
     UPROPERTY(EditAnywhere, Category = "Projectile")

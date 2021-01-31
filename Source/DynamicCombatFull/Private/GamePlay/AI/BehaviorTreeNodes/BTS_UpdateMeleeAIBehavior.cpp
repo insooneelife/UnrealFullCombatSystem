@@ -33,11 +33,14 @@ void UBTS_UpdateMeleeAIBehavior::OnInstanceDestroyed(UBehaviorTreeComponent& Own
 {
     Super::OnInstanceDestroyed(OwnerComp);
 
-    ControlledCharacter->GetStateManager()->OnStateChanged.RemoveDynamic(
-        this, &UBTS_UpdateMeleeAIBehavior::OnStateChanged);
+    if (ControlledCharacter.IsValid())
+    {
+        ControlledCharacter->GetStateManager()->OnStateChanged.RemoveDynamic(
+            this, &UBTS_UpdateMeleeAIBehavior::OnStateChanged);
 
-    ControlledCharacter->GetExtendedStamina()->OnValueChanged.RemoveDynamic(
-        this, &UBTS_UpdateMeleeAIBehavior::OnStaminaValueChanged);
+        ControlledCharacter->GetExtendedStamina()->OnValueChanged.RemoveDynamic(
+            this, &UBTS_UpdateMeleeAIBehavior::OnStaminaValueChanged);
+    }
 }
 
 void UBTS_UpdateMeleeAIBehavior::SetOwner(AActor* InActorOwner)
@@ -108,7 +111,7 @@ void UBTS_UpdateMeleeAIBehavior::UpdateBehavior()
 {
     if (AIOwner.IsValid())
     {
-        if (GameUtils::IsValid(ControlledCharacter))
+        if (ControlledCharacter.IsValid())
         {
             UStateManagerComponent* StateManager = ControlledCharacter->GetStateManager();
             UStatsManagerComponent* StatsManager = ControlledCharacter->GetStatsManager();
@@ -139,8 +142,8 @@ void UBTS_UpdateMeleeAIBehavior::UpdateBehavior()
                     {
                         if (CanBeAttacked->IsAlive())
                         {
-                            float DistanceToTarget = Target->GetDistanceTo(ControlledCharacter);
-                            float DotProductToTarget = Target->GetDotProductTo(ControlledCharacter);
+                            float DistanceToTarget = Target->GetDistanceTo(ControlledCharacter.Get());
+                            float DotProductToTarget = Target->GetDotProductTo(ControlledCharacter.Get());
                             int ReceivedHitsCount = StatsManager->GetRecentlyReceivedHitsCount();
                             float Value = ControlledCharacter->GetExtendedStamina()->GetCurrentValue();
                             float MaxValue = ControlledCharacter->GetExtendedStamina()->GetMaxValue();
@@ -263,7 +266,7 @@ void UBTS_UpdateMeleeAIBehavior::UpdateActivities()
 {
     if (AIOwner.IsValid())
     {
-        if (GameUtils::IsValid(ControlledCharacter))
+        if (ControlledCharacter.IsValid())
         {
             UBlackboardComponent* BlackboardComp = AIOwner->GetBlackboardComponent();
             if (!GameUtils::IsValid(BlackboardComp))

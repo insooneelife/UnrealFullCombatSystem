@@ -28,9 +28,8 @@ ASpellIndicatorActor::ASpellIndicatorActor()
 
 void ASpellIndicatorActor::EndPlay(const EEndPlayReason::Type EndPlayResult)
 {
-    Decal = nullptr;
-
     Super::EndPlay(EndPlayResult);
+    Decal = nullptr;
 }
 
 void ASpellIndicatorActor::Init(float InRadius, UMaterialInterface* InMaterial)

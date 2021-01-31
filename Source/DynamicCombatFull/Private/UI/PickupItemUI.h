@@ -43,27 +43,24 @@ public:
 
 private:
 
-    UPROPERTY(meta = (BindWidget))
-        UTextBlock* AmountText;
+    TWeakObjectPtr<APickupActor> Pickup;
+    TWeakObjectPtr<UPickupUI> PickupUI;
 
     UPROPERTY(meta = (BindWidget))
-        UButton* ItemButton;
+    UTextBlock* AmountText;
 
     UPROPERTY(meta = (BindWidget))
-        UImage* ItemImage;
+    UButton* ItemButton;
 
     UPROPERTY(meta = (BindWidget))
-        UTextBlock* NameText;
+    UImage* ItemImage;
+
+    UPROPERTY(meta = (BindWidget))
+    UTextBlock* NameText;
 
     UPROPERTY(EditAnywhere)
-        UPickupUI* PickupUI;
+    TSubclassOf<UItemBase> ItemClass;
 
     UPROPERTY(EditAnywhere)
-        TSubclassOf<UItemBase> ItemClass;
-
-    UPROPERTY(EditAnywhere)
-        int ItemAmount;
-
-    UPROPERTY(EditAnywhere)
-        APickupActor* Pickup;
+    int ItemAmount;
 };

@@ -45,39 +45,37 @@ public:
     void PickupItemClicked(UPickupItemUI* const InItem);
 
 private:
-    UPROPERTY(EditAnywhere, Category = "LoadedClass")
-        TSubclassOf<UPickupItemUI> PickupItemUIClass;
 
+    TWeakObjectPtr<class UInventoryComponent> InventoryComponent;
 
-    UPROPERTY()
-        class UInventoryComponent* InventoryComponent;
+    TWeakObjectPtr<APickupActor> Pickup;
 
     FKey BackKey;
 
     FKey TakeAllKey;
 
-    UPROPERTY(meta = (BindWidget))
-        UButton* CloseButton;
+    UPROPERTY(EditAnywhere, Category = "LoadedClass")
+    TSubclassOf<UPickupItemUI> PickupItemUIClass;
 
     UPROPERTY(meta = (BindWidget))
-        UInputHelpersUI* InputHelpers;
+    UButton* CloseButton;
 
     UPROPERTY(meta = (BindWidget))
-        UTextBlock* PickupNameText;
+    UInputHelpersUI* InputHelpers;
 
     UPROPERTY(meta = (BindWidget))
-        UScrollBox* PickupScrollBox;
+    UTextBlock* PickupNameText;
 
     UPROPERTY(meta = (BindWidget))
-        UPickupItemUI* Sample1;
+    UScrollBox* PickupScrollBox;
 
     UPROPERTY(meta = (BindWidget))
-        UPickupItemUI* Sample2;
+    UPickupItemUI* Sample1;
 
     UPROPERTY(meta = (BindWidget))
-        UButton* TakeAllButton;
+    UPickupItemUI* Sample2;
 
-    UPROPERTY()
-        APickupActor* Pickup;
+    UPROPERTY(meta = (BindWidget))
+    UButton* TakeAllButton;
 
 };

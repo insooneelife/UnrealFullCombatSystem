@@ -41,6 +41,7 @@ void UInventoryComponent::BeginPlay()
 
 void UInventoryComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
+    Super::EndPlay(EndPlayReason);
     if (GetOwner() == UGameplayStatics::GetPlayerCharacter(GetWorld(), 0))
     {
         ADCSGameMode* GameMode = Cast<ADCSGameMode>(UGameplayStatics::GetGameMode(GetWorld()));
@@ -51,7 +52,6 @@ void UInventoryComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
         }
     }
 
-    Super::EndPlay(EndPlayReason);
 }
 
 void UInventoryComponent::UseItem(FGuid InItemId)
@@ -232,21 +232,19 @@ void UInventoryComponent::DropItem(FStoredItem InItem)
 
         UDefaultGameInstance* DefaultGameInstance = GameUtils::GetDefaultGameInstance(GetWorld());
 
-        if (DefaultGameInstance != nullptr)
-        {
-            APickupActor* SpawnedActor =
-                GetWorld()->SpawnActor<APickupActor>(
-                    SpawnPickupActorClass, SpawnLoc, FRotator::ZeroRotator, SpawnParameters);
+        APickupActor* SpawnedActor =
+            GetWorld()->SpawnActor<APickupActor>(
+                SpawnPickupActorClass, SpawnLoc, FRotator::ZeroRotator, SpawnParameters);
 
-            if (GameUtils::IsValid(SpawnedActor))
-            {
-                SpawnedActor->Init(
-                    FName(TEXT("Items")),
-                    TMap<TSubclassOf<UItemBase>, int> { { InItem.ItemClass, InItem.Amount } }
-                );
-                SpawnedActor->AddItem(InItem.ItemClass, InItem.Amount);
-            }
+        if (GameUtils::IsValid(SpawnedActor))
+        {
+            SpawnedActor->Init(
+                FName(TEXT("Items")),
+                TMap<TSubclassOf<UItemBase>, int> { { InItem.ItemClass, InItem.Amount } }
+            );
+            SpawnedActor->AddItem(InItem.ItemClass, InItem.Amount);
         }
+        
     }
 }
 

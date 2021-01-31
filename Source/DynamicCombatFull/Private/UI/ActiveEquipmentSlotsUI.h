@@ -23,20 +23,20 @@ protected:
 private:
 
     UPROPERTY(meta = (BindWidget))
-        class UActiveEquipmentSlotUI* ToolSlot;
+    class UActiveEquipmentSlotUI* ToolSlot;
 
     UPROPERTY(meta = (BindWidget))
-        class UActiveEquipmentSlotUI* ShieldSlot;
+    class UActiveEquipmentSlotUI* ShieldSlot;
 
     UPROPERTY(meta = (BindWidget))
-        class UActiveEquipmentSlotUI* ArrowsSlot;
+    class UActiveEquipmentSlotUI* ArrowsSlot;
 
     UPROPERTY(meta = (BindWidget))
-        class UActiveEquipmentSlotUI* RangeWeaponSlot;
+    class UActiveEquipmentSlotUI* RangeWeaponSlot;
 
     UPROPERTY(meta = (BindWidget))
-        class UActiveEquipmentSlotUI* SpellSlot;
+    class UActiveEquipmentSlotUI* SpellSlot;
 
     UPROPERTY(meta = (BindWidget))
-        class UActiveEquipmentSlotUI* MeleeWeaponSlot;
+    class UActiveEquipmentSlotUI* MeleeWeaponSlot;
 };

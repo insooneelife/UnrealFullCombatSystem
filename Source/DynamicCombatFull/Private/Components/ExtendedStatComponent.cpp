@@ -53,6 +53,8 @@ void UExtendedStatComponent::BeginPlay()
 
 void UExtendedStatComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
+    Super::EndPlay(EndPlayReason);
+
     if (GetOwner() == UGameplayStatics::GetPlayerCharacter(GetWorld(), 0))
     {
         ADCSGameMode* GameMode = Cast<ADCSGameMode>(UGameplayStatics::GetGameMode(GetWorld()));
@@ -72,8 +74,6 @@ void UExtendedStatComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
         StatsManagerComp->OnModifierRemoved.RemoveDynamic(this, &UExtendedStatComponent::OnModifierRemoved);
         StatsManagerComp->OnBaseValueChanged.RemoveDynamic(this, &UExtendedStatComponent::OnBaseValueChanged);
     }
-
-    Super::EndPlay(EndPlayReason);
 }
 
 void UExtendedStatComponent::ChangeRegenPercent(int InPercent)

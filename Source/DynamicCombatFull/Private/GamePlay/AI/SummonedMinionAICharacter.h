@@ -44,7 +44,7 @@ private:
 
 private:
     UPROPERTY(EditAnywhere)
-        float Duration;
+    float Duration;
 
     UPROPERTY(EditAnywhere)
     TArray<FName> CollisionSockets;

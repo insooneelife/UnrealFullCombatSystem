@@ -59,16 +59,17 @@ public:
     const FStoredItem& GetItem() const { return Item; }
 
 private:
-    UPROPERTY(EditAnywhere)
-    TSubclassOf<UEquipmentUI> EquipmentUIClass;
 
-    UPROPERTY()
-    UEquipmentComponent* EquipmentComponent;
+    TWeakObjectPtr<UEquipmentComponent> EquipmentComponent;
 
-    UPROPERTY()
-    UEquipmentUI* EquipmentUI;
+    TWeakObjectPtr<UEquipmentUI> EquipmentUI;
 
     float SlotSize;
+
+    FStoredItem Item;
+
+    UPROPERTY(EditAnywhere)
+    TSubclassOf<UEquipmentUI> EquipmentUIClass;
 
     UPROPERTY(EditAnywhere)
     EItemType ItemType;
@@ -79,29 +80,27 @@ private:
     UPROPERTY(EditAnywhere)
     int ItemIndex;
 
-    FStoredItem Item;
-
     UPROPERTY(EditAnywhere)
     bool bShowActiveBorder;
 
     UPROPERTY(EditAnywhere, Category = "LoadedObject")
-        UTexture2D* BackgroundTexture;
+    UTexture2D* BackgroundTexture;
 
     UPROPERTY(meta = (BindWidget))
-        class UBorder* ActiveBorder;
+    class UBorder* ActiveBorder;
 
     UPROPERTY(meta = (BindWidget))
-        class UTextBlock* AmountText;
+    class UTextBlock* AmountText;
 
     UPROPERTY(meta = (BindWidget))
-        class UImage* BackgroundImage;
+    class UImage* BackgroundImage;
 
     UPROPERTY(meta = (BindWidget))
-        class UImage* ItemImage;
+    class UImage* ItemImage;
 
     UPROPERTY(meta = (BindWidget))
-        class UButton* SlotButton;
+    class UButton* SlotButton;
 
     UPROPERTY(meta = (BindWidget))
-        class USizeBox* SlotSizeBox;
+    class USizeBox* SlotSizeBox;
 };

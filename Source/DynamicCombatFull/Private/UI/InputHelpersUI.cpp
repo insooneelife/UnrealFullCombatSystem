@@ -14,10 +14,6 @@ UInputHelpersUI::UInputHelpersUI(const FObjectInitializer& ObjectInitializer)
     :
     Super(ObjectInitializer)
 {
-    //static TSubclassOf<UInputHelperUI> LoadedClass =
-    //    GameUtils::LoadAssetClass<UInputHelperUI>("/Game/DynamicCombatSystem/Widgets/InputHelperWB");
-
-    //InputHelperUIClass = LoadedClass;
 }
 
 UInputHelperUI* UInputHelpersUI::AddInputHelper(FText InKey, FText InAction)

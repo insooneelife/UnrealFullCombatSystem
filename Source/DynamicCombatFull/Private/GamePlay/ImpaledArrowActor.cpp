@@ -23,9 +23,8 @@ AImpaledArrowActor::AImpaledArrowActor()
 
 void AImpaledArrowActor::EndPlay(const EEndPlayReason::Type EndPlayResult)
 {
-    StaticMeshComponent = nullptr;
-
     Super::EndPlay(EndPlayResult);
+    StaticMeshComponent = nullptr;
 }
 
 void AImpaledArrowActor::Init(UStaticMesh* const InMesh)

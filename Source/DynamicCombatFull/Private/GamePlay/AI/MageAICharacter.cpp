@@ -62,6 +62,9 @@ void AMageAICharacter::EndPlay(const EEndPlayReason::Type EndPlayResult)
     StateManager->OnStateChanged.RemoveDynamic(this, &AMageAICharacter::OnStateChanged);
 
     Super::EndPlay(EndPlayResult);
+
+    AbilityComponent = nullptr;
+    ExtendedMana = nullptr;
 }
 
 void AMageAICharacter::MakeUntargetable(float InDuration)

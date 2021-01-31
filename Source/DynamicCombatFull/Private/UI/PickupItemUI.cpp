@@ -21,14 +21,16 @@ void UPickupItemUI::NativeConstruct()
 
 void UPickupItemUI::NativeDestruct()
 {
-    ItemButton->OnClicked.RemoveDynamic(this, &UPickupItemUI::OnClicked_ItemButton);
-
     Super::NativeDestruct();
+    ItemButton->OnClicked.RemoveDynamic(this, &UPickupItemUI::OnClicked_ItemButton);
 }
 
 void UPickupItemUI::OnClicked_ItemButton()
 {
-    PickupUI->PickupItemClicked(this);
+    if (PickupUI.IsValid())
+    {
+        PickupUI->PickupItemClicked(this);
+    }
 }
 
 void UPickupItemUI::UpdateWidget()

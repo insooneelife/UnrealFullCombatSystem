@@ -24,8 +24,8 @@ public:
 
 private:
     UPROPERTY(meta = (BindWidget))
-        class UStatBarUI* Stamina;
+    class UStatBarUI* Stamina;
 
     UPROPERTY(meta = (BindWidget))
-        class UStatBarUI* Health;
+    class UStatBarUI* Health;
 };

@@ -74,10 +74,10 @@ private:
 private:
 
     UPROPERTY(EditAnywhere, Category = "Components")
-        UAbilityComponent* AbilityComponent;
+    UAbilityComponent* AbilityComponent;
 
     UPROPERTY(EditAnywhere, Category = "Components")
-        UExtendedStatComponent* ExtendedMana;
+    UExtendedStatComponent* ExtendedMana;
 
     bool bIsTargetable;
     FTimerHandle RetriggerableDelayTimerHandle;

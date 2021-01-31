@@ -37,7 +37,7 @@ public:
     // blueprint implementation
 public:
     UFUNCTION(BlueprintImplementableEvent, Category = "Blueprint")
-        UUserWidget* CreatePickupWidget(AActor* InOwner, TSubclassOf<UUserWidget> WidgetClass, APickupActor* PickupActor);
+    UUserWidget* CreatePickupWidget(AActor* InOwner, TSubclassOf<UUserWidget> WidgetClass, APickupActor* PickupActor);
 
     // IsInteractable
 public:
@@ -53,10 +53,10 @@ private:
 
 private:
 
+    TWeakObjectPtr<UInventoryComponent> InventoryComponent;
+    
     UPROPERTY(EditAnywhere)
     TSubclassOf<UUserWidget> CreateUserWidgetClass;
-
-    TWeakObjectPtr<UInventoryComponent> InventoryComponent;
 
     UPROPERTY(EditAnywhere, Category = "Default")
     FName Name;

@@ -27,13 +27,18 @@ AExplosiveArrowProjectile::AExplosiveArrowProjectile()
     ExplosionSoundObject = LoadedSoundObject;
 }
 
+void AExplosiveArrowProjectile::EndPlay(const EEndPlayReason::Type EndPlayResult)
+{
+    Super::EndPlay(EndPlayResult);
+
+    ExplosionParticleObject = nullptr;
+    ExplosionSoundObject = nullptr;
+}
 
 void AExplosiveArrowProjectile::OnArrowHit(const FHitResult& InHit)
 {
     FVector HitLocation = InHit.Location;
     AActor* HitActor = InHit.GetActor();
-
-
 
     if (GetOwner() != HitActor)
     {
