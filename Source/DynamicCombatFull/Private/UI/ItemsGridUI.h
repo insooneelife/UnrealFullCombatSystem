@@ -58,6 +58,10 @@ private:
     UPROPERTY(EditAnywhere, Category = "LoadedClass")
     TSubclassOf<UInventoryItemUI> InventoryItemUIClass;
 
+
+    UPROPERTY(EditAnywhere, Category = "LoadedClass")
+        TSubclassOf<UUserWidget> Temp;
+
     UPROPERTY(meta = (BindWidget))
     UUniformGridPanel* ItemsGrid;
 

@@ -208,7 +208,6 @@ void ABaseCharacter::BeginPlay()
     AbilityComponent->OnAbilityEnded.AddDynamic(this, &ABaseCharacter::OnAbilityEnded);
     AbilityComponent->OnAbilityChanged.AddDynamic(this, &ABaseCharacter::OnAbilityChanged);
     ExtendedMana->OnValueChanged.AddDynamic(this, &ABaseCharacter::OnValueChanged_ExtendedMana);
-
 }
 
 void ABaseCharacter::EndPlay(const EEndPlayReason::Type EndPlayResult)
@@ -2483,3 +2482,4 @@ void ABaseCharacter::SetData()
     InitialCameraArmLength = CameraBoom->TargetArmLength;
     InitialCameraLagSpeed = CameraBoom->CameraLagSpeed;
 }
+
