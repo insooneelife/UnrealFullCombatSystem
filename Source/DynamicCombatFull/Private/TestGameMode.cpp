@@ -3,7 +3,7 @@
 #include "Engine/Engine.h"
 #include "UnrealEd.h"
 #include "UObject/Package.h"
-#include "AssetRegistryModule.h"
+#include "AssetRegistry/AssetRegistryModule.h"
 #include "TestPrimaryDataAsset.h"
 
 void ATestGameMode::StartPlay()
@@ -25,7 +25,7 @@ void ATestGameMode::StartPlay()
 		*OutSubObjectName);
 
 	FString PackageName = OutPackageName;
-	UPackage* Package = CreatePackage(NULL, *PackageName);
+	UPackage* Package = CreatePackage(*PackageName);
 	Package->FullyLoad();
 
 	Package->MarkPackageDirty();

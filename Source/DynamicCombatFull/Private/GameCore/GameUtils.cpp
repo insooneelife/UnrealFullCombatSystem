@@ -30,12 +30,12 @@ const FItem& GameUtils::GetDefaultItemFromItemClass(TSubclassOf<UItemBase> ItemC
 void GameUtils::SetTimerRetriggerable(
     FTimerManager& InTimerManager,
     FTimerHandle& InTimerHandle, 
-    TBaseDelegate<void> InObjectDelegate, 
+    FTimerDelegate InDelegate, 
     float InTime, 
     bool bInLoop)
 {
     InTimerManager.ClearTimer(InTimerHandle);
-    InTimerManager.SetTimer(InTimerHandle, InObjectDelegate, InTime, bInLoop);
+    InTimerManager.SetTimer(InTimerHandle, InDelegate, InTime, bInLoop);
 }
 
 void GameUtils::PrintStoredItem(const FStoredItem& InStoredItem)
@@ -120,7 +120,7 @@ bool GameUtils::IsValid(const UObjectBase* const InObject)
     }
     else
     {
-        FDebug::DumpStackTraceToLog();
+        FDebug::DumpStackTraceToLog(ELogVerbosity::Type::Error);
         //UE_LOG(LogTemp, Error, TEXT("Is not valid!!"));
         return false;
     }

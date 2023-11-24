@@ -28,7 +28,7 @@ public:
     static void SetTimerRetriggerable(
         FTimerManager& InTimerManager,
         FTimerHandle& InTimerHandle,
-        TBaseDelegate<void> InObjectDelegate,
+		FTimerDelegate InDelegate,
         float InTime,
         bool bInLoop);   
 
